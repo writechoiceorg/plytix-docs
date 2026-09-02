@@ -1,0 +1,199 @@
+---
+title: "Status codes and error codes"
+description: "Reference for the HTTP status codes, error response formats, and rate limits the Plytix API returns across API v1, API v3, and the Bulk API."
+---
+
+This page documents the HTTP status codes, error response formats, and rate limits you'll encounter when calling the Plytix API, across v1, v3, and the legacy Bulk API.
+
+- The API returns a small set of standard HTTP status codes, documented in full below.
+- Creating, updating, or deleting an entity returns 201, 202, or 204, depending on whether the change is synchronous or asynchronous (the current v3 specification still returns 200 for these operations; see the note under Response conventions for changes).
+- v1, v3, and the legacy Bulk API each return errors in a different JSON shape.
+- Exceeding your account's rate limit returns a 429 status code.
+
+## HTTP status codes
+
+| Status code | Meaning |
+|---|---|
+| 200 OK | The request has succeeded. The response body usually contains a representation of the resource. |
+| 201 CREATED | The request has succeeded and a resource has been created. The response body usually contains a representation of the resource, and its location is available in the `location` header. |
+| 202 ACCEPTED | The request has been accepted but will be completed at some point in the future. |
+| 204 NO CONTENT | The request has been fulfilled. There's no response body. |
+| 400 BAD REQUEST | The request has invalid syntax. |
+| 401 AUTH FAILED | The request lacks valid authentication credentials for the target resource. |
+| 403 FORBIDDEN | The server understood the request but refuses to authorize it. |
+| 404 NOT FOUND | The requested resource hasn't been found on the server. |
+| 405 METHOD NOT ALLOWED | The HTTP method isn't allowed on the target resource. |
+| 409 CONFLICT | The server understood the request, but it has no effect on the current state of the resource. |
+| 422 UNPROCESSABLE ENTITY | The request is syntactically well formed but has semantic errors. |
+| 428 PRECONDITION REQUIRED | The request can't be processed because some conditions aren't met. |
+| 429 TOO MANY REQUESTS | The API rate limit has been exceeded. |
+| 500 SERVER ERROR | The server wasn't able to fulfill the request. You can repeat the request later. |
+
+The v3 OpenAPI specification currently declares only two of these codes at the schema level: 200 for successful requests, and 422 for validation errors. The remaining codes above reflect standard usage as documented in the Plytix API v1 guide, and apply across both API versions unless this page notes otherwise.
+
+## Response conventions for changes
+
+When you create, update, or delete an entity, the status code tells you whether the change completed immediately or is still being processed. POST, PUT, and PATCH requests don't return the modified entity in the response body.
+
+- **201 Created**: the creation or modification completed successfully. The response body includes the ID of the created or modified entity.
+- **202 Accepted**: the request was accepted, but processing is still ongoing. The response body includes a `process_id` you can use to track the operation's status.
+- **204 No Content**: returned for PATCH and DELETE requests that completed successfully, with no response body.
+
+Note: as of the current v3 specification, create, update, and delete operations for products and assets return 200 in every case, rather than 201, 202, or 204.
+
+## Error response format
+
+Plytix's error response format depends on which part of the API you're calling. v1, v3, and the Bulk API each use a different shape.
+
+### v1
+
+When an operation fails, the v1 API returns an **error** object. An error object consists of:
+
+- `msg`: a general error message.
+- `errors`: an optional array with detailed information for each error, where each entry has a `field` (the offending column or field) and a `msg` (a detailed message).
+
+Simple error:
+
+```json
+{
+  "error": {
+    "msg": "Missing Authorization Header"
+  }
+}
+```
+
+Detailed error:
+
+```json
+{
+  "error": {
+    "msg": "product data validation failed",
+    "errors": [
+      {
+        "field": "some_non-existing_attribute_to_patch",
+        "msg": "label does not exist"
+      },
+      {
+        "field": "some_decimal_number_attribute_to_patch_using_wrong_number_format",
+        "msg": "Not a valid decimal value. Format must be: ."
+      }
+    ]
+  }
+}
+```
+
+Real example responses from the v1 API, by status code:
+
+| Status code | Example response |
+|---|---|
+| 400 | `{"error": {"msg": "The browser sent a request that this server could not understand."}}` |
+| 401 | `{"msg": "Bad api_key or api_password"}` |
+| 403 | `{"error": {"msg": "Permission denied."}}` |
+| 404 | `{"error": {"msg": " No results found for 000000000000000000000000", "errors": [{"field": "asset_id", "msg": "asset does not exist"}]}}` |
+| 409 | `{"error": {"msg": "Asset already exists", "errors": [{"field": "asset.id", "msg": "5c4c6e10ca59f4061b800ffa"}]}}` |
+| 422 | `{"error": {"msg": "Schema validation error", "errors": [{"field": "filename", "msg": "filename field is mandatory when uploading from content"}]}}` |
+
+The 401 example above, from the authentication endpoint, returns `msg` at the top level instead of wrapping it in an `error` object. A few other v1 endpoints, such as the accounts search endpoints, return a different shape entirely: `{"detail": [...]}`. Check the response you actually receive rather than assuming one fixed shape across every v1 endpoint.
+
+### v3
+
+v3 operations declare only two response codes in the OpenAPI specification: 200 for successful requests, and 422 for validation errors.
+
+Every response, successful or not, uses an envelope with a `data` field and an `errors` array. The `errors` array is always present, even on a successful response, and is empty when there's nothing to report. Search responses also include a `pagination` object with `next_page` and `previous_page`.
+
+Each entry in `errors` is an `Error` object:
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `name` | string | Yes | Error name. |
+| `description` | string | Yes | Error description. |
+
+For 422 responses, the body uses a different shape, `HTTPValidationError`, with a `detail` array instead of `errors`:
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `detail` | array of validation errors | No | List of validation errors. |
+
+Each entry in `detail` is a `ValidationError`:
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `loc` | array of string or integer | Yes | Location of the invalid field. |
+| `msg` | string | Yes | Validation error message. |
+| `type` | string | Yes | Validation error type. |
+
+Note: earlier design drafts of the v3 API described a single `error` object, with `name` and `description`, for all 4xx and 5xx responses. The current specification instead returns an `errors` array on every response, as documented above.
+
+### Bulk API
+
+The legacy Bulk API, available to large clients on request, uses its own response format for job status and errors, separate from both the v1 and v3 shapes above.
+
+Submitting a bulk job returns 200 and a job record:
+
+```json
+{
+  "data": [
+    {
+      "by_user": "hello@plytix.com",
+      "created_at": "2021-04-04T15:21:56.710204+00:00",
+      "display_name": "Edit products",
+      "id": "610ab094cc31a32cb9a3d2a9",
+      "is_system": "false",
+      "modified": "2021-04-04T15:21:56.710350+00:00",
+      "source": "null",
+      "state": "QUEUED"
+    }
+  ]
+}
+```
+
+`id` is the job ID you use to check the job's status. Checking the job returns per-product results, including any errors:
+
+```json
+{
+  "data": [
+    {
+      "action": "Edited",
+      "errors": [
+        {
+          "errors": [
+            {
+              "[Attribute Label]": "[Error message]"
+            }
+          ],
+          "sku": "[Product sku]"
+        }
+      ],
+      "products": [
+        {
+          "id": "[Product id]",
+          "sku": "[Product sku]"
+        }
+      ],
+      "status": "FINISHED",
+      "summary": {
+        "error": "[Number of Errors]",
+        "ok": "[Number of Ok]"
+      }
+    }
+  ]
+}
+```
+
+The bracketed values above are placeholders from the Bulk API documentation: `[Attribute Label]` and `[Error message]` are replaced with the actual attribute and message for each failed product, and `summary.error` and `summary.ok` are replaced with the actual error and success counts for the job.
+
+The Bulk API is limited to large clients. If your integration needs it, ask your account manager about access.
+
+## Rate limits
+
+Exceeding your account's rate limit returns a 429 status code. See [Rate limits](/guides/rate-limits) for how rate limits work, and where to check the limits for your plan.
+
+## Deprecation notices
+
+The API sends a custom `X-Plytix-Deprecation` header in the response when the endpoint you're calling is scheduled for deprecation soon.
+
+## Related resources
+
+- [API Overview](/guides/api-overview) covers what the Plytix API is for and the resources it exposes.
+- [API Overview](/guides/overview) covers authentication, API versions, and the request and response conventions this page builds on.
+- [Rate limits](/guides/rate-limits) covers how Plytix's API rate limits work and where to check the limits for your plan.

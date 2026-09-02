@@ -27,6 +27,16 @@
             "pages": [
               "index"
             ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/get-started-with-api",
+              "guides/api-overview",
+              "guides/overview",
+              "guides/status-codes",
+              "guides/rate-limits"
+            ]
           }
         ]
       },
