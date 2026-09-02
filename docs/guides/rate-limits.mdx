@@ -1,0 +1,31 @@
+---
+title: "Rate limits"
+description: "How Plytix enforces API rate limits, what happens when you exceed them, and where to check the limits for your account plan."
+---
+
+Plytix enforces rate limits on the API so that no single account can degrade the platform for everyone else. This page covers how those limits work, what happens when you exceed them, and where to check the limits for your plan.
+
+## How rate limits work
+
+Your account plan sets a limit on how many requests you can make in two time windows: per 10 seconds, and per hour. Every request counts as one hit against both limits at the same time, so you can be blocked by whichever window you exhaust first.
+
+Rate limits are enforced across all resources available in the API, and they're based on your account plan.
+
+> **FLAG:** The source material (the Plytix API v1 guide) confirms the two time windows and that limits are plan-based, but doesn't give the actual numeric thresholds for either window, or a breakdown of limits by plan tier. It also doesn't confirm whether API v3 documents this mechanism separately; only v1 source material describes it. This page follows the existing site convention of treating rate limits as account-wide across API versions, since that's how they're already described on the API Overview and Status codes pages, but confirm this with Plytix if v3 behaves differently.
+
+## Exceeding your limit
+
+If you reach either limit, the API returns a `429 TOO MANY REQUESTS` status code. Every request you make keeps returning 429 until the time interval for the limit you hit expires.
+
+See [Status codes and error codes](/guides/status-codes) for the full list of HTTP status codes the API returns.
+
+## Checking your plan's limits
+
+Rate limits vary by account plan. To find the limits that apply to your account, check the [Plytix pricing page](https://www.plytix.com/pricing) or ask your account manager.
+
+> **FLAG:** No source material documents a way to check your current rate limit or usage from within the API itself (for example, no rate-limit response headers). If Plytix exposes this some other way, it should be added here.
+
+## Related resources
+
+- [API Overview](/guides/overview) covers authentication, API versions, and the request and response conventions your integration needs alongside rate limits.
+- [Status codes and error codes](/guides/status-codes) covers the full set of HTTP status codes and error response formats the API returns, including 429.

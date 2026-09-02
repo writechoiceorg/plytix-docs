@@ -1,0 +1,81 @@
+---
+title: "API Overview"
+description: "What Plytix PIM is, who builds on the API, the services it exposes, and what you can do with it."
+---
+
+Plytix PIM (Product Information Management) is a platform for centralizing, optimizing, distributing, and analyzing your product content. The Plytix API lets you connect your own systems and tools to your Plytix PIM account, so you can manage that content programmatically instead of only through the dashboard.
+
+This page introduces the API at a conceptual level: who it's for, how its data is organized, what services it exposes, and what you can build with it. For the mechanics of actually making requests — authentication, rate limits, filtering, pagination, and response conventions — see [API Overview](/guides/overview).
+
+## Who the API is for
+
+The API serves a different profile of user than the Plytix dashboard. Three groups build on it:
+
+- **Technical/IT teams** at companies using Plytix, typically ones with their own development or IT resources, who need to sync product data between Plytix and other systems.
+- **Partners and agencies** who build integrations on behalf of Plytix clients — custom connectors, data cleanups, and channel integrations.
+- A growing group of **less-technical "makers"** who use AI tools like Claude, ChatGPT, and Copilot to build against the API or work with PIM data through chat interfaces, rather than writing integration code by hand.
+
+API usage skews toward paid and higher-tier accounts: API-using accounts are a small share of all Plytix accounts but represent a disproportionately large share of revenue, and usage is highest among Legacy Paid and Enterprise plans. In practice, the most common reason companies integrate is to keep product data in sync with an ERP system — automatically creating and updating products in Plytix from an ERP, then enriching them in the PIM. Other real-world uses include bulk updates across large catalogs, exporting catalogs to sales channels, and AI-assisted content or catalog generation built on top of PIM data.
+
+Not everything is available through the API: channel and destination mapping (connecting Plytix to a specific sales channel like Shopify or BigCommerce) is currently configured through the dashboard only.
+
+## Core concepts
+
+**Resources.** The API is organized around resources — products, assets, categories, attributes, relationships, and so on. Each resource defines its own data, the operations available on it, and its relationships to other resources.
+
+**Two API versions.** Plytix currently offers API v1 and API v3. v3 is the current priority and the recommended version for new integrations, with v1 maintained for existing integrations during the transition. The two versions differ in URL structure and conventions — see [API Overview](/guides/overview) for the specifics.
+
+**Synchronous and asynchronous operations.** Some changes apply immediately and return a result right away. Others — like bulk operations — are queued and processed as a job that you check on separately. Which kind of response you get, and how job tracking works, is covered in [API Overview](/guides/overview).
+
+## Available services
+
+The API exposes the following resource areas:
+
+**Product content**
+- Products
+- Product Categories
+- Product Families and Product Family Models
+- Product Attributes and Product Attribute Groups
+- Relationships (links between products)
+
+**Digital assets**
+- Assets
+- Asset Categories
+- Asset Lists
+
+**Distribution and sync**
+- Channels
+- Connections
+- eCatalogs
+- PDF Catalogs
+- Import Profiles
+- PIM Product Lists
+
+**Automation**
+- Bulk operations
+- Process Manager (custom asynchronous processes)
+- Jobs (tracking for asynchronous operations)
+
+Some resources — such as Relationships, Product Families, and Product Family Models — are currently read-only through the API.
+
+A separate, legacy Bulk API also exists for very high-volume product updates. It's limited to large clients; if your integration needs it, ask your account manager about access.
+
+## What you can do with the API
+
+Across these resources, the API supports:
+
+- Full create, read, update, and delete operations on most resources
+- Advanced filtering, including boolean grouping (AND/OR/NOT), comparisons, existence checks, and date-based filters
+- Expanding related entities in a single request, and filtering or querying across related resources
+- Field-level operations, so you can read or update a single field without sending the whole entity
+- Partial updates via PATCH, including advanced updates using JSON Patch
+- Bulk create, edit, and delete — applying the same change to many items by filter, applying different changes to many items at once, or mixing create/update/delete actions in a single call
+- Tracking, pausing, resuming, canceling, and retrying asynchronous jobs
+- Ad-hoc asynchronous actions, such as exporting a catalog to a channel like Shopify
+- Running custom processes through the Process Manager API
+
+Plytix also provides a standardized MCP server implementation, which lets you connect Plytix directly to AI-native tools and agents (such as Claude) that work with your PIM data.
+
+## What's next
+
+Once you're familiar with what the API offers, head to [API Overview](/guides/overview) to set up authentication and learn the request and response conventions before you start building.

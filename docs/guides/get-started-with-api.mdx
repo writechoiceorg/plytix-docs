@@ -1,0 +1,73 @@
+---
+title: "Get started with the API"
+description: "Everything you need before you can start calling the Plytix API: account requirements, how to get your credentials, and how to make your first authenticated request."
+---
+
+Before you write any integration code, there are a few things you need in place: admin access to create credentials, an API key and password, and a bearer token. This page is a checklist that takes you from having a Plytix account to making your first authenticated API request.
+
+## Before you start
+
+- [ ] Owner or Admin rights on the Plytix account you're integrating with
+- [ ] An API key and password, generated from that account
+- [ ] Knowledge of which account plan you're on, so you know the rate limits your integration needs to handle
+- [ ] A decision on which API version your integration needs, v1 or v3
+
+## Step 1: Get your API credentials
+
+Only Owners and Admins can create and manage API keys. If you don't have Admin rights, ask an account Owner or Admin to complete this step, or to grant you those rights first.
+
+1. Go to [accounts.plytix.com](http://accounts.plytix.com/).
+2. Locate the **API** tab.
+3. Click **Create API Key**.
+4. Give the key a name and set its role, which determines its access rights.
+5. Click **Create API Key** to save.
+
+Copy the API key using the clipboard icon next to it. Reveal the API password using the eye icon. Keep both secret: anyone with the key and password can read and change data in your account.
+
+You can edit or delete a key later, and change its role, from the same API tab.
+
+## Step 2: Exchange your credentials for a bearer token
+
+The Plytix API uses bearer token authentication. You don't send your API key and password on every request. Instead, you exchange them once for a token, then send that token instead.
+
+Send your API key and password to:
+
+```
+POST https://auth.plytix.com/auth/api/get-token
+```
+
+Every request you make after that needs these headers:
+
+```
+Authorization: Bearer <token>
+Content-Type: application/json
+Accept: application/json
+```
+
+Tokens expire after 15 minutes. Once a token expires, requests using it return `401`, and you need to request a new one.
+
+## Step 3: Make your first request
+
+With a valid token, you can call the API. For example, on API v1:
+
+```
+GET https://pim.plytix.com/api/v1/products
+Authorization: Bearer <token>
+Content-Type: application/json
+Accept: application/json
+```
+
+> **FLAG:** The source material confirms the v1 base URL (`https://pim.plytix.com/api/v1/...`) but doesn't state a base URL or host for API v3. Confirm the v3 base URL with Plytix before using it in a v3 example.
+
+## Step 4: Know your limits
+
+Your account plan sets a limit on how many requests you can make, and going over it returns a `429` status code. See [Rate limits](/guides/rate-limits) for how these limits work and where to check the limits for your plan.
+
+> **FLAG:** The source material doesn't describe an API signup flow, OAuth, or scopes separate from the role assigned to an API key when it's created. If Plytix offers any of these, add them here.
+
+## What's next
+
+- [API Overview](/guides/api-overview) covers what the Plytix API is for and the resources it exposes.
+- [API Overview](/guides/overview) covers the full authentication mechanics, API versions, and request and response conventions.
+- [Rate limits](/guides/rate-limits) covers how rate limits work and where to check the limits for your plan.
+- [Status codes and error codes](/guides/status-codes) covers the HTTP status codes and error formats the API returns.
