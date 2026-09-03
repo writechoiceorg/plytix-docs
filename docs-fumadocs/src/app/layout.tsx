@@ -8,6 +8,7 @@ const figtree = Figtree({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://plytix-docs.pages.dev'),
   title: 'Plytix Docs',
   description: 'Developer documentation for the Plytix PIM API and onboarding materials.',
   icons: {
@@ -19,7 +20,15 @@ export default function Layout({ children }: LayoutProps<'/'>) {
   return (
     <html lang="en" className={figtree.className} suppressHydrationWarning>
       <body className="flex flex-col min-h-screen">
-        <RootProvider>{children}</RootProvider>
+        <RootProvider
+          search={{
+            options: {
+              type: 'static',
+            },
+          }}
+        >
+          {children}
+        </RootProvider>
       </body>
     </html>
   );
