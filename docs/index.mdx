@@ -3,67 +3,69 @@ title: "Plytix"
 mode: "custom"
 ---
 
-<div className="relative overflow-hidden max-w-4xl mx-auto text-center rounded-2xl bg-[#7A52FF] px-6 py-16 mb-12">
-  <div className="absolute -top-16 -left-16 w-56 h-56 rounded-full bg-white/10 blur-3xl" />
-  <div className="absolute -bottom-20 -right-10 w-64 h-64 rounded-full bg-white/10 blur-3xl" />
-  <div className="absolute -bottom-8 -right-8 opacity-10 rotate-12">
-    <Icon icon="boxes-stacked" size={140} color="white" />
+<div className="max-w-8xl mx-auto px-4 lg:px-8">
+  <div className="relative overflow-hidden w-full text-center rounded-2xl bg-[#7A52FF] px-6 py-16 mb-12">
+    <div className="absolute -top-16 -left-16 w-56 h-56 rounded-full bg-white/10 blur-3xl" />
+    <div className="absolute -bottom-20 -right-10 w-64 h-64 rounded-full bg-white/10 blur-3xl" />
+    <div className="absolute -bottom-8 -right-8 opacity-10 rotate-12">
+      <Icon icon="boxes-stacked" size={140} color="white" />
+    </div>
+
+    <div className="relative z-10">
+      <h1 className="text-white text-4xl sm:text-5xl font-bold tracking-tight mb-5">
+        Build on the Plytix API
+      </h1>
+      <p className="text-white/90 text-lg max-w-2xl mx-auto mb-8">
+        Connect your ERP, storefront, or internal tools to Plytix, so you can manage products, assets, and other PIM data programmatically.
+      </p>
+      <a
+        href="/guides/get-started-with-api"
+        className="inline-flex items-center gap-2 bg-white text-[#7A52FF] px-8 py-3 rounded-lg font-semibold no-underline hover:no-underline"
+      >
+        Get started
+      </a>
+    </div>
   </div>
 
-  <div className="relative z-10">
-    <h1 className="text-white text-4xl sm:text-5xl font-bold tracking-tight mb-5">
-      Build on the Plytix API
-    </h1>
-    <p className="text-white/90 text-lg max-w-2xl mx-auto mb-8">
-      Connect your ERP, storefront, or internal tools to Plytix, so you can manage products, assets, and other PIM data programmatically.
-    </p>
-    <a
-      href="/guides/get-started-with-api"
-      className="inline-flex items-center gap-2 bg-white text-[#7A52FF] px-8 py-3 rounded-lg font-semibold no-underline hover:no-underline"
-    >
-      Get started
-    </a>
-  </div>
+  <CardGroup cols={3}>
+    <Card title="Get started" icon="rocket">
+      <p className="mb-3">Generate an API key, exchange it for a bearer token, and make your first authenticated request against API v3.</p>
+      <div className="space-y-1 mb-4 text-sm text-gray-500 dark:text-zinc-400">
+        <div>&bull; Create an API key in your dashboard</div>
+        <div>&bull; Exchange it for a bearer token</div>
+      </div>
+      <a
+        href="/guides/get-started-with-api"
+        className="inline-flex items-center gap-1 text-sm font-medium text-[#7A52FF] no-underline hover:underline"
+      >
+        Start the checklist &rarr;
+      </a>
+    </Card>
+    <Card title="API reference" icon="book-open">
+      <p className="mb-3">Explore the resources the API exposes, with parameters, request bodies, and example responses for every endpoint.</p>
+      <div className="space-y-1 mb-4 text-sm text-gray-500 dark:text-zinc-400">
+        <div>&bull; Products, assets, and categories</div>
+        <div>&bull; Authentication and status codes</div>
+      </div>
+      <a
+        href="/guides/api-overview"
+        className="inline-flex items-center gap-1 text-sm font-medium text-[#7A52FF] no-underline hover:underline"
+      >
+        Browse the reference &rarr;
+      </a>
+    </Card>
+    <Card title="Plytix Help Center" icon="life-ring">
+      <p className="mb-3">Managing products by hand, configuring channels, or handling account administration? That's covered in the Help Center, not here.</p>
+      <div className="space-y-1 mb-4 text-sm text-gray-500 dark:text-zinc-400">
+        <div>&bull; Using the Plytix dashboard</div>
+        <div>&bull; Account and channel setup</div>
+      </div>
+      <a
+        href="https://help.plytix.com/en"
+        className="inline-flex items-center gap-1 text-sm font-medium text-[#7A52FF] no-underline hover:underline"
+      >
+        Visit the Help Center &rarr;
+      </a>
+    </Card>
+  </CardGroup>
 </div>
-
-<CardGroup cols={3}>
-  <Card title="Get started" icon="rocket">
-    <p className="mb-3">Generate an API key, exchange it for a bearer token, and make your first authenticated request against API v3.</p>
-    <div className="space-y-1 mb-4 text-sm text-gray-500 dark:text-zinc-400">
-      <div>&bull; Create an API key in your dashboard</div>
-      <div>&bull; Exchange it for a bearer token</div>
-    </div>
-    <a
-      href="/guides/get-started-with-api"
-      className="inline-flex items-center gap-1 text-sm font-medium text-[#7A52FF] no-underline hover:underline"
-    >
-      Start the checklist &rarr;
-    </a>
-  </Card>
-  <Card title="API reference" icon="book-open">
-    <p className="mb-3">Explore the resources the API exposes, with parameters, request bodies, and example responses for every endpoint.</p>
-    <div className="space-y-1 mb-4 text-sm text-gray-500 dark:text-zinc-400">
-      <div>&bull; Products, assets, and categories</div>
-      <div>&bull; Authentication and status codes</div>
-    </div>
-    <a
-      href="/guides/api-overview"
-      className="inline-flex items-center gap-1 text-sm font-medium text-[#7A52FF] no-underline hover:underline"
-    >
-      Browse the reference &rarr;
-    </a>
-  </Card>
-  <Card title="Plytix Help Center" icon="life-ring">
-    <p className="mb-3">Managing products by hand, configuring channels, or handling account administration? That's covered in the Help Center, not here.</p>
-    <div className="space-y-1 mb-4 text-sm text-gray-500 dark:text-zinc-400">
-      <div>&bull; Using the Plytix dashboard</div>
-      <div>&bull; Account and channel setup</div>
-    </div>
-    <a
-      href="https://help.plytix.com/en"
-      className="inline-flex items-center gap-1 text-sm font-medium text-[#7A52FF] no-underline hover:underline"
-    >
-      Visit the Help Center &rarr;
-    </a>
-  </Card>
-</CardGroup>
