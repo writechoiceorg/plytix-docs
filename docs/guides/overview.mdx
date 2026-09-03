@@ -1,84 +1,28 @@
 ---
-title: "Plytix API Overview"
-description: "What you need to know before you start building on the Plytix API, and the key integration pieces the how-to guides will walk you through."
+title: "Plytix Developer Documentation"
+sidebar_label: "Overview"
 ---
 
-The Plytix API lets you connect your own systems to your Plytix PIM account, so you can manage products, assets, and other PIM data programmatically instead of through the dashboard. This page covers what you need in place before you start following the how-to guides.
+Plytix is a PIM (Product Information Management) platform, and the API lets you connect your own systems (an ERP, a storefront, an internal tool) to your Plytix account, so you can manage products, assets, and other PIM data programmatically instead of only through the dashboard. 
 
-## What it is
+This documentation is separate from the [Plytix Help Center](https://help.plytix.com/en), which covers using the Plytix dashboard itself (managing products by hand, configuring channels, account administration).
 
-The API is the same integration path used to automate imports, sync product data to other systems, and connect tools like an ERP without manual work. Plytix currently offers two API versions, v1 and v3. v3 introduces a more consistent set of conventions for filters, pagination, response formats, and asynchronous job tracking, so new integrations should build against v3 where the endpoint you need is available there.
+## Your path to integration
 
-## The path to follow
+We recommend following these steps for a smooth integration experience:
 
-Use these steps, in order, before you start working through the how-to guides for specific operations.
+1. **Start with Get Started** to generate your API credentials, exchange them for a bearer token, and make your first authenticated request. This is the essential first step.
+2. **Explore the API Reference** to find the specific endpoints you need for your integration, with parameters, request bodies, and example responses for every resource.
 
-1. **Get your API credentials.** An account administrator generates an API key and password from the API tab in the account's Admin section.
-2. **Authenticate and get a token.** Exchange your API key and password for a bearer token, then send that token on every request.
-3. **Pick the right API version.** Check whether the endpoint you need is available on v3, or whether you still need v1.
-4. **Learn the request and response conventions.** Understand how filtering, pagination, and entity modification responses work, including when an operation is synchronous versus asynchronous.
-5. **Know your limits.** Understand the rate limits tied to your account plan, so your integration can handle them gracefully.
+<CardGroup cols={2}>
+  <Card title="Get Started" icon="rocket" href="/guides/get-started-with-api">
+    **Start here if you're new.** Get your API key, exchange it for a bearer token, and make your first request against API v3.
+  </Card>
+  <Card title="API Reference" icon="book-open" href="/guides/api-overview">
+    **Dive into the technical details.** Explore the resources the API exposes, including products, assets, and categories, with parameters and examples for every endpoint.
+  </Card>
+</CardGroup>
 
-Each of these areas has its own how-to guide with detailed examples. This page just gives you the map before you start.
+## Getting help
 
-## Key parts of the integration
-
-### Authentication
-
-The Plytix API uses bearer token authentication. Every request must include an `Authorization: Bearer <token>` header, along with `Content-Type: application/json` and `Accept: application/json`.
-
-To get a token, send your API key and password to `https://auth.plytix.com/auth/api/get-token`. Tokens are valid for 15 minutes, so your integration needs to request a new one once the current one expires. A 401 response means your token is no longer valid.
-
-### API versions: v1 and v3
-
-Plytix's two API versions use different URL patterns and conventions.
-
-- **v1** uses paths like `api/v1/<entities>/search`, with search filters sent in the request body and pagination handled through a `pagination` object (`page`, `page_size`, `order`).
-- **v3** uses paths like `api/v3/<plural_entity_name>`, with filters and pagination passed as query parameters (`_page`, `_page_size`, `_sort_by`, and more), plus support for field-level operations, bulk endpoints, and asynchronous job tracking that aren't available in v1.
-
-Where a v3 endpoint exists for what you need, build against it. It's the version Plytix is standardizing on going forward.
-
-### Filtering and pagination
-
-Both versions let you filter and paginate list results, using operators like equals, contains, greater than or less than, and exists. v3 list responses return results in a consistent shape:
-
-```json
-{
-  "data": [],
-  "pagination": {
-    "next_page": null,
-    "previous_page": null,
-    "filtered_count": 0,
-    "total_count": 0
-  }
-}
-```
-
-### Response conventions for changes
-
-When you create, update, or delete an entity, the response tells you whether the change happened immediately or is still being processed.
-
-- **201 Created** means the change was applied synchronously, and the response body includes the entity's ID.
-- **202 Accepted** means the change was queued, and the response body includes a `process_id` (or `bulk_job_id` for bulk operations) you can use to check on its status.
-
-PATCH is the recommended way to update entities. PUT is discouraged, since it can unintentionally overwrite data you didn't mean to touch.
-
-### Rate limits
-
-Your account plan sets a limit on how many requests you can make, and going over it returns a 429 status code, so it's worth building in retry logic that respects these limits. See [Rate limits](/guides/rate-limits) for how they work and where to check the limits for your plan.
-
-### Asynchronous jobs
-
-Some operations, like bulk changes, don't complete instantly. Instead of waiting on the request, you get back an ID (a `process_id` or `bulk_job_id`) and check its status separately to see when the job finishes and what it changed.
-
-## Key terms
-
-**Bearer token**: the credential you send with every API request to prove who you are. You get it by exchanging your API Key and password, and it expires after 15 minutes.
-
-**API Key**: the credential, issued by an account administrator, that you exchange for a bearer token.
-
-**Process**: an asynchronous operation, such as a bulk update, that the API queues instead of completing immediately. You track it by its process or job ID until it finishes.
-
-## What's next
-
-Once you're comfortable with these pieces, move on to the how-to guides for the specific operations you want to build, like creating products, managing assets, or setting up bulk updates.
+If you can't find what you're looking for, or get stuck partway through your integration, check the [Plytix Help Center](https://help.plytix.com/en) or reach out to your account manager.
