@@ -20,29 +20,37 @@
   "navigation": {
     "tabs": [
       {
-        "tab": "Documentation",
+        "tab": "Home",
+        "href": "/"
+      },
+      {
+        "tab": "Guides",
         "groups": [
-          {
-            "group": "Get Started",
-            "pages": [
-              "index"
-            ]
-          },
           {
             "group": "Guides",
             "pages": [
-              "guides/get-started-with-api",
-              "guides/api-overview",
               "guides/overview",
-              "guides/status-codes",
-              "guides/rate-limits"
+              "guides/get-started-with-api"
             ]
           }
         ]
       },
       {
         "tab": "API Reference",
-        "openapi": "api-reference/openapi.json"
+        "groups": [
+          {
+            "group": "Introduction",
+            "pages": [
+              "guides/api-overview",
+              "guides/authentication",
+              "guides/status-codes"
+            ]
+          },
+          {
+            "group": "Endpoints",
+            "openapi": "api-reference/openapi.json"
+          }
+        ]
       }
     ]
   },
