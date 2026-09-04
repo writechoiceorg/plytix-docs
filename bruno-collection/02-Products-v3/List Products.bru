@@ -1,0 +1,58 @@
+meta {
+  name: List Products
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{pim_base_url_v3}}/products?_fields=sku&_fields=status
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Accept: application/json
+}
+
+assert {
+  res.status: eq 200
+  res.body.data: isArray
+  res.body.pagination: isDefined
+}
+
+docs {
+  Confirmed live 2026-09-04 against "David's Dev Account" (see
+  `02-Products-v3/Get Access Token (Dev).bru`, in this same folder so a
+  folder-level `bru run "02-Products-v3/" --env "Dev"` covers both without
+  mixing in the Sandbox-only requests in `01-Authentication/`). Run with
+  `--env "Dev"`, after running that auth request first to populate
+  `access_token`.
+
+  ## What it does
+  `GET /api/v3/products` with repeated `_fields` query params to select a
+  sparse field set, exactly as described by Plytix and by `API V3.md`'s
+  `_fields` section. Matches `openapi_pimv3.json`'s `SearchProductsResponse`
+  schema exactly: top-level `data` (array of product objects), `errors`
+  (array, empty on success), `pagination` (object with `next_page`, a full
+  URL for the next page -- confirms cursor/page-link style pagination, not
+  offset/limit params).
+
+  ## This resolves the v3-unreachable blocker
+  v3 is live and matches its documented shape. It was unreachable earlier
+  only because it was tested against the wrong host/account
+  (`pim.plytix.com` under the "API Docs" account) -- v3 for this engagement
+  is served from a separate DEV host/account. See
+  `config/api-testing.config.md` for the full history.
+
+  ## Spec discrepancy found
+  `openapi_pimv3.json`'s `GET /api/v3/products` operation declares **zero**
+  query parameters -- no `_fields`, no pagination params. But `_fields`
+  demonstrably works live exactly as documented in `API V3.md` (the prose
+  doc, not the spec). Per this repo's trust order (verified live behavior >
+  raw materials > spec for *behavior*, but spec > prose for *shapes* where
+  they conflict) -- here they don't conflict on shape, only on
+  completeness: the spec is simply missing parameters that exist and work.
+  Flag to Plytix: `openapi_pimv3.json`'s parameter list for this endpoint
+  (and possibly others) is incomplete/stale relative to the real API.
+}
