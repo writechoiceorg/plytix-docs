@@ -6,8 +6,8 @@
 
 ## Platform
 
-**Documentation framework:** [e.g. Mintlify / Fumadocs / Gitbook / Other]
-**Platform MCP available:** [Yes / No. If yes, name it.]
+**Documentation framework:** Mintlify
+**Platform MCP available:** Yes
 **Base URL:** [e.g. https://docs.yourproject.com]
 
 ---

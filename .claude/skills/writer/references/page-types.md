@@ -103,6 +103,8 @@ Do not bold any words in this introduction.
 
 ## Prerequisites
 
+Short intro before bullet list:
+
 - Tools or software required (with links if necessary).
 - Prior knowledge or previous setup steps (with links to the relevant guides).
 - Be specific and assertive. Avoid vague phrases like "a good knowledge of the tools."
