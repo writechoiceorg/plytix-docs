@@ -1,0 +1,54 @@
+meta {
+  name: Create Product Category
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{pim_base_url_v3}}/product-categories
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {
+    "name": "WC Test Category"
+  }
+}
+
+assert {
+  res.status: eq 201
+  res.body.data.name: eq WC Test Category
+}
+
+docs {
+  Confirmed live 2026-09-07 against "David's Dev Account". **Fixture kept**
+  -- id `6a9f1b482b6fd055ffb7c7dc`, referenced by "Create Child Product
+  Category.bru" in this folder and by Phase 2b (`02-Products-v3`) as a
+  `category_ids` value once products are extended.
+
+  ## Mutating status code confirmed
+  `201 Created` -- matches `API V3.md`'s stated convention, **not**
+  `openapi_pimv3.json`'s declared `200`/`422`-only responses. First
+  confirmed mutating-status-code data point for `TESTING_PLAN.md`'s
+  "don't assume" ground rule -- log per resource as each phase creates
+  something.
+
+  Create-response shape is a subset of the full `GET`-by-id shape (missing
+  `account_id`, `parent_id`, `created` -- see "Get Product Category by
+  ID.bru").
+
+  ## Not idempotent to re-run
+  Category names are unique per account. Re-running this exact request
+  after the fixture already exists returns `422
+  {"errors":[{"name":"ValidationError","description":"Category WC Test
+  Category already exists"}]}` instead of `201` -- expected once the
+  fixture is already in place, not a bug (see
+  `config/api-testing.config.md` quirk #25a).
+}

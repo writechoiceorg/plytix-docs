@@ -1,0 +1,41 @@
+meta {
+  name: Create Dropdown Attribute
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{pim_base_url_v3}}/product-attributes
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {
+    "name": "wc_test_dropdown",
+    "type": "DropdownAttribute",
+    "options": ["Small", "Medium", "Large"]
+  }
+}
+
+assert {
+  res.status: eq 201
+  res.body.data.options: isArray
+}
+
+docs {
+  Confirmed live 2026-09-07. Created then deleted in the same test run (no
+  downstream dependent needs this specific one, `TextAttribute` covers
+  Phase 2b's needs) -- id was `6a9f1bf72b6fd055ffb7c7e3`.
+
+  `201 Created`. Unset optional booleans (`manual_sorting`,
+  `sort_ascending`, `restricted`) get real defaults applied server-side
+  (`true`, `true`, `false` respectively), not left null -- worth knowing
+  these aren't just documentation placeholders.
+}

@@ -1,0 +1,28 @@
+meta {
+  name: Update and Delete Product List (Undeclared)
+  type: http
+  seq: 6
+}
+
+delete {
+  url: {{pim_base_url_v3}}/pim-product-lists/REPLACE_WITH_LIST_ID
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Accept: application/json
+}
+
+docs {
+  Confirmed live 2026-09-08 against a throwaway list (id
+  `6aa032402b6fd055ffb7cabc`, since deleted) -- **not** either kept
+  fixture. `openapi_pimv3.json` declares no `PATCH`/`DELETE` for this
+  resource; both work anyway, same pattern confirmed on every resource
+  tested so far this project:
+  - `PATCH /pim-product-lists/{id}` with `{"name": "..."}` -- `200`,
+    renamed successfully.
+  - `DELETE /pim-product-lists/{id}` -- `204`, then `404` on a follow-up
+    `GET`.
+}

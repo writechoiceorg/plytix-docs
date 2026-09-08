@@ -1,0 +1,51 @@
+meta {
+  name: Update List Products Subpath - Not Supported (Flow 5)
+  type: http
+  seq: 7
+}
+
+patch {
+  url: {{pim_base_url_v3}}/pim-product-lists/REPLACE_WITH_LIST_ID/products
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {
+    "product_ids": ["6aa022262b6fd055ffb7caa4"]
+  }
+}
+
+assert {
+  res.status: eq 422
+  res.body.errors[0].description: contains extra_forbidden
+}
+
+docs {
+  Confirmed live 2026-09-08 -- `USER_FLOWS.md` Flow 5, against a
+  throwaway list (id `6aa04ad02b6fd055ffb7cae8`, since deleted).
+
+  ## Rules out a list-side product-assignment mechanism
+  `POST /pim-product-lists/{id}/products` -- `405 Method Not Allowed`
+  (route recognized at the generic subpath level, but `POST` isn't an
+  accepted verb there).
+
+  `PATCH /pim-product-lists/{id}/products` -- `422`:
+  `{"errors":[{"name":"ValidationError","description":"1 validation
+  error for ProductListUpdateInputDto\nproducts\n  Extra inputs are not
+  permitted [type=extra_forbidden, ...]"}]}`. This reveals the generic
+  subpath `PATCH` mechanism's real behavior: `{path}` is validated as a
+  field name against the resource's own Update DTO
+  (`ProductListUpdateInputDto` here), and the request body becomes that
+  field's new value. Since `products` isn't a real field on that DTO,
+  it 422s as an unrecognized extra field -- **there is no list-side way
+  to manage membership at all**, confirming Flow 5's real answer: the
+  only mechanism is `PATCH /products/{id}` with `static_list_ids` (see
+  `02-Products-v3`), a product-side field, not anything on the list.
+}

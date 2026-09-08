@@ -1,0 +1,52 @@
+meta {
+  name: Create Asset
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{pim_base_url_v3}}/assets
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {
+    "url": "https://picsum.photos/id/237/300/300.jpg",
+    "filename": "wc_test_asset.jpg",
+    "alt_text": "WC test asset",
+    "category_ids": ["6a9f1b862b6fd055ffb7c7de"]
+  }
+}
+
+assert {
+  res.status: eq 201
+  res.body.data.content_type: eq image/jpeg
+}
+
+docs {
+  Confirmed live 2026-09-08 against "David's Dev Account". **Fixture
+  kept** -- id `6aa021b72b6fd055ffb7ca9f`, for Products (Phase 2b)'s
+  `thumbnail_id`.
+
+  `201 Created`. Plytix downloaded the public image from `url` and stored
+  it (`content_type`, `checksum`, `extension`, `file_size` all populated
+  from the real file).
+
+  ## Major finding -- category_ids is silently ignored on create
+  `category_ids` was sent with a real category id (Phase 1b's fixture)
+  but **does not link** -- a follow-up `GET /assets/{id}/categories`
+  right after this create returns `[]`. The linkage only takes effect via
+  a separate `PATCH` after creation -- see "Update Asset.bru" in this
+  folder, which sets `category_ids` again and confirms it actually
+  applies that time. **This is resource-specific**: the same
+  `category_ids` field on `POST /products` (Phase 2b) *does* link at
+  create time -- don't assume this behavior generalizes across resources
+  either way; test per-resource.
+}

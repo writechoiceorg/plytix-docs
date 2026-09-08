@@ -1,0 +1,43 @@
+meta {
+  name: Create Import Profile - With Settings
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{pim_base_url_v3}}/import-profiles
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {
+    "name": "WC Test Import Profile Full",
+    "settings": {
+      "import_action": "NEW",
+      "charset": "UTF-8",
+      "column_separator": ","
+    }
+  }
+}
+
+assert {
+  res.status: eq 201
+  res.body.data.settings.import_action: eq NEW
+}
+
+docs {
+  Confirmed live 2026-09-07. Created then deleted in the same test run (id
+  was `6a9f1d4a2b6fd055ffb7c806`).
+
+  Confirms partial `settings` objects merge with the same defaults seen in
+  "Create Import Profile.bru" -- only the 3 fields sent are overridden,
+  the rest (`import_assets_action`, `new_products_status`, etc.) still get
+  their normal defaults.
+}

@@ -1,0 +1,42 @@
+meta {
+  name: Get Product by ID
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{pim_base_url_v3}}/products/6a38f614c3d65a5f868b1a06
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Accept: application/json
+}
+
+assert {
+  res.status: eq 200
+  res.body.data.id: eq 6a38f614c3d65a5f868b1a06
+  res.body.data.sku: eq BAG-10157
+}
+
+docs {
+  Confirmed live 2026-09-07 against "David's Dev Account". Run with
+  `--env "Dev"`, after `Get Access Token (Dev)`.
+
+  ## What it does
+  `GET /api/v3/products/{identifier}` by the product's Mongo ObjectId
+  (`6a38f614c3d65a5f868b1a06`, SKU `BAG-10157` — a pre-existing read-only
+  fixture, not created by this test). Returns the full `ProductOutputDto`
+  shape, including nested `attributes`, expanded `categories` are NOT
+  included by default here (only `attributes`, `product_relationships`,
+  etc. -- see the sibling "Get Product Subpath" requests for expanded
+  category/asset data).
+
+  ## Spec discrepancy found
+  The live response's relationship field is named `product_relationships`,
+  not `relationships` as `openapi_pimv3.json`'s `ProductOutputDto` declares.
+  See `Search Products - Filters.bru` and
+  `config/api-testing.config.md` quirk #13.
+}

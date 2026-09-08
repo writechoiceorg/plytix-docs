@@ -1,0 +1,28 @@
+meta {
+  name: Get Product Attribute Group by ID
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{pim_base_url_v3}}/product-attribute-groups/6a9f1b872b6fd055ffb7c7df
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Accept: application/json
+}
+
+assert {
+  res.status: eq 200
+  res.body.data.name: eq WC Test Attribute Group
+}
+
+docs {
+  Confirmed live 2026-09-07. Subpath discovery (`GET .../bogus_xyz`)
+  reveals the raw field list: `['id','account_id','name','order',
+  'attribute_labels','created','modified']` -- matches the spec's
+  `ProductAttributeGroupOutputDto` exactly.
+}

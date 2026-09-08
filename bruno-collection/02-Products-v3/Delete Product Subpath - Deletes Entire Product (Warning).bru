@@ -1,0 +1,48 @@
+meta {
+  name: Delete Product Subpath - Deletes Entire Product (Warning)
+  type: http
+  seq: 14
+}
+
+delete {
+  url: {{pim_base_url_v3}}/products/REPLACE_WITH_PRODUCT_ID/categories
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Accept: application/json
+}
+
+docs {
+  Confirmed live 2026-09-08 against two separate disposable products
+  (`WC-TEST-DISPOSABLE-001` id `6aa022442b6fd055ffb7caa5`,
+  `WC-TEST-DISPOSABLE-002` id `6aa0228d2b6fd055ffb7caa6`, both since
+  deleted).
+
+  ## Critical, potentially hazardous finding
+  `DELETE /products/{identifier}/{path}` does **not** scope the delete to
+  `{path}` at all -- it deletes the **entire product**, regardless of what
+  `{path}` is. Confirmed two ways:
+  1. `PATCH`'d `category_ids` onto a disposable product (confirmed linked
+     via `GET .../categories`), then called `DELETE
+     .../products/{id}/categories` expecting it to unassign just the
+     category -- instead the *whole product* was deleted (`204`, then a
+     plain `GET /products/{id}` returned `404`, not just an empty
+     categories list).
+  2. Repeated with a **completely made-up** subpath name
+     (`/totally_made_up_path_xyz`) on a second disposable product with no
+     special setup -- same result: `204`, whole product gone. The `{path}`
+     segment is not inspected by the delete handler at all; it behaves
+     identically to plain `DELETE /products/{identifier}`.
+
+  **Implication for docs**: never document or suggest
+  `DELETE /products/{id}/{subpath}` as a way to remove a single
+  relationship/field (e.g. "unassign a category" or "remove an asset") --
+  it silently deletes the whole product instead. This is exactly the kind
+  of undeclared-route landmine `USER_FLOWS.md` warned could exist; flag to
+  Plytix as a likely bug (a scoped-removal endpoint that isn't scoped) or,
+  at minimum, a sharp edge worth a loud warning in any future docs that
+  mention it.
+}

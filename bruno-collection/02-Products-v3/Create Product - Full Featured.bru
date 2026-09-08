@@ -1,0 +1,69 @@
+meta {
+  name: Create Product - Full Featured
+  type: http
+  seq: 12
+}
+
+post {
+  url: {{pim_base_url_v3}}/products
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {
+    "sku": "WC-TEST-FULL-001",
+    "label": "WC Test Full Product",
+    "category_ids": ["6a9f1b482b6fd055ffb7c7dc", "6a9f1b542b6fd055ffb7c7dd"],
+    "attributes": {"wc_test_text": "WC full-featured test value"},
+    "thumbnail_id": "6aa021b72b6fd055ffb7ca9f"
+  }
+}
+
+assert {
+  res.status: eq 201
+  res.body.data.thumbnail_id: eq 6aa021b72b6fd055ffb7ca9f
+}
+
+docs {
+  Confirmed live 2026-09-08 against "David's Dev Account", wiring together
+  every kept fixture from Phase 1 and Phase 2a. **Fixture kept** -- id
+  `6aa022262b6fd055ffb7caa4`, for Phase 3/4 (Pim Product Lists, Channels,
+  Ecatalogs, etc.) to have something real to query.
+
+  `201 Created`.
+
+  ## attributes map is keyed by attribute NAME, not id
+  `{"attributes": {"wc_test_text": "..."}}` -- confirmed via a separate
+  scratch product (created and deleted in this same test run) that this
+  is the expected key, not the attribute's Mongo `id`. The response's
+  `attributes` map also includes several pre-existing system/completeness
+  attributes not sent in this request (`amazon_ready`,
+  `basic_information_completeness`, `website_ready`, etc., all numeric
+  scores) -- these appear to be account-level default attributes applied
+  to every product automatically, not something this request created.
+
+  ## category_ids DOES link on create -- differs from assets
+  Unlike `09-Assets/Create Asset.bru` (where the identical `category_ids`
+  field is silently ignored on `POST`), it **works immediately** here: a
+  follow-up `GET /products/{id}/categories` shows both categories fully
+  linked. Confirms the create-time relationship-linking behavior is
+  resource-specific, not a blanket rule either way.
+
+  ## thumbnail_id also persists on create
+  Unlike the array-typed `category_ids` on assets, this single-reference
+  field round-trips correctly in the create response itself.
+
+  ## Not idempotent to re-run
+  `sku` is unique per account. Re-running this request once the fixture
+  exists returns `409 Conflict {"errors":[{"name":"AlreadyExists",
+  "description":"product data validation failed"}]}` -- same
+  `409`/`AlreadyExists` family as attribute groups/attributes (Phase 1),
+  not categories' `422` (`config/api-testing.config.md` quirk #33).
+}

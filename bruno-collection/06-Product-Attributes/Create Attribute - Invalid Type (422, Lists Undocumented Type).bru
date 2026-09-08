@@ -1,0 +1,50 @@
+meta {
+  name: Create Attribute - Invalid Type (422, Lists Undocumented Type)
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{pim_base_url_v3}}/product-attributes
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {
+    "name": "wc_test_badtype",
+    "type": "NotARealType"
+  }
+}
+
+assert {
+  res.status: eq 422
+  res.body.errors[0].description: contains HierarchyAttribute
+}
+
+docs {
+  Confirmed live 2026-09-07. Trigger case -- creates nothing.
+
+  `{"data":[],"errors":[{"name":"InputDTOValidationError","description":
+  "Input tag 'NotARealType' found using 'type' does not match any of the
+  expected tags: 'TextAttribute', 'MultilineAttribute',
+  'BooleanAttribute', 'DateAttribute', 'DecimalAttribute',
+  'DropdownAttribute', 'FormulaAttribute', 'HierarchyAttribute',
+  'HtmlAttribute', 'IntAttribute', 'MediaAttribute',
+  'MediaGalleryAttribute', 'MultiSelectAttribute', 'UrlAttribute',
+  'CompletenessAttribute'"}]}`
+
+  This is pydantic's own discriminated-union error message, so it's an
+  authoritative list of every type tag the live API's validator actually
+  recognizes -- 15, not the 14 `openapi_pimv3.json` declares.
+  `HierarchyAttribute` isn't in the spec's `oneOf` for
+  `ProductAttributeCreateInputDto` at all. See "Create Attribute -
+  HierarchyAttribute (500, Unimplemented).bru" for what happens if you try
+  to actually use it.
+}

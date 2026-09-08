@@ -1,0 +1,45 @@
+meta {
+  name: Create Channel - Minimal
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{pim_base_url_v3}}/channels
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {
+    "name": "WC Test Channel CSV",
+    "format": "CSV"
+  }
+}
+
+assert {
+  res.status: eq 201
+  res.body.data.format: eq CSV
+}
+
+docs {
+  Confirmed live 2026-09-08 against "David's Dev Account". Created then
+  deleted in the same test run (id was `6aa047032b6fd055ffb7cad9`) -- the
+  richer "Create Channel - Full Featured.bru" in this folder is the kept
+  fixture instead.
+
+  `201 Created`. Response reveals a large set of real defaults not sent
+  in the request: `output_filename: "plytix_feed"`,
+  `column_separator: ","`, `text_delimiter: "\""`,
+  `process_products: "CREATED_OR_MODIFIED"`,
+  `parent_include_criteria: "ONLY_PARENT_IN_LIST"`, `active: false`, plus
+  a `build_reference_date` already set to the account's creation date.
+  This is the confirmed real shape of `ChannelCreateOutputDto` -- much
+  richer than the spec's field list alone suggests.
+}

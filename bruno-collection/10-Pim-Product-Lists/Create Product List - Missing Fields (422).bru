@@ -1,0 +1,38 @@
+meta {
+  name: Create Product List - Missing Fields (422)
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{pim_base_url_v3}}/pim-product-lists
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {}
+}
+
+assert {
+  res.status: eq 422
+  res.body.errors: isArray
+}
+
+docs {
+  Confirmed live 2026-09-08. Trigger case, creates nothing.
+
+  `{"data":[],"errors":[{"name":"InputDTOValidationError","description":
+  "name: Field required"},{"name":"InputDTOValidationError",
+  "description":"type: Field required"}]}` -- first time this project has
+  seen **two** entries in the `errors` array at once (one per missing
+  required field), rather than just the first one found. Still the same
+  flat `{name, description}` envelope shape as every other 422 confirmed
+  so far.
+}

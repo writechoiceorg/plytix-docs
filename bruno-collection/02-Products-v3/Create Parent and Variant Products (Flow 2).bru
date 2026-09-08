@@ -1,0 +1,57 @@
+meta {
+  name: Create Parent and Variant Products (Flow 2)
+  type: http
+  seq: 15
+}
+
+post {
+  url: {{pim_base_url_v3}}/products
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {
+    "sku": "WC-TEST-PARENT-001",
+    "label": "WC Test Parent",
+    "product_family_id": "6a38f5d8c3d65a5f868b186e"
+  }
+}
+
+assert {
+  res.status: eq 201
+  res.body.data.product_level: eq 0
+}
+
+docs {
+  Confirmed live 2026-09-08 -- `USER_FLOWS.md` Flow 2. Created then
+  deleted in the same test run (parent id was `6aa04a322b6fd055ffb7cae4`,
+  variant id `6aa04a3b2b6fd055ffb7cae5`) -- no downstream dependents, so
+  both were cleaned up via the confirmed `DELETE` rather than kept.
+
+  This base request captures the **parent** create (standalone,
+  `product_level: 0` at this point). The variant was created as a
+  second, separate `POST /products` request:
+  `{"sku":"WC-TEST-VARIANT-001","product_family_id":
+  "6a38f5d8c3d65a5f868b186e","parent_id":"<parent id>"}` -- `201`,
+  `product_level: 2` on the variant.
+
+  ## Findings
+  - After the variant was created, re-fetching the **parent** showed
+    `product_level` flipped from `0` to `1` (a standalone product starts
+    at 0; becoming a parent bumps it to 1) and `num_variations`
+    incremented `0`→`1`.
+  - The family's own `total_products` count
+    (`GET /product-families/{family_id}`) updated live from 7 to 9,
+    confirming both new products were correctly attributed to the family.
+  - `overwritten_attributes` stayed empty on the variant in this test (no
+    attribute values were set on either product, so there was nothing to
+    overwrite) -- attribute-inheritance-copying behavior itself wasn't
+    exercised.
+}

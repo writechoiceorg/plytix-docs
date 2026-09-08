@@ -1,0 +1,31 @@
+meta {
+  name: List Product Families
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{pim_base_url_v3}}/product-families?_page_size=2
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Accept: application/json
+}
+
+assert {
+  res.status: eq 200
+  res.body.data: isArray
+  res.body.data[0].total_products: isNumber
+}
+
+docs {
+  Confirmed live 2026-09-08 against "David's Dev Account". Read-only
+  (`GET` only in `openapi_pimv3.json` -- no create endpoint exists at
+  all). Real pre-existing data: this account has real product families
+  (e.g. "Accessories", "Apparel"), each with `total_products`,
+  `total_attributes`, `total_models` counts. No fixture creation needed
+  or possible for this resource.
+}

@@ -1,0 +1,40 @@
+meta {
+  name: Create Asset Category
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{pim_base_url_v3}}/asset-categories
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {
+    "name": "WC Test Asset Category"
+  }
+}
+
+assert {
+  res.status: eq 201
+  res.body.data.name: eq WC Test Asset Category
+}
+
+docs {
+  Confirmed live 2026-09-07 against "David's Dev Account". **Fixture kept**
+  -- id `6a9f1b862b6fd055ffb7c7de`, for Assets (Phase 2a) to reference via
+  `category_ids`.
+
+  Same shape/behavior as `03-Product-Categories/Create Product
+  Category.bru`: `201 Created` (not spec's `200`), same
+  `AssetCategoryCreateOutputDto` partial shape. Also not idempotent to
+  re-run once the fixture exists -- same `422` duplicate-name behavior
+  (`config/api-testing.config.md` quirk #25a).
+}

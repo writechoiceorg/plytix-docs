@@ -1,0 +1,55 @@
+meta {
+  name: Create Completeness Attribute - Real References (500, Bug)
+  type: http
+  seq: 11
+}
+
+post {
+  url: {{pim_base_url_v3}}/product-attributes
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {
+    "name": "wc_test_completeness_real",
+    "type": "CompletenessAttribute",
+    "attributes": [{"id": "6a9f1bf72b6fd055ffb7c7e1"}]
+  }
+}
+
+assert {
+  res.status: eq 500
+}
+
+docs {
+  Confirmed live 2026-09-08 -- `USER_FLOWS.md` Flow 3. Creates nothing
+  (server error).
+
+  ## Real, reproducible bug -- blocks Flow 3 entirely
+  `CompletenessAttribute.attributes` needs `[{"id": "..."}]` objects, not
+  raw ID strings (confirmed via a 422 first --
+  `RelatedAttributeDto` requires an object; matches
+  `openapi_pimv3.json`'s schema). But once given the **correct** shape
+  with a real attribute id, the request 500s:
+  `{"data":[],"errors":[{"name":"ConfigurationError","description":
+  "There was an error processing your request. Please try again later"}]}`.
+  Reproduced twice, with both one and two real attribute references --
+  consistent, not a fluke.
+
+  This is a **different** failure category from `HierarchyAttribute`'s
+  500 (`Create Attribute - HierarchyAttribute (500, Unimplemented).bru`)
+  -- that's an undocumented/unimplemented type. `CompletenessAttribute`
+  is a fully documented, spec'd type (Phase 1d smoke-tested it
+  successfully with an **empty** `attributes` array) that breaks the
+  moment it's given the real references the feature exists to use. Flag
+  to Plytix as a live bug, not a documentation gap -- this blocks any
+  docs about actually using Completeness Attributes for their intended
+  purpose.
+}
