@@ -1,0 +1,34 @@
+meta {
+  name: Create Product Category - Missing Name (422)
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{pim_base_url_v3}}/product-categories
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {}
+}
+
+assert {
+  res.status: eq 422
+  res.body.errors[0].description: contains name
+}
+
+docs {
+  Confirmed live 2026-09-07. Trigger case -- creates nothing.
+
+  `{"data":[],"errors":[{"name":"InputDTOValidationError","description":
+  "name: Field required"}]}` -- same 422 envelope shape confirmed for
+  `/products` in Phase 0 (`config/api-testing.config.md` quirk #18).
+}

@@ -1,0 +1,25 @@
+meta {
+  name: Delete Product Attribute (Undeclared)
+  type: http
+  seq: 10
+}
+
+delete {
+  url: {{pim_base_url_v3}}/product-attributes/REPLACE_WITH_ATTRIBUTE_ID
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Accept: application/json
+}
+
+docs {
+  Confirmed live 2026-09-07 -- this exact request deleted every smoke-test
+  attribute in this folder except the kept `TextAttribute` fixture (13
+  deletes total, all `204`, all followed by `404` on GET). Same
+  undeclared-but-working pattern as every other Phase 1 resource.
+  `openapi_pimv3.json` declares no `DELETE` for `/product-attributes/
+  {identifier}` at all.
+}

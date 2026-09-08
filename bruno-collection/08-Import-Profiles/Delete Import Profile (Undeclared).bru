@@ -1,0 +1,30 @@
+meta {
+  name: Delete Import Profile (Undeclared)
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{pim_base_url_v3}}/import-profiles/REPLACE_WITH_PROFILE_ID
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Accept: application/json
+}
+
+docs {
+  Confirmed live 2026-09-07 -- deleted both import profiles created in
+  this folder (ids `6a9f1d492b6fd055ffb7c805` and
+  `6a9f1d4a2b6fd055ffb7c806`), both `204`, both followed by `404` on GET.
+  Same undeclared-but-working pattern as every other Phase 1 resource.
+  `openapi_pimv3.json` declares no `DELETE` for `/import-profiles/
+  {identifier}` at all.
+
+  ## Subpath discovery
+  `GET /import-profiles/{id}/bogus_xyz` (before deletion) -- 400, raw
+  field list: `['id','account_id','name','settings','created',
+  'modified']` -- matches spec exactly, no undocumented fields.
+}

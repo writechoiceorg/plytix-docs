@@ -1,0 +1,36 @@
+meta {
+  name: Delete Product
+  type: http
+  seq: 13
+}
+
+delete {
+  url: {{pim_base_url_v3}}/products/REPLACE_WITH_PRODUCT_ID
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Accept: application/json
+}
+
+docs {
+  Confirmed live 2026-09-08 against a disposable product created just for
+  this test (`sku: "WC-TEST-DISPOSABLE-003"`, id `6aa022d82b6fd055ffb7caa8`,
+  since deleted) -- **not** the kept "Create Product - Full Featured.bru"
+  fixture.
+
+  `204 No Content` -- matches `API V3.md`'s stated prose convention,
+  **not** `openapi_pimv3.json`'s declared `200`. A follow-up `GET` on the
+  same id then returns `404`.
+
+  ## Identifier-by-SKU re-confirmed still false
+  `GET /products/WC-TEST-FULL-001` (by SKU, on the kept fixture) still
+  returns `422` (`Id must be of type PydanticObjectId`) -- same result as
+  Phase 0's original finding against a different, pre-existing product.
+  `API V3.md`'s claim that this resource specifically supports SKU lookup
+  does not hold here either, on a product this session created itself
+  (rules out any theory that it only fails for pre-existing/legacy
+  products).
+}

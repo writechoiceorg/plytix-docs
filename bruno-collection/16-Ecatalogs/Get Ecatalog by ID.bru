@@ -1,0 +1,42 @@
+meta {
+  name: Get Ecatalog by ID
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{pim_base_url_v3}}/ecatalogs/6a38f615c3d65a5f868b1a41
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Accept: application/json
+}
+
+assert {
+  res.status: eq 200
+  res.body.data.pdf_active: eq false
+}
+
+docs {
+  Confirmed live 2026-09-08. Fetches the pre-existing "Plytix Brand
+  Portal" ecatalog by id -- read-only fixture, never mutated (no
+  undeclared `PATCH`/`DELETE` spot-check attempted here, unlike every
+  create-able resource in this project, per the ground rule against
+  mutating pre-existing account data).
+
+  Subpath discovery (`GET .../bogus_xyz`) raw field list: `['id',
+  'account_id','name','logo','product_list_id','asset_list_id',
+  'output_attributes','assets','settings','is_public',
+  'password_required','data_sheet_active','pds_active','pdf_active',
+  'quote_active','specification_sheet_active','price_list_active',
+  'pds_template_id','price_list_id','specification_sheet_id',
+  'pdf_catalog_id','exportable_attributes','password','notification_list',
+  'quote_request_output_attributes','notification_active','created',
+  'modified']` -- matches the spec's `ECatalogCreateInputDto` field names
+  closely, plus output-only fields (`is_public`, `assets`, `created`).
+  `pdf_active: false` here confirms this ecatalog doesn't use the
+  (feature-gated-off) PDF catalog integration either.
+}

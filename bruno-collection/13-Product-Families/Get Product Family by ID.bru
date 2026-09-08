@@ -1,0 +1,34 @@
+meta {
+  name: Get Product Family by ID
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{pim_base_url_v3}}/product-families/6a38f5d8c3d65a5f868b186e
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Accept: application/json
+}
+
+assert {
+  res.status: eq 200
+  res.body.data.name: eq Accessories
+}
+
+docs {
+  Confirmed live 2026-09-08. This is the `product_family_id` already
+  present on the Phase 2b kept product (`WC-TEST-FULL-001`) even though
+  that product was created standalone with no explicit family wiring --
+  confirms Plytix auto-assigns a product to a family based on its
+  category/attributes, not something this test set up deliberately.
+
+  Subpath discovery raw field list: `['id','account_id','name',
+  'total_products','total_attributes','total_models','created',
+  'modified']` -- matches the spec's `ProductFamilyOutputDto` exactly, no
+  undocumented fields.
+}

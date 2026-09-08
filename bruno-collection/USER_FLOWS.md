@@ -17,6 +17,24 @@ things to test empirically and report back on.
 
 ---
 
+## ✅ Resolved 2026-09-08 — read this before the section below
+
+Phases 1-4 of `TESTING_PLAN.md` already answered the "do this first"
+question below empirically, resource by resource, before this flow
+document was run: **undeclared `PATCH`/`DELETE` works on 11 of 11
+resources tested** (categories — both kinds, attribute groups,
+attributes, connections, import profiles, product/asset lists, channels;
+`assets`/`products` were already known) — see
+`config/api-testing.config.md` quirk #45 for the full tally. Hypothesis 1
+below is confirmed; hypothesis 2 is ruled out. Today's public v3 API is
+**not** create-and-read-only for these resources — every one supports
+rename (`PATCH`) and delete (`DELETE`) via the same undeclared
+`{identifier}` route, just entirely undocumented in
+`openapi_pimv3.json`. The rest of this section is kept for historical
+context (it accurately describes the state of knowledge before Phases
+1-4 ran) but no longer needs to be re-tested before running the flows
+below.
+
 ## Do this first: the "can I update/delete anything?" question
 
 This blocks or reshapes almost every flow below, so resolve it before
@@ -64,7 +82,13 @@ for Plytix, not a testing gap on our end.
 
 ---
 
-## Flow 1 — Create and enrich a single product
+## Flow 1 — Create and enrich a single product ✅ resolved 2026-09-08
+
+> Already fully executed as Phase 2b's kept fixture (`02-Products-v3`,
+> SKU `WC-TEST-FULL-001`, id `6aa022262b6fd055ffb7caa4`) — every step
+> below confirmed live: `attributes` keyed by name, `category_ids` and
+> `thumbnail_id` both round-trip and expand on `GET`. No further testing
+> needed; see `02-Products-v3/README.md`.
 
 **Dashboard source**: `creating-products.md`, `create-and-manage-product-categories.md`,
 `create-and-manage-product-attributes.md`, `link-and-unlink-files-to-products.md`.
@@ -87,7 +111,21 @@ declared `POST`/`GET` endpoints.
 
 ---
 
-## Flow 2 — Build a parent/variant product structure
+## Flow 2 — Build a parent/variant product structure ✅ resolved 2026-09-08
+
+> Tested live with scratch products (`WC-TEST-PARENT-001` +
+> `WC-TEST-VARIANT-001`, both created against the real "Accessories"
+> family and deleted after). Steps 1-5 below all confirmed working as
+> described. New findings: `product_level` starts at `0` for a standalone
+> product, but a product that **becomes** a parent (gains a variant)
+> flips to `product_level: 1`, while the variant itself is
+> `product_level: 2` — not `0`/`1` as might be guessed. `num_variations`
+> incremented from 0→1 on the parent immediately. The family's own
+> `total_products` count (`GET /product-families/{id}`) also updated
+> live (7→9) to include both new products. `overwritten_attributes`
+> stayed empty on the variant in this test (no attribute values were set
+> that could be overwritten) — inheritance-copying behavior itself
+> wasn't exercised further. See `02-Products-v3/README.md`.
 
 **Dashboard source**: `manage-product-variations.md`,
 `how-to-create-and-manage-product-families.md`,
@@ -125,7 +163,23 @@ inherit; that's set once in Settings by a human, outside API scope.
 
 ---
 
-## Flow 3 — Track product readiness with a Completeness Attribute
+## Flow 3 — Track product readiness with a Completeness Attribute ❌ blocked 2026-09-08
+
+> **Real, reproducible bug found — blocks this entire flow.** Step 1
+> (`POST /product-attributes`, `type: CompletenessAttribute`, with a
+> real `attributes: [{"id": "..."}]` reference) 500s every time:
+> `{"errors":[{"name":"ConfigurationError","description":"There was an
+> error processing your request. Please try again later"}]}`. Confirmed
+> reproducible with both one and two real attribute references, on two
+> separate attempts. `CompletenessAttribute` only works with an **empty**
+> `attributes` array (smoke-tested fine in Phase 1d) — the moment it's
+> given the real references the feature exists to use, it breaks. This
+> is not the same failure as `HierarchyAttribute`'s 500 (Phase 1d) —
+> that's an undocumented/unimplemented type; this is a **documented,
+> spec'd type failing on its documented use case**. Flag to Plytix as a
+> live bug, not a docs gap. Steps 2-4 below (creating products, comparing
+> computed completeness) can't be tested until this is fixed — see
+> `06-Product-Attributes/README.md`.
 
 **Dashboard source**: `completeness-tracking.md`.
 
@@ -147,7 +201,17 @@ inherit; that's set once in Settings by a human, outside API scope.
 
 ---
 
-## Flow 4 — Build a Smart product list (dynamic segment)
+## Flow 4 — Build a Smart product list (dynamic segment) ✅ resolved 2026-09-08
+
+> Steps 1-2 already covered by Phase 3a's kept Smart list
+> (`6aa0322d2b6fd055ffb7cabb`, `10-Pim-Product-Lists`). Step 3 confirmed
+> live: Smart list membership has **no trace anywhere on the product
+> side** — `GET /products/{id}/static_lists` only ever reflects *Static*
+> membership (the field's name is literal, not a catch-all), and no
+> other subpath/field on the product exposes which Smart lists currently
+> match it. The **only** way to see Smart list membership is to
+> re-execute the list's own `query` against `/products` — confirms this
+> flow's suspicion exactly. See `10-Pim-Product-Lists/README.md`.
 
 **Dashboard source**: `create-and-manage-product-lists.md`.
 
@@ -167,7 +231,22 @@ inherit; that's set once in Settings by a human, outside API scope.
 
 ---
 
-## Flow 5 — Build a Static product list (manual membership)
+## Flow 5 — Build a Static product list (manual membership) ✅ resolved 2026-09-08
+
+> **The real mechanism, fully confirmed**: adding a product to a Static
+> list is done via `PATCH /products/{id}` with `{"static_list_ids":
+> ["<list_id>"]}` (undeclared but works, per the Phase 0-4 `PATCH`
+> finding) — confirmed by Phase 3a's kept Static list, which has the
+> Phase 2b product as a real member this way; verify via
+> `GET /products/{id}/static_lists`. The two subpath-guess candidates
+> below were both tested this session and **ruled out**:
+> `POST /pim-product-lists/{id}/products` → `405 Method Not Allowed`;
+> `PATCH /pim-product-lists/{id}/products` → `422`, because `products`
+> isn't a real field on `ProductListUpdateInputDto` at all (the generic
+> subpath `PATCH` mechanism validates the body against that DTO typed at
+> the given field name — there simply is no such field). So: no
+> list-side write path exists for membership; it's exclusively a
+> product-side field. See `10-Pim-Product-Lists/README.md`.
 
 **Dashboard source**: `create-and-manage-product-lists.md` ("Link
 products" action).
@@ -204,7 +283,26 @@ resolves a real ambiguity in a commonly-used dashboard action.
 
 ---
 
-## Flow 6 — Export via a Channel
+## Flow 6 — Export via a Channel ✅ resolved 2026-09-08 (both open steps ruled out)
+
+> Both open/undeclared steps tested and ruled out. **Direct product
+> assignment**: `PATCH /channels/{id}/products` → `422`, same
+> "`products` isn't a real field on `ChannelUpdateInputDto`" shape as
+> Flow 5's list equivalent — no subpath mechanism exists;
+> `product_list_id` (a real, declared field, confirmed linking
+> immediately on create in Phase 4a) is the only way products reach a
+> channel via the API. This directly resolves the help-center-vs-spec
+> discrepancy noted below: the dashboard's "direct assignment" language
+> is UI framing, not a distinct API mechanism — under the hood it's
+> `product_list_id` either way (very likely via an auto-generated hidden
+> list when a user "directly assigns" in the dashboard). **"Process"**:
+> `POST /channels/{id}/process` and `.../build` both → `405 Method Not
+> Allowed` (route exists at the generic subpath level but doesn't accept
+> `POST`). Separately, `PATCH`ing `active: true` on the kept channel left
+> `running`/`last_run_start_at`/`file_path` all unchanged (still
+> false/null) — confirms flipping `active` is just a metadata flag, not
+> a build trigger. **"Process" is confirmed UI/internal-only, not
+> reachable via any v3 endpoint.** See `15-Channels/README.md`.
 
 **Dashboard source**: `creating-a-channel.md`.
 
@@ -242,7 +340,20 @@ alternate mechanism the current UI doesn't use. Test both paths.
 
 ---
 
-## Flow 7 — Build a Brand Portal (API resource name: `ecatalogs`)
+## Flow 7 — Build a Brand Portal (API resource name: `ecatalogs`) ❌ blocked 2026-09-08
+
+> **Blocked entirely, for a reason this flow couldn't have anticipated**:
+> Phase 4b found Ecatalogs feature-gated off for "David's Dev Account" —
+> `POST /ecatalogs` 422s regardless of body validity
+> (`config/api-testing.config.md` status-gating #3). Steps 1-4 below
+> can't be executed at all in this account (no ecatalog can be created to
+> wire `product_list_id`/`asset_list_id`/`pdf_catalog_id` into). Step 6's
+> "Publish" question is consequently untestable too — there's no
+> ecatalog this session created to test it against, and the account's one
+> real pre-existing ecatalog ("Plytix Brand Portal") is a read-only
+> fixture that must not be mutated. This whole flow needs a different
+> account (with both Ecatalogs and PDF Catalogs enabled) before it can be
+> executed end-to-end. See `16-Ecatalogs/README.md`.
 
 **Dashboard source**: `create-and-manage-e-catalogs.md`.
 
@@ -273,7 +384,14 @@ work should use "Brand Portal" as the reader-facing term and note
 
 ---
 
-## Flow 8 — Relationships (mostly out of API reach today)
+## Flow 8 — Relationships (mostly out of API reach today) ✅ resolved 2026-09-08
+
+> Already covered by Phase 3e — `GET /relationships` confirmed 2 real
+> relationship types exist ("Bundles", "Cross-sell"), and
+> `GET /products/{id}` confirmed the product-side read exposure
+> (`product_relationships`) resolves to real relationship-type data. No
+> new testing needed; the "cannot create/assign/modify via API" framing
+> below is confirmed accurate. See `14-Relationships/README.md`.
 
 **Dashboard source**: `relationships/create.md`,
 `relationships/assigning-products.md`.

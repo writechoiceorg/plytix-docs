@@ -1,0 +1,47 @@
+meta {
+  name: Update Asset
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{pim_base_url_v3}}/assets/6aa021b72b6fd055ffb7ca9f
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {
+    "alt_text": "WC test asset UPDATED",
+    "filename": "wc_test_asset_renamed.jpg",
+    "category_ids": ["6a9f1b862b6fd055ffb7c7de"]
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.data.alt_text: eq WC test asset UPDATED
+  res.body.data.categories: isArray
+}
+
+docs {
+  Confirmed live 2026-09-08 against the kept asset fixture. `200 OK` --
+  matches `openapi_pimv3.json`'s declared status, contradicts `API
+  V3.md`'s stated 204-for-patch convention.
+
+  `alt_text`/`filename` update as expected. **`category_ids` here DOES
+  link** (`data.categories` comes back non-empty, and a follow-up `GET
+  /assets/{id}/categories` confirms the full expanded category object) --
+  unlike the identical field silently ignored on `POST` (see "Create
+  Asset.bru"). The `categories` field on this PATCH response is a shallow
+  reference (`[{"id": "..."}]`), while the `/categories` subpath returns
+  the fully expanded object -- same shallow-vs-expanded split seen
+  elsewhere in this API (e.g. products' `product_relationships` field vs.
+  its `/relationships` subpath).
+}

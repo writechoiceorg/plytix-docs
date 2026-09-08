@@ -1,0 +1,31 @@
+meta {
+  name: Get Relationship by ID
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{pim_base_url_v3}}/relationships/6a38f5d8c3d65a5f868b186c
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Accept: application/json
+}
+
+assert {
+  res.status: eq 200
+  res.body.data.label: eq related_products
+}
+
+docs {
+  Confirmed live 2026-09-08. Resolves the exact `relationship_id` named
+  in the Phase 2b kept product's `product_relationships` field
+  (`6a38f5d8c3d65a5f868b186c`) -- confirms the relationship-id references
+  seen on products point to real, fetchable relationship-type resources.
+
+  Subpath discovery raw field list: `['id','account_id','name','label',
+  'status','created','modified']` -- matches spec exactly.
+}

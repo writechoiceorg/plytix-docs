@@ -1,0 +1,43 @@
+meta {
+  name: Create Connection - Invalid Type (422, Reveals Enum)
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{pim_base_url_v3}}/connections
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {
+    "name": "WC Test Nonsense Connection",
+    "type": "ThisIsNotARealType123"
+  }
+}
+
+assert {
+  res.status: eq 422
+  res.body.errors[0].description: contains dropbox
+}
+
+docs {
+  Confirmed live 2026-09-07. Trigger case -- creates nothing.
+
+  ## Spec discrepancy found
+  `openapi_pimv3.json`'s description for `ConnectionCreateInputDto.type`
+  calls it a free string ("Dropbox, FTP, SFTP" given only as examples).
+  **This is false** -- `type` is validated against a fixed, lowercase
+  enum: `{"data":[],"errors":[{"name":"InputDTOValidationError",
+  "description":"type: Input should be 'dropbox', 'ftp' or
+  'sftp'"}]}`. Also confirmed uppercase `"FTP"` fails the same way (case
+  matters) -- see "Create Connection.bru" for the working lowercase
+  value.
+}

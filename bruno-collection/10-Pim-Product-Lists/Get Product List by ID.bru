@@ -1,0 +1,29 @@
+meta {
+  name: Get Product List by ID
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{pim_base_url_v3}}/pim-product-lists/6aa0322d2b6fd055ffb7cabb
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Accept: application/json
+}
+
+assert {
+  res.status: eq 200
+  res.body.data.name: eq WC Test Smart List
+}
+
+docs {
+  Confirmed live 2026-09-08. Subpath discovery (`GET .../bogus_xyz`) raw
+  field list: `['id','account_id','name','query','created','modified',
+  'modified_user_audit','created_user_audit','type']` -- matches the spec
+  closely, plus undocumented `modified_user_audit`/`created_user_audit`
+  (same pattern seen on several other resources this project).
+}

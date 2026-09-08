@@ -1,0 +1,39 @@
+meta {
+  name: Get Product Subpath - Static Lists (Flow 4)
+  type: http
+  seq: 16
+}
+
+get {
+  url: {{pim_base_url_v3}}/products/6aa022262b6fd055ffb7caa4/static_lists
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Accept: application/json
+}
+
+assert {
+  res.status: eq 200
+  res.body.data: isArray
+  res.body.data[0].type: eq Static
+}
+
+docs {
+  Confirmed live 2026-09-08 -- `USER_FLOWS.md` Flow 4/5. Returns the
+  expanded list of **Static** lists this product belongs to (the Phase
+  3a kept Static list, `6aa025bd2b6fd055ffb7cab4`, linked via `PATCH
+  .../static_list_ids`).
+
+  ## Confirms Flow 4's suspicion: Smart list membership has no trace here
+  This subpath -- and every field/subpath checked on the product --
+  **only** ever reflects Static list membership (the field's literal
+  name, `static_lists`/`static_list_ids`). The Phase 3a kept **Smart**
+  list (`6aa0322d2b6fd055ffb7cabb`, which this same product matches via
+  its `sku` filter) does **not** appear here or anywhere else on the
+  product. The only way to discover Smart list membership is to
+  re-execute that list's own `query` against `GET /products` -- there is
+  no reverse-lookup from the product side for dynamic/Smart lists.
+}

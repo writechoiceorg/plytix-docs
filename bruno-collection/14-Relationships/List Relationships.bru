@@ -1,0 +1,32 @@
+meta {
+  name: List Relationships
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{pim_base_url_v3}}/relationships?_fields=name
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Accept: application/json
+}
+
+assert {
+  res.status: eq 200
+  res.body.data: isArray
+}
+
+docs {
+  Confirmed live 2026-09-08 against "David's Dev Account". Read-only
+  (`GET` only -- no create endpoint anywhere, matching `API V3.md`'s
+  claim that relationship *types* are configured in the web app, not this
+  API). Real pre-existing data: 2 relationship types exist ("Bundles" /
+  label `bundles`, "Cross-sell" / label `related_products`) -- the latter
+  is the one referenced by the Phase 2b kept product's
+  `product_relationships` field. `_fields` confirmed working on this
+  list endpoint too.
+}

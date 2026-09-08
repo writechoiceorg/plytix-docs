@@ -1,0 +1,55 @@
+meta {
+  name: Create Text Attribute
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{pim_base_url_v3}}/product-attributes
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {
+    "name": "wc_test_text",
+    "type": "TextAttribute"
+  }
+}
+
+assert {
+  res.status: eq 201
+  res.body.data.type: eq TextAttribute
+}
+
+docs {
+  Confirmed live 2026-09-07 against "David's Dev Account". **Fixture
+  kept** -- id `6a9f1bf72b6fd055ffb7c7e1`, for Products (Phase 2b) to
+  reference in its `attributes` map.
+
+  `201 Created`. `label` defaults to the same value as `name` when
+  omitted (must match the `^[a-z0-9_]+$` pattern the spec declares for
+  `label`, so `name` values that are already lowercase/underscore-safe
+  work as a default label for free).
+
+  Also confirmed: `group_ids: ["6a9f1b872b6fd055ffb7c7df"]` (referencing
+  `05-Product-Attribute-Groups`'s fixture) is **accepted without error**
+  on create, but is **not** reflected back in either the create response
+  or a subsequent `GET`/`_fields=group_ids` -- inconclusive whether the
+  group linkage actually persists. Flag as an open item; worth re-checking
+  from the attribute-group side (`GET
+  /product-attribute-groups/{id}/{path}` for a members-list-shaped
+  subpath) in a later session.
+
+  ## Not idempotent to re-run
+  Same `409 Conflict {"errors":[{"name":"AlreadyExists","description":"An
+  attribute with the same name already exists"}]}` behavior as
+  `05-Product-Attribute-Groups/Create Product Attribute Group.bru` once
+  the fixture already exists.
+}

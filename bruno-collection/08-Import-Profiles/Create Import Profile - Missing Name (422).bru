@@ -1,0 +1,31 @@
+meta {
+  name: Create Import Profile - Missing Name (422)
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{pim_base_url_v3}}/import-profiles
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {}
+}
+
+assert {
+  res.status: eq 422
+  res.body.errors[0].description: contains name
+}
+
+docs {
+  Confirmed live 2026-09-07. Trigger case, creates nothing. Same 422
+  envelope shape confirmed across every resource this session.
+}

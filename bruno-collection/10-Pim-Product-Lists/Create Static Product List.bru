@@ -1,0 +1,60 @@
+meta {
+  name: Create Static Product List
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{pim_base_url_v3}}/pim-product-lists
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {
+    "name": "WC Test Static List",
+    "type": "Static"
+  }
+}
+
+assert {
+  res.status: eq 201
+  res.body.data.type: eq Static
+}
+
+docs {
+  Confirmed live 2026-09-08 against "David's Dev Account". **Fixture
+  kept** -- id `6aa025bd2b6fd055ffb7cab4`, for Channels/Ecatalogs (Phase
+  4) to reference via `product_list_id`.
+
+  `201 Created`.
+
+  ## Major finding -- how "Static" list membership actually works
+  Neither `ProductListCreateInputDto` nor the create response has any
+  field for a fixed member-ID array (`product_ids` etc. don't exist).
+  Instead, creating a `type: "Static"` list **auto-generates a `query`**
+  targeting the list's own id:
+  `[[{"operator":"in","field":"static_lists","value":["<this list's own
+  id>"],"field_type":"PimProductAttribute.ObjectIdAttribute"}]]`. So a
+  Static list is really just a Smart list whose query is
+  `static_lists contains <list_id>` -- membership isn't stored on the
+  list at all, it's stored on **each product's own `static_list_ids`
+  field**. To add a product to this list, `PATCH /products/{id}` with
+  `{"static_list_ids": ["6aa025bd2b6fd055ffb7cab4"]}` -- confirmed working
+  (see `02-Products-v3`'s kept product, which now has this list linked;
+  verify via `GET /products/{id}/static_lists`, a computed subpath, not
+  via `_fields=static_list_ids` on the main resource, which is silently
+  dropped like other relationship-array fields in this API).
+
+  ## Not idempotent to re-run
+  List names are unique per account. Re-running once the fixture exists
+  returns `422 {"errors":[{"name":"ValidationError","description":"A
+  List with same name already exists"}]}` -- expected, not a bug
+  (`config/api-testing.config.md` quirk #38a).
+}

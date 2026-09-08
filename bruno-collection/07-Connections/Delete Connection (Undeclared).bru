@@ -1,0 +1,29 @@
+meta {
+  name: Delete Connection (Undeclared)
+  type: http
+  seq: 4
+}
+
+delete {
+  url: {{pim_base_url_v3}}/connections/REPLACE_WITH_CONNECTION_ID
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Accept: application/json
+}
+
+docs {
+  Confirmed live 2026-09-07 against the connection created in "Create
+  Connection.bru" (id `6a9f1cc92b6fd055ffb7c7fe`, since deleted). This was
+  the **first** resource where the undeclared-DELETE pattern was
+  discovered this session -- `204`, then `404` on a follow-up `GET`
+  (`{"errors":[{"name":"NotFoundError","description":"Document with id
+  ... not found"}]}`) and a follow-up subpath `GET` (`404
+  {"errors":[{"name":"NotFoundError","description":"Resource not
+  found"}]}`). `openapi_pimv3.json` declares no `DELETE` for this resource
+  at all. Confirmed generalizing to every other Phase 1 resource -- see
+  each folder's own "Delete ... (Undeclared)" file.
+}

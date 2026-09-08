@@ -1,0 +1,59 @@
+meta {
+  name: Update Channel Products Subpath - Not Supported (Flow 6)
+  type: http
+  seq: 8
+}
+
+patch {
+  url: {{pim_base_url_v3}}/channels/6aa047d52b6fd055ffb7cadd/products
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {
+    "product_ids": ["6aa022262b6fd055ffb7caa4"]
+  }
+}
+
+assert {
+  res.status: eq 422
+  res.body.errors[0].description: contains extra_forbidden
+}
+
+docs {
+  Confirmed live 2026-09-08 -- `USER_FLOWS.md` Flow 6, against the kept
+  channel fixture (read-only probe, nothing mutated).
+
+  ## Resolves the help-center-vs-spec discrepancy Flow 6 flagged
+  The help-center says a Channel is a "Destination" with products
+  "assigned directly," implying no separate product-list step -- but
+  `ChannelCreateInputDto`/`ChannelOutputDto` both have `product_list_id`.
+  Testing both candidate mechanisms resolves this:
+
+  - **Direct assignment subpath**: `PATCH /channels/{id}/products` --
+    `422`, identical "`products` isn't a real field on
+    `ChannelUpdateInputDto`" shape as
+    `10-Pim-Product-Lists/Update List Products Subpath - Not Supported
+    (Flow 5).bru`. No such mechanism exists.
+  - **`product_list_id`**: confirmed in Phase 4a to link immediately on
+    create. This is the **only** way products reach a channel via the
+    API -- the dashboard's "direct assignment" is UI framing, not a
+    distinct mechanism; very likely implemented as an auto-generated
+    hidden product list under the hood when a user "directly assigns" in
+    the dashboard.
+
+  ## "Process" (Draft → Live) is confirmed UI/internal-only
+  `POST /channels/{id}/process` and `.../build` -- both `405 Method Not
+  Allowed`. Separately, `PATCH`ing `{"active": true}` on the kept channel
+  left `running`/`last_run_start_at`/`file_path` all unchanged
+  (still `false`/`null`) -- confirms `active` is just a metadata flag,
+  not a build trigger. No v3 endpoint (declared or undeclared) exposes
+  the actual export-build action.
+}

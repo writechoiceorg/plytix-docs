@@ -1,0 +1,46 @@
+meta {
+  name: Get Product Attribute by ID
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{pim_base_url_v3}}/product-attributes/6a9f1bf72b6fd055ffb7c7e1
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Accept: application/json
+}
+
+assert {
+  res.status: eq 200
+  res.body.data.type: eq TextAttribute
+}
+
+docs {
+  Confirmed live 2026-09-07. Fetches the kept `TextAttribute` fixture from
+  "Create Text Attribute.bru".
+
+  ## _fields is ignored on GET-by-id (new finding this session)
+  `GET /product-attributes/{id}?_fields=id&_fields=group_ids` still
+  returns the **full** shape (`id, name, label, description, status,
+  created, modified, account_id, type, character_limit`), ignoring the
+  `_fields` restriction entirely. Re-checked against `/products/{id}` too
+  -- same behavior there. **`_fields` only applies to the list/search
+  endpoint (`GET /products`, `GET /product-attributes`, etc.), never to
+  the single-resource `GET /{resource}/{id}`.** Add this to
+  `config/api-testing.config.md`'s quirks -- generalizes Phase 0's
+  `_fields` findings, which were only tested against the search endpoint.
+
+  ## Subpath discovery
+  `GET .../bogus_xyz` -- 400, raw field list:
+  `['id','account_id','name','label','description','status','group_ids',
+  'product_family_ids','created','modified','character_limit','type']`.
+  Includes `group_ids` and an undocumented `product_family_ids` (not in
+  the spec's `ProductAttributeGetOutputDto`) -- neither actually appears
+  in a full `GET` response body though (see the `group_ids` linkage
+  question noted in "Create Text Attribute.bru").
+}

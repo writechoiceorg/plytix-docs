@@ -1,0 +1,32 @@
+meta {
+  name: Get Product Family Model by ID
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{pim_base_url_v3}}/product-family-models/6a38f5d8c3d65a5f868b1871
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Accept: application/json
+}
+
+assert {
+  res.status: eq 200
+  res.body.data.product_family_id: eq 6a38f5d8c3d65a5f868b186e
+}
+
+docs {
+  Confirmed live 2026-09-08. The model belonging to the "Accessories"
+  family (`GET /product-family-models`, filtered to
+  `product_family_id: 6a38f5d8c3d65a5f868b186e`). Shape is richer than
+  `product-families` itself: `variant_attribute_labels`,
+  `parent_attribute_labels`, `no_level_attribute_labels` (each an array
+  of `"attributes.<name>"` strings) describe which attributes apply at
+  which level of the variation hierarchy -- matches
+  `ProductFamilyModelOutputDto`. Also read-only, no create endpoint.
+}

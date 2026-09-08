@@ -1,0 +1,43 @@
+meta {
+  name: Get Product by SKU (Invalid Identifier)
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{pim_base_url_v3}}/products/BAG-10157
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Accept: application/json
+}
+
+assert {
+  res.status: eq 422
+  res.body.errors[0].name: eq ValidationError
+}
+
+docs {
+  Confirmed live 2026-09-07 against "David's Dev Account". Trigger case --
+  intentionally uses a SKU (`BAG-10157`) instead of the Mongo ObjectId as
+  the `{identifier}` path segment.
+
+  ## Spec/docs discrepancy found -- important
+  `API V3.md` explicitly documents `GET /products/<identifier>` as
+  accepting **either** the Mongo ID or the `sku`. This is **false for this
+  v3 endpoint/account**: passing a SKU returns
+  `422 {"errors":[{"name":"ValidationError","description":"...Id must be
+  of type PydanticObjectId..."}]}`. Only the raw ObjectId works (see
+  "Get Product by ID.bru" in this folder). Flag to Plytix -- this may be a
+  v1-only behavior `API V3.md` incorrectly carried over to v3, or a
+  feature this account/endpoint doesn't have enabled.
+
+  This is also the confirmed shape of a 422 validation error on a GET
+  path-param mismatch: `errors` is a flat array of
+  `{name, description}`, distinct from the nested `error.msg`/
+  `errors[].field` shape documented (and confirmed) for the 401 auth
+  error in `01-Authentication/`.
+}

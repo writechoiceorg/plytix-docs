@@ -1,0 +1,43 @@
+meta {
+  name: Create Import Profile
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{pim_base_url_v3}}/import-profiles
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {
+    "name": "WC Test Import Profile"
+  }
+}
+
+assert {
+  res.status: eq 201
+  res.body.data.settings.import_action: isString
+}
+
+docs {
+  Confirmed live 2026-09-07 against "David's Dev Account". Created then
+  deleted in the same test run (id was `6a9f1d492b6fd055ffb7c805`) --
+  Import Profiles has no downstream dependents in `TESTING_PLAN.md`.
+
+  `201 Created`. `settings` (spec-optional, undocumented sub-shape) gets a
+  full set of real defaults applied even when omitted entirely:
+  `{"import_action":"ALL","import_assets_action":"SKIP",
+  "import_decimal_separator":".","new_products_status":"Draft",
+  "charset":null,"column_separator":null,"text_delimiter":null,
+  "create_static_list":false,"family_options":null,"column_matches":[]}`
+  -- this is now the confirmed live shape of `ProfileSettingsInputDto`'s
+  defaults, previously undiscovered.
+}

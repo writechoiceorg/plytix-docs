@@ -1,0 +1,48 @@
+meta {
+  name: Create Pdf Catalog - Feature Not Enabled (422)
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{pim_base_url_v3}}/pdf-catalogs
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {
+    "name": "WC Test PDF Catalog"
+  }
+}
+
+assert {
+  res.status: eq 422
+  res.body.errors[0].description: contains pdfs
+}
+
+docs {
+  Confirmed live 2026-09-08 against "David's Dev Account". Creates
+  nothing -- **this account does not have the PDF Catalogs feature
+  enabled at all**:
+  `{"data":[],"errors":[{"name":"ValidationError","description":"Cannot
+  create new items the feature pdfs for account
+  6a38f5a5b22478f30bfd755c"}]}`.
+
+  This is a genuine account-level feature gate, not a request-shape
+  problem -- the body itself (`name` only, matching
+  `PdfCatalogCreateInputDto`'s single required field) is otherwise valid.
+  **Blocks the rest of this phase**: no PDF catalog can be created in
+  this account, so `output_attributes`/`pages`/`settings` remain
+  completely untested, and Ecatalogs (Phase 4) will have no real
+  `pdf_catalog_id` to reference -- document that field as
+  optional/untestable-in-this-account rather than skip it silently. Flag
+  to Plytix/the user: can this feature be enabled on "David's Dev
+  Account" so PDF catalog creation can actually be tested?
+}

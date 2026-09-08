@@ -46,7 +46,21 @@ environment 401 against the other's hosts. Always pass the matching
 | # | Folder | Covers |
 |---|---|---|
 | 01 | `01-Authentication` | The `Sandbox` bearer-token exchange used by v1/v3-on-sandbox calls. Run only with `--env "Sandbox"`. |
-| 02 | `02-Products-v3` | Live v3 product endpoints, run against `Dev` only (v3 is unreachable under the `Sandbox` account). Includes its own `Get Access Token (Dev)` request so the folder is self-contained — run the whole folder with `--env "Dev"`. |
+| 02 | `02-Products-v3` | Live v3 product endpoints, run against `Dev` only (v3 is unreachable under the `Sandbox` account). Also carries `TESTING_PLAN.md`'s Phase 0 cross-cutting checks (query params, identifier flexibility, subpaths, 422 shape), tested once here as the reference resource — see its own `README.md`. Includes its own `Get Access Token (Dev)` request so the folder is self-contained — run the whole folder with `--env "Dev"`. |
+| 03 | `03-Product-Categories` | Phase 1a. Confirms undeclared `PATCH`/`DELETE` work despite not being in the spec — see its own `README.md`. |
+| 04 | `04-Asset-Categories` | Phase 1b. Same shape/behavior as `03-Product-Categories`. |
+| 05 | `05-Product-Attribute-Groups` | Phase 1c. |
+| 06 | `06-Product-Attributes` | Phase 1d. Polymorphic create across 14 documented types (+ a 15th undocumented, unimplemented one found live) — see its own `README.md`. |
+| 07 | `07-Connections` | Phase 1e. Reveals `type` is a fixed enum, not the free string the spec describes. |
+| 08 | `08-Import-Profiles` | Phase 1f. |
+| 09 | `09-Assets` | Phase 2a. `category_ids` silently ignored on create but applies via `PATCH` — see its own `README.md`. |
+| 10 | `10-Pim-Product-Lists` | Phase 3a. Reveals how "Static" list membership actually works (lives on the product, not the list) — see its own `README.md`. |
+| 11 | `11-Asset-Lists` | Phase 3b. Same shape/behavior as `10-Pim-Product-Lists`. |
+| 12 | `12-Pdf-Catalogs` | Phase 3c. Creation blocked entirely — account lacks the PDF Catalogs feature. |
+| 13 | `13-Product-Families` | Phase 3d. Read-only; real pre-existing data used, no fixtures created. |
+| 14 | `14-Relationships` | Phase 3e. Read-only; real pre-existing data used, no fixtures created. |
+| 15 | `15-Channels` | Phase 4a. `format` is a hidden fixed set; rebuild-scheduling validation errors are unusually vague — see its own `README.md`. |
+| 16 | `16-Ecatalogs` | Phase 4b. Creation blocked entirely — account lacks the Ecatalogs feature (same as `12-Pdf-Catalogs`). Real pre-existing catalog used for shape confirmation. |
 
 ## Test Fixtures
 

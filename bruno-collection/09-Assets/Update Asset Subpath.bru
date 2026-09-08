@@ -1,0 +1,36 @@
+meta {
+  name: Update Asset Subpath
+  type: http
+  seq: 6
+}
+
+patch {
+  url: {{pim_base_url_v3}}/assets/6aa021b72b6fd055ffb7ca9f/alt_text
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  "WC test via subpath"
+}
+
+assert {
+  res.status: eq 200
+  res.body.data.alt_text: eq WC test via subpath
+}
+
+docs {
+  Confirmed live 2026-09-08. `PATCH /assets/{id}/{path}` has zero spec
+  detail (matches Phase 0's pattern for every subpath route), but works
+  the same way the `GET` subpath does: `{path}` names a single field
+  (here `alt_text`), and the request body is that field's raw new value
+  (a bare JSON string, not wrapped in an object) -- not a partial-object
+  PATCH like the root `PATCH /assets/{id}` uses. Response is the **full**
+  updated asset object, same shape as the root PATCH.
+}
