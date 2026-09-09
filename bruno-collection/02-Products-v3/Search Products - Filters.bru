@@ -1,7 +1,7 @@
 meta {
   name: Search Products - Filters
   type: http
-  seq: 6
+  seq: 5
 }
 
 get {
@@ -22,11 +22,11 @@ assert {
 
 docs {
   Confirmed live 2026-09-07 against "David's Dev Account".
-
+  
   ## What it does
   `GET /api/v3/products?sku=BAG-10157` -- a plain field-equality filter.
   Confirmed working: returns exactly the one matching product.
-
+  
   ## Filter dialect findings (Phase 0)
   `API V3.md`'s filter table (~lines 145-186) lists a "Current" (JSON
   object) and "Possible Alternative" (query-string) syntax for each filter
@@ -48,7 +48,7 @@ docs {
     `attributes.name[<filter>]=value`-shaped dialect (~line 150), except
     the dot-segment names the actual attribute (e.g. `color`, `brand`),
     not the literal string `name`.
-
+  
   ## `_fields`/`_expand` edge cases found
   - `_fields=category_ids` (declared in `openapi_pimv3.json`'s
     `ProductOutputDto`) is **rejected**: `400
@@ -68,6 +68,6 @@ docs {
     does not exist in model 'Product'."}]}`. Expansion instead appears
     automatic per-`_fields` value (requesting `_fields=categories` already
     returns fully expanded objects with no `_expand` needed).
-
+  
   See `config/api-testing.config.md` quirks #10-13 for the full log.
 }

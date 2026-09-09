@@ -1,7 +1,7 @@
 meta {
   name: Get Product Subpath - Assets
   type: http
-  seq: 9
+  seq: 8
 }
 
 get {
@@ -23,13 +23,13 @@ assert {
 
 docs {
   Confirmed live 2026-09-07 against "David's Dev Account".
-
+  
   ## What it does
   `GET /products/{id}/assets` -- returns the product's assigned assets
   fully expanded (matches `AssetOutputDto`: `id`, `content_type`,
   `checksum`, `extension`, `file_size`, `file_type`, `filename`, `path`,
   `n_catalogs`, `n_products`, `status`, `created`, `modified`).
-
+  
   ## Assets subpath spot-check (Phase 0, ahead of Phase 2a)
   Also spot-checked `GET /assets/{id}/{path}` directly against one of this
   product's real assets (id `6a38f5e1c3d65a5f868b18a5`, a read-only
@@ -41,7 +41,7 @@ docs {
     **400** (`ValueError`, not in the asset's raw field list -- assets
     have no attributes/relationships concept, and there's no reverse
     `assets/{id}/products` lookup subpath).
-
+  
   Full Bruno coverage for assets (create/patch, and confirming whether
   `DELETE /assets/{id}` truly doesn't exist per the spec) is deferred to
   Phase 2a's own `09-Assets/` folder, per `TESTING_PLAN.md`.

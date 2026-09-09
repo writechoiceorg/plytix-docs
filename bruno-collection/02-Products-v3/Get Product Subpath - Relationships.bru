@@ -1,7 +1,7 @@
 meta {
   name: Get Product Subpath - Relationships
   type: http
-  seq: 10
+  seq: 9
 }
 
 get {
@@ -23,14 +23,14 @@ assert {
 
 docs {
   Confirmed live 2026-09-07 against "David's Dev Account".
-
+  
   ## What it does
   `GET /products/{id}/relationships` -- returns
   `[{relationship_id, relationship_label, product_id}, ...]`. This account
   DOES have relationships configured (unlike the "none identified yet"
   placeholder in `config/api-testing.config.md` before this test) --
   useful fixture data for Phase 3e (`14-Relationships`) later.
-
+  
   ## Shape note
   This subpath's shape is a flatter summary than the `product_relationships`
   field embedded in the full `GET /products/{id}` response, which nests
@@ -38,7 +38,7 @@ docs {
   entry. Neither matches `openapi_pimv3.json`'s `relationships` field name
   at all (see `Get Product by ID.bru` and `Search Products - Filters.bru`
   for the `product_relationships` vs. `relationships` naming discrepancy).
-
+  
   Also confirmed via `_fields=product_relationships` on the search
   endpoint: this same product's `product_family_id` is populated
   (`6a38f5d8c3d65a5f868b186e`) even though `num_variations: 0` -- real

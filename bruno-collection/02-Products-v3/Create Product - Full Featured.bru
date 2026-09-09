@@ -1,7 +1,7 @@
 meta {
   name: Create Product - Full Featured
   type: http
-  seq: 12
+  seq: 11
 }
 
 post {
@@ -36,9 +36,9 @@ docs {
   every kept fixture from Phase 1 and Phase 2a. **Fixture kept** -- id
   `6aa022262b6fd055ffb7caa4`, for Phase 3/4 (Pim Product Lists, Channels,
   Ecatalogs, etc.) to have something real to query.
-
+  
   `201 Created`.
-
+  
   ## attributes map is keyed by attribute NAME, not id
   `{"attributes": {"wc_test_text": "..."}}` -- confirmed via a separate
   scratch product (created and deleted in this same test run) that this
@@ -48,18 +48,18 @@ docs {
   `basic_information_completeness`, `website_ready`, etc., all numeric
   scores) -- these appear to be account-level default attributes applied
   to every product automatically, not something this request created.
-
+  
   ## category_ids DOES link on create -- differs from assets
   Unlike `09-Assets/Create Asset.bru` (where the identical `category_ids`
   field is silently ignored on `POST`), it **works immediately** here: a
   follow-up `GET /products/{id}/categories` shows both categories fully
   linked. Confirms the create-time relationship-linking behavior is
   resource-specific, not a blanket rule either way.
-
+  
   ## thumbnail_id also persists on create
   Unlike the array-typed `category_ids` on assets, this single-reference
   field round-trips correctly in the create response itself.
-
+  
   ## Not idempotent to re-run
   `sku` is unique per account. Re-running this request once the fixture
   exists returns `409 Conflict {"errors":[{"name":"AlreadyExists",

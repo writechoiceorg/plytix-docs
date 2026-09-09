@@ -1,7 +1,7 @@
 meta {
   name: Delete Product Subpath - Deletes Entire Product (Warning)
   type: http
-  seq: 14
+  seq: 13
 }
 
 delete {
@@ -20,7 +20,7 @@ docs {
   (`WC-TEST-DISPOSABLE-001` id `6aa022442b6fd055ffb7caa5`,
   `WC-TEST-DISPOSABLE-002` id `6aa0228d2b6fd055ffb7caa6`, both since
   deleted).
-
+  
   ## Critical, potentially hazardous finding
   `DELETE /products/{identifier}/{path}` does **not** scope the delete to
   `{path}` at all -- it deletes the **entire product**, regardless of what
@@ -36,7 +36,7 @@ docs {
      special setup -- same result: `204`, whole product gone. The `{path}`
      segment is not inspected by the delete handler at all; it behaves
      identically to plain `DELETE /products/{identifier}`.
-
+  
   **Implication for docs**: never document or suggest
   `DELETE /products/{id}/{subpath}` as a way to remove a single
   relationship/field (e.g. "unassign a category" or "remove an asset") --

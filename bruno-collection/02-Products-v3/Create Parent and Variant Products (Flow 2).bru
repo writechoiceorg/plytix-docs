@@ -1,7 +1,7 @@
 meta {
   name: Create Parent and Variant Products (Flow 2)
   type: http
-  seq: 15
+  seq: 14
 }
 
 post {
@@ -34,14 +34,14 @@ docs {
   deleted in the same test run (parent id was `6aa04a322b6fd055ffb7cae4`,
   variant id `6aa04a3b2b6fd055ffb7cae5`) -- no downstream dependents, so
   both were cleaned up via the confirmed `DELETE` rather than kept.
-
+  
   This base request captures the **parent** create (standalone,
   `product_level: 0` at this point). The variant was created as a
   second, separate `POST /products` request:
   `{"sku":"WC-TEST-VARIANT-001","product_family_id":
   "6a38f5d8c3d65a5f868b186e","parent_id":"<parent id>"}` -- `201`,
   `product_level: 2` on the variant.
-
+  
   ## Findings
   - After the variant was created, re-fetching the **parent** showed
     `product_level` flipped from `0` to `1` (a standalone product starts

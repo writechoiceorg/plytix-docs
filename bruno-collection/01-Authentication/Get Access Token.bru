@@ -17,14 +17,8 @@ headers {
 
 body:json {
   {
-    "api_key": "{{process.env.PLYTIX_API_KEY}}",
-    "api_password": "{{process.env.PLYTIX_API_PASSWORD}}"
-  }
-}
-
-script:post-response {
-  if (res.status === 200) {
-    bru.setVar("access_token", res.body.data[0].access_token);
+    "api_key": "{{process.env.PLYTIX_DEV_API_KEY}}",
+    "api_password": "{{process.env.PLYTIX_DEV_API_PASSWORD}}"
   }
 }
 
@@ -33,15 +27,21 @@ assert {
   res.body.data[0].access_token: isString
 }
 
+script:post-response {
+  if (res.status === 200) {
+    bru.setVar("access_token", res.body.data[0].access_token);
+  }
+}
+
 docs {
   Confirmed live 2026-08-31 against the "API Docs" test account
   (writechoice_test, ADMIN role) provisioned for this engagement.
-
+  
   ## What it does
   Exchanges an account's `api_key`/`api_password` (issued by an account
   admin under the account's admin section -> "API" tab) for a short-lived
   Bearer access token used on every subsequent PIM API call.
-
+  
   ## Confirmed behavior (differs from the v1 Postman collection's docs)
   - Response `data[0]` includes an undocumented `refresh_token` field
     alongside `access_token`. No refresh-token endpoint is documented
@@ -59,13 +59,13 @@ docs {
     specifically (separate from the higher per-account PIM rate limits
     embedded in the JWT's `account.rate_limit` claim: 20 req/10s and
     15000 req/3600s).
-
+  
   ## Required fields
   | Field | Type | Notes |
   |---|---|---|
   | api_key | string | from account admin -> API tab |
   | api_password | string | from account admin -> API tab |
-
+  
   ## Using the token
   `Authorization: Bearer <access_token>` on all subsequent requests.
   Casing of "Bearer" and the single space matter (per the collection's own

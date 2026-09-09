@@ -1,7 +1,7 @@
 meta {
   name: Get Access Token (Dev)
   type: http
-  seq: 1
+  seq: 3
 }
 
 post {
@@ -22,20 +22,20 @@ body:json {
   }
 }
 
+assert {
+  res.status: eq 200
+  res.body.data[0].access_token: isString
+}
+
 script:post-response {
   if (res.status === 200) {
     bru.setVar("access_token", res.body.data[0].access_token);
   }
 }
 
-assert {
-  res.status: eq 200
-  res.body.data[0].access_token: isString
-}
-
 docs {
   Confirmed live 2026-09-04, run with `--env "Dev"`.
-
+  
   ## What it does
   Same exchange as "Get Access Token", but against "David's Dev Account"
   (account id `6a38f5a5b22478f30bfd755c`, user `TestDH`, ADMIN role) --
@@ -43,7 +43,7 @@ docs {
   specifically so v3 could be tested (v3 is unreachable on the prod/sandbox
   host under the "API Docs" account -- see 02-Products-v3 and
   config/api-testing.config.md).
-
+  
   ## Confirmed behavior
   - **Auth host differs by environment.** `auth.plytix.com` returns
     `401 {"error":{"msg":"Bad api_key or api_password: Query did not throw

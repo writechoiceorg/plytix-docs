@@ -18,9 +18,20 @@ Real projects rarely hand you a single clean input. Treat this as a gathering st
 - **Brand / positioning / SEO guidelines** — preferred terminology, keyword priorities, tone, page-structure conventions, CTAs. This shapes *phrasing only* — tab names, section names, page titles and descriptions — never content or scope. Never invent a feature, capability, or page because a keyword list mentions it; only use these guidelines to word real content the other sources already established. Preserve exact brand-name spellings this source specifies (e.g. a specific product name over its more common synonym) rather than normalizing to whichever term is more familiar.
 - **Multiple products/brands** — if the gathered materials clearly cover more than one distinct product or brand (different folders, different terminology, different positioning docs), do not silently merge them into one outline. Produce a separate outline per product by default, and call out where their structures deliberately diverge (e.g. one has a section/capability the other doesn't) rather than forcing a shared shape. Only unify if the user explicitly asks for a combined outline.
 
+### In this project (Plytix)
+
+The categories above map onto specific, known locations here — check all of them, not just the ones that come to mind first:
+
+- **Existing documentation** — `materials/help-center/` (a full scrape of Plytix's live end-user help center, one file per article/slug — includes a `plytix-glossary.md` worth mining for terminology even though it ranks as unverified for facts); `materials/api-references/index.html` (a scraped Scalar-rendered "External Provider" API reference); and, once it exists, anything already under `docs/` (an existing `docs.json`/nav scaffold or drafted pages are themselves "existing documentation" to audit against, not to overwrite blindly).
+- **Raw source materials** — `openapi_pimv3.json` at the repo root (the FastAPI-generated OpenAPI v3 spec — 51 paths; this is ground truth for endpoint *shapes* specifically, ranking above `materials/api-references/API V3.md`'s prose when the two disagree, per CLAUDE.md); `materials/api-references/API V3.md` (prose v3 design doc — filters, pagination, response conventions, Process Manager API); `materials/api-references/Plytix_pimv1.postman_collection*.json` (v1, plus a partial v2-BETA folder); every PDF under `materials/project-references/` (project requirements, product-board API feedback, bulk-operations docs — note some of these describe *v1* behavior only, don't assume it carries to v3 without checking); and every transcript under `materials/transcripts/` (kickoff calls and internal WriteChoice syncs — read non-English ones, e.g. Portuguese, for content rather than skipping them; do not translate in place).
+- **Verified/live findings** — a `config/api-testing.config.md` and any `endpoint-tester` skill logs/findings, if they exist yet in this repo. If neither exists, say so explicitly in Sources & Corrections rather than silently treating raw materials as verified.
+- **Brand / positioning / SEO guidelines** — the branding and content-guidelines PDFs under `materials/project-references/` (e.g. `Plytix Content Guidelines*.pdf`, `Plytix-Branding-Guidelines*.pdf`). **These are PDFs and require actually reading them** (a PDF reader/renderer, not a filename guess) — if the tooling to do so is unavailable in the current environment, don't skip them silently: say explicitly in Sources & Corrections that they exist but could not be read this pass, so a later run knows to retry rather than assuming they were already consulted.
+
+Treat this list as a starting point, not a ceiling — if new folders or files show up under `materials/` or elsewhere, gather them under whichever category above fits.
+
 ### When sources conflict
 
-Trust order, highest first: **verified/live findings → raw source materials → existing documentation.** SEO/positioning guidelines never override any of the above on matters of fact — they only govern wording.
+Trust order, highest first: **verified/live findings → raw source materials → existing documentation.** SEO/positioning guidelines never override any of the above on matters of fact — they only govern wording. Within "raw source materials," a machine-generated spec (e.g. `openapi_pimv3.json`) outranks a hand-written prose doc describing the same surface (e.g. `API V3.md`) on matters of exact shape — but the disagreement itself still gets flagged (see Step 3), since it may mean the prose describes a planned-but-unshipped feature rather than a stale doc.
 
 Use everything gathered to inform every decision in the outline — tab names, section names, page titles, and page types must all reflect the actual product, not a generic template.
 
@@ -165,6 +176,8 @@ If no existing documentation was in scope (nothing to contradict), state that pl
 Before finishing, verify:
 
 - [ ] Every context category actually present in the project (existing docs, raw materials, verified findings, SEO/positioning guidance) was gathered, not just the first one found
+- [ ] Every known location under "In this project (Plytix)" was checked: `materials/help-center/`, `materials/api-references/` (including `openapi_pimv3.json` at the repo root), `materials/project-references/` (all PDFs), `materials/transcripts/` (all transcripts, including non-English ones), and any existing `docs/` scaffold
+- [ ] If any project-references PDF (branding/content guidelines especially) could not be read, that gap is stated explicitly in Sources & Corrections rather than left unmentioned
 - [ ] Multiple distinct products, if present, got separate outlines (or an explicit user-requested merge) rather than a silent blend
 - [ ] No placeholder text (`{...}`) remains anywhere in the file
 - [ ] Every page has a title, a page type, and a one-sentence description

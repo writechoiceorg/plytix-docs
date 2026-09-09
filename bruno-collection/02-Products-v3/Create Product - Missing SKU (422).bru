@@ -1,7 +1,7 @@
 meta {
   name: Create Product - Missing SKU (422)
   type: http
-  seq: 11
+  seq: 10
 }
 
 post {
@@ -34,7 +34,7 @@ docs {
   create/delete testing belongs to Phase 2b (`02-Products-v3`'s own
   future extension), which uses disposable scratch products, not this
   Phase 0 validation probe.
-
+  
   ## 422 shape confirmed
   `{"data":[],"errors":[{"name":"InputDTOValidationError","description":
   "sku: Field required"}]}` -- a flat `errors` array of

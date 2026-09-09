@@ -1,7 +1,7 @@
 meta {
   name: List Products
   type: http
-  seq: 2
+  seq: 1
 }
 
 get {
@@ -28,7 +28,7 @@ docs {
   mixing in the Sandbox-only requests in `01-Authentication/`). Run with
   `--env "Dev"`, after running that auth request first to populate
   `access_token`.
-
+  
   ## What it does
   `GET /api/v3/products` with repeated `_fields` query params to select a
   sparse field set, exactly as described by Plytix and by `API V3.md`'s
@@ -37,14 +37,14 @@ docs {
   (array, empty on success), `pagination` (object with `next_page`, a full
   URL for the next page -- confirms cursor/page-link style pagination, not
   offset/limit params).
-
+  
   ## This resolves the v3-unreachable blocker
   v3 is live and matches its documented shape. It was unreachable earlier
   only because it was tested against the wrong host/account
   (`pim.plytix.com` under the "API Docs" account) -- v3 for this engagement
   is served from a separate DEV host/account. See
   `config/api-testing.config.md` for the full history.
-
+  
   ## Spec discrepancy found
   `openapi_pimv3.json`'s `GET /api/v3/products` operation declares **zero**
   query parameters -- no `_fields`, no pagination params. But `_fields`

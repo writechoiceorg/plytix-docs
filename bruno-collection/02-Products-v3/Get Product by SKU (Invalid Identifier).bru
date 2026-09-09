@@ -1,7 +1,7 @@
 meta {
   name: Get Product by SKU (Invalid Identifier)
   type: http
-  seq: 4
+  seq: 3
 }
 
 get {
@@ -24,7 +24,7 @@ docs {
   Confirmed live 2026-09-07 against "David's Dev Account". Trigger case --
   intentionally uses a SKU (`BAG-10157`) instead of the Mongo ObjectId as
   the `{identifier}` path segment.
-
+  
   ## Spec/docs discrepancy found -- important
   `API V3.md` explicitly documents `GET /products/<identifier>` as
   accepting **either** the Mongo ID or the `sku`. This is **false for this
@@ -34,7 +34,7 @@ docs {
   "Get Product by ID.bru" in this folder). Flag to Plytix -- this may be a
   v1-only behavior `API V3.md` incorrectly carried over to v3, or a
   feature this account/endpoint doesn't have enabled.
-
+  
   This is also the confirmed shape of a 422 validation error on a GET
   path-param mismatch: `errors` is a flat array of
   `{name, description}`, distinct from the nested `error.msg`/

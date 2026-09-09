@@ -1,7 +1,7 @@
 meta {
   name: Get Product Subpath - Attributes
   type: http
-  seq: 7
+  seq: 6
 }
 
 get {
@@ -22,16 +22,16 @@ assert {
 
 docs {
   Confirmed live 2026-09-07 against "David's Dev Account".
-
+  
   ## What it does
   `GET /products/{id}/attributes` -- returns the product's full
   `attributes` map directly as `data` (same object also embedded under
   `data.attributes` on the plain `GET /products/{id}` request).
-
+  
   Also confirmed: `GET /products/{id}/attributes/brand` -- 200, returns
   just the single value (`data: "Plytix"`), per `API V3.md`'s
   `attributes/<attribute_name>` subpath.
-
+  
   ## Subpath discovery technique (applies to every v3 resource)
   Hitting `GET /{resource}/{id}/{path}` with a `{path}` that isn't a
   recognized field/relation returns
@@ -43,7 +43,7 @@ docs {
   'product_family_id','product_family_model_id','overwritten_attributes',
   'mark_as_deleted','product_relationships','created','modified',
   'last_context','modified_user_audit','created_user_audit']`.
-
+  
   **Caveat**: this list is the raw model only -- it does NOT include
   computed/joined relations that are still valid subpaths (`categories`,
   `assets`, `relationships`, all confirmed 200 -- see the sibling
