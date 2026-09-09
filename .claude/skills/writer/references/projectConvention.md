@@ -44,11 +44,15 @@ List the available components for this project. The Writer skill will only use c
 
 ## Callout Types
 
-| Type | When to use |
-|---|---|
-| [e.g. Note] | [e.g. Additional context that is helpful but not critical] |
-| [e.g. Warning] | [e.g. Actions that may cause data loss or irreversible changes] |
-| [e.g. Tip] | [e.g. Optional shortcuts or best practices] |
+> This table is the canonical syntax source referenced from `style-guide.md`'s "Links and callouts" section — keep the "When to use" wording in sync with that file.
+
+| Type | When to use | Syntax |
+|---|---|---|
+| Note | Additional context that is helpful but not critical | `<Note>...</Note>` |
+| Tip | Optional shortcuts or best practices | `<Tip>...</Tip>` |
+| Info | Neutral, supplementary information | `<Info>...</Info>` |
+| Warning | Actions that may cause data loss or unexpected results | `<Warning>...</Warning>` |
+| Danger | Irreversible actions or serious consequences | `[PENDING]` — Mintlify has no distinct built-in "danger" component. Confirm whether `<Warning>` should double for this case or a custom callout is needed before publishing. |
 
 ---
 

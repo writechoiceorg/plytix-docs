@@ -35,3 +35,10 @@ Nest sections to reflect the actual navigation hierarchy.
 ## Notes
 
 <!-- Add any IA decisions, redirects, or structural constraints here -->
+
+**Source: `materials/project-references/before-writing.md`, §3 ("Product Roadmap") — read before scoping the API documentation IA.**
+
+- **Channels have no API endpoints at all.** Channels (Shopify, BigCommerce, feed exports) are configured and managed entirely in the Plytix UI. Do not plan an API reference or how-to page for creating/managing channels — there is nothing to document. Once Destinations ships, route any "assign a product to a channel via the API" need there instead (see `glossary.md`'s Channel/Destinations entries and `style-guide.md`'s worked example under "Don't say no").
+- **v1/v2 endpoints remain required for write workflows.** Any workflow that creates, updates, or deletes products (ERP write-back, stock updates, price updates, status changes) currently must use v1/v2 — v3 doesn't yet have write parity. IA needs a v1/v2 write-workflow section living alongside the v3 sections, not just a single "migrate to v3" redirect page. Revisit this constraint once v3 write endpoints ship.
+- **Several features are upcoming, not yet shippable pages.** Webhooks, the MCP Server, Destinations, and (tentatively) Workspaces are in progress at time of writing — see `glossary.md` for each term's `[PENDING]` status. Flag these as placeholders to revisit once confirmed live; don't build final IA structure or write pages for them yet.
+- **An API entity-coverage reference is a required future addition.** Customers frequently spend support time looking for endpoints that don't exist (Channels, Smart Lists among them) because no page states plainly what is and isn't accessible via API. Once IA planning starts, this needs its own Reference-type page (see `page-types.md`) — don't let this fall through as "covered elsewhere."
