@@ -14,6 +14,8 @@ Review [file path] and confirm:
 Content
 [ ] All information comes from the source material — nothing invented
 [ ] No product behavior is implied without being explicitly stated in the source
+[ ] Page doesn't imply an API endpoint or entity exists when it's UI-only (e.g. Channels) — check `information-architecture.md`'s Notes before publishing
+[ ] Any versioned behavior states which API version (v1/v2 vs. v3) it applies to
 [ ] All flags in the draft have been resolved or escalated — none left silent
 
 Terminology

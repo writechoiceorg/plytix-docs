@@ -5,6 +5,8 @@
 > The skill may add new entries automatically when it encounters undocumented terms during a writing session. Review new entries before the next session to confirm accuracy.
 >
 > Source: `materials/project-references/Plytix Content Guidelines 2026 (1).pdf`, §3 ("How we talk about Plytix and Plytix products") and §7 ("Word list").
+>
+> Additional entries below (Bulk API, Destinations, MCP Server, Smart List, Webhooks) are sourced from `materials/project-references/before-writing.md`, §3 ("Product Roadmap") — a meeting-prep doc, not the content-guidelines PDF. Capitalization for these is marked `[PENDING]` where the source doesn't state it explicitly; confirm with the project lead before publishing content that uses them.
 
 ---
 
@@ -20,11 +22,27 @@
 
 ---
 
+### Bulk API
+
+**Capitalisation:** Bulk API `[PENDING]`
+**Definition:** The Plytix v2 API surface for bulk create/edit/delete operations, distinct from the v1 and v3 APIs.
+**Notes:** Not shared with all users. Referenced in customer feedback for its partial-failure error reporting; if documenting it, confirm current availability and error-response shape before publishing — don't assume v3's response conventions apply.
+
+---
+
 ### Channel
 
 **Capitalisation:** channel (lowercase in running text, unless starting a sentence)
 **Definition:** A destination you send product data to (e.g. Shopify, Amazon).
-**Notes:** Not "export" or "feed." If a reader uses their own term for this (e.g. "export feed" or "output"), bridge to the correct term instead of correcting bluntly: "You may know this as an export feed. In Plytix, it's a channel."
+**Notes:** Not "export" or "feed." If a reader uses their own term for this (e.g. "export feed" or "output"), bridge to the correct term instead of correcting bluntly: "You may know this as an export feed. In Plytix, it's a channel." **API note:** channels are configured and managed entirely in the Plytix UI — there are no API endpoints to create or manage a channel. For API-driven product-to-destination assignment, the correct term is Destinations (see below), not Channel.
+
+---
+
+### Destinations
+
+**Capitalisation:** Destinations `[PENDING]`
+**Definition:** The new, direct way of assigning a product to destinations (channels, Brand Portals, and Product Data Sheets) — replaces the older channel-assignment approach for API purposes. Destinations are retrievable and filterable fields on a product via the API, and products can be added to or removed from them via the API.
+**Notes:** Not yet fully live at time of writing — confirm shipped status before publishing. This is the API-facing term to bridge to whenever a reader asks about managing channels, Brand Portals, or Product Data Sheets assignment through the API (see the **Channel** entry above).
 
 ---
 
@@ -57,6 +75,14 @@
 **Capitalisation:** internet (lowercase)
 **Definition:** The global network.
 **Notes:** Not "Internet."
+
+---
+
+### MCP Server
+
+**Capitalisation:** MCP Server `[PENDING]`
+**Definition:** Plytix's planned Model Context Protocol server, letting AI IDEs and AI agents (Claude, Gemini, etc.) connect to Plytix data directly.
+**Notes:** Not yet live at time of writing — confirm shipped status before publishing. A significant differentiator for the developer audience; likely to need its own getting-started content once available.
 
 ---
 
@@ -137,6 +163,22 @@
 **Capitalisation:** retweet (lowercase)
 **Definition:** To repost another user's post on X/Twitter.
 **Notes:** Not "re-tweet" or "reTweet."
+
+---
+
+### Smart List
+
+**Capitalisation:** Smart List `[PENDING]`
+**Definition:** A saved, reusable set of filter conditions in Plytix (referred to in the UI as a "smart list") that a user can load and re-run.
+**Notes:** Most accounts use these to save and re-apply common filter combinations. Confirm exact in-product capitalization before publishing.
+
+---
+
+### Webhooks
+
+**Capitalisation:** Webhooks `[PENDING]`
+**Definition:** A planned real-time, event-driven alternative to polling-based incremental sync. The entry point for incoming webhooks is the Automations feature, set up in-product.
+**Notes:** Active project at time of writing, not yet fully documented — confirm shipped status and exact feature name/capitalization before publishing.
 
 ---
 

@@ -15,7 +15,12 @@
 
 The goal of this guide is to ensure all Plytix documentation is clear, accurate, and helpful. The content transforms complex technical information into guides that empower Plytix PIM and DAM users — product content, ecommerce, and catalog teams — to use the platform.
 
-> `[Note: target audience above is inferred from repository context (CLAUDE.md), not from the content-guidelines PDF. Confirm/refine with the project lead if a more specific audience definition exists.]`
+For API documentation specifically, the audience is more technical and distinct from the in-product UI audience above. Calibrate voice and depth to whichever of these personas the page is for (source: `materials/project-references/before-writing.md`, §1):
+
+- **Technical Internal User / Automation Builder** — a technical person inside a Plytix customer account, comfortable with APIs but not always a professional developer. Automates repetitive tasks (bulk exports, scheduled reports, data quality checks). Needs conceptual clarity more than technical depth.
+- **Integration Engineer** — employed by a Plytix customer (brand, retailer, or agency) to build and maintain the connection between Plytix and their ERP, ecommerce platform, or marketplace. A power user who needs the full data model, query capabilities, and sync patterns, but isn't a Plytix expert going in.
+- **Partner Developer** — builds a third-party product that integrates with Plytix for multiple customers (e.g. a catalog-production plugin or an ERP connector). Needs deep understanding of read patterns, relationship resolution, and performance at scale, since documentation quality directly affects their ability to support their own product.
+- **AI agents** (emerging) — tools like Cursor, Copilot, and Claude acting on a developer's behalf. This is why OpenAPI format and AI-readable descriptions are a hard requirement for API reference content, not a nice-to-have.
 
 ---
 
@@ -53,6 +58,7 @@ Plytix sounds like an experienced, friendly colleague: competent, relatable, and
 - **Specifics beat superlatives.** Concrete actions and outcomes build credibility. "Sync product titles and prices to Shopify automatically," not "Unlock unlimited potential with effortless automation."
 - **Answer first, then expand.** Lead with the concise answer, then add detail for readers who want it. "Yes. Go to Settings → Attributes → Add Attribute," not "It depends…" without ever answering.
 - **Don't say "no." Lead with what we can do.** Keep momentum. Be honest about limits, but make progress the headline. "You can do Y today using Z, and here's how. (X isn't supported yet.)" — not "No, we don't support X."
+  - Worked example specific to this project: channels (Shopify, BigCommerce, feed exports) have no API endpoints at all — they're configured entirely in the Plytix UI. Don't write "The API doesn't support channels." Bridge to what the reader can actually do: "Channels are set up in the Plytix UI. To manage channel-eligible products from the API, use Destinations instead — see [Destinations]." (Source: `materials/project-references/before-writing.md`, §3; see also `information-architecture.md`'s Notes.)
 
 ---
 
@@ -292,31 +298,13 @@ Format: `[Note: Need clarification on [specific topic or parameter].]`
 
 ## "Related articles" section
 
-When a guide needs a "Related articles" section, use this format exactly. The number of cards and column count may vary — adjust `cols` to match the number of cards (maximum 3 columns).
+When a guide needs a "Related articles" section, follow this content pattern:
 
-```mdx
-## Related articles
+- Open with one sentence: "Now that you know how to [complete the main task of this guide], you can explore these related guides."
+- One card per related guide, each with a single sentence describing what the user will learn.
+- Cap at 3 cards per row.
 
-Now that you know how to [complete the main task of this guide], you can explore these related guides.
-
-<CardList cols={3}>
-
-  <Card title="[Guide title]" icon="[icon-name]" link="/[path/to/guide]">
-    [One sentence describing what the user will learn.]
-  </Card>
-
-  <Card title="[Guide title]" icon="[icon-name]" link="/[path/to/guide]">
-    [One sentence describing what the user will learn.]
-  </Card>
-
-  <Card title="[Guide title]" icon="[icon-name]" link="/[path/to/guide]">
-    [One sentence describing what the user will learn.]
-  </Card>
-
-</CardList>
-```
-
-> Check `ProjectConvention.md` for the available icon names for this project.
+Use the exact `CardList`/`Card` tag syntax and available icon names defined in `ProjectConvention.md`'s Components table — do not redefine the syntax here.
 
 ---
 
