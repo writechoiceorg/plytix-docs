@@ -1,0 +1,97 @@
+---
+title: "Audit product data quality with filters"
+description: "Find products with missing images, empty descriptions, or incomplete data before it reaches a channel."
+slug: /guides/auditing-product-data-quality-with-filters
+audience: "Integration Engineer or Automation Builder running pre-publish data-quality checks"
+---
+
+# Audit product data quality with filters
+
+Catch incomplete product data before it reaches a channel or marketplace: products missing an image, an empty description, or a field that was never filled in. 
+This guide covers the filter operators that make these checks possible, and where the built-in completeness attributes can save you from writing the checks yourself.
+
+## Prerequisites
+
+- A bearer token. See the Quickstart guide for the authentication flow.
+- Familiarity with the query-string filter syntax covered in "Filtering, Sorting & Pagination." This guide assumes you can already build a basic filter like `sku=BAG-10157`.
+
+## Steps
+
+1. **Find products missing a required field with `!exists`.**
+
+   ```bash
+   curl -G "https://pim.plytix.com/api/v3/products" \
+     -H "Authorization: Bearer <access_token>" \
+     --data-urlencode "gtin[!exists]=true" \
+     --data-urlencode "_fields=id" \
+     --data-urlencode "_fields=sku"
+   ```
+
+   Swap `gtin` for any field. `attributes.main_image_link[!exists]=true` finds products with no main image, and the same pattern works for any custom attribute, for example `attributes.short_description[!exists]=true`.
+
+2. **Find products that do have a field set, with `exists`.**
+
+   ```bash
+   curl -G "https://pim.plytix.com/api/v3/products" \
+     -H "Authorization: Bearer <access_token>" \
+     --data-urlencode "attributes.main_image_link[exists]=true"
+   ```
+
+   Useful as a sanity check on the inverse of step 1, or to confirm how many products a required-field rollout still needs to reach.
+
+3. **Check for an empty value, in addition to a missing one, with `icontains`.**
+
+   `!exists` catches a field that was never set. A field that's present but empty (an empty string) needs a different check:
+
+   ```bash
+   curl -G "https://pim.plytix.com/api/v3/products" \
+     -H "Authorization: Bearer <access_token>" \
+     --data-urlencode "attributes.short_description[icontains]="
+   ```
+
+   > **FLAG:** This project confirmed `[icontains]` works for substring matching against a real value, but didn't independently test it with an empty string specifically to distinguish "empty" from "missing." Confirm this distinction behaves as expected for your account before relying on it, or combine both `exists` and a length check if your account supports one.
+
+4. **Narrow an audit to a set of statuses with `in`.**
+
+   ```bash
+   curl -G "https://pim.plytix.com/api/v3/products" \
+     -H "Authorization: Bearer <access_token>" \
+     --data-urlencode "status[in]=Draft" \
+     --data-urlencode "status[in]=Completed"
+   ```
+
+   Repeat the parameter for each value you want to match. This is the same pattern behind "products in category A or category B."
+
+5. **Read the built-in completeness scores instead of writing your own checks.**
+
+   Every product's `attributes` map already includes a set of automatically computed completeness fields, for example `basic_information_completeness`, `website_ready`, and `marketing_ready`, without any setup on your end:
+
+   ```bash
+   curl "https://pim.plytix.com/api/v3/products/<product_id>" \
+     -H "Authorization: Bearer <access_token>"
+   ```
+
+   Filter on one of these the same way as any other field:
+
+   ```bash
+   curl -G "https://pim.plytix.com/api/v3/products" \
+     -H "Authorization: Bearer <access_token>" \
+     --data-urlencode "attributes.website_ready[gt]=90"
+   ```
+
+   > **FLAG:** Creating your own custom Completeness Attribute through the API is currently broken: sending a real attribute reference in the create request returns a server error. Use the automatically computed scores above instead of trying to create a new one until this is resolved.
+
+6. **Combine filters and turn a recurring audit into a Smart List.**
+
+   Any combination of the filters above can also become a Smart List's saved query, so you don't have to rebuild the request each time. See "Building a Smart product list" in Core Concepts.
+
+## Related articles
+
+<CardList cols={2}>
+  <Card title="Exporting Your Full Catalog" icon="download" link="/guides/exporting-your-full-catalog">
+    Pull the full catalog once you know which products need attention.
+  </Card>
+  <Card title="Building Channel-Specific Product Feeds" icon="satellite-dish" link="/guides/building-channel-specific-product-feeds">
+    Use the same filters to keep incomplete products out of a channel feed.
+  </Card>
+</CardList>

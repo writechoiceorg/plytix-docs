@@ -145,20 +145,7 @@ For long articles with a main H2 heading followed by many H3 subheadings, add a 
 
 ## How-to step formatting
 
-> **Project decision:** Choose one option below and delete the other before using this skill.
-
-### Option A — Narrative steps (H3 headings)
-
-Best for: complex processes where context and explanation matter as much as the action itself.
-
-- Do not use numbered lists for procedures.
-- Each major part of the process is a step, formatted as an H3 heading: `### Step 1: [Descriptive title]`
-- Follow each step heading with paragraphs that explain the process in detail.
-- You may use a bulleted list within a step for short, individual actions (e.g. clicking a button, entering a value).
-
-### Option B — Numbered list steps
-
-Best for: quick, action-focused procedures where the action is more important than the explanation.
+**Decided 2026-09-10**: this project uses numbered list steps for all how-to procedures — action-focused API integration tasks suit this better than narrative/H3 steps.
 
 - Use numbered lists for all procedures.
 - Begin each step with a bold imperative verb: `1. **Create** your template`

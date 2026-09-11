@@ -58,9 +58,11 @@ List the available components for this project. The Writer skill will only use c
 
 ## File Naming Conventions
 
-**Format:** [e.g. kebab-case]
-**Extension:** [e.g. `.mdx` / `.md`]
-**Example:** `[example-file-name.mdx]`
+**Format:** kebab-case
+**Extension:** `.mdx`
+**Example:** `syncing-your-erp-with-plytix.mdx`
+
+**Decided 2026-09-10** (Mintlify's standard convention) — override here if the project lead prefers otherwise.
 
 ---
 
