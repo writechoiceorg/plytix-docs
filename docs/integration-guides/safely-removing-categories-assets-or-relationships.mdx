@@ -1,0 +1,81 @@
+---
+title: "Safely remove categories, assets, or relationships"
+description: "The right way to unassign a category, asset, or relationship without affecting the rest of the product."
+slug: /guides/safely-removing-categories-assets-or-relationships
+audience: "Integration Engineer or Automation Builder updating existing product data"
+---
+
+# Safely remove categories, assets, or relationships
+
+Remove a single category or asset from a product without touching anything else on that product. This guide exists because of one specific, confirmed hazard: the API path that looks like the obvious way to do this deletes the entire product instead.
+
+<Warning>
+`DELETE` on a product subpath, for example `DELETE /products/{id}/categories`, does not remove only that category. It deletes the entire product, with no warning and no way to undo it. This was confirmed twice in testing, including against a subpath name that wasn't even real, so the deletion isn't scoped to categories specifically. This also holds for the more specific-looking path `DELETE /products/{id}/categories/{category_id}` (with the exact category ID appended), confirmed the same destructive way against a real test product. Never send a `DELETE` request to a product subpath, with or without a trailing ID, expecting a partial removal.
+</Warning>
+
+## Prerequisites
+
+- A bearer token. See the Quickstart guide for the authentication flow.
+- The product's current `category_ids` (or `thumbnail_id`), read from a `GET` request, before you attempt to change either.
+
+## Steps
+
+1. **Read the product's current state first.**
+
+   ```bash
+   curl "https://pim.plytix.com/api/v3/products/<product_id>" \
+     -H "Authorization: Bearer <access_token>"
+   ```
+
+   Note the current `category_ids` array (or check the expanded list at `_fields=categories`). You'll need the full current list to build the reduced one in the next step.
+
+2. **Remove a category by sending the array without it.**
+
+   ```bash
+   curl -X PATCH "https://pim.plytix.com/api/v3/products/<product_id>" \
+     -H "Authorization: Bearer <access_token>" \
+     -H "Content-Type: application/json" \
+     -d '{"category_ids": ["<category_id_to_keep>"]}'
+   ```
+
+   `PATCH` sets the field to whatever array you send. Sending the current list minus the one category is how you remove only that one. The response returns the full updated product, so you can check the result directly instead of making a separate `GET` call.
+
+   > **FLAG:** This project confirmed that `PATCH` reliably applies a `category_ids` array you send. The removal direction specifically (sending a shorter array to drop one entry) follows directly from that same behavior but wasn't re-verified as its own dedicated test. Confirm the result with a follow-up `GET` after your first attempt, as shown in step 4.
+   >
+   > **FLAG:** Some Plytix API documentation describes `PATCH` as returning no content (status `204`, no entity in the response body). This project consistently found the opposite in live testing: `PATCH` returns `200` with the full updated entity. Rely on the response body if you're testing against a live account, but don't be surprised if you see documentation describing it differently.
+
+3. **Change or clear a product's thumbnail the same way.**
+
+   ```bash
+   curl -X PATCH "https://pim.plytix.com/api/v3/products/<product_id>" \
+     -H "Authorization: Bearer <access_token>" \
+     -H "Content-Type: application/json" \
+     -d '{"thumbnail_id": "<new_asset_id>"}'
+   ```
+
+   > **FLAG:** Setting `thumbnail_id` to a new asset is a straightforward application of the same `PATCH` behavior confirmed elsewhere in this API. Clearing it entirely (setting it to no value) wasn't independently tested in this project. Confirm the result before relying on it in production.
+
+4. **Confirm the removal took effect.**
+
+   ```bash
+   curl "https://pim.plytix.com/api/v3/products/<product_id>/categories" \
+     -H "Authorization: Bearer <access_token>"
+   ```
+
+   The response should list only the categories you kept. If you see the category you tried to remove, or if the product itself returns `404`, stop and check what you sent before retrying.
+
+## What you can't do
+
+- **Removing a linked, non-thumbnail asset from a product has no confirmed mechanism.** Unlike categories, there's no equivalent array field for assets on a product. Treat asset removal as untested until you've confirmed a working approach for your account.
+- **Relationships can't be removed, or created, through the API at all.** Relationship data on a product is read-only. Removing a relationship link is a dashboard-only action today, regardless of whether it was originally set up through the dashboard or a CSV import.
+
+## Related articles
+
+<CardList cols={2}>
+  <Card title="Syncing Your ERP with Plytix" icon="rotate" link="/guides/syncing-your-erp-with-plytix">
+    The broader pattern for reading and writing product data safely.
+  </Card>
+  <Card title="Reconstructing Parent/Variant Hierarchies" icon="sitemap" link="/guides/reconstructing-parent-variant-hierarchies">
+    Read family and relationship data the API does expose.
+  </Card>
+</CardList>

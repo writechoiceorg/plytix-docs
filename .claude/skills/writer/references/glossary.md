@@ -14,6 +14,14 @@
 
 <!-- Add entries below in alphabetical order. Use the format shown. -->
 
+### Automations
+
+**Capitalisation:** Automations `[PENDING]`
+**Definition:** A dashboard-only, if/then rule engine that changes or fills in product data automatically when a product matches a condition (e.g. setting a default Brand value when one is missing).
+**Notes:** Sourced from `materials/help-center/automations.md` and `materials/project-references/before-writing.md`, not the content-guidelines PDF. Unrelated to Channel webhooks despite Plytix's roadmap describing Automations as the planned "entry point" for an upcoming webhooks capability — that pairing isn't live yet. No corresponding API endpoint exists; confirm shipped status of any API surface before publishing.
+
+---
+
 ### Brand Portal
 
 **Capitalisation:** Brand Portal
