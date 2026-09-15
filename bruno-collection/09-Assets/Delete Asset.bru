@@ -1,0 +1,101 @@
+meta {
+  name: Delete Asset
+  type: http
+  seq: 7
+}
+
+delete {
+  url: {{pim_base_url_v3}}/assets/REPLACE_WITH_ASSET_ID
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Accept: application/json
+}
+
+docs {
+  Confirmed live 2026-09-15 against a fresh disposable scratch asset
+  (`wc_test_patch_delete_asset.jpg`, id `6aa98267a30ca5945169a24f`,
+  created and destroyed in this same run) on "David's Dev Account" --
+  retested from scratch since the original version of this file (named
+  "Delete Asset (Undeclared)") pointed at a throwaway id from an earlier
+  session with no `example{}`. `openapi_pimv3.json`'s 2026-09-15 refresh
+  now formally declares `DELETE /assets/{identifier}` -- previously it
+  declared `GET`/`PATCH` but explicitly no `DELETE` at all (confirmed
+  working anyway, quirk #20).
+
+  ## What it does
+  `DELETE /assets/{id}` -- `204 No Content`, then `404` on a follow-up
+  `GET` -- genuinely deleted.
+}
+
+example {
+  name: Delete Asset - Success (204, then 404 on follow-up GET)
+  description: Real response captured 2026-09-15 against a disposable scratch asset on "David's Dev Account", immediately after the PATCH in "Update Asset.bru" in this same folder.
+
+  request: {
+    url: {{pim_base_url_v3}}/assets/6aa98267a30ca5945169a24f
+    method: delete
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 204
+      text: No Content
+    }
+    headers: {
+    }
+    body: {
+      type: json
+      content: '''
+        (empty body)
+      '''
+    }
+  }
+}
+
+example {
+  name: Get Asset by ID - After Delete (404)
+  description: Real response captured 2026-09-15, follow-up GET immediately after the DELETE above.
+
+  request: {
+    url: {{pim_base_url_v3}}/assets/6aa98267a30ca5945169a24f
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 404
+      text: Not Found
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "NotFoundError",
+              "description": "Document with id 6aa98267a30ca5945169a24f not found"
+            }
+          ]
+        }
+      '''
+    }
+  }
+}

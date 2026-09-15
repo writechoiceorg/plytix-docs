@@ -1,0 +1,94 @@
+meta {
+  name: Update Family Attribute Level
+  type: http
+  seq: 9
+}
+
+patch {
+  url: {{pim_base_url_v3}}/product-families/REPLACE_WITH_FAMILY_ID/attributes/REPLACE_WITH_ATTRIBUTE_ID
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {
+    "level": "parent_level"
+  }
+}
+
+docs {
+  Confirmed live 2026-09-15 against the disposable scratch product family
+  from "Create Family Attribute Link.bru" (id `6aa97212a30ca5945169a21e`)
+  and the Phase 1 kept text-attribute fixture (id
+  `6a9f1bf72b6fd055ffb7c7e1`) on "David's Dev Account". Brand-new
+  endpoint in the 2026-09-15 `openapi_pimv3.json` refresh.
+
+  ## Real finding -- a genuine account-level feature gate
+  Attempting to change an attribute's `level` (e.g. from `no_level` to
+  `parent_level`, which implies moving the attribute's values up to the
+  parent and having variants inherit them) returned `403
+  {"errors":[{"name":"PermissionError","description":"Automatic
+  inheritance is not available for this account"}]}` -- **not** a 422
+  validation error, a distinct 403 permission-error shape not seen
+  anywhere else in this project. This reads as a real account-tier
+  feature flag (attribute-level automatic inheritance), not a request
+  bug. Add this account to the status-gating rules in
+  `config/api-testing.config.md` -- untestable further without a
+  different account/plan tier.
+
+  This means the success shape of this PATCH (what the response looks
+  like when the level change is actually applied) remains **unconfirmed**
+  in this account -- flag as an open item, same category as the
+  PDF Catalogs/Ecatalogs feature gates (status-gating #2/#3).
+}
+
+example {
+  name: Update Family Attribute Level - Feature Not Enabled (403)
+  description: Real response captured 2026-09-15 -- the only response shape this account can produce for this operation.
+
+  request: {
+    url: {{pim_base_url_v3}}/product-families/6aa97212a30ca5945169a21e/attributes/6a9f1bf72b6fd055ffb7c7e1
+    method: patch
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "level": "parent_level"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 403
+      text: Forbidden
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "PermissionError",
+              "description": "Automatic inheritance is not available for this account"
+            }
+          ]
+        }
+      '''
+    }
+  }
+}

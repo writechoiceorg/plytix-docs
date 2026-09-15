@@ -1,0 +1,173 @@
+meta {
+  name: Get Product Relationships (Top-Level)
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{pim_base_url_v3}}/product-relationships?account_id=6a38f5a5b22478f30bfd755c&_page_size=5
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Accept: application/json
+}
+
+assert {
+  res.status: eq 200
+  res.body.data: isArray
+}
+
+docs {
+  Confirmed live 2026-09-15 against "David's Dev Account". Brand-new
+  top-level search endpoint in the 2026-09-15 `openapi_pimv3.json`
+  refresh, covering the flat `{relationship_id, relationship_label,
+  product_id}` link records also reachable per-product via
+  `/products/{product_id}/relationships` (see "Get Product Relationships
+  Collection.bru").
+
+  ## Critical finding -- NOT account-scoped by default (same bug as
+  `GET /family-attributes`)
+  `GET /product-relationships?_page_size=3` with **no filter** returned
+  records for `relationship_id 5de65201ac3fa1c04e8289cf` /
+  `product_id`s starting `5e2ac6...` -- **not** any id format recognizable
+  as "David's Dev Account" data (this account's own product ids all start
+  `6a38f6...`/`6aa9...`). This is the second of three brand-new top-level
+  search endpoints in this refresh confirmed to leak cross-tenant data by
+  default (the third is `GET /related-products`, see its own file) --
+  see `config/api-testing.config.md`'s new quirk/open question for the
+  full writeup and the recommendation to report this to Plytix.
+
+  **Workaround**: filter with `?account_id=<id>` (used in this file's
+  base request) or `?product_id=<id>` -- both confirmed correctly scoped.
+
+  ## Real bug: filtering by `relationship_id` alone times out
+  `GET /product-relationships?relationship_id=<real_id>` returned a raw
+  `504 Gateway Time-out` HTML page (not even a JSON error envelope) after
+  a long hang -- reproduced once, not retried further per the stop
+  condition on repeated unexpected errors. Filtering by `product_id`
+  instead works fine and is the safer/faster way to look up a specific
+  product's relationships via this endpoint.
+}
+
+example {
+  name: Get Product Relationships - Filtered by account_id (Safe/Scoped)
+  description: Real response captured 2026-09-15, filtered to "David's Dev Account" to avoid the cross-tenant leak documented above.
+
+  request: {
+    url: {{pim_base_url_v3}}/product-relationships?account_id=6a38f5a5b22478f30bfd755c&_page_size=5
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [
+            {"relationship_id": "6a38f5d8c3d65a5f868b186c", "relationship_label": "related_products", "product_id": "6a38f614c3d65a5f868b1a06"},
+            {"relationship_id": "6a38f5d8c3d65a5f868b186c", "relationship_label": "related_products", "product_id": "6a38f614c3d65a5f868b1a07"},
+            {"relationship_id": "6a38f5d8c3d65a5f868b186b", "relationship_label": "bundles", "product_id": "6a38f614c3d65a5f868b1a07"},
+            {"relationship_id": "6a38f5d8c3d65a5f868b186c", "relationship_label": "related_products", "product_id": "6a38f614c3d65a5f868b1a08"},
+            {"relationship_id": "6a38f5d8c3d65a5f868b186b", "relationship_label": "bundles", "product_id": "6a38f614c3d65a5f868b1a08"}
+          ],
+          "errors": [],
+          "pagination": {
+            "next_page": "http://pim.dev.plytix.com/api/v3/product-relationships?account_id=6a38f5a5b22478f30bfd755c&_page_size=5&_page=2"
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Get Product Relationships - No Filter (Cross-Tenant Data Leak, Bug)
+  description: Real response captured 2026-09-15 with NO account filter applied -- the returned product_id/relationship_id values do not belong to "David's Dev Account".
+
+  request: {
+    url: {{pim_base_url_v3}}/product-relationships?_page_size=3
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [
+            {"relationship_id": "5de65201ac3fa1c04e8289cf", "relationship_label": "matching_products", "product_id": "5e2ac61866bc1da6674d2e4a"},
+            {"relationship_id": "5de65201ac3fa1c04e8289cf", "relationship_label": "matching_products", "product_id": "5e2ac5fa66bc1da6674d2e24"},
+            {"relationship_id": "5de65201ac3fa1c04e8289cf", "relationship_label": "matching_products", "product_id": "5e2ac61a1f40812e384d2cd2"}
+          ],
+          "errors": [],
+          "pagination": {
+            "next_page": "http://pim.dev.plytix.com/api/v3/product-relationships?_page_size=3&_page=2"
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Get Product Relationships - Filtered by relationship_id (504 Timeout, Bug)
+  description: Real response captured 2026-09-15 -- a raw gateway timeout, not a JSON error envelope. Use the product_id filter instead when looking up a specific product/relationship pair.
+
+  request: {
+    url: {{pim_base_url_v3}}/product-relationships?relationship_id=6aa97b2ca30ca5945169a23e
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 504
+      text: Gateway Time-out
+    }
+    headers: {
+      content-type: text/html
+    }
+    body: {
+      type: text
+      content: '''
+        <html>
+        <head><title>504 Gateway Time-out</title></head>
+        <body>
+        <center><h1>504 Gateway Time-out</h1></center>
+        </body>
+        </html>
+      '''
+    }
+  }
+}

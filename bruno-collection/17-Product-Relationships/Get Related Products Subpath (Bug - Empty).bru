@@ -1,0 +1,122 @@
+meta {
+  name: Get Related Products Subpath (Bug - Empty)
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{pim_base_url_v3}}/products/REPLACE_WITH_PRODUCT_ID/relationships/REPLACE_WITH_RELATIONSHIP_ID/related-products
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Accept: application/json
+}
+
+docs {
+  Confirmed live 2026-09-15 against the same disposable scratch products
+  and relationship type as "Create Product Relationship Link.bru" on
+  "David's Dev Account".
+
+  ## Real bug: this subpath returns empty despite a confirmed live link
+  `GET /products/{product_id}/relationships/{relationship_id}/related-products`
+  is documented by the spec as the way to list which products are on the
+  other end of a relationship link. Tested immediately after "Create
+  Product Relationship Link.bru" successfully linked product A to product
+  B (confirmed three independent ways: the create response itself, the
+  full product's `product_relationships` field, and
+  `GET /related-products?product_id=<A>` all show the link) -- but this
+  dedicated subpath returned `{"data": [], "errors": []}`, empty, both
+  immediately and on a retry a few seconds later (ruling out simple
+  read-after-write/indexing lag). **This looks like a genuine bug in the
+  new endpoint**, not a naming/discovery mistake -- the sibling identity
+  endpoint one level up (`.../relationships/{relationship_id}`, see "Get
+  Product Relationship by ID.bru") correctly reflects the link's
+  existence; only this specific `related-products` collection view is
+  wrong.
+
+  Use `GET /related-products?product_id=<id>` (the top-level search
+  endpoint, correctly scoped when filtered -- see "Get Related Products
+  (Top-Level).bru") as the reliable way to find which products are
+  related to a given one, until this subpath is fixed. Report to Plytix.
+
+  The single-item variant, `GET .../related-products/{related_product_id}`,
+  was also tested and 404s even for the real, just-linked product --
+  consistent with the collection view being empty (see the second
+  example below).
+}
+
+example {
+  name: Get Related Products Subpath - Empty Despite Confirmed Link (Bug)
+  description: Real response captured 2026-09-15, immediately after "Create Product Relationship Link.bru" confirmed the link exists via three other independent checks.
+
+  request: {
+    url: {{pim_base_url_v3}}/products/6aa97b2ca30ca5945169a23f/relationships/6aa97b2ca30ca5945169a23e/related-products
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Get Related Product by ID Subpath - Not Found Despite Confirmed Link (Bug)
+  description: Real response captured 2026-09-15, same underlying bug as the collection view above -- the single-item lookup also can't find the just-linked related product.
+
+  request: {
+    url: {{pim_base_url_v3}}/products/6aa97b2ca30ca5945169a23f/relationships/6aa97b2ca30ca5945169a23e/related-products/6aa97b2da30ca5945169a240
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 404
+      text: Not Found
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "NotFoundError",
+              "description": "Association (product_id=6aa97b2ca30ca5945169a23f, relationship_id=6aa97b2ca30ca5945169a23e, related_product_id=6aa97b2da30ca5945169a240) not found"
+            }
+          ]
+        }
+      '''
+    }
+  }
+}

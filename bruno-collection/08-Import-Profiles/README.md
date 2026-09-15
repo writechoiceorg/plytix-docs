@@ -12,7 +12,7 @@ downstream dependents anywhere in `TESTING_PLAN.md`.
 | Create Import Profile | POST | Minimal create (`name` only) | 201; reveals full live `settings` defaults |
 | Create Import Profile - With Settings | POST | Partial `settings` override | Confirms partial merge with defaults |
 | Create Import Profile - Missing Name (422) | POST | Validation trigger | Same 422 envelope |
-| Delete Import Profile (Undeclared) | DELETE | Not in spec | Works — 204 |
+| Update and Delete Import Profile | PATCH/DELETE | Rename + delete | Both work — 200/204; now formally declared (2026-09-15); `PATCH` never had a file before |
 
 ## Behaviors that differ from the spec
 
@@ -36,6 +36,15 @@ to `null`.
 - ✅ 422 (missing `name`) and undeclared `DELETE` (204, then 404)
   confirmed.
 - All 5 requests pass `bru run "08-Import-Profiles/" --env "Dev"`.
+
+## Update — 2026-09-15 (spec refresh: 51→63 paths)
+
+`openapi_pimv3.json` now formally declares both `PATCH` and `DELETE`
+(`DELETE` was previously undeclared but working; `PATCH` had never been
+tested). Combined into "Update and Delete Import Profile.bru", replacing
+"Delete Import Profile (Undeclared).bru". Retested fresh against a new
+disposable scratch profile — `name` confirmed patchable; the full
+`settings` object round-trips unchanged when omitted from the patch body.
 
 ## Open items
 

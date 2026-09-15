@@ -1,0 +1,170 @@
+meta {
+  name: Update and Delete Import Profile
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{pim_base_url_v3}}/import-profiles/REPLACE_WITH_PROFILE_ID
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Accept: application/json
+}
+
+docs {
+  Confirmed live 2026-09-15 against a fresh disposable scratch import
+  profile ("WC Test Import Profile For Patch Delete", id
+  `6aa98255a30ca5945169a24e`, created and destroyed in this same run) on
+  "David's Dev Account". `DELETE` was previously tested (as "Delete
+  Import Profile (Undeclared)") against a throwaway id with no
+  `example{}`; `PATCH` never had a file at all. Both are now formally
+  declared in `openapi_pimv3.json`'s 2026-09-15 refresh (previously
+  undeclared but working per quirk #20).
+
+  ## What it does
+  - `PATCH /import-profiles/{id}` -- `200`, applies a partial update.
+    Confirmed `name` applies and round-trips; the full `settings` object
+    (import/assets actions, decimal separator, etc.) is returned
+    unchanged when not included in the patch body.
+  - `DELETE /import-profiles/{id}` -- `204`, then `404` on a follow-up
+    `GET`.
+}
+
+example {
+  name: Update Import Profile - Success (PATCH)
+  description: Real response captured 2026-09-15 against a disposable scratch import profile on "David's Dev Account".
+
+  request: {
+    url: {{pim_base_url_v3}}/import-profiles/6aa98255a30ca5945169a24e
+    method: patch
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "WC Test Import Profile Renamed"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "created_user_audit": {
+              "type": "API",
+              "user_email": "TestDH",
+              "user_id": "6a96a370a3fb0431c692820d"
+            },
+            "id": "6aa98255a30ca5945169a24e",
+            "modified": "2026-09-15T17:37:34.266972+00:00",
+            "modified_user_audit": {
+              "type": "API",
+              "user_email": "TestDH",
+              "user_id": "6a96a370a3fb0431c692820d"
+            },
+            "name": "WC Test Import Profile Renamed",
+            "settings": {
+              "charset": null,
+              "column_matches": [],
+              "column_separator": null,
+              "create_static_list": false,
+              "family_options": null,
+              "import_action": "ALL",
+              "import_assets_action": "SKIP",
+              "import_decimal_separator": ".",
+              "new_products_status": "Draft",
+              "text_delimiter": null
+            }
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Delete Import Profile - Success (204, then 404 on follow-up GET)
+  description: Real response captured 2026-09-15 against the same disposable scratch import profile, immediately after the PATCH above.
+
+  request: {
+    url: {{pim_base_url_v3}}/import-profiles/6aa98255a30ca5945169a24e
+    method: delete
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 204
+      text: No Content
+    }
+    headers: {
+    }
+    body: {
+      type: json
+      content: '''
+        (empty body)
+      '''
+    }
+  }
+}
+
+example {
+  name: Get Import Profile by ID - After Delete (404)
+  description: Real response captured 2026-09-15, follow-up GET immediately after the DELETE above.
+
+  request: {
+    url: {{pim_base_url_v3}}/import-profiles/6aa98255a30ca5945169a24e
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 404
+      text: Not Found
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "NotFoundError",
+              "description": "Document with id 6aa98255a30ca5945169a24e not found"
+            }
+          ]
+        }
+      '''
+    }
+  }
+}

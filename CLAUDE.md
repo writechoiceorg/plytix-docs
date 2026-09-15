@@ -15,7 +15,7 @@ Do not go looking for `package.json`, lint configs, or test runners — there ar
   - `project-references/` — PDFs: project requirements, product-board API feedback, bulk-operations docs, brand/content guidelines, image optimization guide.
   - `transcripts/` — kickoff call transcripts with Plytix stakeholders (product, PM) and internal WriteChoice team syncs. Contain project context, terminology, and decisions (e.g. tooling choices) not written down elsewhere.
   - `help-center/` — full scrape of Plytix's existing end-user help center (help.plytix.com/en), converted to Markdown, one file per article/category page, mirroring the site's URL slugs (e.g. `operations/if.md` for the formula-operations reference). This is existing/scraped-docs material — per `docs-ia`'s trust order it ranks below `materials/`'s other raw sources and below verified API findings, but above nothing; treat its content and terminology as a starting point, not ground truth.
-- `openapi_pimv3.json` — the authoritative OpenAPI 3 spec for Plytix's PIM v3 API (FastAPI-generated), 51 paths covering products, assets, product/asset categories, asset lists, and related entities. Treat this as ground truth for endpoint shapes over the prose in `API V3.md` where they conflict.
+- `openapi_pimv3.json` — the authoritative OpenAPI 3 spec for Plytix's PIM v3 API (FastAPI-generated), 63 paths covering products, assets, product/asset categories, asset lists, product families/attributes, product relationships, and related entities. Treat this as ground truth for endpoint shapes over the prose in `API V3.md` where they conflict.
 - `.claude/skills/` — project-specific Claude Code skills that drive the actual work (see below).
 
 ## Skills that drive this project's workflow

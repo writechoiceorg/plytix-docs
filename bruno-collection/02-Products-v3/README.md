@@ -36,6 +36,7 @@ own fully-featured product — see below.
 | Create Product - Full Featured | POST | Wires in Phase 1/2a fixtures (categories, attribute, thumbnail) | **201**; kept fixture; `attributes` keyed by name; `category_ids` links immediately (unlike assets) |
 | Delete Product | DELETE | Deletes a disposable product | **204** (not spec's 200); confirms SKU-identifier still fails on a self-created product |
 | Delete Product Subpath - Deletes Entire Product (Warning) | DELETE | `.../{{id}}/categories` (or any subpath) | **Deletes the whole product**, `{path}` is ignored entirely — see warning below |
+| Update Product (PATCH) | PATCH | Partial update (label/status, etc.) | **200**, full updated product returned; `PATCH` newly *formally declared* in the 2026-09-15 spec refresh (was already empirically confirmed working, quirks #26/#27) but never had its own file until now |
 
 ## Behaviors that differ from the spec
 
@@ -105,6 +106,21 @@ list with request/response detail. Summary:
   list membership having zero product-side trace (Flow 4) — see
   `config/api-testing.config.md` quirks #46/#48. All 16 requests pass on
   a first run.
+
+## Update — 2026-09-15 (spec refresh: 51→63 paths)
+
+`openapi_pimv3.json` was refreshed and now formally declares `PATCH
+/products/{identifier}` (previously undeclared but working, quirks
+#26/#27) alongside `DELETE` (already declared). Retested live against a
+disposable scratch product (`WC-TEST-PATCH-001`, id
+`6aa98167a30ca5945169a245`, created and deleted in the same run — not the
+kept `WC-TEST-FULL-001` fixture) and captured a real `example{}` in the
+new "Update Product (PATCH).bru" file. See
+`config/api-testing.config.md`'s 2026-09-15 session entry for the full
+quirk list from this refresh, including a project-wide cross-tenant data
+leak found on three brand-new endpoints elsewhere in the spec (not this
+folder — see `13-Product-Families/README.md` and
+`17-Product-Relationships/README.md`).
 
 ## Open items
 

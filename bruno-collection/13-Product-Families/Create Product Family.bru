@@ -1,0 +1,161 @@
+meta {
+  name: Create Product Family
+  type: http
+  seq: 11
+}
+
+post {
+  url: {{pim_base_url_v3}}/product-families
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {
+    "name": "WC Test Product Family"
+  }
+}
+
+assert {
+  res.status: eq 201
+  res.body.data.name: eq WC Test Product Family
+}
+
+docs {
+  Confirmed live 2026-09-15 on "David's Dev Account". **Major finding**:
+  Product Families were confirmed **read-only** in Phase 3
+  (config quirk #38 -- "genuinely read-only, no `POST` anywhere in the
+  spec"). The 2026-09-15 `openapi_pimv3.json` refresh adds `POST
+  /product-families` (and `PATCH`/`DELETE /product-families/{identifier}`)
+  for the first time -- this is a **new capability**, not a
+  previously-undeclared-but-working one like most of this session's other
+  findings. Confirmed live: it genuinely works now.
+
+  ## What it does
+  `POST /product-families` with just `{"name": "..."}` -- `201 Created`.
+  The new family immediately gets `total_attributes: 4` with no
+  attributes specified in the create body -- these are account-level
+  default/system attributes auto-assigned to every family (mirrors
+  quirk #30's finding that products get default completeness attributes
+  even when not requested).
+
+  `ProductFamilyCreateInputDto` also accepts `attributes` /
+  `parent_attributes` / `variant_attributes` arrays (attribute IDs or
+  `{id, label}` objects) to link attributes at creation time -- not
+  exercised in this session's create call; attribute linking was tested
+  separately via the dedicated `/attributes` sub-resource (see
+  "Create Family Attribute Link.bru").
+
+  ## Not idempotent to re-run
+  Family names are unique per account, enforced with **`409`**
+  (`AlreadyExists` family, same side of the split as products/attributes/
+  channels per quirk #25a/#33/#45a -- NOT categories'/lists' `422` side):
+  `{"errors":[{"name":"AlreadyExists","description":"A Product family with
+  same name already exists"}]}`.
+
+  ## Not kept as a fixture
+  The family created in this example was renamed and deleted in the same
+  session (see "Update and Delete Product Family.bru") -- no new
+  Product Families fixture was kept, since the real pre-existing
+  "Accessories"/"Apparel"/"Office Supplies" families already cover every
+  read-only scenario this collection needs.
+}
+
+example {
+  name: Create Product Family - Success
+  description: Real response captured 2026-09-15 on "David's Dev Account" -- this family was renamed and deleted later in the same session, not kept as a fixture.
+
+  request: {
+    url: {{pim_base_url_v3}}/product-families
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "WC Test Product Family"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 201
+      text: Created
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6aa97212a30ca5945169a21e",
+            "name": "WC Test Product Family",
+            "total_products": 0,
+            "total_attributes": 4,
+            "total_models": 1,
+            "created": "2026-09-15T16:28:02.086000+00:00",
+            "modified": "2026-09-15T16:28:02.090000+00:00"
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Create Product Family - Duplicate Name (409)
+  description: Real response captured 2026-09-15, re-creating a family with a name that already existed in this account at the time.
+
+  request: {
+    url: {{pim_base_url_v3}}/product-families
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "WC Test Product Family Renamed"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 409
+      text: Conflict
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "AlreadyExists",
+              "description": "A Product family with same name already exists"
+            }
+          ]
+        }
+      '''
+    }
+  }
+}

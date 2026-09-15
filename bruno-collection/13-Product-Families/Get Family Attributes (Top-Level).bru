@@ -1,0 +1,145 @@
+meta {
+  name: Get Family Attributes (Top-Level)
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{pim_base_url_v3}}/family-attributes?account_id=6a38f5a5b22478f30bfd755c&_page_size=5
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Accept: application/json
+}
+
+assert {
+  res.status: eq 200
+  res.body.data: isArray
+}
+
+docs {
+  Confirmed live 2026-09-15 against "David's Dev Account"
+  (`6a38f5a5b22478f30bfd755c`). New in the 2026-09-15 `openapi_pimv3.json`
+  refresh -- `GET /family-attributes` is a brand-new top-level search
+  endpoint over the `product_family_id`<->`attribute_id` link records
+  also reachable per-family via `/product-families/{id}/attributes`
+  (see "Get Family Attributes Collection.bru").
+
+  ## Critical finding -- NOT account-scoped by default
+  Calling this endpoint with **no filter at all**
+  (`GET /family-attributes?_page_size=3`) returned link records from
+  **other Plytix accounts entirely** (`account_id` values
+  `5ee27f5db2a5094797405d9b` and `60a61a3ac87241687d4dea1b` observed in
+  one response, neither of which is "David's Dev Account"). Every other
+  v3 resource confirmed in this project (all of Phases 0-5, ~50+
+  endpoints) is automatically scoped to the caller's own account with no
+  filter needed -- this is the **first** endpoint found that leaks
+  cross-tenant data by default. The same pattern was independently
+  confirmed on the two other brand-new top-level search endpoints this
+  session, `GET /product-relationships` and `GET /related-products` (see
+  `17-Product-Relationships/`) -- three for three of the newly-added
+  top-level search endpoints in this spec refresh show the same gap.
+  **This should be reported to Plytix as a likely data-isolation bug**,
+  not documented to customers as normal behavior -- see
+  `config/api-testing.config.md`'s new quirk and open question for this
+  session.
+
+  **Workaround for safe/scoped use**: explicitly filter with
+  `?account_id=<your_account_id>` (confirmed working, as this request
+  does) -- every record in this account then resolves to real
+  product-family/attribute pairs.
+
+  ## Key fields
+  Each record: `account_id`, `level` (`"parent_level"` / `"no_level"` /
+  `null` -- seen in the raw cross-tenant sample, meaning `level` can be
+  genuinely absent), `product_family_id`, `attribute_id`. Standard
+  `pagination.next_page` link. No dedicated output DTO documented in the
+  spec beyond the generic `SearchFamily-attributesResponse` wrapper.
+}
+
+example {
+  name: Get Family Attributes - Filtered by account_id (Safe/Scoped)
+  description: Real response captured 2026-09-15, filtered to "David's Dev Account" to avoid the cross-tenant leak documented above.
+
+  request: {
+    url: {{pim_base_url_v3}}/family-attributes?account_id=6a38f5a5b22478f30bfd755c&_page_size=5
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [
+            {"account_id": "6a38f5a5b22478f30bfd755c", "level": "parent_level", "product_family_id": "6a38f5d8c3d65a5f868b186e", "attribute_id": "6a38f613c3d65a5f868b19d1"},
+            {"account_id": "6a38f5a5b22478f30bfd755c", "level": "parent_level", "product_family_id": "6a38f5d8c3d65a5f868b186f", "attribute_id": "6a38f613c3d65a5f868b19d1"},
+            {"account_id": "6a38f5a5b22478f30bfd755c", "level": "parent_level", "product_family_id": "6a38f5d8c3d65a5f868b186d", "attribute_id": "6a38f613c3d65a5f868b19d1"},
+            {"account_id": "6a38f5a5b22478f30bfd755c", "level": "parent_level", "product_family_id": "6a38f5d8c3d65a5f868b186f", "attribute_id": "6a38f613c3d65a5f868b19cd"},
+            {"account_id": "6a38f5a5b22478f30bfd755c", "level": "parent_level", "product_family_id": "6a38f5d8c3d65a5f868b186e", "attribute_id": "6a38f613c3d65a5f868b19cd"}
+          ],
+          "errors": [],
+          "pagination": {
+            "next_page": "http://pim.dev.plytix.com/api/v3/family-attributes?account_id=6a38f5a5b22478f30bfd755c&_page_size=5&_page=2"
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Get Family Attributes - No Filter (Cross-Tenant Data Leak, Bug)
+  description: Real response captured 2026-09-15 with NO account filter applied -- documents the data-isolation gap above. account_id values here belong to other Plytix accounts, not "David's Dev Account".
+
+  request: {
+    url: {{pim_base_url_v3}}/family-attributes?_page_size=3
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [
+            {"account_id": "5ee27f5db2a5094797405d9b", "level": "parent_level", "product_family_id": "62f0f4d2cc4298ab620c7db8", "attribute_id": "5f32749f722977e42213fe7f"},
+            {"account_id": "5ee27f5db2a5094797405d9b", "level": "no_level", "product_family_id": "6823647b00352c0f11ace1c9", "attribute_id": "5f32749f722977e42213fe7f"},
+            {"account_id": "60a61a3ac87241687d4dea1b", "level": null, "product_family_id": "634d7a6601a8c5b91c7e3c6f", "attribute_id": "60d58862be49950ef129d1a2"}
+          ],
+          "errors": [],
+          "pagination": {
+            "next_page": "http://pim.dev.plytix.com/api/v3/family-attributes?_page_size=3&_page=2"
+          }
+        }
+      '''
+    }
+  }
+}

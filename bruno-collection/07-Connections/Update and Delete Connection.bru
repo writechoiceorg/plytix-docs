@@ -1,0 +1,159 @@
+meta {
+  name: Update and Delete Connection
+  type: http
+  seq: 4
+}
+
+delete {
+  url: {{pim_base_url_v3}}/connections/REPLACE_WITH_CONNECTION_ID
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Accept: application/json
+}
+
+docs {
+  Confirmed live 2026-09-15 against a fresh disposable scratch FTP
+  connection ("WC Test Connection For Patch Delete", id
+  `6aa98241a30ca5945169a24d`, created and destroyed in this same run) on
+  "David's Dev Account". `DELETE` was previously tested (as "Delete
+  Connection (Undeclared)") against a throwaway id with no `example{}`;
+  `PATCH` never had a file at all. Both are now formally declared in
+  `openapi_pimv3.json`'s 2026-09-15 refresh (previously undeclared but
+  working per quirk #20).
+
+  ## What it does
+  - `PATCH /connections/{id}` -- `200`, applies a partial update.
+    Confirmed `name`, `url`, `port` all apply and round-trip. `type`
+    remains the fixed lowercase enum from quirk #21
+    (`dropbox`/`ftp`/`sftp`) -- not re-tested for patchability here, but
+    worth checking before assuming it can be changed after creation.
+  - `DELETE /connections/{id}` -- `204`, then `404` on a follow-up `GET`.
+}
+
+example {
+  name: Update Connection - Success (PATCH)
+  description: Real response captured 2026-09-15 against a disposable scratch FTP connection on "David's Dev Account".
+
+  request: {
+    url: {{pim_base_url_v3}}/connections/6aa98241a30ca5945169a24d
+    method: patch
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "WC Test Connection Renamed",
+        "url": "ftp.example.com",
+        "port": 21
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "created_at": "2026-09-15T17:37:05.229000+00:00",
+            "id": "6aa98241a30ca5945169a24d",
+            "last_processed": null,
+            "last_result_operation": null,
+            "modified": "2026-09-15T17:37:12.598351+00:00",
+            "name": "WC Test Connection Renamed",
+            "port": 21,
+            "source": null,
+            "type": "ftp",
+            "url": "ftp.example.com",
+            "use_tls": false,
+            "user": null
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Delete Connection - Success (204, then 404 on follow-up GET)
+  description: Real response captured 2026-09-15 against the same disposable scratch connection, immediately after the PATCH above.
+
+  request: {
+    url: {{pim_base_url_v3}}/connections/6aa98241a30ca5945169a24d
+    method: delete
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 204
+      text: No Content
+    }
+    headers: {
+    }
+    body: {
+      type: json
+      content: '''
+        (empty body)
+      '''
+    }
+  }
+}
+
+example {
+  name: Get Connection by ID - After Delete (404)
+  description: Real response captured 2026-09-15, follow-up GET immediately after the DELETE above.
+
+  request: {
+    url: {{pim_base_url_v3}}/connections/6aa98241a30ca5945169a24d
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 404
+      text: Not Found
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "NotFoundError",
+              "description": "Document with id 6aa98241a30ca5945169a24d not found"
+            }
+          ]
+        }
+      '''
+    }
+  }
+}

@@ -13,7 +13,7 @@ Covers `GET`/`POST /api/v3/assets`, `GET`/`PATCH .../{identifier}`, and
 | Update Asset | PATCH | Update `alt_text`/`filename`/`category_ids` | **200**; `category_ids` *does* link via PATCH (unlike POST) |
 | Get Asset Subpath - Categories | GET | `/categories` | Confirms the PATCH-applied linkage persisted |
 | Update Asset Subpath | PATCH | `/alt_text` | Undeclared in spec; body is a raw value, not an object |
-| Delete Asset (Undeclared) | DELETE | Not in spec | Works — 204 |
+| Delete Asset | DELETE | Not previously declared | Works — 204; now formally declared (2026-09-15) |
 
 ## Behaviors that differ from the spec
 
@@ -43,6 +43,17 @@ Covers `GET`/`POST /api/v3/assets`, `GET`/`PATCH .../{identifier}`, and
   constraint observed on assets, unlike Phase 1's named resources) but
   will create an **additional** duplicate asset each time — be aware if
   re-running this folder repeatedly.
+
+## Update — 2026-09-15 (spec refresh: 51→63 paths)
+
+`openapi_pimv3.json` now formally declares `DELETE` for this resource
+(previously undeclared but working) — `PATCH` was already declared
+before this refresh. Renamed "Delete Asset (Undeclared).bru" to
+"Delete Asset.bru" and retested fresh against a new disposable scratch
+asset. Also captured "Update Asset.bru"'s first-ever real `example{}`
+block, retesting the same `alt_text`/`filename` PATCH behavior against a
+disposable scratch asset (not the kept fixture, to avoid mutating it
+further) — this file previously only had prose `docs{}`, no example.
 
 ## Open items
 

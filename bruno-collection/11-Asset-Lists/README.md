@@ -14,7 +14,7 @@ here too, not re-documented in depth).
 | Create Smart Asset List | POST | `type: "Smart"` with a `query` | **201**; fixture kept |
 | Get Asset List by ID | GET | Fetch by Mongo ID | Subpath discovery matches product lists exactly |
 | Create Asset List - Missing Fields (422) | POST | Validation trigger | Same two-entry `errors` array as product lists |
-| Update and Delete Asset List (Undeclared) | PATCH/DELETE | Not in spec | Both work — 200/204 |
+| Update and Delete Asset List | PATCH/DELETE | Rename + delete | Both work — 200/204; now formally declared (2026-09-15) |
 
 ## Test report — 2026-09-08
 
@@ -26,6 +26,16 @@ here too, not re-documented in depth).
 - All 5 requests passed on the initial run. **Note**: re-running "Create
   Smart Asset List" after the fixture already exists will 422 (duplicate
   name), same expected behavior as `10-Pim-Product-Lists`.
+
+## Update — 2026-09-15 (spec refresh: 51→63 paths)
+
+`openapi_pimv3.json` now formally declares both `PATCH` and `DELETE`
+(previously undeclared but working). Retested fresh against a new
+disposable scratch Smart asset list, renamed the file to drop
+"(Undeclared)", and captured real `example{}` blocks for both. Aside:
+the list-`query` body's filter operator vocabulary is `like`/`!like`
+etc., not the `icontains` operator confirmed for live `GET` query-string
+filters (quirk #11/#53) — two different filter DSLs, don't conflate them.
 
 ## Open items
 

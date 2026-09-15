@@ -1,0 +1,80 @@
+meta {
+  name: Get Product Relationship by ID
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{pim_base_url_v3}}/products/REPLACE_WITH_PRODUCT_ID/relationships/REPLACE_WITH_RELATIONSHIP_ID
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Accept: application/json
+}
+
+assert {
+  res.status: eq 200
+  res.body.data.relationship_id: isString
+}
+
+docs {
+  Confirmed live 2026-09-15 against the same disposable scratch products
+  and relationship type as "Create Product Relationship Link.bru" on
+  "David's Dev Account".
+
+  ## What it does
+  Fetches one relationship link on a product by `relationship_id`. Same
+  flat shape as the collection view (`relationship_id`,
+  `relationship_label`, `product_id`) -- still no `related_product_id`
+  visible here either (see the bug noted in "Delete Product Relationship
+  (Safe Unlink).bru"'s docs and `config/api-testing.config.md`).
+
+  ## Subpath discovery (technique reused from Phase 0)
+  `GET /products/{id}/relationships/{relationship_id}/bogus_xyz` -- `400
+  {"errors":[{"name":"ValueError","description":"Field 'bogus_xyz' not
+  found. Available fields: ['_id','product_id','account_id',
+  'relationship_id','relationship_label']"}]}` -- confirms the internal
+  model backing this identity resource has an `account_id` field even
+  though it's never surfaced in any response body seen this session.
+}
+
+example {
+  name: Get Product Relationship by ID - Success
+  description: Real response captured 2026-09-15, immediately after "Create Product Relationship Link.bru" created this link.
+
+  request: {
+    url: {{pim_base_url_v3}}/products/6aa97b2ca30ca5945169a23f/relationships/6aa97b2ca30ca5945169a23e
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "relationship_id": "6aa97b2ca30ca5945169a23e",
+            "relationship_label": "wc_test_product_relationship",
+            "product_id": "6aa97b2ca30ca5945169a23f"
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}

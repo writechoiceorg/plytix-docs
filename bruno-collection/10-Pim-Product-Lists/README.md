@@ -12,7 +12,7 @@ and `GET .../{identifier}/{path}`, run against `Dev`. Self-contained.
 | Create Smart Product List | POST | `type: "Smart"` with a `query` | 201; filters on the kept product's `sku` |
 | Get Product List by ID | GET | Fetch by Mongo ID | Subpath discovery |
 | Create Product List - Missing Fields (422) | POST | Validation trigger | First **multi-entry** `errors` array seen this project |
-| Update and Delete Product List (Undeclared) | PATCH/DELETE | Not in spec | Both work — 200/204 |
+| Update and Delete Product List | PATCH/DELETE | Rename + delete | Both work — 200/204; now formally declared (2026-09-15) |
 
 ## Behaviors that differ from the spec
 
@@ -51,6 +51,14 @@ and `GET .../{identifier}/{path}`, run against `Dev`. Self-contained.
   mechanism is `PATCH /products/{id}` with `static_list_ids` (see
   `02-Products-v3`). See quirk #49 and "Update List Products Subpath -
   Not Supported (Flow 5).bru". All 7 requests pass on a first run.
+
+## Update — 2026-09-15 (spec refresh: 51→63 paths)
+
+`openapi_pimv3.json` now formally declares both `PATCH` and `DELETE`
+(previously undeclared but working, quirks #20/#35). Retested fresh
+against a new disposable scratch static list, renamed the file to drop
+"(Undeclared)", and captured real `example{}` blocks for both (rename
+via `PATCH`, then `204`/`404` on `DELETE`).
 
 ## Open items
 

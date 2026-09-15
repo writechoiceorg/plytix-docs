@@ -1,0 +1,132 @@
+meta {
+  name: Delete Product Relationship (Safe Unlink)
+  type: http
+  seq: 8
+}
+
+delete {
+  url: {{pim_base_url_v3}}/products/REPLACE_WITH_PRODUCT_ID/relationships/REPLACE_WITH_RELATIONSHIP_ID
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Accept: application/json
+}
+
+docs {
+  Confirmed live 2026-09-15 against the same disposable scratch products
+  and relationship type as "Create Product Relationship Link.bru" on
+  "David's Dev Account".
+
+  ## Major, genuinely good finding -- the first confirmed SAFE scoped
+  unlink in this entire project
+  Every prior "remove one related thing from a product" mechanism tested
+  in this project has been actively dangerous: `DELETE
+  /products/{id}/categories` (2-segment subpath) deletes the **entire
+  product**, not just the category link (quirk #31); the newly-documented
+  "1:M Unlink" pattern `DELETE /products/{id}/categories/{category_id}`
+  (3-segment) does the exact same thing (quirk #54). Both are open
+  questions #12/#20 in `config/api-testing.config.md` -- "is there any
+  safe DELETE-based unlink at all?"
+
+  **This new endpoint is the answer, at least for relationships**:
+  `DELETE /products/{product_id}/relationships/{relationship_id}` --
+  confirmed `204`, and a follow-up `GET /products/{product_id}` shows the
+  product **fully intact** (`sku`, `label`, `status` all unchanged) with
+  only `product_relationships` now emptied to `[]`. This is a real,
+  properly-scoped removal -- the first one found in the whole API. Worth
+  highlighting prominently in any how-to docs about removing a product
+  relationship, and worth re-raising with Plytix alongside open question
+  #20: *why* does this new dedicated endpoint get scoped deletion right
+  when the older subpath-based patterns don't?
+
+  Note the URL shape: this only removes the *entire relationship-type
+  link* (all related products under that `relationship_id` for this
+  product), not one individual related product out of a multi-product
+  link -- removing a single related product from a link with several
+  requires `PATCH`ing a reduced `related_products` array instead (not
+  separately tested this session, but consistent with every other
+  "safe removal via PATCH" pattern found in this project).
+}
+
+example {
+  name: Delete Product Relationship - Success (204, Product Stays Intact)
+  description: Real response captured 2026-09-15, unlinking the relationship created earlier in this session.
+
+  request: {
+    url: {{pim_base_url_v3}}/products/6aa97b2ca30ca5945169a23f/relationships/6aa97b2ca30ca5945169a23e
+    method: delete
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 204
+      text: No Content
+    }
+    headers: {
+    }
+    body: {
+      type: json
+      content: '''
+        (empty body)
+      '''
+    }
+  }
+}
+
+example {
+  name: Get Product by ID - After Delete (Product Intact, Relationship Gone)
+  description: Real response captured 2026-09-15, follow-up GET on the PRODUCT (not the relationship) immediately after the DELETE above -- the product is still fully present, unlike every other subpath-delete hazard found in this project.
+
+  request: {
+    url: {{pim_base_url_v3}}/products/6aa97b2ca30ca5945169a23f
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6aa97b2ca30ca5945169a23f",
+            "account_id": "6a38f5a5b22478f30bfd755c",
+            "sku": "WC-TEST-REL-A",
+            "label": "WC Test Relationship Product A",
+            "status": "Draft",
+            "attributes": {},
+            "thumbnail_id": null,
+            "parent_id": null,
+            "num_variations": 0,
+            "product_level": 0,
+            "product_family_id": null,
+            "overwritten_attributes": [],
+            "product_relationships": [],
+            "created": "2026-09-15T17:06:52.993000",
+            "modified": "2026-09-15T17:32:58.807000"
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}

@@ -1,0 +1,210 @@
+meta {
+  name: Update and Delete Channel
+  type: http
+  seq: 7
+}
+
+delete {
+  url: {{pim_base_url_v3}}/channels/REPLACE_WITH_CHANNEL_ID
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Accept: application/json
+}
+
+docs {
+  Confirmed live 2026-09-15 against a fresh disposable scratch channel
+  ("WC Test Channel For Patch Delete", format `CSV`, id
+  `6aa982cba30ca5945169a253`, created and destroyed in this same run) on
+  "David's Dev Account" -- retested from scratch since the original
+  version of this file (named "... (Undeclared)") pointed at a throwaway
+  id from 2026-09-08 with no `example{}`. `openapi_pimv3.json`'s
+  2026-09-15 refresh now formally declares `PATCH`/`DELETE` for
+  `/channels/{identifier}` (previously undeclared but working, quirk
+  #20/#45).
+
+  ## What it does
+  - `PATCH /channels/{id}` with `{"name": "..."}` -- `200`, renames the
+    channel. Full channel shape returned (same rich default shape as
+    create, quirk #41) -- confirms two new fields not previously
+    surfaced in this project's Phase 4 create-response spot-check:
+    `is_fmt` (`false`) and `rebuild_once`/`rebuild_once_at`/
+    `rebuild_once_timezone` (all `null`/`false`), alongside the
+    already-documented `rebuild_periodically` family (quirk #40).
+  - `DELETE /channels/{id}` -- `204`, then `404` on a follow-up `GET`.
+}
+
+example {
+  name: Update Channel - Success (PATCH)
+  description: Real response captured 2026-09-15 against a disposable scratch channel on "David's Dev Account".
+
+  request: {
+    url: {{pim_base_url_v3}}/channels/6aa982cba30ca5945169a253
+    method: patch
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "WC Test Channel Renamed"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "active": false,
+            "already_processed_through_integrations": true,
+            "attribute_sorting": null,
+            "build_reference_date": "2026-06-22T08:43:17",
+            "build_reference_date_timezone": "UTC",
+            "changes_required": false,
+            "childs_first": false,
+            "column_separator": ",",
+            "columns": [],
+            "connections": [],
+            "created_at": "2026-09-15T17:39:23.768000+00:00",
+            "created_user_audit": {
+              "type": "API",
+              "user_email": "TestDH",
+              "user_id": "6a96a370a3fb0431c692820d"
+            },
+            "file_path": null,
+            "format": "CSV",
+            "id": "6aa982cba30ca5945169a253",
+            "is_fmt": false,
+            "last_run_by_user": null,
+            "last_run_ends_at": null,
+            "last_run_error": false,
+            "last_run_queue_at": null,
+            "last_run_start_at": null,
+            "modified": "2026-09-15T17:39:31.251247+00:00",
+            "modified_user_audit": {
+              "type": "API",
+              "user_email": "TestDH",
+              "user_id": "6a96a370a3fb0431c692820d"
+            },
+            "name": "WC Test Channel Renamed",
+            "on_demand_parent_include_criteria": "ONLY_PARENT_IN_LIST",
+            "on_demand_process_products": "CREATED_OR_MODIFIED",
+            "output_filename": "plytix_feed",
+            "output_filename_with_timestamp": false,
+            "parent_include_criteria": "ONLY_PARENT_IN_LIST",
+            "process_products": "CREATED_OR_MODIFIED",
+            "processed_user_audit": null,
+            "product_list_id": null,
+            "product_nodes": [],
+            "rebuild_feed_dom": null,
+            "rebuild_feed_dow": null,
+            "rebuild_feed_frequency": null,
+            "rebuild_feed_hod": null,
+            "rebuild_feed_moh": null,
+            "rebuild_feed_next_build": null,
+            "rebuild_feed_timezone": null,
+            "rebuild_once": false,
+            "rebuild_once_at": null,
+            "rebuild_once_timezone": null,
+            "rebuild_periodically": false,
+            "running": false,
+            "shopify": null,
+            "store_description": null,
+            "store_link": null,
+            "store_title": null,
+            "text_delimiter": "\"",
+            "wayfair": null,
+            "webhook": null,
+            "xml_nodes": [],
+            "xml_output_attributes": []
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Delete Channel - Success (204, then 404 on follow-up GET)
+  description: Real response captured 2026-09-15 against the same disposable scratch channel, immediately after the PATCH above.
+
+  request: {
+    url: {{pim_base_url_v3}}/channels/6aa982cba30ca5945169a253
+    method: delete
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 204
+      text: No Content
+    }
+    headers: {
+    }
+    body: {
+      type: json
+      content: '''
+        (empty body)
+      '''
+    }
+  }
+}
+
+example {
+  name: Get Channel by ID - After Delete (404)
+  description: Real response captured 2026-09-15, follow-up GET immediately after the DELETE above.
+
+  request: {
+    url: {{pim_base_url_v3}}/channels/6aa982cba30ca5945169a253
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 404
+      text: Not Found
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "NotFoundError",
+              "description": "Document with id 6aa982cba30ca5945169a253 not found"
+            }
+          ]
+        }
+      '''
+    }
+  }
+}

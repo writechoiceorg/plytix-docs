@@ -1,0 +1,158 @@
+meta {
+  name: Update and Delete Asset Category
+  type: http
+  seq: 4
+}
+
+delete {
+  url: {{pim_base_url_v3}}/asset-categories/REPLACE_WITH_CATEGORY_ID
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Accept: application/json
+}
+
+docs {
+  Confirmed live 2026-09-15 against a fresh disposable scratch asset
+  category ("WC Test Asset Category For Patch Delete", id
+  `6aa9819ca30ca5945169a247`, created and destroyed in this same run) on
+  "David's Dev Account". Combines two things into one file, following the
+  pattern established elsewhere in this collection (e.g.
+  `10-Pim-Product-Lists/Update and Delete Product List.bru`):
+
+  - `DELETE` was previously tested (as "Delete Asset Category
+    (Undeclared).bru") but that file pointed at a throwaway id with no
+    reachable resource and no `example{}` -- retested fresh here.
+  - `PATCH` never had a file at all before this session. Both methods are
+    now formally declared in `openapi_pimv3.json`'s 2026-09-15 refresh
+    (previously neither was declared -- both were undeclared-but-working
+    per quirk #20).
+
+  ## What it does
+  - `PATCH /asset-categories/{id}` with `{"name": "..."}` -- `200`,
+    renames the category. Same shape/behavior as `product-categories`'
+    `PATCH` (including the same `order`-comes-back-as-a-string quirk).
+  - `DELETE /asset-categories/{id}` -- `204`, then `404` on a follow-up
+    `GET` -- genuinely deleted.
+}
+
+example {
+  name: Update Asset Category - Success (PATCH)
+  description: Real response captured 2026-09-15 against a disposable scratch asset category on "David's Dev Account".
+
+  request: {
+    url: {{pim_base_url_v3}}/asset-categories/6aa9819ca30ca5945169a247
+    method: patch
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "WC Test Asset Category For Patch Delete Renamed"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6aa9819ca30ca5945169a247",
+            "modified": "2026-09-15T17:34:36.985871+00:00",
+            "n_children": 0,
+            "name": "WC Test Asset Category For Patch Delete Renamed",
+            "order": "7",
+            "path": ["WC Test Asset Category For Patch Delete Renamed"],
+            "slug": "wc-test-asset-category-for-patch-delete-renamed",
+            "account_id": "6a38f5a5b22478f30bfd755c"
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Delete Asset Category - Success (204, then 404 on follow-up GET)
+  description: Real response captured 2026-09-15 against the same disposable scratch asset category, immediately after the PATCH above.
+
+  request: {
+    url: {{pim_base_url_v3}}/asset-categories/6aa9819ca30ca5945169a247
+    method: delete
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 204
+      text: No Content
+    }
+    headers: {
+    }
+    body: {
+      type: json
+      content: '''
+        (empty body)
+      '''
+    }
+  }
+}
+
+example {
+  name: Get Asset Category by ID - After Delete (404)
+  description: Real response captured 2026-09-15, follow-up GET immediately after the DELETE above, confirming a hard delete.
+
+  request: {
+    url: {{pim_base_url_v3}}/asset-categories/6aa9819ca30ca5945169a247
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 404
+      text: Not Found
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "NotFoundError",
+              "description": "Document with id 6aa9819ca30ca5945169a247 not found"
+            }
+          ]
+        }
+      '''
+    }
+  }
+}

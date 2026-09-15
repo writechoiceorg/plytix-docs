@@ -18,7 +18,7 @@ and `GET .../{identifier}/{path}`, run against `Dev`. Self-contained.
 | Create Attribute - Invalid Type (422, Lists Undocumented Type) | POST | Trigger case | Reveals a **15th, undocumented type**: `HierarchyAttribute` |
 | Create Attribute - HierarchyAttribute (500, Unimplemented) | POST | Tries the undocumented type | **500** — real tag, unfinished handler |
 | Get Product Attribute by ID | GET | Fetch by Mongo ID | `_fields` confirmed ignored on GET-by-id (new, generalizes to all resources) |
-| Delete Product Attribute (Undeclared) | DELETE | Not in spec | Works — 204, used to clean up 13 of 14 smoke-tested types |
+| Update and Delete Product Attribute | PATCH/DELETE | Rename via `name` (not `label`) + delete | Both work — 200/204; now formally declared (2026-09-15); **`label` is explicitly NOT patchable** (422) |
 
 ## Behaviors that differ from the spec
 
@@ -64,6 +64,24 @@ and `GET .../{identifier}/{path}`, run against `Dev`. Self-contained.
   `HierarchyAttribute`'s unimplemented-type 500. See
   `config/api-testing.config.md` quirk #47 and "Create Completeness
   Attribute - Real References (500, Bug).bru".
+
+## Update — 2026-09-15 (spec refresh: 51→63 paths)
+
+`openapi_pimv3.json` now formally declares both `PATCH` and `DELETE` for
+this resource (`DELETE` was previously undeclared but working; `PATCH`
+had never been tested). Combined both into "Update and Delete Product
+Attribute.bru", replacing "Delete Product Attribute (Undeclared).bru".
+
+**Real finding**: `ProductAttributeUpdateInputDto` accepts `name`,
+`description`, `character_limit`, `include_time`, `options`,
+`manual_sorting`, `sort_ascending`, `restricted`, `attributes`
+(completeness), `formula_str` — but **not `label`**. Sending
+`{"label": "..."}` 422s (`"label: Extra inputs are not permitted"`) even
+though `label` is the field every `GET` response surfaces most
+prominently. Use `name` to rename an attribute instead; renaming via
+`name` does not retroactively update the already-set `label`. Both
+findings are captured with real `example{}` blocks (a rejected attempt
+and a successful one).
 
 ## Open items
 

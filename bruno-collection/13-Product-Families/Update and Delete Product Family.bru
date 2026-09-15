@@ -1,0 +1,284 @@
+meta {
+  name: Update and Delete Product Family
+  type: http
+  seq: 12
+}
+
+delete {
+  url: {{pim_base_url_v3}}/product-families/REPLACE_WITH_FAMILY_ID
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Accept: application/json
+}
+
+docs {
+  Confirmed live 2026-09-15 against the disposable scratch family from
+  "Create Product Family.bru" (id `6aa97212a30ca5945169a21e`) on
+  "David's Dev Account". Like `POST`, `PATCH`/`DELETE` on
+  `/product-families/{identifier}` are **brand-new** capabilities in the
+  2026-09-15 `openapi_pimv3.json` refresh, not previously-undeclared-but-
+  working ones -- Phase 3 confirmed this resource had **zero** write
+  capability at all (quirk #38). Confirmed live: both now genuinely work.
+
+  ## What it does
+  - `PATCH /product-families/{id}` -- `200`. `ProductFamilyUpdateInputDto`
+    accepts **only `name`**, by design: the spec's own schema description
+    explains attribute membership changes are excluded on purpose because
+    they trigger an unbounded, destructive propagation across the
+    family's products (deleting attribute values off variants whose
+    parent now owns them) that must go through a Job, not a synchronous
+    PATCH. Response is the full family shape (adds `created_at`,
+    `created_user_audit`, `modified_user_audit` vs. the create response).
+  - `DELETE /product-families/{id}` -- `204`, then `404` on a follow-up
+    `GET`.
+  - The generic subpath mechanism (`PATCH /product-families/{id}/{path}`,
+    same convention as every other resource -- `{path}` names an
+    Update-DTO field, body is that field's bare new value) also works:
+    `PATCH /product-families/{id}/name` with a raw string body -- `200`,
+    same effect as the root PATCH. **`POST` on that same subpath is
+    explicitly rejected** -- `405 {"errors":[{"name":"MethodNotAllowed",
+    "description":"POST is not allowed on this path."}]}`, even though
+    `openapi_pimv3.json` declares `post` as one of the methods on
+    `/product-families/{identifier}/{path}` -- a real spec-vs-live status
+    code mismatch worth flagging (the spec claims a route exists that
+    405s for every path tried).
+  - Not separately re-tested here: whether `DELETE
+    /product-families/{id}/{path}` has the same "ignores `{path}`, deletes
+    the whole family" hazard already proven on products (quirk #31) and
+    products' relationships (quirk #54, now safely fixed for the new
+    dedicated relationships endpoint -- see `17-Product-Relationships/`).
+    Treat it as equally dangerous until proven otherwise; don't suggest a
+    scoped subpath DELETE for this resource in any docs.
+}
+
+example {
+  name: Update Product Family - Success (PATCH root)
+  description: Real response captured 2026-09-15 against the disposable scratch family, renaming it.
+
+  request: {
+    url: {{pim_base_url_v3}}/product-families/6aa97212a30ca5945169a21e
+    method: patch
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "WC Test Product Family Renamed"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "created": "2026-09-15T16:28:02.086000+00:00",
+            "created_at": "2026-09-15T16:28:02.086000+00:00",
+            "created_user_audit": {
+              "type": "API",
+              "user_email": "TestDH",
+              "user_id": "6a96a370a3fb0431c692820d"
+            },
+            "id": "6aa97212a30ca5945169a21e",
+            "modified": "2026-09-15T16:29:00.361586+00:00",
+            "modified_user_audit": {
+              "type": "API",
+              "user_email": "TestDH",
+              "user_id": "6a96a370a3fb0431c692820d"
+            },
+            "name": "WC Test Product Family Renamed",
+            "total_attributes": 4,
+            "total_models": 1,
+            "total_products": 0
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Update Product Family - Success (PATCH generic subpath /name)
+  description: Real response captured 2026-09-15, using the generic subpath-write mechanism instead of the root PATCH -- same effect.
+
+  request: {
+    url: {{pim_base_url_v3}}/product-families/6aa97212a30ca5945169a21e/name
+    method: patch
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      "WC Test Family Via Subpath"
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "created": "2026-09-15T16:28:02.086000+00:00",
+            "created_at": "2026-09-15T16:28:02.086000+00:00",
+            "created_user_audit": {
+              "type": "API",
+              "user_email": "TestDH",
+              "user_id": "6a96a370a3fb0431c692820d"
+            },
+            "id": "6aa97212a30ca5945169a21e",
+            "modified": "2026-09-15T16:29:26.834999+00:00",
+            "modified_user_audit": {
+              "type": "API",
+              "user_email": "TestDH",
+              "user_id": "6a96a370a3fb0431c692820d"
+            },
+            "name": "WC Test Family Via Subpath",
+            "total_attributes": 4,
+            "total_models": 1,
+            "total_products": 0
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: POST on Generic Subpath - Not Allowed (405, Spec Mismatch)
+  description: Real response captured 2026-09-15 -- the spec declares POST as valid on this path but it 405s for every path tried.
+
+  request: {
+    url: {{pim_base_url_v3}}/product-families/6aa97212a30ca5945169a21e/name
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      "WC Test Family Via Subpath POST"
+    }
+  }
+
+  response: {
+    status: {
+      code: 405
+      text: Method Not Allowed
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "MethodNotAllowed",
+              "description": "POST is not allowed on this path."
+            }
+          ]
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Delete Product Family - Success (204, then 404 on follow-up GET)
+  description: Real response captured 2026-09-15, cleaning up the disposable scratch family used across this session's Product Families testing.
+
+  request: {
+    url: {{pim_base_url_v3}}/product-families/6aa97212a30ca5945169a21e
+    method: delete
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 204
+      text: No Content
+    }
+    headers: {
+    }
+    body: {
+      type: json
+      content: '''
+        (empty body)
+      '''
+    }
+  }
+}
+
+example {
+  name: Get Product Family by ID - After Delete (404)
+  description: Real response captured 2026-09-15, follow-up GET immediately after the DELETE above.
+
+  request: {
+    url: {{pim_base_url_v3}}/product-families/6aa97212a30ca5945169a21e
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 404
+      text: Not Found
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "NotFoundError",
+              "description": "Document with id 6aa97212a30ca5945169a21e not found"
+            }
+          ]
+        }
+      '''
+    }
+  }
+}

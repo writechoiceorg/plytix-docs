@@ -1,5 +1,5 @@
 meta {
-  name: Update and Delete Product Category (Undeclared)
+  name: Update and Delete Product Category
   type: http
   seq: 6
 }
@@ -16,35 +16,146 @@ headers {
 }
 
 docs {
-  Confirmed live 2026-09-07 against "David's Dev Account", against a
-  throwaway category created and destroyed in the same test run (id
-  `6a9f1d2e2b6fd055ffb7c804`, no longer exists -- this file's `http` block
-  uses a placeholder since there's nothing live to point it at).
+  Confirmed live 2026-09-15 against a fresh disposable scratch category
+  ("WC Test Category For Patch Delete", id `6aa98187a30ca5945169a246`,
+  created and destroyed in this same run) on "David's Dev Account" --
+  retested from scratch as part of the 2026-09-15 spec refresh, since the
+  original version of this file (named "... (Undeclared)") had no
+  reachable resource and no `example{}` block. `openapi_pimv3.json`'s
+  2026-09-15 refresh now formally declares `PATCH`/`DELETE` for
+  `/product-categories/{identifier}` -- **historical note**: before this
+  refresh, the spec declared neither method at all, and both were only
+  known to work empirically (quirk #20 in `config/api-testing.config.md`).
 
-  ## Major finding -- resolves `USER_FLOWS.md`'s central open question
-  `openapi_pimv3.json` declares **no** `PATCH`/`DELETE` for
-  `/product-categories/{identifier}` at all. Both work anyway:
-
-  - `PATCH /product-categories/{id}` with `{"name": "..."}` -- **200**,
-    renames the category (confirmed via a follow-up `GET` showing the new
-    name). Same response shape as `POST`'s create-output (partial, missing
-    `account_id`/`created`).
-  - `DELETE /product-categories/{id}` -- **204 No Content**, and a
-    follow-up `GET` on the same id then returns **404**
+  ## What it does
+  - `PATCH /product-categories/{id}` with a partial body (`{"name": "..."}`)
+    -- `200`, renames the category. Response shape matches the create
+    response (missing `account_id`/`parent_id`; unlike `POST`'s response,
+    `order` here comes back as a **string** `"6"` rather than a number --
+    worth flagging as a minor type inconsistency, not previously noted.
+  - `DELETE /product-categories/{id}` -- `204 No Content`, and a
+    follow-up `GET` on the same id then returns `404`
     (`{"errors":[{"name":"NotFoundError","description":"Document with id
-    ... not found"}]}`) -- genuinely deleted, not a soft-delete.
-  - `GET /product-categories/{id}/{path}` on a deleted id -- **404**
-    `{"errors":[{"name":"NotFoundError","description":"Resource not
-    found"}]}` (a different, simpler error shape than the "field not
-    found" 400 used for an invalid `{path}` on a *live* resource).
+    ... not found"}]}`) -- genuinely deleted, not soft-deleted.
 
-  This same undeclared PATCH/DELETE pattern was spot-checked and confirmed
-  working across every other Phase 1 resource this session (asset
-  categories, attribute groups, product attributes, connections, import
-  profiles -- see each folder's own README). Strongly suggests the pattern
-  generalizes to every v3 resource, including ones later phases will test
-  (Pim Product Lists, Asset Lists, Channels, Ecatalogs, etc.) -- confirm
-  per-resource rather than assuming, but this is no longer an open
-  question in the "does undeclared PATCH/DELETE exist at all" sense that
-  `USER_FLOWS.md` raised it as.
+  This same undeclared-then-declared PATCH/DELETE pattern applies across
+  nearly every v3 resource -- see `config/api-testing.config.md` quirk
+  #20 and its 2026-09-15 update note for the running tally.
+}
+
+example {
+  name: Update Product Category - Success (PATCH)
+  description: Real response captured 2026-09-15 against a disposable scratch category on "David's Dev Account".
+
+  request: {
+    url: {{pim_base_url_v3}}/product-categories/6aa98187a30ca5945169a246
+    method: patch
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "WC Test Category For Patch Delete Renamed"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6aa98187a30ca5945169a246",
+            "modified": "2026-09-15T17:34:11.451775+00:00",
+            "n_children": 0,
+            "name": "WC Test Category For Patch Delete Renamed",
+            "order": "6",
+            "path": ["WC Test Category For Patch Delete Renamed"],
+            "slug": "wc-test-category-for-patch-delete-renamed"
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Delete Product Category - Success (204, then 404 on follow-up GET)
+  description: Real response captured 2026-09-15 against the same disposable scratch category, immediately after the PATCH above.
+
+  request: {
+    url: {{pim_base_url_v3}}/product-categories/6aa98187a30ca5945169a246
+    method: delete
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 204
+      text: No Content
+    }
+    headers: {
+    }
+    body: {
+      type: json
+      content: '''
+        (empty body)
+      '''
+    }
+  }
+}
+
+example {
+  name: Get Product Category by ID - After Delete (404)
+  description: Real response captured 2026-09-15, follow-up GET on the same id immediately after the DELETE above, confirming a hard delete.
+
+  request: {
+    url: {{pim_base_url_v3}}/product-categories/6aa98187a30ca5945169a246
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 404
+      text: Not Found
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "NotFoundError",
+              "description": "Document with id 6aa98187a30ca5945169a246 not found"
+            }
+          ]
+        }
+      '''
+    }
+  }
 }

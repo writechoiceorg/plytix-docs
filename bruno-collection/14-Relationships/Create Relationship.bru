@@ -1,0 +1,153 @@
+meta {
+  name: Create Relationship
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{pim_base_url_v3}}/relationships
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {
+    "name": "WC Test Relationship"
+  }
+}
+
+assert {
+  res.status: eq 201
+  res.body.data.name: eq WC Test Relationship
+}
+
+docs {
+  Confirmed live 2026-09-15 on "David's Dev Account". **Major finding**:
+  Relationships (relationship *types*, e.g. "Bundles"/"Cross-sell") were
+  confirmed **read-only** in Phase 3 (quirk #38 -- "genuinely read-only,
+  `API V3.md` says types are configured in the web app dashboard, not
+  this API"). The 2026-09-15 `openapi_pimv3.json` refresh adds `POST
+  /relationships` (and `PATCH`/`DELETE /relationships/{identifier}`) for
+  the first time -- a **new** capability. Confirmed live: it genuinely
+  works now, contradicting `API V3.md`'s dashboard-only claim.
+
+  ## What it does
+  `POST /relationships` with just `{"name": "..."}` -- `201 Created`.
+  `RelationshipCreateInputDto` accepts only `name` -- `label` is
+  auto-derived (slugified from the name, e.g. "WC Test Relationship" ->
+  `wc_test_relationship`) and `status` defaults to `"ACTIVE"`; neither is
+  settable on create.
+
+  ## Not idempotent to re-run
+  Relationship names are unique per account, enforced with **`409`**
+  (`AlreadyExists` family, same side of the split as products/attributes/
+  channels/families per quirk #25a/#33/#45a): `{"errors":[{"name":
+  "AlreadyExists","description":"A Relationship with same name already
+  exists"}]}`.
+
+  ## Not kept as a fixture
+  This relationship was renamed and deleted in the same session (see
+  "Update and Delete Relationship.bru"); a second one
+  ("WC Test Product Relationship") was created and used to test the new
+  product-to-product linking endpoints, then also cleaned up -- see
+  `17-Product-Relationships/`.
+}
+
+example {
+  name: Create Relationship - Success
+  description: Real response captured 2026-09-15 on "David's Dev Account" -- this relationship was renamed and deleted later in the same session, not kept as a fixture.
+
+  request: {
+    url: {{pim_base_url_v3}}/relationships
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "WC Test Relationship"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 201
+      text: Created
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6aa97b0ca30ca5945169a23c",
+            "account_id": "6a38f5a5b22478f30bfd755c",
+            "name": "WC Test Relationship",
+            "label": "wc_test_relationship",
+            "status": "ACTIVE",
+            "created": "2026-09-15T17:06:20.283000",
+            "modified": "2026-09-15T17:06:20.284000"
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Create Relationship - Duplicate Name (409)
+  description: Real response captured 2026-09-15, re-creating a relationship with a name that already existed in this account at the time.
+
+  request: {
+    url: {{pim_base_url_v3}}/relationships
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "WC Test Relationship"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 409
+      text: Conflict
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "AlreadyExists",
+              "description": "A Relationship with same name already exists"
+            }
+          ]
+        }
+      '''
+    }
+  }
+}
