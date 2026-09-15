@@ -1,0 +1,172 @@
+meta {
+  name: Update and Delete Product List
+  type: http
+  seq: 6
+}
+
+delete {
+  url: {{pim_base_url_v3}}/pim-product-lists/REPLACE_WITH_LIST_ID
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Accept: application/json
+}
+
+docs {
+  Confirmed live 2026-09-15 against a fresh disposable scratch static
+  list ("WC Test List For Patch Delete", id `6aa9827ea30ca5945169a251`,
+  created and destroyed in this same run) on "David's Dev Account" --
+  retested from scratch since the original version of this file (named
+  "... (Undeclared)") pointed at a throwaway id from 2026-09-08 with no
+  `example{}`. `openapi_pimv3.json`'s 2026-09-15 refresh now formally
+  declares `PATCH`/`DELETE` for `/pim-product-lists/{identifier}`
+  (previously undeclared but working, quirk #20/#35).
+
+  ## What it does
+  - `PATCH /pim-product-lists/{id}` with `{"name": "..."}` -- `200`,
+    renames the list. Response is the full list shape, including the
+    auto-generated `query` for a `Static` list (quirk #34 -- unchanged by
+    this rename).
+  - `DELETE /pim-product-lists/{id}` -- `204`, then `404` on a follow-up
+    `GET`.
+}
+
+example {
+  name: Update Product List - Success (PATCH)
+  description: Real response captured 2026-09-15 against a disposable scratch static product list on "David's Dev Account".
+
+  request: {
+    url: {{pim_base_url_v3}}/pim-product-lists/6aa9827ea30ca5945169a251
+    method: patch
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "WC Test List Renamed"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "created_user_audit": {
+              "type": "API",
+              "user_email": "TestDH",
+              "user_id": "6a96a370a3fb0431c692820d"
+            },
+            "id": "6aa9827ea30ca5945169a251",
+            "modified": "2026-09-15T17:38:14.953731+00:00",
+            "modified_user_audit": {
+              "type": "API",
+              "user_email": "TestDH",
+              "user_id": "6a96a370a3fb0431c692820d"
+            },
+            "name": "WC Test List Renamed",
+            "relationship_filters": [],
+            "type": "Static",
+            "query": [
+              [
+                {
+                  "field": "static_lists",
+                  "field_type": "PimProductAttribute.ObjectIdAttribute",
+                  "operator": "in",
+                  "value": ["6aa9827ea30ca5945169a251"]
+                }
+              ]
+            ],
+            "created": "2026-09-15T17:38:06.457000+00:00",
+            "account_id": "6a38f5a5b22478f30bfd755c"
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Delete Product List - Success (204, then 404 on follow-up GET)
+  description: Real response captured 2026-09-15 against the same disposable scratch list, immediately after the PATCH above.
+
+  request: {
+    url: {{pim_base_url_v3}}/pim-product-lists/6aa9827ea30ca5945169a251
+    method: delete
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 204
+      text: No Content
+    }
+    headers: {
+    }
+    body: {
+      type: json
+      content: '''
+        (empty body)
+      '''
+    }
+  }
+}
+
+example {
+  name: Get Product List by ID - After Delete (404)
+  description: Real response captured 2026-09-15, follow-up GET immediately after the DELETE above.
+
+  request: {
+    url: {{pim_base_url_v3}}/pim-product-lists/6aa9827ea30ca5945169a251
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 404
+      text: Not Found
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "NotFoundError",
+              "description": "Document with id 6aa9827ea30ca5945169a251 not found"
+            }
+          ]
+        }
+      '''
+    }
+  }
+}

@@ -13,7 +13,7 @@ Covers `GET`/`POST /api/v3/channels`, `GET .../{identifier}`, and
 | Create Channel - Full Featured | POST | `product_list_id` + full rebuild schedule | 201; fixture kept |
 | Get Channel by ID | GET | Fetch by Mongo ID | Richest subpath field list in this project |
 | Create Channel - Missing Fields (422) | POST | Validation trigger | Two-entry `errors` array, same as Phase 3 |
-| Update and Delete Channel (Undeclared) | PATCH/DELETE | Not in spec | Both work — 11th resource confirmed |
+| Update and Delete Channel | PATCH/DELETE | Rename + delete | Both work — now formally declared (2026-09-15) |
 
 ## Behaviors that differ from the spec
 
@@ -51,6 +51,17 @@ Covers `GET`/`POST /api/v3/channels`, `GET .../{identifier}`, and
   `active: true` alone doesn't trigger a build. See quirk #50 and
   "Update Channel Products Subpath - Not Supported (Flow 6).bru". All 8
   requests pass on a first run.
+
+## Update — 2026-09-15 (spec refresh: 51→63 paths)
+
+`openapi_pimv3.json` now formally declares both `PATCH` and `DELETE`
+(previously undeclared but working, quirks #20/#45). Retested fresh
+against a new disposable scratch channel, renamed the file to drop
+"(Undeclared)", and captured real `example{}` blocks. The `PATCH`
+response also surfaced two fields not previously spot-checked in this
+project's create-response documentation: `is_fmt` and the
+`rebuild_once`/`rebuild_once_at`/`rebuild_once_timezone` trio (alongside
+the already-documented `rebuild_periodically` family, quirk #40).
 
 ## Open items
 

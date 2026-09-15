@@ -44,7 +44,22 @@ anything.
   one real one is a read-only fixture. No new live testing possible here
   until the feature is enabled.
 
+## Update — 2026-09-15 (spec refresh: 51→63 paths)
+
+`openapi_pimv3.json` now formally declares `PATCH`/`DELETE` for
+`/ecatalogs/{identifier}` (previously read-only in the spec). **No live
+testing was attempted for this update**, per this session's scope: `POST`
+still fails with the account-level feature-not-enabled `422`
+(status-gating rule #3), so no disposable ecatalog can be created to
+`PATCH`/`DELETE`, and the one real pre-existing ecatalog ("Plytix Brand
+Portal", `6a38f615c3d65a5f868b1a41`) must never be mutated per this
+project's ground rules against touching real kept fixtures. These two new
+methods remain formally declared but **entirely untestable in this
+account**, for the same underlying reason creation is (see status-gating
+#3). No new `.bru` files were added for `PATCH`/`DELETE` as a result.
+
 ## Open items
 
 - [ ] Ask Plytix: can Ecatalogs (and PDF Catalogs) be enabled on this Dev
-      account? (Config open question #16.)
+      account? (Config open question #16.) This now also covers testing
+      the newly-declared `PATCH`/`DELETE`.

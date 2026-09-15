@@ -1,0 +1,178 @@
+meta {
+  name: Update and Delete Asset List
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{pim_base_url_v3}}/asset-lists/REPLACE_WITH_LIST_ID
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Accept: application/json
+}
+
+docs {
+  Confirmed live 2026-09-15 against a fresh disposable scratch Smart
+  asset list ("WC Test Asset List For Patch Delete", id
+  `6aa982afa30ca5945169a252`, created and destroyed in this same run) on
+  "David's Dev Account" -- retested from scratch since the original
+  version of this file (named "... (Undeclared)") pointed at a throwaway
+  id from 2026-09-08 with no `example{}`. `openapi_pimv3.json`'s
+  2026-09-15 refresh now formally declares `PATCH`/`DELETE` for
+  `/asset-lists/{identifier}` (previously undeclared but working, quirk
+  #20/#35).
+
+  ## What it does
+  - `PATCH /asset-lists/{id}` with `{"name": "..."}` -- `200`, renames the
+    list; `query` is unchanged.
+  - `DELETE /asset-lists/{id}` -- `204`, then `404` on a follow-up `GET`.
+
+  ## Aside, discovered while building the scratch fixture
+  The list-`query` filter operator vocabulary here is `like`/`!like` etc.
+  (see `query.0.0.operator` in the 422 this file's create attempt first
+  hit), **not** the `icontains` search-string operator confirmed in
+  quirk #11/#53 for `GET /products` query params -- these are two
+  different filter DSLs (one for a stored Smart-list `query` body, one
+  for the live `_fields`/filter query-string on search endpoints). Don't
+  assume the same operator vocabulary applies to both.
+}
+
+example {
+  name: Update Asset List - Success (PATCH)
+  description: Real response captured 2026-09-15 against a disposable scratch Smart asset list on "David's Dev Account".
+
+  request: {
+    url: {{pim_base_url_v3}}/asset-lists/6aa982afa30ca5945169a252
+    method: patch
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "WC Test Asset List Renamed"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "created_user_audit": {
+              "type": "API",
+              "user_email": "TestDH",
+              "user_id": "6a96a370a3fb0431c692820d"
+            },
+            "id": "6aa982afa30ca5945169a252",
+            "modified": "2026-09-15T17:39:06.858288+00:00",
+            "modified_user_audit": {
+              "type": "API",
+              "user_email": "TestDH",
+              "user_id": "6a96a370a3fb0431c692820d"
+            },
+            "name": "WC Test Asset List Renamed",
+            "relationship_filters": [],
+            "type": "Smart",
+            "query": [
+              [
+                {
+                  "field": "filename",
+                  "operator": "like",
+                  "value": "wc_test"
+                }
+              ]
+            ],
+            "created": "2026-09-15T17:38:55.346000+00:00",
+            "account_id": "6a38f5a5b22478f30bfd755c"
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Delete Asset List - Success (204, then 404 on follow-up GET)
+  description: Real response captured 2026-09-15 against the same disposable scratch asset list, immediately after the PATCH above.
+
+  request: {
+    url: {{pim_base_url_v3}}/asset-lists/6aa982afa30ca5945169a252
+    method: delete
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 204
+      text: No Content
+    }
+    headers: {
+    }
+    body: {
+      type: json
+      content: '''
+        (empty body)
+      '''
+    }
+  }
+}
+
+example {
+  name: Get Asset List by ID - After Delete (404)
+  description: Real response captured 2026-09-15, follow-up GET immediately after the DELETE above.
+
+  request: {
+    url: {{pim_base_url_v3}}/asset-lists/6aa982afa30ca5945169a252
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 404
+      text: Not Found
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "NotFoundError",
+              "description": "Document with id 6aa982afa30ca5945169a252 not found"
+            }
+          ]
+        }
+      '''
+    }
+  }
+}

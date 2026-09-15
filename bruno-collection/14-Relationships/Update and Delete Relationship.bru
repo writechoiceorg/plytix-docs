@@ -1,0 +1,162 @@
+meta {
+  name: Update and Delete Relationship
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{pim_base_url_v3}}/relationships/REPLACE_WITH_RELATIONSHIP_ID
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Accept: application/json
+}
+
+docs {
+  Confirmed live 2026-09-15 against the disposable scratch relationship
+  from "Create Relationship.bru" (id `6aa97b0ca30ca5945169a23c`) on
+  "David's Dev Account". Brand-new capability in the 2026-09-15
+  `openapi_pimv3.json` refresh -- this resource was confirmed fully
+  read-only in Phase 3 (quirk #38).
+
+  ## What it does
+  - `PATCH /relationships/{id}` -- `200`. `RelationshipUpdateInputDto`
+    accepts only `name`, by design (per the spec's own schema
+    description): `label` is derived/dump-only and non-writable in v1,
+    and `status` is managed by the delete flow, not by callers. Confirmed
+    live: renaming via `name` does **not** change the already-derived
+    `label` (it stays `wc_test_relationship` even after the name changes
+    to "WC Test Relationship Renamed") -- `label` is set once at creation
+    and frozen thereafter.
+  - `DELETE /relationships/{id}` -- `204`, then `404` on a follow-up
+    `GET` (`{"errors":[{"name":"NotFoundError","description":"Document
+    with id ... not found"}]}`). Note the spec's own `RelationshipUpdateInputDto`
+    description says "status is managed by the delete flow" -- this
+    phrasing suggests delete may be implemented internally as a status
+    transition (e.g. to an inactive/archived status) rather than a hard
+    document delete, but the externally-observable behavior via this API
+    is indistinguishable from a hard delete: the id 404s exactly like
+    every other resource's `DELETE` in this project. Worth a note for
+    Plytix conversations but not a doc-affecting distinction from the
+    API consumer's point of view.
+}
+
+example {
+  name: Update Relationship - Success (PATCH)
+  description: Real response captured 2026-09-15 against the disposable scratch relationship, renaming it.
+
+  request: {
+    url: {{pim_base_url_v3}}/relationships/6aa97b0ca30ca5945169a23c
+    method: patch
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "WC Test Relationship Renamed"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6aa97b0ca30ca5945169a23c",
+            "account_id": "6a38f5a5b22478f30bfd755c",
+            "name": "WC Test Relationship Renamed",
+            "label": "wc_test_relationship",
+            "status": "ACTIVE",
+            "created": "2026-09-15T17:06:20.283000",
+            "modified": "2026-09-15T17:06:33.480000"
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Delete Relationship - Success (204, then 404 on follow-up GET)
+  description: Real response captured 2026-09-15 against the same disposable scratch relationship, immediately after the PATCH above.
+
+  request: {
+    url: {{pim_base_url_v3}}/relationships/6aa97b0ca30ca5945169a23c
+    method: delete
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 204
+      text: No Content
+    }
+    headers: {
+    }
+    body: {
+      type: json
+      content: '''
+        (empty body)
+      '''
+    }
+  }
+}
+
+example {
+  name: Get Relationship by ID - After Delete (404)
+  description: Real response captured 2026-09-15, follow-up GET immediately after the DELETE above.
+
+  request: {
+    url: {{pim_base_url_v3}}/relationships/6aa97b0ca30ca5945169a23c
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 404
+      text: Not Found
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "NotFoundError",
+              "description": "Document with id 6aa97b0ca30ca5945169a23c not found"
+            }
+          ]
+        }
+      '''
+    }
+  }
+}

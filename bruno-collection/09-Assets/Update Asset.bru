@@ -44,4 +44,82 @@ docs {
   the fully expanded object -- same shallow-vs-expanded split seen
   elsewhere in this API (e.g. products' `product_relationships` field vs.
   its `/relationships` subpath).
+
+  **Update (2026-09-15)**: `PATCH` is now formally declared in
+  `openapi_pimv3.json`'s refreshed spec (it was already declared before
+  this refresh too, unlike most of this session's other resources -- see
+  quirk list). This file previously had no `example{}` block; the
+  `example` below was captured fresh against a disposable scratch asset
+  (not the kept fixture, to avoid mutating it further) confirming the
+  same `alt_text`/`filename` PATCH behavior described above.
+}
+
+example {
+  name: Update Asset - Success (alt_text/filename)
+  description: Real response captured 2026-09-15 against a disposable scratch asset on "David's Dev Account" (not the kept fixture).
+
+  request: {
+    url: {{pim_base_url_v3}}/assets/6aa98267a30ca5945169a24f
+    method: patch
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "alt_text": "WC test asset alt text",
+        "filename": "wc_test_patch_delete_asset_renamed.jpg"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "alt_text": "WC test asset alt text",
+            "assigned": false,
+            "categories": [],
+            "content_type": "image/jpeg",
+            "created": "2026-09-15T17:37:43.394000+00:00",
+            "created_user_audit": {
+              "type": "API",
+              "user_email": "TestDH",
+              "user_id": "6a96a370a3fb0431c692820d"
+            },
+            "extension": "jpg",
+            "file_modified": "2026-09-15",
+            "file_size": 9959,
+            "file_type": "IMAGES",
+            "filename": "wc_test_patch_delete_asset_renamed.jpg",
+            "has_custom_thumb": false,
+            "id": "6aa98267a30ca5945169a24f",
+            "modified": "2026-09-15T17:37:51.253104+00:00",
+            "modified_user_audit": {
+              "type": "API",
+              "user_email": "TestDH",
+              "user_id": "6a96a370a3fb0431c692820d"
+            },
+            "n_catalogs": 0,
+            "n_products": 0,
+            "status": "ACTIVE",
+            "thumbnail": "https://files.dev.plytix.com/api/v1.1/thumb/public_files/pim/assets/a5/f5/38/6a/6a38f5a5b22478f30bfd755c/images/67/82/a9/6a/6aa98267a30ca5945169a24f/wc_test_patch_delete_asset_renamed.jpg",
+            "url": "https://files.dev.plytix.com/api/v1.1/file/public_files/pim/assets/a5/f5/38/6a/6a38f5a5b22478f30bfd755c/images/67/82/a9/6a/6aa98267a30ca5945169a24f/wc_test_patch_delete_asset_renamed.jpg"
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
 }

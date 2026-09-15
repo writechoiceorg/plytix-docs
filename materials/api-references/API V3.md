@@ -28,9 +28,9 @@
 
 [General](#general)
 
-[PUT](#put)
-
 [PATCH](#patch)
+
+[DELETE](#delete)
 
 [**ANEXO**](#anexo)
 
@@ -55,27 +55,19 @@
 | **Containing a \[** |  |  |  |  |  |
 | **Containing a |** |  |  |  |  |  |
 
-| Grouping Operators |  |  |
-| ----- | ----- | ----- |
-| Logic | V1/2 | V3 |
-| \<filter1\> AND \<filter2\> | "filters": {   \[\[\<filter1\>, \<filter2\>\]\] } | **\<filter1\>&\<filter2\>** |
-|  |  | \_top\_logic=and&\<filter1\>&\<filter2\> |
-|  |  | \_top\_logic=and&\[0\]\<filter1\>&\[0\]\<filter2\> |
-|  |  | \_and\[0\]\<filter1\>&\_and\[0\]\<filter2\> |
-| \<filter1\> OR \<filter2\> | "filters": {   \[\<filter1\>, \<filter2\>\] } | \_top\_logic=or&\<filter1\>&\<filter2\> |
-|  |  | \_top\_logic=or&\[\#\]\<filter1\>&\[\#\]\<filter2\> |
-|  |  | **\_or\[\#\]\<filter1\>&\_or\[\#\]\<filter2\>** |
-| (\<filter1\> OR \<filter2\>)AND(\<filter3\> OR \<filter4\>) | Not possible | \[0\]\[logic\]=or&\[1\]\[logic\]=or& \[0\]\<filter1\>&\[0\]\<filter2\>& \[2\]\<filter3\>&\[0\]\<filter4\> |
-|  |  | **\_or\[0\]\<filter1\>&\_or\[0\]\<filter2\>& \_or\[1\]\<filter3\>&\_or\[1\]\<filter4\>** |
-|  |  | \_and\[0\]\_or\[0\]\<filter1\>&\_and\[0\]\_or\[0\]\<filter2\>& \_and\[0\]\_or\[1\]\<filter3\>&\_and\[0\]\_or\[1\]\<filter4\> |
-| (\<filter1\> AND \<filter2\>)OR(\<filter3\> AND \<filter4\>) | "filters": {   \[\[\<filter1\>, \<filter2\>\],    \[\<filter3\>, \<filter4\>\]\] } | \_top\_logic=or& \[0\]\[logic\]=and&\[1\]\[logic\]=and& \[0\]\<filter1\>&\[0\]\<filter2\>& \[2\]\<filter3\>&\[0\]\<filter4\> |
-|  |  | \_top\_logic=or&\[0\] \_and\[0\]\<filter1\>&\_and\[0\]\<filter2\>& \_and\[1\]\<filter3\>&\_and\[1\]\<filter4\> |
-|  |  | **\_or\[0\]\_and\[0\]\<filter1\>&\_or\[0\]\_and\[0\]\<filter2\>& \_or\[0\]\_and\[1\]\<filter3\>&\_or\[0\]\_and\[1\]\<filter4\>** |
-| NOT (\<filter1\> \<bool\> \<filter2\>) | Not possible | \_not\[0\]\<bool\>\[0\]\<filter1\>&\_not\[0\]\<bool\>\[0\]\<filter2\> |
-|  |  | **\<\!bool\>\[0\]\<filter1\>&\<\!bool\>\[0\]\<filter2\>eg: \_\!or\[0\]\<filter1\>&\_\!or\[0\]\<filter2\>** |
-| SELECT     …FROM     t1 LEFT JOIN     t2 ON         t1.t2\_fk \= t2.id AND         \<t2\_filter\>WHERE     t2.id IS NULL  AND EXISTS (SELECT \* FROM T2 WHERE ) | Not actual generic equivalent, although somewhat present in the relationship\_filters | **\_\!exists\[\#\]\<t2\_filter\> Por public APIs, this must be heavily restricted. For the public PIM API V3.0, it will only be allowed for relationships.id or relationships.label and without being grouped with \_and or \_or** |
-| SELECT     …FROM     t1 LEFT JOIN     t2 ON         t1.id \= t2.t1\_fk AND         \<t2\_filter\>WHERE     t2.id IS NULL |  |  |
-|  | (3 level nesting) Not possible | Allowed, although it is advisable to study where to limit the depth for each API |
+| Grouping Operators |  |
+| ----- | ----- |
+| Logic | V3 |
+| \<filter1\> AND \<filter2\> | **\<filter1\>&\<filter2\>** |
+|  | \_and\[0\]\<filter1\>&\_and\[0\]\<filter2\> |
+| \<filter1\> OR \<filter2\> | **\_or\[\#\]\<filter1\>&\_or\[\#\]\<filter2\>** |
+| (\<filter1\> OR \<filter2\>)AND(\<filter3\> OR \<filter4\>) | **\_or\[0\]\<filter1\>&\_or\[0\]\<filter2\>& \_or\[1\]\<filter3\>&\_or\[1\]\<filter4\>** |
+|  | \_and\[0\]\_or\[0\]\<filter1\>&\_and\[0\]\_or\[0\]\<filter2\>& \_and\[0\]\_or\[1\]\<filter3\>&\_and\[0\]\_or\[1\]\<filter4\> |
+| (\<filter1\> AND \<filter2\>)OR(\<filter3\> AND \<filter4\>) | **\_or\[0\]\_and\[0\]\<filter1\>&\_or\[0\]\_and\[0\]\<filter2\>& \_or\[0\]\_and\[1\]\<filter3\>&\_or\[0\]\_and\[1\]\<filter4\>** |
+| NOT (\<filter1\> \<bool\> \<filter2\>) | **\<\!bool\>\[0\]\<filter1\>&\<\!bool\>\[0\]\<filter2\>eg: \_\!or\[0\]\<filter1\>&\_\!or\[0\]\<filter2\>** |
+| SELECT FROM t1 LEFT JOIN t2 ON t1.t2\_fk \= t2.id AND \<t2\_filter\> WHERE t2.id IS NULL AND EXISTS (SELECT \* FROM T2 WHERE ) | **\_\!exists\[\#\]\<t2\_filter\> Por public APIs, this must be heavily restricted. For the public PIM API V3.0, it will only be allowed for relationships.id or relationships.label and without being grouped with \_and or \_or** |
+| SELECT FROM t1 LEFT JOIN t2 ON t1.id \= t2.t1\_fk AND \<t2\_filter\> WHERE t2.id IS NULL |  |
+| (3+ level nesting) | Allowed, although it is advisable to study where to limit the depth for each API |
 
 | Functions |  |  |  |  |  |
 | :---- | ----- | ----- | :---- | ----- | ----- |
@@ -85,62 +77,34 @@
 | Full days passed from the field’s date to the current date. (Since the date fields are considered to be UTC, the current date is the UTC one too, unless a tz database code) |  |  | **\<field\>\[days\_passed:\<\*tz\_database\_name\>\]\[\<filter\>\]**  Eg. creation\_date\[days\_passed\]\[gt\]=7  (UTC is inferred) Eg. last\_update\[days\_passed:Europe/Madrid\]\[lt\]=1 |  |  |
 | Custom filters (can be injected in each API) |  |  | Eg. .\[last\_updated\_by\]\[eq\]=admin Eg. related\_products.\[last\_updated\_by\]\[eq\]=admin Eg. country\_code\[continent\]=africa |  |  |
 
-| Filters |  |  |
-| ----- | ----- | ----- |
-| Filters only apply to fields |  |  |
-|  | Current | Possible Alternative |
-| Field \= ‘value’ | {"operator": "eq", "field": "field",  "value": "value"} | **field=value(alt) field\[eq\]=value** |
-| (Universal Group \- equality filter) field \<\> ‘value’ OR field IS NULL OR NOT EXISTS(field) | {"operator": "\!eq", "field": "field",  "value": "value"} | field\[not\]=value |
-|  |  | \_not\[0\]field=value |
-|  |  | field\[\!\!eq\]=value |
-|  |  | field\[\~eq\]=value |
-|  |  | (If the field is undefinable) \_or\[\#\]field\[\!eq\]=value&\_or\[\#\]field\[\!exists\] (If the field is nullable) \_or\[\#\]field\[\!eq\]=value&\_or\[\#\]field\[\!null\] (If the field is undefinable and nullable) \_or\[\#\]field\[\!eq\]=value&\_or\[\#\]field\[\!exists\]&\_or\[\#\]field\[\!null\] |
-| (“not equal” among the elements with value) field \<\> ‘value’ | \[\[   {     "operator": "\!eq",    "field": "field",     "value": "value"   }, {     "operator": "exists",    "field": "field",     "value": null   } \]\] | **field\[\!eq\]=value** |
-|  |  | field\[\!\!eq\]=value |
-|  |  | field\[\~eq\]=value |
-|  |  | (If the field is undefinable) field\[\!eq\]=value\&field\[exists\] (If the field is nullable) field\[\!eq\]=value\&field\[\!null\] (If the field is undefinable and nullable) field\[\!eq\]=value\&field\[exists\]\&field\[\!null\] |
-| Field is not null | Not possible | **field\[\!null\]** |
-| Field is null | Not possible | **field\[null\]** |
-| Field \= ‘’ OR Field \= \[\] | Not possible | field\[len\]=0 |
-| NOT (Field \= ‘’ OR Field \= \[\]) AND EXISTS(Field) |  | field\[len\]\[gt\]=0 |
-| IS UNDEFINED(field not exists) | {"operator": "\!exists", "field": "field",  "value": null} | **field\[\!exists\]** |
-| IS NOT UNDEFINED | {"operator": "exists", "field": "field",  "value": null} | **field\[exists\]** |
-| Field like ‘%value%’ (IGNORE CASE) | {"operator": "like", "field": "field",  "value": value} | **field\[icontains\]=value** |
-|  |  | **field\[contains:ignorecase\]=value** |
-| Field like ‘%value%’ (CASE SENSITIVE) | Not possible | **field\[contains\]=value** |
-| With ARRAYs:ARRAY\[field\] && ARRAY\[\<value1\>, \<value2\>\] With jsonb arrays: '\["a", "b", "c"\]'::jsonb ?& array\['a', 'b'\] | {"operator": "in", "field": "\<multiselect\_field\>",  "value": \["value1", "value2"\]} | **field\[intersects\]=value field\[\!intersects\]=value** |
-| Field in (‘value1’, ‘value2’) | {"operator": "in", "field": "field",  "value": \["value1", "value2"\]} | **field\[in\]=value1\&field\[in\]=value2** |
-|  |  | \_or\[\#\]field=value1&\_or\[\#\]field=value2 |
-| Field not in (‘value1’, ‘value2’) OR field IS NULL  | {"operator": "\!in", "field": "field",  "value": \["value1", "value2"\]} | (If the field is undefinable) \_or\[\#\]field\[\!in\]=value1&\_or\[\#\]field\[\!in\]=value2&\_or\[\#\]field\[\!exists\] (If the field is nullable) \_or\[\#\]field\[\!in\]=value1&\_or\[\#\]field\[\!in\]=value2&\_or\[\#\]field\[\!null\] (If the field is undefinable and nullable) \_or\[\#\]field\[\!in\]=value1&\_or\[\#\]field\[\!in\]=value2&\_or\[\#\]field\[\!exists\]&\_or\[\#\]field\[\!null\] |
-|  |  | field\[\!in\]=value1\&field\[\!in\]=value2 |
-| Field not in (‘value1’, ‘value2’) | \[\[   {     "operator": "\!in",    "field": "field",     "value": \["value1", "value2"\]},   {     "operator": "exists",    "field": "field",     "value": null   } \]\] | **field\[\!in\]=value1\&field\[\!in\]=value2**   |
-| Field \> \# | {"operator": "gt", "field": "field",  "value": \#} | **field\[gt\]=\#** |
-| Field \>= \# | {"operator": "gte", "field": "field",  "value": \#} | **field\[gte\]=\#** |
-| Field \< \# | {"operator": "lt", "field": "field",  "value": \#} | **field\[lt\]=\#** |
-| Field \<= \# | {"operator": "lte", "field": "field",  "value": \#} | **field\[lte\]=\#** |
-| Generic Length Comparison LEN(field) \<\# comparison\> \= value |  | \<field\>\[length\]\[\<eq|\!eq|lt|lte|gt|gte\>\]=\<value\> |
-| LEN(field) \= \# |  | field\[len\_eq\]=\# |
-| NOT(LEN(field) \= \#) |  | field\[\!len\_eq\]=\# |
-| EXISTS(field) AND field IS NOT NULL AND LEN(field) \<\> \# |  | \_or\[0\]field\[len\_lt\]=\#&\_or\[0\]field\[len\_gt\]=\# |
-|  |  | field\[exists\]\&field\[\!len\_eq\]=\# |
-| LEN(field) \> \# |  | field\[len\_gt\]=\# |
-| LEN(field) \>= \# |  | field\[len\_gte\]=\# |
-| LEN(field) \< \# |  | field\[len\_lt\]=\# |
-| LEN(field) \<= \# |  | field\[len\_lte\]=\# |
-| Field1 like ‘%value%’ or Field2 like ‘%value%’ (IGNORE CASE) | {"operator": "text\_search", "field": \["field1", "field2"\],  "value": "value"} | \_or\[\#\]field1\[icontains\]=value& \_or\[\#\]field2\[icontains\]=value |
-| field BETWEEN \#1 AND \#2 | {"operator": "bte", "field": "field",  "value": \[\#1, \#2\]} | field\[from\]=\#1\&field\[to\]=\#2 |
-|  |  | field\[between\_from\]=\#1\&field\[between\_to\]=\#2 |
-|  |  | field\[between\]=\#1\&field\[between\]=\#2 |
-|  |  | field\[gte\]=\#1\&field\[lte\]=\#2 |
-| Generic Days passed Comparison UTCDATE(Field) \<\# comparison\> (UTCDATE(NOW(timezone)) \- DAYS(\#)) | Not PossibleOnly allowed for “\<=” in UTC:{"operator": "last\_days", "field": "field",  "value": \#} | \<field\>\[\<days\_passed\_function\>\]\[\<eq|\!eq|lt|lte|gt|gte\>\]=\<value\> |
-| UTCDATE(Field) \= (UTCDATE(NOW(timezone)) \- DAYS(\#)) | Not Possible | field\[days\_past\_eq\]=\#-\<tz\> (alt) field\[days\_past\]=\#-\<tz\> (Note: field\[days\_past\]=\# \== field\[days\_past\]=\#-UTC) |
-|  |  | field\[days\_passed:\<tz\>\]\[eq\]=\# (alt) field\[days\_passed:\<tz\>\]=\#(Note: field\[days\_passed\]=\# \== field\[days\_passed:UTC\]=\#) |
-| field IS NULL OR UTCDATE(field) \<\> (UTCDATE(NOW(timezone)) \- DAYS(\#)) | Not Possible | field\[\!days\_past\_eq\]=\#-\<tz\> |
-| UTCDATE(Field) \< (UTCDATE(NOW(timezone)) \- DAYS(\#)) | Not Possible | field\[\!days\_past\_lt\]=\#-\<tz\> |
-| UTCDATE(Field) \<= (UTCDATE(NOW(timezone)) \- DAYS(\#)) | Only possible for UTC {"operator": "last\_days", "field": "field",  "value": \#} | field\[since\_x\_days\_ago\]=\# |
-|  |  | field\[days\_past\_lte\]=\#-\<tz\> |
-| UTCDATE(Field) \> (UTCDATE(NOW(timezone)) \- DAYS(\#)) | Not Possible | field\[\!days\_past\_gt\]=7 |
-| UTCDATE(Field) \>= (UTCDATE(NOW(timezone)) \- DAYS(\#)) | Not Possible | field\[days\_past\_gte\]=\# |
+| Filters |  |
+| ----- | ----- |
+| Filters only apply to fields |  |
+|  | Approved format |
+| Field \= 'value' | **field=value** (alt) field\[eq\]=value |
+| (Universal Group \- equality filter) field \<\> 'value' OR field IS NULL OR NOT EXISTS(field) | (If the field is undefinable) \_or\[\#\]field\[\!eq\]=value&\_or\[\#\]field\[\!exists\] (If the field is nullable) \_or\[\#\]field\[\!eq\]=value&\_or\[\#\]field\[\!null\] (If the field is undefinable and nullable) \_or\[\#\]field\[\!eq\]=value&\_or\[\#\]field\[\!exists\]&\_or\[\#\]field\[\!null\] |
+| (“not equal” among the elements with value) field \<\> 'value' | **field\[\!eq\]=value** (If the field is undefinable) field\[\!eq\]=value\&field\[exists\] (If the field is nullable) field\[\!eq\]=value\&field\[\!null\] (If the field is undefinable and nullable) field\[\!eq\]=value\&field\[exists\]\&field\[\!null\] |
+| Field is not null | **field\[\!null\]** |
+| Field is null | **field\[null\]** |
+| Field \= '' OR Field \= \[\] | field\[len\]=0 |
+| NOT (Field \= '' OR Field \= \[\]) AND EXISTS(Field) | field\[len\]\[gt\]=0 |
+| IS UNDEFINED(field not exists) | **field\[\!exists\]** |
+| IS NOT UNDEFINED | **field\[exists\]** |
+| Field like ‘%value%’ (IGNORE CASE) | **field\[contains:ignorecase\]=value** |
+| Field like ‘%value%’ (CASE SENSITIVE) | **field\[contains\]=value** |
+| With ARRAYs:ARRAY\[field\] && ARRAY\[\<value1\>, \<value2\>\] With jsonb arrays: '\["a", "b", "c"\]'::jsonb ?& array\['a', 'b'\] | **field\[intersects\]=value field\[\!intersects\]=value** |
+| Field in (‘value1’, ‘value2’) | **field\[in\]=value1\&field\[in\]=value2** |
+|  | \_or\[\#\]field=value1&\_or\[\#\]field=value2 |
+| Field not in (‘value1’, ‘value2’) OR field IS NULL | (If the field is undefinable) \_or\[\#\]field\[\!in\]=value1&\_or\[\#\]field\[\!in\]=value2&\_or\[\#\]field\[\!exists\] (If the field is nullable) \_or\[\#\]field\[\!in\]=value1&\_or\[\#\]field\[\!in\]=value2&\_or\[\#\]field\[\!null\] (If the field is undefinable and nullable) \_or\[\#\]field\[\!in\]=value1&\_or\[\#\]field\[\!in\]=value2&\_or\[\#\]field\[\!exists\]&\_or\[\#\]field\[\!null\] |
+| Field not in (‘value1’, ‘value2’) | **field\[\!in\]=value1\&field\[\!in\]=value2** |
+| Field \> \# | **field\[gt\]=\#** |
+| Field \>= \# | **field\[gte\]=\#** |
+| Field \< \# | **field\[lt\]=\#** |
+| Field \<= \# | **field\[lte\]=\#** |
+| Generic Length Comparison LEN(field) \<\# comparison\> \= value | \<field\>\[length\]\[\<eq\!eq\|lt\|lte\|gt\|gte\>\]=\<value\> |
+| Field1 like ‘%value%’ or Field2 like ‘%value%’ (IGNORE CASE) | \_or\[\#\]field1\[icontains\]=value& \_or\[\#\]field2\[icontains\]=value |
+| field BETWEEN \#1 AND \#2 | field\[gte\]=\#1\&field\[lte\]=\#2 |
+| Generic Days passed Comparison UTCDATE(Field) \<\# comparison\> (UTCDATE(NOW(timezone)) \- DAYS(\#)) | \<field\>\[\<days\_passed\_function\>\]\[\<eq\!eq\|lt\|lte\|gt\|gte\>\]=\<value\> |
 
 | Related entities filtering transversal |  |  |
 | ----- | ----- | ----- |
@@ -164,18 +128,14 @@
 | ----- | ----- | ----- |
 |  | Current | Possible Alternative |
 | Selected ones | {     "attributes": \[\] } | **\_fields=\<field1\>&\_fields\<field2\> (Optional)** |
-|  |  | \_return=\<field1\>&\_return\<field2\> (Mandatory) |
 | All | Not possible, they have to be enumerated | **Default behaviour** |
-|  |  | \_return=\* |
-|  |  | \_return=\_all |
+|  |  | \_fields=\* |
 
 | Returned multilevel fields |  |  |
 | ----- | ----- | ----- |
 |  | Current | Possible Alternative |
-| Selected ones | {     "attributes": \[\] }  | \_**fields=\<expansion1\>.\<field1\>& \[\*...\]&\_fields=\<expansion1\>.\<fieldn\>& \[\*...\]&\_fields=\<expansionn\>.\<field1\>& \[\*...\]&\_fields=\<expansionn\>.\<fieldn\> If the \<field\> is \*, then all fields are returned (default behaviour for “.”)** |
-|  |  | \_return=\<expansion1\>.\<field1\>& \[\*...\]&\_return=\<expansion1\>.\<fieldn\>& \[\*...\]&\_return=\<expansionn\>.\<field1\>& \[\*...\]&\_return=\<expansionn\>.\<fieldn\> Required, or the expansion won’t work |
-| All | Not possible when filtering, they have to be enumerated. Default behaviour on get by id. | \_expand=entity  |
-|  |  | \_fields=\<entity\>.\* |
+| Selected ones | {     "attributes": \[\] }  | \_**fields=\<expansion1\>.\<field1\>& \[\*...\]&\_fields=\<expansion1\>.\<fieldn\>& \[\*...\]&\_fields=\<expansionn\>.\<field1\>& \[\*...\]&\_fields=\<expansionn\>.\<fieldn\> If the \<field\> is \*, then all fields are returned (default behaviour for “.”)** |
+| All | Not possible when filtering, they have to be enumerated. Default behaviour on get by id. | \_fields=\<entity\>.\* |
 
 | Related entities data expansion |  |  |
 | ----- | ----- | ----- |
@@ -184,6 +144,12 @@
 |  |  | **\_include\_unfiltered\_entities=\<subentity\> (one per subentity)** (required if we want \_field=\<relationship\> to return that field for all elements even unfiltered ones) |
 | Expand filtered | Not possible | **default behaviour using \_field=\<subentities\>.\<field\>** |
 |  |  | \_expand\_filtered=\<relationship\> (Alternative when there are already other filters on the same relationship that are only intended to indicate what 1st level entity results are retrieved) \_alias\[\<relationship\>\]=\<alias\>& \_expand=.\<alias\>& .\<alias\>.\<field\>\[\<filter\>\]=\<value\>**Not discarded but it is excluded for 3.0 version** relationships.label=pack& \_expand=relationships relationships.label=pack& \_alias\[relationships\]=alias& \_field=.alias.links.quantity& .alias.label\[len\]\[gt\]=10  |
+
+\_fields=\* and GET should return the same result:
+
+* \_ids fields are hidden for now, as they expose denormalization (excluded from responses and for operational use)
+* \_id fields are exposed, as they are foreign keys correctly modeled
+* \_fields=related\_entity must match \_fields=related\_entity.\*, so it matches the behaviour of \_fields=json-field | \_fields=json-field.\* and GET /entity | GET /entity?\_fields=\*
 
 | Pagination |  |
 | ----- | ----- |
@@ -213,19 +179,19 @@
 | 1:M get aLink a new entity instance  | GET | Get link entity | GET | **api/v3/\<plural\_entity\_name\>/\<identifier\>/\<plural\_related\_entity\_name\>/\<linked\_id\>** |  |
 | 1:M Edit a Relationship entity instance | PATCH | link endpoints | PATCH | **api/v3/\<plural\_entity\_name\>/\<identifier\>/\<plural\_related\_entity\_name\>/\<linked\_id\>** | {  "id": \<related\_entity\_id\>,  \[\<M:M stuff\>\]} |
 | 1:M Unlink a new entity instance  | POST | unlink endpoints | DELETE | **api/v3/\<plural\_entity\_name\>/\<identifier\>/\<plural\_related\_entity\_name\>/\<linked\_id\>** | It deletes all the coincidences in the strange case of M:M relationships that allow repetitions. |
-| Bulk additions |  |  | POST | **api/v3/-bulk/\<plural\_entity\_name\> api/v3/\<plural\_entity\_name/-/bulk  api/v3/-/bulk/\<plural\_entity\_name\>  List of items equal to the non bulk POST Payload:{   \*"webhook": \<url\>,  \*"external\_reference": \<str\>,  "data": \[{},{} ... {}\]}** | **Response: {   "bulk\_job\_id": \<id\> }** |
-| Bulk edits (a filter and the same edit for all matches) |  |  | PATCH | **api/v3/-bulk/\<plural\_entity\_name\>/?\<search\_query\>api/v3/-/bulk/\<plural\_entity\_name\>/?\<search\_query\>Same payload as the non bulk PATCHPayload: {   \*"webhook": \<url\>,  \*"external\_reference": \<str\>,  "data": {"\<field\_1\>": \<value\_1\>, ...,  "\<field\_n\>": \<value\_n\>} }** | **“EMPTY” VALUES SUCH AS “” OR \[\] ARE STORED VERBATIM AND DON’T MEAN DELETION** |
-| Bulk edits (different edit per entity instance) |  |  | PATCH | **api/v3/-bulk/\<plural\_entity\_name\>/api/v3/-/bulk/\<plural\_entity\_name\>/List of items equal to the non bulk PATCH plus the idPayload:  {   \*"webhook": \<url\>,  \*"external\_reference": \<str\>,  "data": \[{"id": \<id\_1\>, ...}, ..., {"id": \<id\_n\>, ...}\] }** | **“EMPTY” VALUES SUCH AS “” OR \[\] ARE STORED VERBATIM AND DON’T MEAN DELETION** |
-| Bulk deletes by filter |  |  | DELETE | **api/v3/-bulk/\<plural\_entity\_name\>/?\<search\_query\>  api/v3/-/bulk/\<plural\_entity\_name\>/?\<search\_query\>   {   \*"webhook": \<url\>,  \*"external\_reference": \<str\> }** |  |
-| Bulk deletes by individual items |  |  | DELETE | **api/v3/-bulk/\<plural\_entity\_name\>/ api/v3/-/bulk/\<plural\_entity\_name\>/ Payload:  {   \*"webhook": \<url\>,  \*"external\_reference": \<str\>,  "data": \[id, id, id\] }** |  |
+| Bulk additions |  |  | POST | **api/v3/-/bulk/\<plural\_entity\_name\> List of items equal to the non bulk POST Payload:{   \*"webhook": \<url\>,  \*"external\_reference": \<str\>,  "data": \[{},{} ... {}\]}** | **Response: {   "bulk\_job\_id": \<id\> }** |
+| Bulk edits (a filter and the same edit for all matches) |  |  | PATCH | **api/v3/-/bulk/\<plural\_entity\_name\>/?\<search\_query\> Same payload as the non bulk PATCH Payload: {   \*"webhook": \<url\>,  \*"external\_reference": \<str\>,  "data": {"\<field\_1\>": \<value\_1\>, ...,  "\<field\_n\>": \<value\_n\>} }** | **“EMPTY” VALUES SUCH AS “” OR \[\] ARE STORED VERBATIM AND DON’T MEAN DELETION** |
+| Bulk edits (different edit per entity instance) |  |  | PATCH | **api/v3/-/bulk/\<plural\_entity\_name\>/ List of items equal to the non bulk PATCH plus the id Payload:  {   \*"webhook": \<url\>,  \*"external\_reference": \<str\>,  "data": \[{"id": \<id\_1\>, ...}, ..., {"id": \<id\_n\>, ...}\] }** | **“EMPTY” VALUES SUCH AS “” OR \[\] ARE STORED VERBATIM AND DON’T MEAN DELETION** |
+| Bulk deletes by filter |  |  | DELETE | **api/v3/-/bulk/\<plural\_entity\_name\>/?\<search\_query\> {   \*"webhook": \<url\>,  \*"external\_reference": \<str\> }** |  |
+| Bulk deletes by individual items |  |  | DELETE | **api/v3/-/bulk/\<plural\_entity\_name\>/ Payload:  {   \*"webhook": \<url\>,  \*"external\_reference": \<str\>,  "data": \[id, id, id\] }** |  |
 | Advanced bulk updates |  |  | PATCH | **api/v3/-/bulk/-/edit/\<plural\_entity\_name\>/?\<search\_query\> The payload format is the same one of the advanced updates** |  |
-| Bulk Individual updates |  |  | POST | **api/v3/-/bulk/-/edit The payload contains a list of individual actions (deletions, creations and updates) {   \*"webhook": \<url\>,  \*"external\_reference": \<str\>,  "data": \[{ "entity: ‘products", "action": "PATCH|DELETE|POST", data: { individual-object }}\] } The result, except for performance, is equivalent to individually calling the other update endpoints one by one.** |  |
-| Bulks: check job |  |  | GET | **api/v3/-bulk/-jobs/\<bulk\_job\_id\>  api/v3/-/bulk/-/jobs/\<bulk\_job\_id\>** | **Response: {   "state": \<str\>,   "webhook": \<url|none\>,   "external\_reference": \<str|none\>,   "created": \<datetime\>,   "updated": \<datetime\>,   "data": \<object|none\> }** |
-| Bulks: search job |  |  | GET | **api/v3/-bulk/-jobs/?\<search\_query\>  api/v3/-/bulk/-/jobs/?\<search\_query\> queryable attributes: external\_reference \<str\> state \<str\>** |  |
+| Bulk Individual updates |  |  | POST | **api/v3/-/bulk/-/edit The payload contains a list of individual actions (deletions, creations and updates) {   \*"webhook": \<url\>,  \*"external\_reference": \<str\>,  "data": \[{ "entity: ‘products", "action": "PATCH|DELETE|POST", data: { individual-object }}\] } The result, except for performance, is equivalent to individually calling the other update endpoints one by one.** |  |
+| Bulks: check job |  |  | GET | **api/v3/-/bulk/-/jobs/\<bulk\_job\_id\>** | **Response: {   "state": \<str\>,   "webhook": \<url|none\>,   "external\_reference": \<str|none\>,   "created": \<datetime\>,   "updated": \<datetime\>,   "data": \<object|none\> }** |
+| Bulks: search job |  |  | GET | **api/v3/-/bulk/-/jobs/?\<search\_query\> queryable attributes: external\_reference \<str\> state \<str\>** |  |
 | Bulks: transition job |  |  | POST | **api/v3/-/bulk/-/jobs/\<bulk\_job\_id\>/\<cancel|pause|resume|retry\> api/v3/-/bulk/-/jobs/\<bulk\_job\_id\>/-/\<cancel|pause|resume|retry\>** |  |
-| Ad-Hoc async action (eg. Shopify export) |  |  | POST | **api/v3/-\<action-name\>/  api/v3/-/\<action-name\>/ {   \*"webhook": \<url\>,  \*"external\_reference": \<str\>,  "data": "\<whatever\>" }** eg. api/v3/-/shopify-export/ | **Response: {   "action-name\_job\_id": \<id\> }**  eg. {   "shopify-export\_job\_id": \<id\> } |
-| Ad-Hoc async action: check job |  |  | GET | **api/v3/-\<action-name\>/-jobs/\<action-name\_job\_id\>  api/v3/-/\<action-name\>/-/jobs/\<action-name\_job\_id\>**  | **Response: {   "state": \<str\>,   "webhook": \<url|none\>,   "external\_reference": \<str|none\>,   "created": \<datetime\>,   "updated": \<datetime\>,   "data": \<object|none\> }** |
-| Ad-Hoc async action: search jobs |  |  | GET | **GET api/v3/-\<action-name\>/-jobs/?\<search\_query\>  GET api/v3/-/\<action-name\>/-/jobs/?\<search\_query\> queryable attributes: external\_reference \<str\>** |  |
+| Ad-Hoc async action (eg. Shopify export) |  |  | POST | **api/v3/-/\<action-name\>/ {   \*"webhook": \<url\>,  \*"external\_reference": \<str\>,  "data": "\<whatever\>" }** eg. api/v3/-/shopify-export/ | **Response: {   "action-name\_job\_id": \<id\> }**  eg. {   "shopify-export\_job\_id": \<id\> } |
+| Ad-Hoc async action: check job |  |  | GET | **api/v3/-/\<action-name\>/-/jobs/\<action-name\_job\_id\>** | **Response: {   "state": \<str\>,   "webhook": \<url|none\>,   "external\_reference": \<str|none\>,   "created": \<datetime\>,   "updated": \<datetime\>,   "data": \<object|none\> }** |
+| Ad-Hoc async action: search jobs |  |  | GET | **api/v3/-/\<action-name\>/-/jobs/?\<search\_query\> queryable attributes: external\_reference \<str\>** |  |
 | Ad-Hoc async action:  transition job |  |  | POST | **api/v3/-/bulk/-/\<action-name\>/\<action-name\_job\_id\>/\<cancel|pause|resume|retry\> api/v3/-/\<action-name\>/-/jobs/\<action-name\_job\_id\>/-/\<cancel|pause|resume|retry\>** |  |
 | Check a job |  |  | GET | **GET api/v3/-jobs/\<job\_id\>** | **Response: {   "state": \<str\>,   "webhook": \<url|none\>,   "external\_reference": \<str|none\>,   "created": \<datetime\>,   "updated": \<datetime\>,   "data": \<object|none\> } add a type?** |
 | List jobs |  |  | GET | **api/v3/-jobs/?\<search\_query\> queryable attributes: external\_reference \<str\>**  | **Regardless of the filter, it must ONLY return jobs that have been triggered by the API** |
@@ -257,13 +223,13 @@ For the definition of the new API, the following conventions will apply:
 
 * In the case of **202 Accepted**, the response body will include a **process\_id** that can be used to track the status of the ongoing operation.
 
-### PUT
-
-It is important to carefully evaluate the use of **PUT** operations, as they can introduce several issues. Specifically, PUT requests typically replace the entire resource, which can lead to unintended data overwrites, increased complexity in handling partial updates, and potential inconsistencies in concurrent environments.
-
 ### PATCH
 
 Instead, the recommended approach is to use **PATCH** requests, where only the intended changes are explicitly specified. This method provides more precise control over updates, reduces the risk of accidental data loss, and simplifies concurrency management. Adopting PATCH as the standard for modifications ensures a safer and more maintainable API design.
+
+### DELETE
+
+In API V3 a **DELETE** operation erases the entity or field (if using a path based DELETE) it is performed over, it doesn't set null or applies defaults (it can cause inheritance to resolve for the field).
 
 ## ANEXO
 

@@ -1,0 +1,124 @@
+meta {
+  name: Get Product Relationships Collection
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{pim_base_url_v3}}/products/REPLACE_WITH_PRODUCT_ID/relationships
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Accept: application/json
+}
+
+assert {
+  res.status: eq 200
+  res.body.data: isArray
+}
+
+docs {
+  Confirmed live 2026-09-15 against two disposable scratch products
+  ("WC-TEST-REL-A" id `6aa97b2ca30ca5945169a23f`, "WC-TEST-REL-B" id
+  `6aa97b2da30ca5945169a240`) and a disposable scratch relationship type
+  ("WC Test Product Relationship", id `6aa97b2ca30ca5945169a23e`), all
+  created and destroyed in this same run on "David's Dev Account".
+  Brand-new dedicated resource in the 2026-09-15 `openapi_pimv3.json`
+  refresh for managing one product's relationships -- distinct from (but
+  overlapping with) the existing read-only `GET
+  /products/{id}/relationships` subpath confirmed in Phase 0 (quirk #16),
+  which is still the flat, all-relationships-at-once view embedded on the
+  product resource itself. This new `17-Product-Relationships` resource
+  is the write-capable counterpart.
+
+  ## What it does
+  Lists every relationship link a product currently has, scoped
+  automatically to `product_id` from the URL (no cross-tenant leak
+  observed here, unlike the two top-level search endpoints in this same
+  folder). Empty array when the product has no links yet.
+
+  ## Shape
+  Flat: `{relationship_id, relationship_label, product_id}` per entry --
+  the same shape as quirk #16's existing subpath, and notably **does
+  NOT include which product(s) it's related to** (no `related_product_id`
+  anywhere in this collection view) -- see "Get Related Products Subpath
+  (Bug).bru" for the one place that's supposed to live, and the bug found
+  there.
+}
+
+example {
+  name: Get Product Relationships Collection - Empty (Before Linking)
+  description: Real response captured 2026-09-15 against a disposable scratch product before any relationship was linked.
+
+  request: {
+    url: {{pim_base_url_v3}}/products/6aa97b2ca30ca5945169a23f/relationships
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Get Product Relationships Collection - After Linking
+  description: Real response captured 2026-09-15, immediately after "Create Product Relationship Link.bru" linked this product to a second scratch product.
+
+  request: {
+    url: {{pim_base_url_v3}}/products/6aa97b2ca30ca5945169a23f/relationships
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [
+            {
+              "relationship_id": "6aa97b2ca30ca5945169a23e",
+              "relationship_label": "wc_test_product_relationship",
+              "product_id": "6aa97b2ca30ca5945169a23f"
+            }
+          ],
+          "errors": []
+        }
+      '''
+    }
+  }
+}

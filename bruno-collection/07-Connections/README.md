@@ -12,7 +12,7 @@ references `connections` optionally, not required.
 | Get Access Token (Dev) | POST | Auth exchange | Shared finding |
 | Create Connection - Invalid Type (422, Reveals Enum) | POST | Trigger case | **`type` is a fixed lowercase enum**, not a free string as the spec describes |
 | Create Connection | POST | Create with `type: "ftp"` | 201; created then deleted (no dependents) |
-| Delete Connection (Undeclared) | DELETE | Not in spec | Works — 204 (first resource this session where this was found) |
+| Update and Delete Connection | PATCH/DELETE | Rename/update + delete | Both work — 200/204; now formally declared (2026-09-15); `PATCH` never had a file before |
 
 ## Behaviors that differ from the spec
 
@@ -33,7 +33,17 @@ uppercase and nonsense values are rejected identically.
   GET.
 - All 4 requests pass `bru run "07-Connections/" --env "Dev"`.
 
+## Update — 2026-09-15 (spec refresh: 51→63 paths)
+
+`openapi_pimv3.json` now formally declares both `PATCH` and `DELETE`
+(`DELETE` was previously undeclared but working; `PATCH` had never been
+tested). Combined into "Update and Delete Connection.bru", replacing
+"Delete Connection (Undeclared).bru". Retested fresh against a new
+disposable scratch FTP connection — `name`/`url`/`port` all confirmed
+patchable and round-trip; real `example{}` blocks captured for both.
+
 ## Open items
 
-- None specific to this folder — see config open question #8 (is
-  undeclared PATCH/DELETE stable/intentional).
+- None specific to this folder — config open question #8 (is undeclared
+  PATCH/DELETE stable/intentional) is resolved by the 2026-09-15 spec
+  refresh formally declaring both.

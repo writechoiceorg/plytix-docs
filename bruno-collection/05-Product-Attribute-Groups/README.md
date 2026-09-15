@@ -11,7 +11,7 @@ Covers `GET`/`POST /api/v3/product-attribute-groups`,
 | Get Access Token (Dev) | POST | Auth exchange | Shared finding |
 | Create Product Attribute Group | POST | Create a group | **201**; fixture kept |
 | Get Product Attribute Group by ID | GET | Fetch by Mongo ID | Subpath discovery matches spec exactly |
-| Delete Product Attribute Group (Undeclared) | DELETE | Not in spec | Works — 204 |
+| Delete Product Attribute Group | DELETE | Not previously declared | Works — 204; now formally declared (2026-09-15) — note `PATCH` is still NOT declared for this resource |
 
 ## Test report — 2026-09-07
 
@@ -30,6 +30,16 @@ Covers `GET`/`POST /api/v3/product-attribute-groups`,
   after the fixture already exists returns **`409 Conflict`**
   (`"AlreadyExists"`) — a different status/error name than categories'
   `422` duplicate-name response (quirk #25a).
+
+## Update — 2026-09-15 (spec refresh: 51→63 paths)
+
+`openapi_pimv3.json` now formally declares `DELETE` for this resource
+(previously undeclared but working). **Unlike almost every other
+resource touched in this refresh, `PATCH` is still NOT declared** for
+`product-attribute-groups` — so this folder only has a renamed
+"Delete Product Attribute Group.bru" (dropped "(Undeclared)"), not a
+combined update+delete file. Retested `DELETE` fresh against a new
+disposable scratch group and captured a real `example{}` (204, then 404).
 
 ## Open items
 

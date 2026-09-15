@@ -33,8 +33,25 @@ spot-check are all untestable without a real catalog to target.
   with a real value in this account — document it as
   optional/untestable-here rather than silently omit it.
 
+## Update — 2026-09-15 (spec refresh: 51→63 paths)
+
+`openapi_pimv3.json` now formally declares `PATCH`/`DELETE` for
+`/pdf-catalogs/{identifier}` (previously read-only in the spec, matching
+this resource's already-known-blocked create path). **No live testing was
+attempted for this update** — per this session's scope, since `POST`
+already fails with the same account-level feature-not-enabled `422`
+(status-gating rule #2) and there is no way to create a disposable PDF
+catalog to `PATCH`/`DELETE` in this account, and the one path that would
+let us exercise `PATCH`/`DELETE` without creating anything (an existing
+real fixture) doesn't exist for this resource — unlike Ecatalogs, this
+account has zero pre-existing PDF catalogs at all. These two new methods
+remain formally declared but **entirely untestable in this account**, for
+the same underlying reason creation is (see status-gating #2). No new
+`.bru` files were added for `PATCH`/`DELETE` as a result.
+
 ## Open items
 
 - [ ] Ask Plytix: can the PDF Catalogs feature be enabled on this Dev
       account so the rest of this phase can actually run? (Config open
-      question #14.)
+      question #14.) This now also covers testing the newly-declared
+      `PATCH`/`DELETE`.

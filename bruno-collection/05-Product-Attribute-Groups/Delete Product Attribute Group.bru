@@ -1,0 +1,106 @@
+meta {
+  name: Delete Product Attribute Group
+  type: http
+  seq: 4
+}
+
+delete {
+  url: {{pim_base_url_v3}}/product-attribute-groups/REPLACE_WITH_GROUP_ID
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Accept: application/json
+}
+
+docs {
+  Confirmed live 2026-09-15 against a fresh disposable scratch group
+  ("WC Test Group For Delete", id `6aa981b9a30ca5945169a248`, created and
+  destroyed in this same run) on "David's Dev Account". Retested from
+  scratch, since the original version of this file (named "Delete Product
+  Attribute Group (Undeclared)") pointed at a throwaway id from an
+  earlier session with no `example{}` block.
+
+  `openapi_pimv3.json`'s 2026-09-15 refresh formally declares `DELETE`
+  for `/product-attribute-groups/{identifier}` (previously undeclared but
+  working, quirk #20). **Unlike most other resources touched in this
+  refresh, `PATCH` is NOT newly declared for this resource** -- the spec
+  still declares no `PATCH` here, so this file only covers `DELETE`
+  (no combined PATCH+DELETE file was created for this resource).
+
+  ## What it does
+  `DELETE /product-attribute-groups/{id}` -- `204 No Content`, then `404`
+  on a follow-up `GET` -- genuinely deleted, same pattern as every other
+  resource confirmed in this project.
+}
+
+example {
+  name: Delete Product Attribute Group - Success (204, then 404 on follow-up GET)
+  description: Real response captured 2026-09-15 against a disposable scratch attribute group on "David's Dev Account".
+
+  request: {
+    url: {{pim_base_url_v3}}/product-attribute-groups/6aa981b9a30ca5945169a248
+    method: delete
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 204
+      text: No Content
+    }
+    headers: {
+    }
+    body: {
+      type: json
+      content: '''
+        (empty body)
+      '''
+    }
+  }
+}
+
+example {
+  name: Get Product Attribute Group by ID - After Delete (404)
+  description: Real response captured 2026-09-15, follow-up GET immediately after the DELETE above, confirming a hard delete.
+
+  request: {
+    url: {{pim_base_url_v3}}/product-attribute-groups/6aa981b9a30ca5945169a248
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 404
+      text: Not Found
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "NotFoundError",
+              "description": "Document with id 6aa981b9a30ca5945169a248 not found"
+            }
+          ]
+        }
+      '''
+    }
+  }
+}

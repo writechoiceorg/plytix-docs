@@ -71,6 +71,7 @@ Confirmed live 2026-09-07 testing Phase 1 (`product-categories`, `asset-categori
 
 19. **Mutating create status code confirmed: `201 Created`**, on every Phase 1 resource — matches `API V3.md`'s stated convention, **not** `openapi_pimv3.json`'s declared `200`/`422`-only responses. (Products' own create wasn't tested yet — that's Phase 2b — but every Phase 1 create so far agrees on 201.)
 20. **Major finding — resolves `USER_FLOWS.md`'s central open question.** `openapi_pimv3.json` declares `PATCH`/`DELETE` for **no** Phase 1 resource. Both work anyway, confirmed on every one of the six: `PATCH /{resource}/{id}` with a partial body — `200`, applies the update (spot-checked as a rename on `product-categories`). `DELETE /{resource}/{id}` — `204 No Content`, and a follow-up `GET` on the same id then returns `404 {"errors":[{"name":"NotFoundError","description":"Document with id ... not found"}]}` (genuinely deleted, not soft-deleted); a follow-up subpath `GET` returns a simpler `404 {"errors":[{"name":"NotFoundError","description":"Resource not found"}]}`. Strongly suggests this undeclared-but-working PATCH/DELETE pattern generalizes to every v3 resource — confirm per-resource in later phases rather than assuming, but it's no longer an open "does it exist at all" question.
+    - **Update (2026-09-15):** `openapi_pimv3.json` was refreshed to a newer FastAPI export (51→63 paths, 191→289 schemas) that now formally declares `PATCH`/`DELETE` on nearly every resource, plus new resources (`family-attributes`, `product-relationships`/`related-products`). This specific gap is resolved in the spec text itself — no longer just an observed-but-undeclared behavior. The live-behavior findings above remain accurate and worth keeping as historical record of what was verified by hand.
 21. **`ConnectionCreateInputDto.type` is not a free string** despite the spec's description ("Dropbox, FTP, SFTP" given only as examples) — it's validated against a fixed, **lowercase** enum: `dropbox`, `ftp`, `sftp`. Uppercase (`"FTP"`) is rejected the same as a nonsense value: `422 {"errors":[{"name":"InputDTOValidationError","description":"type: Input should be 'dropbox', 'ftp' or 'sftp'"}]}`.
 22. **Real status-gating rule found (first one)**: `FormulaAttribute` creation is capped — `422 {"errors":[{"name":"ValidationError","description":"This account reached the limit of 2 formula attributes"}]}` on "David's Dev Account" (already at its limit via pre-existing fixtures). `FormulaAttribute`'s create path itself remains unconfirmed as working since this account can't test it further — see Status-gating rules below.
 23. **Undocumented 15th product-attribute type found.** `openapi_pimv3.json`'s `POST /product-attributes` `oneOf` declares 14 types, but an invalid-`type` 422 lists **15** valid discriminator tags, including `HierarchyAttribute` — not in the spec at all. Attempting to actually create one 500s (`{"errors":[{"name":"ConfigurationError","description":"There was an error processing your request. Please try again later"}]}`) — reads as an unfinished/unexposed feature, not a documented bug. Don't build customer-facing docs around it; flag to Plytix.
@@ -131,11 +132,154 @@ Confirmed live 2026-09-11, incorporating `materials/project-references/API_V3-04
 57. **`product_relationships` is now confirmed as the official renamed term, not just an empirical finding.** The PDF's changelog states directly that `relationship_links` was renamed to `product_relationships` in the documentation, matching what this project already found live (quirk #13) and had to infer as a spec-vs-live correction. No live re-testing needed; this just upgrades the citation from "empirically discovered" to "also officially documented."
 58. **The newer PDF still repeats the disproven SKU-as-identifier claim unchanged.** Page 13's identifier section states "for products, both id and sku (correctly url-encoded) can be used as identifiers" — the same claim `API V3.md` made and this project already disproved live (`GET /products/<sku>` → `422`, quirk #14). Not re-tested (no new information), but worth noting this incorrect claim persisted into the newer document rather than being corrected.
 
+Confirmed live 2026-09-15, bringing the Bruno collection up to date with a
+refreshed `openapi_pimv3.json` (51→63 paths, 12 brand-new paths covering
+`family-attributes`, newly-writable `product-families`/`relationships`,
+and a new `product-relationships`/`related-products` resource; plus
+`PATCH`/`DELETE` formally declared on nearly every resource that
+previously had them only as undeclared-but-working per quirk #20) against
+"David's Dev Account":
+
+59. **Critical finding — three brand-new endpoints leak cross-tenant data
+    when called with no filter.** `GET /family-attributes`, `GET
+    /product-relationships`, and `GET /related-products` (all three new
+    in this spec refresh) each returned real records belonging to *other
+    Plytix accounts* when called with no query filter at all — the first
+    time in this entire project (all of Phases 0-5 plus this session, 60+
+    endpoints) that a v3 endpoint has failed to auto-scope to the
+    caller's own account. Every other list/search endpoint tested is
+    implicitly scoped with no filter needed. Filtering explicitly with
+    `?account_id=<id>` (all three) or `?product_id=<id>` (the latter two)
+    correctly scopes the results. **This should be reported to Plytix as
+    a likely data-isolation bug**, not documented as normal API behavior.
+    See `13-Product-Families/README.md` and
+    `17-Product-Relationships/README.md` for full request/response
+    detail.
+60. **Product Families and Relationships (types) are genuinely writable
+    now — resolves quirk #38's "zero write capability" finding.** Both
+    resources were confirmed fully read-only as recently as Phase 3
+    (2026-09-08). The 2026-09-15 spec refresh adds `POST
+    /product-families`, `PATCH`/`DELETE /product-families/{identifier}`,
+    and the same trio for `/relationships`. Confirmed live: all six
+    genuinely work — `POST` returns `201`, `PATCH`/`DELETE` behave like
+    every other resource (`200`/`204`, `404` on a follow-up `GET`).
+    `ProductFamilyUpdateInputDto` and `RelationshipUpdateInputDto` are
+    both deliberately narrow (`name` only) — see each schema's own
+    description for why (family: attribute-membership changes are
+    excluded because they trigger a destructive, unbounded cross-product
+    propagation that must go through a Job, not a synchronous PATCH;
+    relationship: `label` is derived/dump-only, `status` is managed by
+    the delete flow).
+61. **New family-attribute linking endpoints, and a real account-level
+    feature gate found on one of them.** `POST
+    /product-families/{id}/attributes` links an attribute to a family —
+    the undocumented request DTO is `FamilyAttributeLinkInputDto`
+    (`attribute_id` required, `level` optional), discovered via 422
+    error messages, same technique as every prior phase. Attempting to
+    **change** a link's `level` via `PATCH
+    .../attributes/{attribute_id}` (e.g. `no_level` → `parent_level`,
+    which implies moving values to the parent for variant inheritance)
+    returned `403 {"errors":[{"name":"PermissionError","description":
+    "Automatic inheritance is not available for this account"}]}` — a
+    genuine account-tier feature gate, not a validation error. Add to
+    Status-gating rules below. The identity endpoint
+    (`/attributes/{attribute_id}`) also accepts `POST` as an idempotent
+    link-by-URL variant — `409 AlreadyExists` if the attribute is already
+    linked, same status/error-name family as every other duplicate-check
+    in this project (quirk #25a).
+62. **First confirmed SAFE, scoped `DELETE`-based unlink in this entire
+    project.** `DELETE /products/{product_id}/relationships/{relationship_id}`
+    (the new dedicated product-relationships resource) removes only that
+    relationship link — confirmed via a follow-up `GET` on the *product*
+    showing it fully intact (`sku`/`label`/`status` unchanged), only
+    `product_relationships` emptied. This is the opposite of every prior
+    subpath-delete hazard found in this project: plain `DELETE
+    /products/{id}/categories` deletes the whole product (quirk #31), and
+    so does the newly-documented "1:M Unlink" pattern `DELETE
+    /products/{id}/categories/{category_id}` (quirk #54). Worth asking
+    Plytix directly why this new endpoint gets scoped deletion right when
+    the older category/asset subpath deletes don't (see updated open
+    question #20 below).
+63. **Real bug: the new `.../relationships/{relationship_id}/related-products`
+    subpath is broken — returns empty/404 despite a confirmed live
+    link.** Immediately after linking two products (confirmed three
+    independent ways: the link's own create response, the full product's
+    `product_relationships` field, and `GET /related-products?product_id=`),
+    this dedicated subpath still returned `{"data": [], "errors": []}` for
+    the collection form and a `NotFoundError` for the single-item form.
+    Retried a few seconds later with the same empty result, ruling out
+    simple read-after-write lag. Use `GET /related-products?product_id=<id>`
+    instead until fixed.
+64. **Filtering the two new top-level search endpoints by `relationship_id`
+    fails in two different bad ways.** `GET /product-relationships?relationship_id=<id>`
+    hangs and returns a raw `504 Gateway Time-out` (HTML, no JSON
+    envelope). `GET /related-products?relationship_id=<id>` instead
+    returns `500 {"errors":[{"name":"HiddenFieldError","description":
+    "Field 'relationship_id' does not exist in model 'RelatedProduct'"}]}`
+    — a real bug, since every other "field doesn't exist" case in this
+    project (e.g. quirk #12) correctly returns `400`, not `500`. Filter
+    by `product_id` instead on both endpoints.
+65. **The plain product's embedded `product_relationships` field is
+    missing `related_product_id`.** `GET /products/{id}` (or
+    `_fields=product_relationships`) returns each relationship's
+    `related_products` entries as only `{quantity, last_modified}` — no
+    way to tell which product is on the other end. The new dedicated
+    `PATCH /products/{id}/relationships/{relationship_id}` response, by
+    contrast, does include `related_product_id` (oddly duplicated under
+    both `product_id` and `related_product_id` keys in the same object).
+    Use the dedicated endpoints or `GET /related-products?product_id=`
+    when you need to know which product a link points to.
+66. **`label` is explicitly NOT patchable on `product-attributes`,
+    despite being the field every response surfaces most prominently.**
+    `PATCH /product-attributes/{id}` with `{"label": "..."}` → `422
+    {"errors":[{"name":"InputDTOValidationError","description":"label:
+    Extra inputs are not permitted"}]}`. Use `name` instead — confirmed
+    renaming via `name` does not retroactively update an already-set
+    `label`. `ProductAttributeUpdateInputDto`'s full patchable field list:
+    `name`, `description`, `character_limit`, `include_time`, `options`,
+    `manual_sorting`, `sort_ascending`, `restricted`, `attributes`
+    (completeness), `formula_str` — narrowed server-side per the
+    attribute's concrete type.
+67. **Spec-vs-live mismatch: `POST` on `/product-families/{identifier}/{path}`
+    405s despite the refreshed spec declaring `post` as a valid method on
+    that path.** Every `{path}` value tried (including the same field
+    name a `PATCH` on the identical URL successfully updates) returns
+    `405 {"errors":[{"name":"MethodNotAllowed","description":"POST is
+    not allowed on this path."}]}`. The generic subpath mechanism only
+    supports `GET`/`PATCH` in practice on this resource, regardless of
+    what the spec's path-item declares.
+68. **Minor type inconsistency, first noticed this session**: `product-categories`'
+    (and `asset-categories`') `order` field comes back as a **string**
+    (e.g. `"6"`) on a `PATCH` response, but as a **number** on the
+    original `POST`-create response. Cosmetic, but worth flagging if any
+    docs promise a consistent type for this field.
+69. **Retested and reconfirmed the "undeclared PATCH/DELETE" pattern
+    (quirk #20/#45) now that the spec formally declares it** on
+    `asset-categories`, `assets` (DELETE only new), `channels`,
+    `connections`, `import-profiles`, `pim-product-lists`,
+    `product-attribute-groups` (DELETE only, no PATCH declared for this
+    one), `product-attributes`, `product-categories`, and `products`
+    (PATCH only new) — every one behaves exactly as quirk #20 predicted,
+    with fresh `example{}` blocks now captured for the first time in each
+    corresponding `.bru` file (previously only prose `docs{}` existed for
+    most of these). No behavioral surprises found in this retest pass
+    beyond the specific items already called out above (#66/#68).
+
+## Known gaps
+
+- The ~70 pre-existing `.bru` files from Phases 0-5 that predate the
+  `example{}` convention (every "List"/"Get"/successful "Create" request)
+  still have no captured `example{}` block — only this session's
+  new-endpoint and newly-declared-method files do. A full backfill across
+  the rest of the collection was explicitly scoped out of this session
+  (2026-09-15) per the user's direction and remains a future opportunity.
+
 ## Status-gating rules
 
 1. **`FormulaAttribute` creation is capped per account** (confirmed on "David's Dev Account", already at its limit of 2). `POST /product-attributes` with `type: "FormulaAttribute"` → `422 "This account reached the limit of 2 formula attributes"` regardless of body validity. No known way to raise the limit from the API itself — would need Plytix/dashboard-side confirmation of how this cap is configured, and whether it's raisable for testing purposes.
 2. **PDF Catalogs feature is disabled entirely for "David's Dev Account."** `POST /pdf-catalogs` → `422 "Cannot create new items the feature pdfs for account ..."` regardless of body validity — an account-level feature flag, not a per-request gate. `GET` still works (returns an empty list). No known way to enable it via the API.
 3. **Ecatalogs feature is also disabled entirely for "David's Dev Account"** — identical pattern to #2: `POST /ecatalogs` → `422 "Cannot create new items the feature ecatalogs for account ..."` regardless of body validity. `GET` still works (this account has one real pre-existing ecatalog, "Plytix Brand Portal"). No known way to enable it via the API. Combined with #2, this account cannot exercise either distribution-output creation path — anyone extending this collection to Channels/Ecatalogs output testing needs a different account.
+4. **"Automatic inheritance" for product-family attribute levels is disabled for "David's Dev Account."** `PATCH /product-families/{id}/attributes/{attribute_id}` with a `level` change → `403 {"errors":[{"name":"PermissionError","description":"Automatic inheritance is not available for this account"}]}` regardless of the target level — confirmed 2026-09-15, an account-level feature flag, not a request problem. Blocks confirming this PATCH's success response shape. No known way to enable it via the API. Note this account-wide feature-gate pattern is now 3 for 3 (PDF Catalogs, Ecatalogs, automatic inheritance) — worth asking Plytix in one conversation whether "David's Dev Account" is simply provisioned on a lower plan tier that gates several premium features at once.
 
 ## Async / webhook-driven resources
 
@@ -167,6 +311,13 @@ Confirmed live 2026-09-11, incorporating `materials/project-references/API_V3-04
 
 **Phases 0-5 are now complete** — every one of the 51 paths in `openapi_pimv3.json` has been individually smoke-tested, and all 8 end-to-end dashboard-equivalent flows in `USER_FLOWS.md` have been run and resolved (6 fully resolved, 2 blocked by real findings — a live bug in `CompletenessAttribute`, quirk #47, and Ecatalogs' account-level feature gate). No new fixtures were kept from Phase 5 — every scratch resource it created (parent/variant products, a scratch text attribute) had no downstream dependents and was cleaned up via the confirmed `DELETE`. `TESTING_PLAN.md`'s full plan is now complete; only the "After all phases" wrap-up and the accumulated open questions below remain as follow-up work for Plytix.
 
+- **2026-09-15 spec-refresh session fixtures (all cleaned up, none kept)**: this session covered the 12 brand-new paths and the newly-declared `PATCH`/`DELETE` methods from the refreshed `openapi_pimv3.json` (51→63 paths). Every scratch resource created was disposable and fully cleaned up by the end of the session — no new fixtures were added to the account:
+  - `13-Product-Families`: two scratch families (`6aa97212a30ca5945169a21e` "WC Test Product Family", renamed and deleted; `6aa9727aa30ca5945169a226` "WC Test Product Family 2", used to test the identity-endpoint `POST` idempotent-link behavior, deleted) and their attribute links — all deleted.
+  - `14-Relationships`: two scratch relationship types (`6aa97b0ca30ca5945169a23c` "WC Test Relationship", renamed and deleted; `6aa97b2ca30ca5945169a23e` "WC Test Product Relationship", used for the product-linking tests below, deleted).
+  - `17-Product-Relationships`: two scratch products (`6aa97b2ca30ca5945169a23f` `WC-TEST-REL-A`, `6aa97b2da30ca5945169a240` `WC-TEST-REL-B`) linked, patched, unlinked via the new safe `DELETE`, then both deleted.
+  - `02-Products-v3`, `03-Product-Categories`, `04-Asset-Categories`, `05-Product-Attribute-Groups`, `06-Product-Attributes`, `07-Connections`, `08-Import-Profiles`, `09-Assets`, `10-Pim-Product-Lists`, `11-Asset-Lists`, `15-Channels`: one scratch resource each, created solely to retest newly-declared `PATCH`/`DELETE` and capture a real `example{}`, then deleted (real ids are in each `.bru` file's `example{}` block and folder README — not re-listed here to avoid duplicating ~11 short-lived ids).
+  - `12-Pdf-Catalogs`, `16-Ecatalogs`: no live calls made this session (both remain feature-gated per status-gating #2/#3) — see each folder's README for the note added instead.
+
 ## Open questions for the user / Plytix
 
 1. ~~**v3 reachability**~~ — ✅ fully resolved 2026-09-04: v3 is live and working on `https://pim.dev.plytix.com/api/v3`, under "David's Dev Account", authenticated via `https://auth.dev.plytix.com`. See Environment section above for the full trail (wrong-host 503s → right-host-wrong-account 401s → right-host-right-account 200). Bruno coverage in place (`Get Access Token (Dev).bru`, `02-Products-v3/List Products.bru`, `Dev` environment).
@@ -188,4 +339,7 @@ Confirmed live 2026-09-11, incorporating `materials/project-references/API_V3-04
 17. **New, from Phase 4**: worth flagging to Plytix as a DX issue — `Channel`'s rebuild-scheduling validation error (quirk #40) is the only 422 in this whole project that doesn't name the specific invalid/missing field. Everything else does. Low priority, but a real inconsistency.
 18. **New, from Phase 5 (2026-09-08) — the second most urgent question after #12, and possibly higher priority since it's a clear-cut bug, not a design question.** `CompletenessAttribute` creation 500s on any real attribute reference (quirk #47), reproduced twice — this needs a Plytix bug report, ideally before any docs promise Completeness Attributes as a usable feature.
 19. **New, from Phase 5**: can Plytix confirm whether a Channel's "direct product assignment" (per the help-center) really is implemented as an auto-generated hidden product list under the hood (quirk #50), or works some other way entirely invisible to the API? Affects how confidently docs can explain the relationship between the dashboard's "Destination" framing and the API's `product_list_id` field.
-20. **New, from the 2026-09-04 PDF update (2026-09-11) — now the single most urgent question, since it's now confirmed on two independent URL patterns.** Neither the plain subpath DELETE (`/products/{id}/categories`, quirk #31) nor the newly-documented "1:M Unlink" pattern (`/products/{id}/categories/{category_id}`, quirk #54) provide a scoped removal — both delete the entire product. Is there **any** confirmed-safe, officially-sanctioned way to unlink a single related entity via `DELETE`, or is `PATCH` with a reduced array genuinely the only safe mechanism? This affects every "remove X from a product" how-to across the whole API, not just categories.
+20. **New, from the 2026-09-04 PDF update (2026-09-11) — updated 2026-09-15, partially answered.** Neither the plain subpath DELETE (`/products/{id}/categories`, quirk #31) nor the newly-documented "1:M Unlink" pattern (`/products/{id}/categories/{category_id}`, quirk #54) provide a scoped removal — both delete the entire product. **2026-09-15 update**: the brand-new `DELETE /products/{id}/relationships/{relationship_id}` endpoint *does* provide a safe, scoped unlink (quirk #62) — proving the pattern is achievable. The remaining question is narrower: can Plytix backport the same safe-delete design to the older category/asset subpath routes, or explain why relationships got it and categories/assets didn't?
+21. **New, from the 2026-09-15 spec refresh — the most urgent new question this session, since it looks like a genuine data-isolation bug.** Three brand-new endpoints (`GET /family-attributes`, `GET /product-relationships`, `GET /related-products`) all return records from *other Plytix accounts* when called with no filter (quirk #59). Is this a real cross-tenant data leak that needs an urgent fix, or is there some reason these three specific endpoints are exempt from the account-scoping every other v3 endpoint has? Needs a fast answer before any docs reference these endpoints without a loud warning to always filter by `account_id`/`product_id`.
+22. **New, from the 2026-09-15 spec refresh**: is `GET /products/{id}/relationships/{relationship_id}/related-products[/{id}]` (quirk #63) meant to work at all, or is it a known-broken/unfinished endpoint? It returns empty/404 even for a link confirmed to exist by three other means.
+23. **New, from the 2026-09-15 spec refresh**: can "automatic inheritance" for product-family attribute levels (quirk #61, status-gating #4) be enabled on this Dev account, so `PATCH /product-families/{id}/attributes/{attribute_id}`'s actual success response can finally be captured rather than only its `403` rejection?

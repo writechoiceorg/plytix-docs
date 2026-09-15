@@ -1,0 +1,180 @@
+meta {
+  name: Get Related Products (Top-Level)
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{pim_base_url_v3}}/related-products?account_id=6a38f5a5b22478f30bfd755c&_page_size=5
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Accept: application/json
+}
+
+assert {
+  res.status: eq 200
+  res.body.data: isArray
+}
+
+docs {
+  Confirmed live 2026-09-15 against "David's Dev Account". Brand-new
+  top-level search endpoint in the 2026-09-15 `openapi_pimv3.json`
+  refresh, covering the individual `{product_id, related_product_id,
+  quantity, last_modified}` link records (the `RelatedProduct` model) --
+  a flatter, per-pair view than `/product-relationships`, which groups by
+  `relationship_id`/`product_id` without naming the related product(s).
+
+  ## Critical finding -- NOT account-scoped by default (third of three)
+  `GET /related-products?_page_size=3` with no filter returned records
+  with `account_id: "5da70dd81f44e030456efd2b"` -- explicitly **not**
+  "David's Dev Account" (`6a38f5a5b22478f30bfd755c`), visible directly in
+  the response body since (unlike the other two leaking endpoints) this
+  one happens to echo `account_id` per record. This is the third of three
+  brand-new top-level search endpoints in this refresh confirmed to leak
+  cross-tenant data by default -- see `config/api-testing.config.md`'s
+  quirk for the full three-endpoint pattern and the recommendation to
+  report it to Plytix as a likely data-isolation bug.
+
+  **Workaround**: filter with `?account_id=<id>` or `?product_id=<id>`
+  (both confirmed correctly scoped, and both used across this file's
+  examples).
+
+  ## Real bug: filtering by `relationship_id` 500s (not just times out)
+  Unlike `/product-relationships` (which times out, `504`, on a
+  `relationship_id` filter), this endpoint instead 500s immediately:
+  `{"errors":[{"name":"HiddenFieldError","description":"Field
+  'relationship_id' does not exist in model 'RelatedProduct'."}]}` -- a
+  genuine bug, since an internal field-validation error is leaking out as
+  a raw `500` instead of being caught and returned as a `400`/`422` like
+  every other "field doesn't exist" case in this project (e.g. quirk
+  #12's `HiddenFieldError` on products correctly returns `400`). Confirms
+  the `RelatedProduct` model genuinely has no `relationship_id` field --
+  use `/product-relationships` instead when relationship type matters.
+}
+
+example {
+  name: Get Related Products - Filtered by account_id (Safe/Scoped)
+  description: Real response captured 2026-09-15, filtered to "David's Dev Account" -- shows real relationship data for the kept fixture product `BAG-10157` (id `6a38f614c3d65a5f868b1a06`).
+
+  request: {
+    url: {{pim_base_url_v3}}/related-products?account_id=6a38f5a5b22478f30bfd755c&_page_size=5
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [
+            {"product_id": "6a38f614c3d65a5f868b1a06", "account_id": "6a38f5a5b22478f30bfd755c", "related_product_id": "6a38f615c3d65a5f868b1a1a", "quantity": 1, "last_modified": "2025-02-26T14:45:06.971000"},
+            {"product_id": "6a38f614c3d65a5f868b1a06", "account_id": "6a38f5a5b22478f30bfd755c", "related_product_id": "6a38f615c3d65a5f868b1a1b", "quantity": 1, "last_modified": "2025-02-26T14:45:06.971000"},
+            {"product_id": "6a38f614c3d65a5f868b1a07", "account_id": "6a38f5a5b22478f30bfd755c", "related_product_id": "6a38f614c3d65a5f868b1a11", "quantity": 1, "last_modified": "2025-03-13T14:15:55.826000"},
+            {"product_id": "6a38f614c3d65a5f868b1a07", "account_id": "6a38f5a5b22478f30bfd755c", "related_product_id": "6a38f615c3d65a5f868b1a1d", "quantity": 1, "last_modified": "2025-02-26T14:45:07.525000"},
+            {"product_id": "6a38f614c3d65a5f868b1a07", "account_id": "6a38f5a5b22478f30bfd755c", "related_product_id": "6a38f615c3d65a5f868b1a1c", "quantity": 1, "last_modified": "2025-02-26T14:45:07.525000"}
+          ],
+          "errors": [],
+          "pagination": {
+            "next_page": "http://pim.dev.plytix.com/api/v3/related-products?account_id=6a38f5a5b22478f30bfd755c&_page_size=5&_page=2"
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Get Related Products - No Filter (Cross-Tenant Data Leak, Bug)
+  description: Real response captured 2026-09-15 with NO account filter applied -- account_id in every record is a different, real Plytix account, not "David's Dev Account".
+
+  request: {
+    url: {{pim_base_url_v3}}/related-products?_page_size=3
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [
+            {"product_id": "5e2ac61866bc1da6674d2e4a", "account_id": "5da70dd81f44e030456efd2b", "related_product_id": "5e2ac60c66bc1da6674d2e3a", "quantity": 1, "last_modified": "2020-01-28T14:28:58.756000"},
+            {"product_id": "5e2ac61866bc1da6674d2e4a", "account_id": "5da70dd81f44e030456efd2b", "related_product_id": "5e2ac612cb2f253729c1f16a", "quantity": 1, "last_modified": "2020-01-28T14:28:58.801000"},
+            {"product_id": "5e2ac5fa66bc1da6674d2e24", "account_id": "5da70dd81f44e030456efd2b", "related_product_id": "5e2ac64e66bc1da6674d2e6a", "quantity": 1, "last_modified": "2020-01-28T14:28:58.770000"}
+          ],
+          "errors": [],
+          "pagination": {
+            "next_page": "http://pim.dev.plytix.com/api/v3/related-products?_page_size=3&_page=2"
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Get Related Products - Filtered by relationship_id (500, Bug)
+  description: Real response captured 2026-09-15 -- a genuine HiddenFieldError leaking out as a 500 instead of a 400/422.
+
+  request: {
+    url: {{pim_base_url_v3}}/related-products?relationship_id=6aa97b2ca30ca5945169a23e
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 500
+      text: Internal Server Error
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "HiddenFieldError",
+              "description": "Field 'relationship_id' does not exist in model 'RelatedProduct'."
+            }
+          ]
+        }
+      '''
+    }
+  }
+}

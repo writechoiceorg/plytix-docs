@@ -1,0 +1,141 @@
+meta {
+  name: Update Product (PATCH)
+  type: http
+  seq: 16
+}
+
+patch {
+  url: {{pim_base_url_v3}}/products/REPLACE_WITH_PRODUCT_ID
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {
+    "label": "New Label",
+    "status": "Completed"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.data.label: isString
+}
+
+docs {
+  Confirmed live 2026-09-15 against a disposable scratch product
+  (`WC-TEST-PATCH-001`, id `6aa98167a30ca5945169a245`, created and deleted
+  in this same test run) on "David's Dev Account". `openapi_pimv3.json`
+  now formally declares `PATCH /products/{identifier}` (it did not before
+  this spec refresh) -- this was already empirically confirmed working in
+  Phase 2 (quirks #26/#27 in `config/api-testing.config.md`), but never
+  had its own dedicated `.bru` file until now.
+
+  ## What it does
+  Partial update of a product. Any subset of `ProductUpdateInputDto`
+  fields may be sent; unset fields are left untouched. Returns `200` with
+  the **full** updated product (all fields, not just the ones patched) --
+  matches `openapi_pimv3.json`'s declared `200`, contradicts `API V3.md`'s
+  stated 204-for-PATCH convention (also flagged project-wide in quirk
+  #56).
+
+  ## Key fields confirmed in this run
+  - `label` and `status` both apply immediately and round-trip in the
+    response.
+  - The response shape here is richer than `POST`'s create-response
+    (adds `assets`, `categories`, `relationships` arrays, `created_user_audit`/
+    `modified_user_audit`, `product_type`) -- same shape as a plain `GET`.
+
+  ## Related, resource-specific quirks (see config for the full list)
+  - `category_ids`/other relationship-array fields reliably apply via
+    `PATCH` even when silently dropped on `POST` for some resources
+    (quirk #27) -- not re-tested here since this file focuses on plain
+    scalar fields, but relevant if extending this request.
+  - `DELETE /products/{id}/{path}` ignores `{path}` and deletes the whole
+    product (quirk #31) -- this is a `PATCH`-only file; never assume the
+    same subpath convention is safe for `DELETE`.
+}
+
+example {
+  name: Update Product - Success
+  description: Real response captured 2026-09-15 against a disposable scratch product on "David's Dev Account".
+
+  request: {
+    url: {{pim_base_url_v3}}/products/6aa98167a30ca5945169a245
+    method: patch
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "label": "WC Test Patch Product Updated",
+        "status": "Completed"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "assets": [],
+            "attributes": {
+              "amazon_ready": 0.0,
+              "basic_information_completeness": 0.0,
+              "english_content_completeness": 0.0,
+              "google_shopping_completeness": 0.0,
+              "marketing_ready": 0.0,
+              "product_specifications_completeness": 0.0,
+              "shopify_ready": 0.0,
+              "spanish_content_completeness": 0.0,
+              "website_ready": 7.14
+            },
+            "categories": [],
+            "created": "2026-09-15T17:33:27.474000+00:00",
+            "created_user_audit": {
+              "type": "API",
+              "user_email": "TestDH",
+              "user_id": "6a96a370a3fb0431c692820d"
+            },
+            "id": "6aa98167a30ca5945169a245",
+            "label": "WC Test Patch Product Updated",
+            "modified": "2026-09-15T17:33:38.480000+00:00",
+            "modified_user_audit": {
+              "type": "API",
+              "user_email": "TestDH",
+              "user_id": "6a96a370a3fb0431c692820d"
+            },
+            "num_variations": 0,
+            "overwritten_attributes": [],
+            "product_family_id": null,
+            "product_family_model_id": null,
+            "product_level": 0,
+            "product_type": "SINGLE",
+            "relationships": [],
+            "sku": "WC-TEST-PATCH-001",
+            "status": "Completed"
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}

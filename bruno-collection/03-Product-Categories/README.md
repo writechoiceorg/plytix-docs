@@ -13,7 +13,7 @@ Self-contained — includes its own `Get Access Token (Dev)` request.
 | Create Product Category | POST | Create top-level category | **201** (not spec's 200); fixture kept |
 | Create Child Product Category | POST | Create nested category (`parent_id`) | Confirms nesting via `path`/`n_children` |
 | Get Product Category by ID | GET | Fetch by Mongo ID | Subpath discovery; `parent` computed subpath; SKU-style identifier-by-name fails (422) |
-| Update and Delete Product Category (Undeclared) | PATCH/DELETE | Rename + delete, neither declared in spec | **Both work** — 200/204 |
+| Update and Delete Product Category | PATCH/DELETE | Rename + delete | **Both work** — 200/204; now formally declared in the spec (2026-09-15) |
 | Create Product Category - Missing Name (422) | POST | Validation trigger | Same 422 envelope as products |
 
 ## Behaviors that differ from the spec
@@ -45,9 +45,22 @@ Self-contained — includes its own `Get Access Token (Dev)` request.
   — category names are unique per account; this is expected, not a
   regression (see `config/api-testing.config.md` quirk #25a).
 
+## Update — 2026-09-15 (spec refresh: 51→63 paths)
+
+`openapi_pimv3.json` now formally declares `PATCH`/`DELETE` for this
+resource (previously undeclared but working, quirk #20). Retested fresh
+against a new disposable scratch category (the original file's target had
+been deleted in the same 2026-09-07 run and had no `example{}`) and
+renamed the file to drop "(Undeclared)". Real `example{}` blocks captured
+for both `PATCH` and `DELETE` (204, then 404) — the first time this
+file's live behavior was captured as a reusable, machine-readable
+example rather than only prose in `docs{}`. One small new finding:
+`order` comes back as a **string** (`"6"`) on the `PATCH` response,
+unlike `POST`'s numeric `order` — a minor type inconsistency not
+previously noted.
+
 ## Open items
 
-- [ ] Ask Plytix whether undeclared PATCH/DELETE is a stable, intentional
-      part of the public API (config open question #8) — determines
-      whether docs can confidently promise rename/delete for this and
-      every other Phase 1 resource.
+- [x] Ask Plytix whether undeclared PATCH/DELETE is a stable, intentional
+      part of the public API (config open question #8) — resolved by the
+      2026-09-15 spec refresh formally declaring both.

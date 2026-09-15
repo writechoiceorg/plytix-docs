@@ -61,6 +61,7 @@ environment 401 against the other's hosts. Always pass the matching
 | 14 | `14-Relationships` | Phase 3e. Read-only; real pre-existing data used, no fixtures created. |
 | 15 | `15-Channels` | Phase 4a. `format` is a hidden fixed set; rebuild-scheduling validation errors are unusually vague — see its own `README.md`. |
 | 16 | `16-Ecatalogs` | Phase 4b. Creation blocked entirely — account lacks the Ecatalogs feature (same as `12-Pdf-Catalogs`). Real pre-existing catalog used for shape confirmation. |
+| 17 | `17-Product-Relationships` | Added 2026-09-15 (spec refresh, 51→63 paths). New product-to-product relationship-linking resource — see its own `README.md`. First confirmed safe, scoped `DELETE`-based unlink in this whole project; also found a cross-tenant data-isolation gap shared with `13-Product-Families`'s new `family-attributes` endpoint. |
 
 ## Test Fixtures
 
