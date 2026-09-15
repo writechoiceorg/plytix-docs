@@ -44,8 +44,8 @@ Before creating any files:
    operations that require prior state (e.g. "requires an existing resource
    in status X").
 4. **Read existing Bruno files** in this collection to match its established
-   format before writing new ones — pay attention to `info`, `http`,
-   `settings`, and `examples` block structure.
+   format before writing new ones — pay attention to `meta`, the HTTP verb
+   block, `headers`, `assert`, `docs`, and `example` block structure.
 5. **Read the relevant READMEs.** Check the collection's central
    `README.md` for the overview (sections, fixtures, webhook setup). Then
    check the folder-specific `README.md` for endpoint details, test groups,
@@ -118,89 +118,129 @@ after the body so you can read it separately from the response JSON.
 
 ## Phase 3: Bruno file format
 
+Bruno's real file format is `.bru` (a custom block-based DSL), not YAML, and
+it does NOT have a YAML-style top-level `examples:` list. It does have a
+native `example { }` block for storing a full captured request/response —
+but `bru run` never writes one for you. It is a "save as example" feature
+of the Bruno desktop app; the CLI only parses and preserves it. When you
+test via `bru run` or `curl`, you must author this block yourself from the
+real response you just received, or the response is lost the moment your
+terminal scrolls past it.
+
 ### File and folder naming
 
 - Folder: `NN-ResourceName/` where `NN` is the next sequence number.
-- Files: readable English names ending in `.yml` (e.g. `Get a Widget.yml`).
+- Files: readable English names ending in `.bru` (e.g. `Get a Widget.bru`).
 - When an endpoint has required prerequisites, prefix the files with
-  `Step N - ` (e.g. `Step 1 - Create a Widget.yml`).
+  `Step N - ` (e.g. `Step 1 - Create a Widget.bru`).
 
-### Folder metadata file (`folder.yml`)
+### Folder metadata file (`folder.bru`)
 
-```yaml
-info:
+```
+meta {
   name: NN-ResourceName
-  type: folder
   seq: N
-
-request:
-  auth: inherit
+}
 ```
 
 ### Request file structure
 
-```yaml
-info:
+```
+meta {
   name: Get a Widget
   type: http
-  seq: 4          # controls order within the folder
+  seq: 4
+}
 
-# Comment block: explain what the endpoint does, what fields are required,
-# what the response means, and any important behaviors or caveats.
+get {
+  url: {{base_url}}/widgets/REPLACE_WITH_WIDGET_ID
+  body: none
+  auth: none
+}
 
-http:
-  method: GET
-  url: "{{base_url}}/widgets/REPLACE_WITH_WIDGET_ID"
-  headers:
-    - name: accept
-      value: application/json
-    - name: <auth-header-name>
-      value: "{{<auth-header-var>}}"
-  # For POST/PUT/PATCH, add:
-  # body:
-  #   type: json
-  #   data: |-
-  #     { ... }
+headers {
+  Authorization: Bearer {{access_token}}
+  Accept: application/json
+}
 
-settings:
-  encodeUrl: true
-  timeout: 0
-  followRedirects: true
-  maxRedirects: 5
+assert {
+  res.status: eq 200
+  res.body.data.id: eq wdgt_692346097175102464
+}
 
-examples:
-  - name: Get a Widget
-    request:
-      url: "{{base_url}}/widgets/wdgt_692346097175102464"
-      method: GET
-      headers:
-        - name: accept
-          value: application/json
-        - name: <auth-header-name>
-          value: "{{<auth-header-var>}}"
-    response:
-      status: 200
-      statusText: OK
-      headers:
-        - name: content-type
-          value: application/json; charset=utf-8
-      body:
-        type: json
-        data: |-
-          { ... actual response from the live API ... }
+script:post-response {
+  // only if a later step needs a value out of this response, e.g.:
+  // if (res.status === 200) { bru.setVar("widget_id", res.body.data.id); }
+}
+
+docs {
+  Confirmed live <date> against "<account>".
+
+  ## What it does
+  What the endpoint does, required fields, key response fields, and any
+  behaviors or spec discrepancies worth flagging in prose.
+}
+
+example {
+  name: Get a Widget - Success
+  description: Real response captured <date> against "<account>".
+
+  request: {
+    url: {{base_url}}/widgets/wdgt_692346097175102464
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        { ... actual, verbatim response body from the live API ... }
+      '''
+    }
+  }
+}
 ```
 
 Key rules:
-- The `http` block uses `REPLACE_WITH_...` placeholder IDs.
-- The `examples` block uses real IDs from actual test runs.
+- The base `get`/`post`/etc. block uses `REPLACE_WITH_...` placeholder IDs;
+  the `example` block's nested `request:` uses the real IDs from the actual
+  test run that produced the captured response.
+- **Every tested endpoint gets at least one `example` block**, with the
+  full, real response body captured from that live run — this is the
+  primary deliverable of a testing session, not optional polish. It's what
+  lets a docs writer (or a future testing session) see real field
+  shapes/values without re-sending the request.
+- Add one `example` block per distinct scenario you validated in that file
+  (e.g. a success case and a documented error case each get their own
+  block with a distinct `name`), not just the first one you tried.
+- Capture the response verbatim: run with `bru run ... --output json` or
+  `curl` first (Phase 2), then paste that real JSON into `body.content`.
+  Never paraphrase or hand-write a plausible-looking response.
+- Never paste real secrets (bearer tokens, API keys) into an `example`
+  block's `request.headers` — keep them as `{{access_token}}`-style
+  variable references, same as the base request. The response body itself
+  is fine to keep verbatim since it's already been reviewed for the
+  account's test-fixture data.
 - Use `"{{$randomUUID}}"` for idempotency-key headers in the base request
   (if the API uses idempotency keys). Use a fixed UUID string in examples
   so they stay reproducible.
 - Always include `content-type: application/json` and `accept:
   application/json` headers on requests with a body.
 - Trim long response bodies to the essential fields when the response
-  embeds large nested objects.
-- Add a comment block at the top of each file explaining: what the endpoint
+  embeds large nested objects — note in `docs` that it was trimmed and why.
+- Add a `docs` block at the top of each file explaining: what the endpoint
   does, prerequisite steps, required fields, key response fields, and any
   behaviors that differ from the spec.
 
@@ -308,11 +348,16 @@ cat /proc/sys/kernel/random/uuid
 
 For each tested endpoint:
 
-1. Create/update the `.yml` file with the validated request structure in
-   the `http` block and the real response in an `examples` entry.
-2. Add a comment block at the top explaining the endpoint and any
-   behaviors that differ from the spec.
-3. Run the full folder with `bru run` and confirm all requests receive a
+1. Create/update the `.bru` file with the validated request structure in
+   the base HTTP-verb block.
+2. Add or update an `example` block with the real, captured response body
+   from the live run — do this for every tested scenario, not just the
+   first file you touch. This is the step that's easy to skip since
+   nothing forces it (`bru run` doesn't write it for you); skipping it
+   means the response is lost as soon as you move on.
+3. Add a `docs` block at the top explaining the endpoint and any behaviors
+   that differ from the spec.
+4. Run the full folder with `bru run` and confirm all requests receive a
    response (even an error for placeholder-ID requests is fine).
 
 ### Spec file (if the project has one)
