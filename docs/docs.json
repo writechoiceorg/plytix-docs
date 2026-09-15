@@ -34,6 +34,18 @@
               "guides/overview",
               "guides/get-started-with-api"
             ]
+          },
+          {
+            "group": "Integration Guides",
+            "pages": [
+              "integration-guides/syncing-your-erp-with-plytix",
+              "integration-guides/exporting-your-full-catalog",
+              "integration-guides/auditing-product-data-quality-with-filters",
+              "integration-guides/building-marketplace-specific-product-feeds", 
+              "integration-guides/safely-removing-categories-assets-or-relationships",
+              "integration-guides/reconstructing-parent-variant-hierarchies",                           
+              "integration-guides/bulk-operations-for-large-catalogs"
+            ]
           }
         ]
       },
