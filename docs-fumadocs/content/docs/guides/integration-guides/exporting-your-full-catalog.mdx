@@ -1,0 +1,94 @@
+---
+title: Export your full catalog
+description: Pull every product, with attributes and assets fully expanded, in one paginated operation.
+---
+
+import { Search, SatelliteDish } from 'lucide-react';
+
+Pull your entire product catalog, with attributes and assets included, without a separate call per product or per image. This guide covers paging through a large result set and expanding related data inline, the pattern behind tools like catalog-production plugins, platform migrations, and backups.
+
+## Prerequisites
+
+- A bearer token. See the Quickstart guide for the authentication flow.
+- An idea of which fields you actually need. Requesting only those fields keeps each page smaller and the export faster.
+
+## Steps
+
+1. **Request the first page with the fields you need.**
+
+   ```bash
+   curl -G "https://pim.plytix.com/api/v3/products" \
+     -H "Authorization: Bearer <access_token>" \
+     --data-urlencode "_fields=sku" \
+     --data-urlencode "_fields=label" \
+     --data-urlencode "_fields=attributes" \
+     --data-urlencode "_fields=categories" \
+     --data-urlencode "_fields=assets" \
+     --data-urlencode "_page_size=100"
+   ```
+
+   `_fields` accepts repeated values. Requesting `categories` or `assets` returns them fully expanded, with no separate call and no `_expand` parameter needed.
+
+   <Callout type="warn" title="FLAG">
+     `_expand` does not work on this endpoint in this project's testing, despite appearing in some Plytix API documentation. Expansion happens automatically per `_fields` value instead, as shown above.
+   </Callout>
+
+2. **Follow the `next_page` link until it stops appearing.**
+
+   Every response includes a `pagination` object:
+
+   ```json
+   {
+     "data": [ /* ... */ ],
+     "pagination": { "next_page": "https://pim.plytix.com/api/v3/products?_fields=sku&_page=2" }
+   }
+   ```
+
+   Request `pagination.next_page` directly. It's a complete URL, including every filter and field you sent on the first call. The default page size is 25; setting `_page_size` explicitly (as in step 1) reduces the number of requests for a large catalog. Stop when a response has no `next_page` value.
+
+3. **Read the expanded asset and category data directly from each product.**
+
+   ```json
+   {
+     "sku": "BAG-10157",
+     "categories": [{ "id": "...", "name": "Backpacks", "path": ["Website Taxonomy", "Bags & Luggage", "Backpacks"] }],
+     "assets": [{ "id": "...", "content_type": "image/jpeg", "path": "..." }]
+   }
+   ```
+
+   Because `assets` returns the full asset object, including its file path, your export doesn't need a separate request per image. This replaces the per-asset lookup that earlier API versions required.
+
+4. **Scope the export if you don't need the whole catalog.**
+
+   Combine `_fields` with a filter, for example to export only one category:
+
+   ```bash
+   curl -G "https://pim.plytix.com/api/v3/products" \
+     -H "Authorization: Bearer <access_token>" \
+     --data-urlencode "categories.name=Backpacks" \
+     --data-urlencode "_fields=sku"
+   ```
+
+   See "Build a Marketplace-Specific Product Feed" for more filtering patterns aimed at a specific audience or destination.
+
+## Troubleshooting
+
+- **Problem:** A field you requested with `_fields` doesn't appear in the response, but you also don't see an error.
+  - **Solution:** Some invalid field names are silently dropped rather than rejected. Double-check the exact field name against the product's full response shape.
+  - **Prevention:** Confirm a field name against one full, unfiltered product response before building it into a bulk export.
+- **Problem:** Requesting `_fields=category_ids` (or another field ending in `_ids`) returns an error instead of the field.
+  - **Solution:** This is intentional. Plytix hides `_ids`-suffixed fields from API responses to avoid exposing internal data structure. Use the expanded plural form instead, for example `_fields=categories`, which returns the same relationship fully expanded.
+  - **Prevention:** Request the expanded relationship (`categories`, `assets`) directly rather than its `_ids` field, as shown in step 1.
+- **Problem:** `_fields` doesn't seem to narrow the response on a single-product lookup.
+  - **Solution:** `_fields` only applies to the search endpoint (`GET /products`), not to `GET /products/{id}`, which always returns the full product. Use the search endpoint for a sparse-field export.
+
+## Related articles
+
+<Cards>
+  <Card icon={<Search />} title="Auditing Product Data Quality with Filters" href="/docs/guides/integration-guides/auditing-product-data-quality-with-filters">
+    Find products with missing images, empty fields, or incomplete data before an export.
+  </Card>
+  <Card icon={<SatelliteDish />} title="Build a Marketplace-Specific Product Feed" href="/docs/guides/integration-guides/building-marketplace-specific-product-feeds">
+    Shape a scoped export for a specific channel instead of the whole catalog.
+  </Card>
+</Cards>

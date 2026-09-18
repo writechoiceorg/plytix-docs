@@ -1,0 +1,89 @@
+---
+title: Reconstruct parent/variant hierarchies
+description: Retrieve a parent product together with its variants in one structured call.
+---
+
+import { RotateCw, TriangleAlert } from 'lucide-react';
+
+Read a parent product and its variants as a structured hierarchy, the way an ERP or marketplace needs it, using `parent_id` and `product_family_id`. This guide covers reading an existing hierarchy. Creating or configuring a Product Family itself is a dashboard-only action; the API can only assign products into a family that already exists.
+
+## Prerequisites
+
+- A bearer token. See the Quickstart guide for the authentication flow.
+- An existing product family in your account. If you're not sure whether one exists, step 1 shows you how to check.
+
+## Steps
+
+1. **List the product families already in your account.**
+
+   ```bash
+   curl "https://pim.plytix.com/api/v3/product-families" \
+     -H "Authorization: Bearer <access_token>"
+   ```
+
+   Each family includes `total_products`, `total_attributes`, and `total_models`, so you can confirm a family actually has data before building against it.
+
+   <Callout type="warn" title="FLAG">
+     Creating a new Product Family, choosing its attributes, or configuring inheritance between levels are all dashboard-only actions today. There's no API endpoint for any of them. The steps below assign products into an existing family, they don't build one from scratch.
+   </Callout>
+
+2. **Create the parent product, assigned to that family.**
+
+   ```bash
+   curl -X POST "https://pim.plytix.com/api/v3/products" \
+     -H "Authorization: Bearer <access_token>" \
+     -H "Content-Type: application/json" \
+     -d '{"sku": "PARENT-001", "product_family_id": "<family_id>"}'
+   ```
+
+   A standalone product starts at `product_level: 0`. The response includes the full created product, not only its ID, even though some Plytix API documentation describes `POST` as returning only an ID.
+
+3. **Create a variant, referencing the parent.**
+
+   ```bash
+   curl -X POST "https://pim.plytix.com/api/v3/products" \
+     -H "Authorization: Bearer <access_token>" \
+     -H "Content-Type: application/json" \
+     -d '{"sku": "VARIANT-001", "product_family_id": "<family_id>", "parent_id": "<parent_id>"}'
+   ```
+
+   Use the same `product_family_id` as the parent. The API doesn't enforce this, but a mismatched family will break how the hierarchy reads back.
+
+4. **Read the parent back and confirm the hierarchy updated.**
+
+   ```bash
+   curl "https://pim.plytix.com/api/v3/products/<parent_id>" \
+     -H "Authorization: Bearer <access_token>"
+   ```
+
+   Once a product has at least one variant, its `product_level` changes from `0` to `1`, and `num_variations` increments by one for each variant. The variant itself reads back at `product_level: 2`.
+
+5. **Read the family's structure for a full picture.**
+
+   ```bash
+   curl "https://pim.plytix.com/api/v3/product-family-models/<family_id>" \
+     -H "Authorization: Bearer <access_token>"
+   ```
+
+   A family model includes `parent_attribute_labels`, `variant_attribute_labels`, and `no_level_attribute_labels`, the arrays that define which attributes apply at each level of the hierarchy. This is read-only. Changing which attributes belong at which level is done in Settings, not through the API.
+
+## Reading inheritance
+
+When a variant is created under a parent, Plytix tracks which of its attribute values were inherited versus explicitly overwritten, in the `overwritten_attributes` field on the product. Read this field to see which attributes a specific variant customized.
+
+<Callout type="warn" title="FLAG">
+  This project confirmed the `overwritten_attributes` field is present and returns an array, but didn't independently test what it contains once a variant actually overwrites an inherited value. Verify the exact shape against your own account's data before building logic around its contents.
+</Callout>
+
+Plytix's own API documentation notes that deleting a variant's overwritten attribute value (rather than setting it to an empty value) can cause that attribute to fall back to, or "resolve," the parent's inherited value. This wasn't independently tested in this project. If you need to revert a variant's attribute back to its parent's value, this is worth verifying directly against your account before relying on it.
+
+## Related articles
+
+<Cards>
+  <Card icon={<RotateCw />} title="Syncing Your ERP with Plytix" href="/docs/guides/integration-guides/syncing-your-erp-with-plytix">
+    Apply the same read/write pattern to keep hierarchy data in sync.
+  </Card>
+  <Card icon={<TriangleAlert />} title="Safely Removing Categories, Assets, or Relationships from a Product" href="/docs/guides/integration-guides/safely-removing-categories-assets-or-relationships">
+    What's read-only versus writable across related product data.
+  </Card>
+</Cards>

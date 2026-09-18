@@ -1,5 +1,5 @@
 {
   "title": "Guides",
   "root": true,
-  "pages": ["overview", "get-started-with-api"]
+  "pages": ["overview", "get-started-with-api", "integration-guides"]
 }

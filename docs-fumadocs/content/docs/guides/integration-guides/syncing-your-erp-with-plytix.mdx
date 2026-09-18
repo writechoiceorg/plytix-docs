@@ -1,0 +1,119 @@
+---
+title: Sync your ERP with Plytix
+description: Read product data from Plytix, detect changes, and push updates back so your ERP and Plytix stay in sync.
+---
+
+import { Download, TriangleAlert } from 'lucide-react';
+
+Keep product data consistent between your ERP and Plytix by reading changes from Plytix on a schedule and writing your own changes back through the same API. This guide covers both directions: pulling updates into your ERP, and pushing stock, price, or status changes back to Plytix.
+
+<Callout type="warn" title="FLAG">
+  Plytix's product team currently recommends v1/v2 for any workflow that creates, updates, or deletes products (ERP write-back, stock updates, price updates, status changes), while v3 write parity is still growing. The v3 endpoints below are confirmed working live today, but confirm with your Plytix contact which version to build against before committing to a production integration. See the "Choosing Between v1/v2 and v3" guide for the current recommendation.
+</Callout>
+
+## Prerequisites
+
+- A Plytix account with API credentials (an `api_key` and `api_password` from **Admin > API**).
+- A way to exchange those credentials for a bearer token. See the Quickstart guide for the full authentication flow.
+- A field in your ERP to store each product's Plytix product ID, so you can address a product directly instead of searching by SKU on every call.
+
+## Steps
+
+1. **Get an access token.**
+
+   ```bash
+   curl -X POST "https://auth.plytix.com/auth/api/get-token" \
+     -H "Content-Type: application/json" \
+     -d '{"api_key": "your_api_key", "api_password": "your_api_password"}'
+   ```
+
+   The token appears at `data[0].access_token` and expires after 15 minutes. Request a new one when a call returns `401`.
+
+2. **Resolve a product's Plytix ID from its SKU, the first time you see that SKU.**
+
+   <Callout type="warn" title="FLAG">
+     `GET /products/{identifier}` only accepts the Plytix product ID, not the SKU, even though this may not match what you'd expect from a resource where SKU is the natural key, and even though some Plytix API documentation (including a version as recent as September 2026) states that both work. Look up the ID once with a search, then store it.
+   </Callout>
+
+   ```bash
+   curl -G "https://pim.plytix.com/api/v3/products" \
+     -H "Authorization: Bearer <access_token>" \
+     --data-urlencode "sku=BAG-10157" \
+     --data-urlencode "_fields=id"
+   ```
+
+   Store the returned `id` alongside the SKU in your ERP so every later call can skip this lookup.
+
+3. **Read the current product state.**
+
+   ```bash
+   curl "https://pim.plytix.com/api/v3/products/<product_id>" \
+     -H "Authorization: Bearer <access_token>"
+   ```
+
+   The response includes `attributes`, `category_ids`, and `thumbnail_id` fully resolved, along with a `product_relationships` field for any configured relationships.
+
+4. **Find what changed since your last sync.**
+
+   ```bash
+   curl -G "https://pim.plytix.com/api/v3/products" \
+     -H "Authorization: Bearer <access_token>" \
+     --data-urlencode "created[gt]=2026-09-01" \
+     --data-urlencode "_fields=id" \
+     --data-urlencode "_fields=sku"
+   ```
+
+   <Callout type="warn" title="FLAG">
+     This example filters on `created`, the only timestamp field independently confirmed to work with the `[gt]` operator. If you need "modified since," confirm the exact field name for your account before relying on it in production, since it wasn't separately tested.
+   </Callout>
+
+   Store the timestamp of each successful sync and reuse it as the next run's filter value.
+
+5. **Push a change back to Plytix.**
+
+   ```bash
+   curl -X PATCH "https://pim.plytix.com/api/v3/products/<product_id>" \
+     -H "Authorization: Bearer <access_token>" \
+     -H "Content-Type: application/json" \
+     -d '{"attributes": {"price": 34.99}}'
+   ```
+
+   Send only the fields that changed. A `PATCH` request merges your fields into the existing product rather than replacing it.
+
+   <Callout type="warn" title="FLAG">
+     Some Plytix API documentation describes `PATCH` as returning no content (status `204`). This project consistently found the opposite in live testing: `PATCH` returns `200` with the full updated product in the response body, as used in step 7.
+   </Callout>
+
+6. **Create a product your ERP has that Plytix doesn't have yet.**
+
+   ```bash
+   curl -X POST "https://pim.plytix.com/api/v3/products" \
+     -H "Authorization: Bearer <access_token>" \
+     -H "Content-Type: application/json" \
+     -d '{"sku": "NEW-SKU-001", "label": "New Product"}'
+   ```
+
+   `sku` is the only required field. Everything else, including `attributes` and `category_ids`, can follow in the same request or a later `PATCH`. The response includes the full created product, not only its ID, even though some Plytix API documentation describes `POST` as returning only an ID.
+
+7. **Confirm the write took effect.**
+
+   Read the product back and compare the fields you sent against the response. A successful `PATCH` returns the full updated product, so you can usually skip this step and check the `PATCH` response directly.
+
+## Troubleshooting
+
+- **Problem:** `POST /products` returns `409 Conflict` with `"A product with the same name already exists"`-style text.
+  - **Solution:** The SKU already exists in this account. Look it up with a search instead of creating it again.
+  - **Prevention:** Check for an existing SKU before creating, using the lookup in step 2.
+- **Problem:** `GET /products/<sku>` returns `422` instead of the product.
+  - **Solution:** Use the Plytix product ID, not the SKU, as shown in step 2.
+
+## Related articles
+
+<Cards>
+  <Card icon={<Download />} title="Exporting Your Full Catalog" href="/docs/guides/integration-guides/exporting-your-full-catalog">
+    Pull every product, with attributes and assets, in one paginated pass.
+  </Card>
+  <Card icon={<TriangleAlert />} title="Safely Removing Categories, Assets, or Relationships from a Product" href="/docs/guides/integration-guides/safely-removing-categories-assets-or-relationships">
+    The right way to unassign data from a product without deleting it.
+  </Card>
+</Cards>

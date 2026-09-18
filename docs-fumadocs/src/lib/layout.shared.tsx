@@ -29,6 +29,10 @@ export function baseOptions(): BaseLayoutProps {
         text: 'Home',
         url: '/',
       },
+      {
+        text: 'Plytix',
+        url: 'https://www.plytix.com',
+      },
     ],
     githubUrl: `https://github.com/${gitConfig.user}/${gitConfig.repo}`,
   };
