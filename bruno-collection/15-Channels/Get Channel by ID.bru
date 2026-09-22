@@ -1,7 +1,7 @@
 meta {
   name: Get Channel by ID
   type: http
-  seq: 5
+  seq: 3
 }
 
 get {
@@ -21,16 +21,64 @@ assert {
 }
 
 docs {
-  Confirmed live 2026-09-08. Subpath discovery (`GET .../bogus_xyz`)
-  reveals a very large raw field list (`id`, `account_id`, `name`,
-  `format`, `product_list_id`, `build_reference_date*`, `active`,
-  `output_filename*`, `connections`, `webhook*`, all the
-  `rebuild_feed_*` scheduling fields, `columns`, `column_separator`,
-  `text_delimiter`, `xml_*`/`product_nodes`, `shopify`, `wayfair`
-  (undocumented -- not in the spec's `ChannelCreateInputDto` or output
-  DTO), `running`, `file_path`, `last_run_*` fields, `process_products`,
+  Confirmed live 2026-09-08 and 2026-09-21. Subpath discovery (`GET .../bogus_xyz`)
+  reveals a very large raw field list (`id`, `account_id`, `name`, `format`,
+  `product_list_id`, `build_reference_date*`, `active`, `output_filename*`,
+  `connections`, `webhook*`, all the `rebuild_feed_*` scheduling fields, `columns`,
+  `column_separator`, `text_delimiter`, `xml_*`/`product_nodes`, `shopify`,
+  `wayfair` (undocumented -- not in the spec's `ChannelCreateInputDto` or output DTO),
+  `running`, `file_path`, `last_run_*` fields, `process_products`,
   `parent_include_criteria`, `changes_required`,
-  `already_processed_through_integrations`, `processed_user_audit`,
-  `store_*`, `created`, `modified`) -- by far the richest resource shape
-  in this project so far.
+  `already_processed_through_integrations`, `processed_user_audit`, `store_*`,
+  `created`, `modified`) -- by far the richest resource shape in this project so far.
+}
+
+example {
+  name: Get Channel by ID - Success (Google Shopping, simplified)
+  description: Real response captured 2026-09-21 against a pre-existing Google Shopping channel. Truncated to key fields only -- the full response includes many column definitions.
+
+  request: {
+    url: {{pim_base_url_v3}}/channels/6a38f615c3d65a5f868b1a3e
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6a38f615c3d65a5f868b1a3e",
+            "account_id": "6a38f5a5b22478f30bfd755c",
+            "name": "Google Shopping",
+            "format": "GOOGLE_SHOPPING",
+            "active": false,
+            "product_list_id": null,
+            "connections": [],
+            "columns": ["... many column definitions ..."],
+            "output_filename": "plytix_feed",
+            "rebuild_periodically": false,
+            "rebuild_feed_frequency": null,
+            "rebuild_feed_next_build": null,
+            "running": false,
+            "created": "2025-03-13T11:22:01.749000",
+            "modified": "2026-09-15T17:36:40.591000"
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
 }

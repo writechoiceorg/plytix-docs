@@ -40,4 +40,129 @@ docs {
   "create_static_list":false,"family_options":null,"column_matches":[]}`
   -- this is now the confirmed live shape of `ProfileSettingsInputDto`'s
   defaults, previously undiscovered.
+
+  ## Partial settings are merged with defaults
+  Confirmed live 2026-09-07 (absorbed from "Create Import Profile - With
+  Settings.bru"): sending only 3 fields in `settings` (e.g.
+  `import_action`, `charset`, `column_separator`) causes the remaining
+  fields (`import_assets_action`, `new_products_status`, etc.) to still
+  receive their normal defaults. Full `settings` is always returned on the
+  response regardless of what was sent.
+
+  ## GET by ID response shape (confirmed live 2026-09-21)
+  Real fixture `6aa98678a30ca5945169a25c` ("WC Test Import Profile"):
+  `{"id":"6aa98678a30ca5945169a25c","account_id":"6a38f5a5b22478f30bfd755c",
+  "name":"WC Test Import Profile","settings":{"import_action":"ALL",
+  "import_assets_action":"SKIP","import_decimal_separator":".",
+  "new_products_status":"Draft","charset":null,"column_separator":null,
+  "text_delimiter":null,"create_static_list":false,"family_options":null,
+  "column_matches":[]},"created":null,"modified":"2026-09-15T17:55:04.587000"}`.
+  Note `created` is null for older fixtures -- not a bug, just sparse audit
+  data on pre-existing records.
+
+  ## 422 -- missing name (absorbed from "Create Import Profile - Missing Name (422).bru")
+  Confirmed live 2026-09-07. Empty body `{}` returns 422. Same 422
+  envelope shape confirmed across every resource this session.
+}
+
+example {
+  name: Create with Full Settings
+  description: Confirmed live 2026-09-07. Partial settings object is merged with defaults; only sent fields are overridden.
+
+  request: {
+    url: {{pim_base_url_v3}}/import-profiles
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "WC Test Import Profile Full",
+        "settings": {
+          "import_action": "NEW",
+          "charset": "UTF-8",
+          "column_separator": ","
+        }
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 201
+      text: Created
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "name": "WC Test Import Profile Full",
+            "settings": {
+              "import_action": "NEW",
+              "import_assets_action": "SKIP",
+              "import_decimal_separator": ".",
+              "new_products_status": "Draft",
+              "charset": "UTF-8",
+              "column_separator": ",",
+              "text_delimiter": null,
+              "create_static_list": false,
+              "family_options": null,
+              "column_matches": []
+            }
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Missing Name (422)
+  description: Confirmed live 2026-09-07. Empty body triggers 422; name is required.
+
+  request: {
+    url: {{pim_base_url_v3}}/import-profiles
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {}
+    }
+  }
+
+  response: {
+    status: {
+      code: 422
+      text: Unprocessable Entity
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "InputDTOValidationError",
+              "description": "name: Field required"
+            }
+          ]
+        }
+      '''
+    }
+  }
 }

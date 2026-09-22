@@ -1,7 +1,7 @@
 meta {
   name: Delete Product
   type: http
-  seq: 12
+  seq: 5
 }
 
 delete {
@@ -16,21 +16,88 @@ headers {
 }
 
 docs {
-  Confirmed live 2026-09-08 against a disposable product created just for
-  this test (`sku: "WC-TEST-DISPOSABLE-003"`, id `6aa022d82b6fd055ffb7caa8`,
-  since deleted) -- **not** the kept "Create Product - Full Featured.bru"
-  fixture.
-  
-  `204 No Content` -- matches `API V3.md`'s stated prose convention,
-  **not** `openapi_pimv3.json`'s declared `200`. A follow-up `GET` on the
-  same id then returns `404`.
-  
-  ## Identifier-by-SKU re-confirmed still false
-  `GET /products/WC-TEST-FULL-001` (by SKU, on the kept fixture) still
-  returns `422` (`Id must be of type PydanticObjectId`) -- same result as
-  Phase 0's original finding against a different, pre-existing product.
-  `API V3.md`'s claim that this resource specifically supports SKU lookup
-  does not hold here either, on a product this session created itself
-  (rules out any theory that it only fails for pre-existing/legacy
-  products).
+  `DELETE /api/v3/products/{identifier}` — delete a product by Mongo ObjectId.
+  Confirmed live 2026-09-08 against disposable products on "David's Dev Account".
+
+  ## 204 (not the spec's 200)
+  `openapi_pimv3.json` declares `200` only. Live: **204 No Content**. A follow-up
+  `GET /products/{id}` after deletion returns `404`. Matches `API V3.md`'s prose
+  convention.
+
+  ## SKU-as-identifier still rejected
+  `GET /products/WC-TEST-FULL-001` (by SKU on the kept fixture) still returns `422`
+  after this session created the product itself — rules out any theory that the
+  identifier-flexibility claim from `API V3.md` applies to v3 (see `Get Product
+  by ID.bru`).
+
+  ## ⚠️ Critical hazard — DELETE /products/{id}/{path} deletes the entire product
+  `DELETE /products/{identifier}/{path}` does **not** scope the delete to `{path}`.
+  It deletes the **entire product** regardless of what `{path}` is. Confirmed two
+  ways:
+  1. `PATCH`'d `category_ids` onto a disposable product (confirmed linked via
+     `GET .../categories`), then called `DELETE .../products/{id}/categories`
+     expecting only the category links to be removed — instead the whole product
+     was deleted (204, then `GET /products/{id}` returned 404, not an empty list).
+  2. Repeated with a completely made-up subpath (`/totally_made_up_path_xyz`) on
+     a second disposable product — same result: 204, whole product gone. The
+     `{path}` segment is not inspected by the delete handler at all.
+
+  **Implication for docs**: never document or suggest
+  `DELETE /products/{id}/{subpath}` as a way to unassign a category, remove an
+  asset, or clear any field. Flag to Plytix as a likely bug — a scoped-removal
+  endpoint that isn't scoped. See "Subpath Delete Hazard" example below.
+}
+
+example {
+  name: 204 - Standard Delete
+  description: Confirmed live 2026-09-08 against disposable product WC-TEST-DISPOSABLE-003 (id 6aa022d82b6fd055ffb7caa8, since deleted). 204 No Content with empty body. A follow-up GET on the same id returns 404.
+
+  request: {
+    url: {{pim_base_url_v3}}/products/6aa022d82b6fd055ffb7caa8
+    method: delete
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 204
+      text: No Content
+    }
+    headers: {}
+    body: {
+      type: text
+      content: ''
+    }
+  }
+}
+
+example {
+  name: 204 - Subpath Delete Hazard (Entire Product Deleted)
+  description: CONFIRMED HAZARD live 2026-09-08. Despite the /categories path segment, the entire product is deleted — not just its category links. Identical 204 is returned for any subpath value, including completely made-up ones. Do not use this pattern to unassign categories or assets.
+
+  request: {
+    url: {{pim_base_url_v3}}/products/6aa022442b6fd055ffb7caa5/categories
+    method: delete
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 204
+      text: No Content
+    }
+    headers: {}
+    body: {
+      type: text
+      content: ''
+    }
+  }
 }

@@ -54,6 +54,11 @@ docs {
   #12's `HiddenFieldError` on products correctly returns `400`). Confirms
   the `RelatedProduct` model genuinely has no `relationship_id` field --
   use `/product-relationships` instead when relationship type matters.
+
+  ## Re-test 2026-09-21 — still 500
+  Re-tested with `relationship_id=6a38f5d8c3d65a5f868b186c` (a real id
+  in this account). Still returns `HTTP 500` with the same
+  `HiddenFieldError` body. Not fixed.
 }
 
 example {

@@ -21,32 +21,48 @@ assert {
 }
 
 docs {
-  Confirmed live 2026-09-15 against two disposable scratch products
-  ("WC-TEST-REL-A" id `6aa97b2ca30ca5945169a23f`, "WC-TEST-REL-B" id
-  `6aa97b2da30ca5945169a240`) and a disposable scratch relationship type
-  ("WC Test Product Relationship", id `6aa97b2ca30ca5945169a23e`), all
-  created and destroyed in this same run on "David's Dev Account".
-  Brand-new dedicated resource in the 2026-09-15 `openapi_pimv3.json`
-  refresh for managing one product's relationships -- distinct from (but
-  overlapping with) the existing read-only `GET
-  /products/{id}/relationships` subpath confirmed in Phase 0 (quirk #16),
-  which is still the flat, all-relationships-at-once view embedded on the
-  product resource itself. This new `17-Product-Relationships` resource
-  is the write-capable counterpart.
+  Confirmed live 2026-09-15 against two disposable scratch products ("WC-TEST-REL-A"
+  id `6aa97b2ca30ca5945169a23f`, "WC-TEST-REL-B" id `6aa97b2da30ca5945169a240`) and
+  a disposable scratch relationship type ("WC Test Product Relationship", id
+  `6aa97b2ca30ca5945169a23e`), all created and destroyed in this same run on "David's
+  Dev Account". Brand-new dedicated resource in the 2026-09-15 `openapi_pimv3.json`
+  refresh for managing one product's relationships -- distinct from (but overlapping
+  with) the existing read-only `GET /products/{id}/relationships` subpath confirmed in
+  Phase 0 (quirk #16), which is still the flat, all-relationships-at-once view
+  embedded on the product resource itself. This new resource is the write-capable
+  counterpart.
 
-  ## What it does
-  Lists every relationship link a product currently has, scoped
-  automatically to `product_id` from the URL (no cross-tenant leak
-  observed here, unlike the two top-level search endpoints in this same
-  folder). Empty array when the product has no links yet.
+  ## GET collection: /products/{id}/relationships
+  Lists every relationship link a product currently has, scoped automatically to
+  `product_id` from the URL (no cross-tenant leak observed here, unlike the two
+  top-level search endpoints in this same folder). Empty array when the product has
+  no links yet.
 
-  ## Shape
-  Flat: `{relationship_id, relationship_label, product_id}` per entry --
-  the same shape as quirk #16's existing subpath, and notably **does
-  NOT include which product(s) it's related to** (no `related_product_id`
-  anywhere in this collection view) -- see "Get Related Products Subpath
-  (Bug).bru" for the one place that's supposed to live, and the bug found
-  there.
+  Shape per entry: `{relationship_id, relationship_label, product_id}` -- notably
+  does NOT include which product(s) it's related to (no `related_product_id` anywhere
+  in this collection view). See "Get Related Products Subpath (Bug - Empty).bru" for
+  the one place that's supposed to live, and the bug found there.
+
+  ## POST: /products/{id}/relationships (absorbed here)
+  Links one or more related products to the given product under a specific relationship
+  type. `201 Created`.
+
+  ## Discovering the POST body shape
+  The spec declares no request schema for this operation (`{}`). Two rounds of 422s
+  revealed the real `ProductRelationshipLinkInputDto`: an empty `{}` body names both
+  top-level required fields (`relationship_id`, `related_products`); passing
+  `related_products: [{"id": "..."}]` (a natural guess) is rejected with
+  `related_products.0.product_id: Field required` AND `related_products.0.id: Extra
+  inputs are not permitted` in the same response -- the correct nested field name is
+  `related_products[].product_id`, not `id`.
+
+  ## POST success shape (richer than GET)
+  `201 Created`. Response nests the newly-created link's `related_products` array
+  with both `related_product_id` and `quantity`/`last_modified` per entry -- `quantity`
+  defaults to `1` when not specified. This is notably richer than the GET collection
+  view (which has no `related_product_id`). Use this endpoint's responses (or
+  `GET /related-products?product_id=...`) when you need to know which product is on
+  the other end of a link.
 }
 
 example {
@@ -85,7 +101,7 @@ example {
 
 example {
   name: Get Product Relationships Collection - After Linking
-  description: Real response captured 2026-09-15, immediately after "Create Product Relationship Link.bru" linked this product to a second scratch product.
+  description: Real response captured 2026-09-15, immediately after the Create Product Relationship Link call linked this product to a second scratch product.
 
   request: {
     url: {{pim_base_url_v3}}/products/6aa97b2ca30ca5945169a23f/relationships
@@ -116,6 +132,151 @@ example {
               "product_id": "6aa97b2ca30ca5945169a23f"
             }
           ],
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Create Product Relationship Link - Missing Fields (422)
+  description: Real response captured 2026-09-15, empty body -- reveals both required top-level fields and the DTO name.
+
+  request: {
+    url: {{pim_base_url_v3}}/products/6aa97b2ca30ca5945169a23f/relationships
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {}
+    }
+  }
+
+  response: {
+    status: {
+      code: 422
+      text: Unprocessable Entity
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "ValidationError",
+              "description": "2 validation errors for ProductRelationshipLinkInputDto\nrelationship_id\n  Field required [type=missing, input_value={}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nrelated_products\n  Field required [type=missing, input_value={}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing"
+            }
+          ]
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Create Product Relationship Link - Wrong Nested Field Name (422)
+  description: Real response captured 2026-09-15, using "id" instead of "product_id" in related_products -- reveals the correct nested field name.
+
+  request: {
+    url: {{pim_base_url_v3}}/products/6aa97b2ca30ca5945169a23f/relationships
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "relationship_id": "6aa97b2ca30ca5945169a23e",
+        "related_products": [
+          { "id": "6aa97b2da30ca5945169a240" }
+        ]
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 422
+      text: Unprocessable Entity
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "ValidationError",
+              "description": "2 validation errors for ProductRelationshipLinkInputDto\nrelated_products.0.product_id\n  Field required [type=missing, input_value={'id': '6aa97b2da30ca5945169a240'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nrelated_products.0.id\n  Extra inputs are not permitted [type=extra_forbidden, input_value='6aa97b2da30ca5945169a240', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden"
+            }
+          ]
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Create Product Relationship Link - Success
+  description: Real response captured 2026-09-15, using the correct field name. quantity defaults to 1. related_product_id is present in the create response (unlike the GET collection).
+
+  request: {
+    url: {{pim_base_url_v3}}/products/6aa97b2ca30ca5945169a23f/relationships
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "relationship_id": "6aa97b2ca30ca5945169a23e",
+        "related_products": [
+          { "product_id": "6aa97b2da30ca5945169a240" }
+        ]
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 201
+      text: Created
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "relationship_id": "6aa97b2ca30ca5945169a23e",
+            "relationship_label": "wc_test_product_relationship",
+            "related_products": [
+              {
+                "related_product_id": "6aa97b2da30ca5945169a240",
+                "quantity": 1,
+                "last_modified": "2026-09-15T17:17:08.594000+00:00"
+              }
+            ],
+            "product_id": "6aa97b2ca30ca5945169a23f"
+          },
           "errors": []
         }
       '''

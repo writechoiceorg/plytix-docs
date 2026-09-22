@@ -1,7 +1,7 @@
 meta {
   name: Get Related Products Subpath (Bug - Empty)
   type: http
-  seq: 9
+  seq: 6
 }
 
 get {
@@ -46,6 +46,13 @@ docs {
   was also tested and 404s even for the real, just-linked product --
   consistent with the collection view being empty (see the second
   example below).
+
+  ## Re-test 2026-09-21 — still empty
+  Re-tested `GET /products/6a38f614c3d65a5f868b1a06/relationships/6a38f5d8c3d65a5f868b186c/related-products`
+  against the pre-existing Cross-sell relationship on the `BAG-10157`
+  fixture (confirmed active via `/related-products?account_id=...`).
+  Still returns `{"data": [], "errors": []}`. The bug persists as of
+  2026-09-21 (~6 days after initial discovery).
 }
 
 example {

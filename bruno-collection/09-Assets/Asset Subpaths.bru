@@ -1,0 +1,169 @@
+meta {
+  name: Asset Subpaths
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{pim_base_url_v3}}/assets/6aa021b72b6fd055ffb7ca9f/categories
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Accept: application/json
+}
+
+assert {
+  res.status: eq 200
+  res.body.data: isArray
+  res.body.data[0].name: eq WC Test Asset Category
+}
+
+docs {
+  Covers both `GET /assets/{id}/{path}` and `PATCH /assets/{id}/{path}` --
+  the two subpath operations on assets.
+
+  ## GET /assets/{id}/categories (confirmed live 2026-09-08)
+  Returns the fully expanded category objects linked to the asset,
+  confirming "Update Asset.bru"'s `PATCH`-applied `category_ids` linkage
+  actually persisted (not just reflected in that one response).
+
+  GET /assets/{id}/categories for a fixture not in any category (asset
+  `6a38f5d8c3d65a5f868b187a`, confirmed live 2026-09-21) returns
+  `{"data":[],"errors":[]}`.
+
+  Subpath discovery (`GET .../bogus_xyz`) raw field list:
+  `['id','account_id','assigned','content_type','checksum','extension',
+  'file_size','file_type','file_modified','filename','path',
+  'downloaded_from','n_catalogs','n_products','public','alt_text',
+  'status','created','modified']` -- matches Phase 0's earlier spot-check
+  on a different (pre-existing) asset.
+
+  ## PATCH /assets/{id}/{path} (confirmed live 2026-09-08)
+  `{path}` names a single field (here `alt_text`), and the request body
+  is that field's raw new value (a bare JSON string, not wrapped in an
+  object) -- not a partial-object PATCH like the root `PATCH /assets/{id}`
+  uses. Response is the **full** updated asset object, same shape as the
+  root PATCH. `PATCH /assets/{id}/{path}` has zero spec detail (matches
+  Phase 0's pattern for every subpath route).
+}
+
+example {
+  name: GET /assets/{id}/categories - Categories Linked
+  description: Confirmed live 2026-09-08. Returns fully expanded category objects after PATCH-applied linkage.
+
+  request: {
+    url: {{pim_base_url_v3}}/assets/6aa021b72b6fd055ffb7ca9f/categories
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [
+            {
+              "id": "6a9f1b862b6fd055ffb7c7de",
+              "name": "WC Test Asset Category",
+              "account_id": "6a38f5a5b22478f30bfd755c"
+            }
+          ],
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: GET /assets/{id}/categories - Not In Any Category (Empty)
+  description: Confirmed live 2026-09-21 against asset 6a38f5d8c3d65a5f868b187a. Returns empty data array.
+
+  request: {
+    url: {{pim_base_url_v3}}/assets/6a38f5d8c3d65a5f868b187a/categories
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: PATCH /assets/{id}/alt_text - Update Single Field via Subpath
+  description: Confirmed live 2026-09-08. Body is the raw new value for the named field, not a JSON object. Response is the full updated asset.
+
+  request: {
+    url: {{pim_base_url_v3}}/assets/6aa021b72b6fd055ffb7ca9f/alt_text
+    method: patch
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      "WC test via subpath"
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6aa021b72b6fd055ffb7ca9f",
+            "alt_text": "WC test via subpath",
+            "filename": "wc_test_asset_renamed.jpg",
+            "content_type": "image/jpeg",
+            "status": "ACTIVE"
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}

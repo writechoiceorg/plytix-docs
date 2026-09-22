@@ -30,36 +30,45 @@ assert {
 
 docs {
   Confirmed live 2026-09-15 against a disposable scratch product family
-  ("WC Test Product Family", id `6aa97212a30ca5945169a21e`, later
-  renamed and deleted -- see "Update and Delete Product Family.bru") and
-  the Phase 1 kept text-attribute fixture (`wc_test_text`, id
-  `6a9f1bf72b6fd055ffb7c7e1`) on "David's Dev Account". Brand-new
-  endpoint in the 2026-09-15 `openapi_pimv3.json` refresh -- links an
-  existing attribute to a product family.
+  ("WC Test Product Family", id `6aa97212a30ca5945169a21e`, later renamed and deleted --
+  see "Update and Delete Product Family.bru") and the Phase 1 kept text-attribute fixture
+  (`wc_test_text`, id `6a9f1bf72b6fd055ffb7c7e1`) on "David's Dev Account". Brand-new
+  endpoint in the 2026-09-15 `openapi_pimv3.json` refresh -- links an existing attribute
+  to a product family.
 
   ## Discovering the body shape
-  The spec declares no request schema at all for this operation (`{}`).
-  An empty `{}` body 422s naming the real DTO:
-  `{"errors":[{"name":"ValidationError","description":"1 validation error
-  for FamilyAttributeLinkInputDto\\nattribute_id\\n  Field required
+  The spec declares no request schema at all for this operation (`{}`). An empty `{}`
+  body 422s naming the real DTO: `{"errors":[{"name":"ValidationError","description":
+  "1 validation error for FamilyAttributeLinkInputDto\nattribute_id\n  Field required
   [...]"}]}` -- revealing both the DTO name (`FamilyAttributeLinkInputDto`,
-  undocumented in the spec) and the required field (`attribute_id`).
-  `level` is optional (one of `"parent_level"`/`"no_level"`/`"variant_level"`
-  presumably, mirroring `ProductFamilyCreateInputDto`'s
-  `attributes`/`parent_attributes`/`variant_attributes` split -- only
-  `"no_level"` was exercised live in this session).
+  undocumented in the spec) and the required field (`attribute_id`). `level` is optional
+  (one of `"parent_level"`/`"no_level"`/`"variant_level"` presumably, mirroring
+  `ProductFamilyCreateInputDto`'s `attributes`/`parent_attributes`/`variant_attributes`
+  split -- only `"no_level"` was exercised live in this session).
 
   ## Status code
-  `201 Created` -- matches this project's general convention for creates
-  (quirk #19), though the spec itself only declares a bare `200` for this
-  operation.
+  `201 Created` -- matches this project's general convention for creates (quirk #19),
+  though the spec itself only declares a bare `200` for this operation.
 
-  ## Related finding -- PATCH on the identity endpoint is gated
-  Once linked, attempting `PATCH /product-families/{id}/attributes/{attribute_id}`
-  to change `level` returned `403 {"errors":[{"name":"PermissionError",
-  "description":"Automatic inheritance is not available for this
-  account"}]}` -- a genuine account-level feature gate distinct from the
-  usual validation-error shapes, not previously seen in this project. See
+  ## Identity endpoint POST (also tested -- also absorbed here)
+  `openapi_pimv3.json` also declares `POST` on the identity path
+  (`/product-families/{id}/attributes/{attribute_id}`). Tested it against an
+  already-linked attribute: it behaves as an idempotent link-by-URL variant, not a
+  distinct action -- `409 {"errors":[{"name":"AlreadyExists","description":"Attribute
+  <id> is already linked to this product family."}]}` when the link already exists
+  (confirmed both with and without a body). Likely the same effect as the collection
+  POST but taking `attribute_id` from the URL instead of the body.
+
+  ## DELETE (also tested -- see Delete example below)
+  `DELETE /product-families/{id}/attributes/{attribute_id}` -- `204 No Content`.
+  A follow-up `GET` on the same pair returns `404` with a more specific error shape:
+  `{"errors":[{"name":"NotFoundError","description":"Association
+  (product_family_id=..., attribute_id=...) not found"}]}`.
+
+  ## PATCH on the identity endpoint is feature-gated
+  Once linked, `PATCH /product-families/{id}/attributes/{attribute_id}` to change
+  `level` returned `403 {"errors":[{"name":"PermissionError","description":"Automatic
+  inheritance is not available for this account"}]}` -- see
   "Update Family Attribute Level.bru".
 }
 
@@ -146,6 +155,116 @@ example {
             "level": "no_level"
           },
           "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Link Family Attribute via Identity POST - Already Linked (409)
+  description: Real response captured 2026-09-15 against a second disposable scratch family -- confirms the identity endpoint's POST verb is an idempotent link, not a distinct action.
+
+  request: {
+    url: {{pim_base_url_v3}}/product-families/6aa9727aa30ca5945169a226/attributes/6a9f1bf72b6fd055ffb7c7e1
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {}
+    }
+  }
+
+  response: {
+    status: {
+      code: 409
+      text: Conflict
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "AlreadyExists",
+              "description": "Attribute 6a9f1bf72b6fd055ffb7c7e1 is already linked to this product family."
+            }
+          ]
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Delete Family Attribute Link - Success (204)
+  description: Real response captured 2026-09-15, unlinking the attribute linked above. A follow-up GET returns 404 with the specific "Association not found" error shape.
+
+  request: {
+    url: {{pim_base_url_v3}}/product-families/6aa97212a30ca5945169a21e/attributes/6a9f1bf72b6fd055ffb7c7e1
+    method: delete
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 204
+      text: No Content
+    }
+    headers: {
+    }
+    body: {
+      type: text
+      content: ''
+    }
+  }
+}
+
+example {
+  name: Get Family Attribute by ID - After Delete (404, Association Not Found)
+  description: Real response captured 2026-09-15, follow-up GET immediately after the DELETE above -- note the more specific "Association (...) not found" error shape (more descriptive than the generic "Document with id ... not found" seen on other resources).
+
+  request: {
+    url: {{pim_base_url_v3}}/product-families/6aa97212a30ca5945169a21e/attributes/6a9f1bf72b6fd055ffb7c7e1
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 404
+      text: Not Found
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "NotFoundError",
+              "description": "Association (product_family_id=6aa97212a30ca5945169a21e, attribute_id=6a9f1bf72b6fd055ffb7c7e1) not found"
+            }
+          ]
         }
       '''
     }

@@ -28,27 +28,176 @@ assert {
 }
 
 docs {
-  Confirmed live 2026-09-07 against "David's Dev Account". **Fixture kept**
-  -- id `6a9f1b482b6fd055ffb7c7dc`, referenced by "Create Child Product
-  Category.bru" in this folder and by Phase 2b (`02-Products-v3`) as a
-  `category_ids` value once products are extended.
+  `POST /api/v3/product-categories` -- creates a root or child product category.
+
+  Confirmed live 2026-09-07 against "David's Dev Account".
+
+  ## Fixture
+  "WC Test Category" kept -- id `6a9f1b482b6fd055ffb7c7dc`, referenced by
+  "Create Child Product Category" example below and by Phase 2b
+  (`02-Products-v3`) as a `category_ids` value once products are extended.
+  Child "WC Test Child Category" kept -- id `6a9f1b542b6fd055ffb7c7dd`.
 
   ## Mutating status code confirmed
   `201 Created` -- matches `API V3.md`'s stated convention, **not**
-  `openapi_pimv3.json`'s declared `200`/`422`-only responses. First
-  confirmed mutating-status-code data point for `TESTING_PLAN.md`'s
-  "don't assume" ground rule -- log per resource as each phase creates
-  something.
+  `openapi_pimv3.json`'s declared `200`/`422`-only responses. First confirmed
+  mutating-status-code data point for `TESTING_PLAN.md`'s "don't assume" ground
+  rule -- logged per resource as each phase creates something.
 
-  Create-response shape is a subset of the full `GET`-by-id shape (missing
-  `account_id`, `parent_id`, `created` -- see "Get Product Category by
-  ID.bru").
+  ## Create-response shape
+  The create response is a subset of the full GET-by-id shape (missing
+  `account_id`, `parent_id`, `created` -- see "Get Product Category by ID.bru").
+
+  ## Nesting (parent_id)
+  Pass `parent_id` (a valid ObjectId) to create a child. `path` reflects the
+  full ancestry (e.g. `["WC Test Category", "WC Test Child Category"]`).
+  Re-fetching the parent afterward shows `n_children` incremented -- nesting
+  persists server-side.
 
   ## Not idempotent to re-run
-  Category names are unique per account. Re-running this exact request
-  after the fixture already exists returns `422
-  {"errors":[{"name":"ValidationError","description":"Category WC Test
-  Category already exists"}]}` instead of `201` -- expected once the
-  fixture is already in place, not a bug (see
-  `config/api-testing.config.md` quirk #25a).
+  Category names are unique per account. Re-running after the fixture exists
+  returns `422 {"errors":[{"name":"ValidationError","description":"Category WC
+  Test Category already exists"}]}` -- expected, not a bug (see
+  `config/api-testing.config.md` quirk #25a). Note: this is `422`/`ValidationError`,
+  distinct from attribute groups' `409`/`AlreadyExists` for the same kind of
+  conflict.
+}
+
+example {
+  name: Create Root Category - Success (201)
+  description: Confirmed live 2026-09-07. Minimal body with only name; create-response shape omits account_id, parent_id, and created compared to GET-by-id.
+
+  request: {
+    url: {{pim_base_url_v3}}/product-categories
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "WC Test Category"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 201
+      text: Created
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6a9f1b482b6fd055ffb7c7dc",
+            "name": "WC Test Category",
+            "path": ["WC Test Category"],
+            "slug": "wc-test-category",
+            "order": 1,
+            "n_children": 0
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Create Child Category - Success (201)
+  description: Confirmed live 2026-09-07. parent_id links to an existing root category; path reflects full ancestry and parent n_children increments to 1 after creation.
+
+  request: {
+    url: {{pim_base_url_v3}}/product-categories
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "WC Test Child Category",
+        "parent_id": "6a9f1b482b6fd055ffb7c7dc"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 201
+      text: Created
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6a9f1b542b6fd055ffb7c7dd",
+            "name": "WC Test Child Category",
+            "parent_id": "6a9f1b482b6fd055ffb7c7dc",
+            "path": ["WC Test Category", "WC Test Child Category"],
+            "slug": "wc-test-child-category",
+            "order": 1,
+            "n_children": 0
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Create Category - Missing Name (422)
+  description: Confirmed live 2026-09-07. Empty body triggers InputDTOValidationError; same 422 envelope shape as every other resource tested.
+
+  request: {
+    url: {{pim_base_url_v3}}/product-categories
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {}
+    }
+  }
+
+  response: {
+    status: {
+      code: 422
+      text: Unprocessable Entity
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "InputDTOValidationError",
+              "description": "name: Field required"
+            }
+          ]
+        }
+      '''
+    }
+  }
 }

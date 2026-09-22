@@ -28,16 +28,61 @@ assert {
 }
 
 docs {
-  Confirmed live 2026-09-08 against "David's Dev Account". Creates
-  nothing -- **this account does not have the Ecatalogs feature enabled
-  either**, same pattern as PDF Catalogs (Phase 3c):
-  `{"data":[],"errors":[{"name":"ValidationError","description":"Cannot
-  create new items the feature ecatalogs for account
-  6a38f5a5b22478f30bfd755c"}]}`.
+  Confirmed live 2026-09-08 against "David's Dev Account". Creates nothing -- this
+  account does not have the Ecatalogs feature enabled, same pattern as PDF Catalogs
+  (Phase 3c): `{"data":[],"errors":[{"name":"ValidationError","description":"Cannot
+  create new items the feature ecatalogs for account 6a38f5a5b22478f30bfd755c"}]}`.
 
-  The body itself (`name` only, matching `ECatalogCreateInputDto`'s
-  single required field) is otherwise valid. This account has two
-  distribution-output features gated off (PDF Catalogs, now Ecatalogs) --
-  worth asking Plytix whether Dev accounts routinely lack these, or
-  whether this specific account's plan/tier excludes them.
+  The body itself (`name` only, matching `ECatalogCreateInputDto`'s single required
+  field) is otherwise valid. This account has two distribution-output features gated
+  off (PDF Catalogs, now Ecatalogs) -- worth asking Plytix whether Dev accounts
+  routinely lack these, or whether this specific account's plan/tier excludes them.
+
+  Despite `POST` being blocked, `GET /ecatalogs` and `GET /ecatalogs/{id}` work fine
+  against a pre-existing "Plytix Brand Portal" ecatalog (id `6a38f615c3d65a5f868b1a41`).
+}
+
+example {
+  name: Create Ecatalog - Feature Not Enabled (422)
+  description: Real response captured 2026-09-08. The account-level feature gate blocks creation regardless of request body validity.
+
+  request: {
+    url: {{pim_base_url_v3}}/ecatalogs
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "WC Test Ecatalog"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 422
+      text: Unprocessable Entity
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "ValidationError",
+              "description": "Cannot create new items the feature ecatalogs for account 6a38f5a5b22478f30bfd755c"
+            }
+          ]
+        }
+      '''
+    }
+  }
 }

@@ -1,7 +1,7 @@
 meta {
   name: Get Product Category by ID
   type: http
-  seq: 5
+  seq: 4
 }
 
 get {
@@ -21,27 +21,74 @@ assert {
 }
 
 docs {
-  Confirmed live 2026-09-07 against "David's Dev Account". Fetches the
-  parent category created in "Create Product Category.bru" -- `n_children`
-  is now `1` after the child was created, confirming nesting persisted.
+  `GET /api/v3/product-categories/{id}` -- fetch a single product category by
+  its Mongo ObjectId.
+
+  Confirmed live 2026-09-07 against "David's Dev Account". Fetches the parent
+  category created in "Create Product Category.bru" -- `n_children` is `1` after
+  the child was created, confirming nesting persisted.
 
   ## Subpath discovery (Phase 0 technique reused)
   `GET /product-categories/{id}/bogus_xyz` -- 400
-  `{"errors":[{"name":"ValueError","description":"Field 'bogus_xyz' not
-  found. Available fields: ['id','account_id','name','parent_id','path',
-  'slug','order','n_children','created','modified']"}]}`. Unlike products,
-  this raw field list matches the spec's `ProductCategoryGetOutputDto`
-  exactly (no undocumented internal fields).
+  `{"errors":[{"name":"ValueError","description":"Field 'bogus_xyz' not found.
+  Available fields: ['id','account_id','name','parent_id','path','slug','order',
+  'n_children','created','modified']"}]}`. Unlike products, this raw field list
+  matches the spec's `ProductCategoryGetOutputDto` exactly (no undocumented
+  internal fields).
 
-  Also confirmed: `GET /product-categories/{child_id}/parent` -- 200,
-  returns the expanded parent object (a computed subpath, same as
-  products' `categories`/`assets` subpaths -- not in the raw field list
-  above but still valid).
+  Also confirmed: `GET /product-categories/{child_id}/parent` -- 200, returns
+  the expanded parent object (a computed subpath, same as products'
+  `categories`/`assets` subpaths -- not in the raw field list above but valid).
 
-  ## Identifier flexibility -- confirms Phase 0's product finding generalizes
+  ## Identifier flexibility -- only ObjectId works
   `GET /product-categories/WC%20Test%20Category` (by name instead of ID) --
-  **422**, same `ValidationError`/"Id must be of type PydanticObjectId"
-  shape as `GET /products/<sku>` in Phase 0. Only the Mongo ObjectId works
-  as `{identifier}` on this resource too -- `API V3.md`'s identifier
-  flexibility claim doesn't hold here either.
+  **422**, same `ValidationError`/"Id must be of type PydanticObjectId" shape
+  as `GET /products/<sku>` in Phase 0. Only the Mongo ObjectId works as
+  `{identifier}` on this resource -- `API V3.md`'s identifier flexibility
+  claim doesn't hold here.
+}
+
+example {
+  name: Get Category by ID - Success (200)
+  description: Confirmed live 2026-09-21. Full GET-by-id shape includes account_id, parent_id, and created fields absent from the create response.
+
+  request: {
+    url: {{pim_base_url_v3}}/product-categories/6a38f5d8c3d65a5f868b182e
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6a38f5d8c3d65a5f868b182e",
+            "account_id": "6a38f5a5b22478f30bfd755c",
+            "name": "Website Taxonomy",
+            "parent_id": null,
+            "path": ["Website Taxonomy"],
+            "slug": "website-taxonomy",
+            "order": 2,
+            "n_children": 4,
+            "created": "2026-06-22T08:44:08.293000",
+            "modified": "2026-06-22T08:44:08.293000"
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
 }

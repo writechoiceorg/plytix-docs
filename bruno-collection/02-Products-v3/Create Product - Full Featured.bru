@@ -1,7 +1,7 @@
 meta {
-  name: Create Product - Full Featured
+  name: Create Product
   type: http
-  seq: 11
+  seq: 4
 }
 
 post {
@@ -32,38 +32,254 @@ assert {
 }
 
 docs {
-  Confirmed live 2026-09-08 against "David's Dev Account", wiring together
-  every kept fixture from Phase 1 and Phase 2a. **Fixture kept** -- id
-  `6aa022262b6fd055ffb7caa4`, for Phase 3/4 (Pim Product Lists, Channels,
-  Ecatalogs, etc.) to have something real to query.
-  
-  `201 Created`.
-  
-  ## attributes map is keyed by attribute NAME, not id
-  `{"attributes": {"wc_test_text": "..."}}` -- confirmed via a separate
-  scratch product (created and deleted in this same test run) that this
-  is the expected key, not the attribute's Mongo `id`. The response's
-  `attributes` map also includes several pre-existing system/completeness
-  attributes not sent in this request (`amazon_ready`,
-  `basic_information_completeness`, `website_ready`, etc., all numeric
-  scores) -- these appear to be account-level default attributes applied
-  to every product automatically, not something this request created.
-  
-  ## category_ids DOES link on create -- differs from assets
-  Unlike `09-Assets/Create Asset.bru` (where the identical `category_ids`
-  field is silently ignored on `POST`), it **works immediately** here: a
-  follow-up `GET /products/{id}/categories` shows both categories fully
-  linked. Confirms the create-time relationship-linking behavior is
-  resource-specific, not a blanket rule either way.
-  
-  ## thumbnail_id also persists on create
-  Unlike the array-typed `category_ids` on assets, this single-reference
-  field round-trips correctly in the create response itself.
-  
-  ## Not idempotent to re-run
-  `sku` is unique per account. Re-running this request once the fixture
-  exists returns `409 Conflict {"errors":[{"name":"AlreadyExists",
-  "description":"product data validation failed"}]}` -- same
-  `409`/`AlreadyExists` family as attribute groups/attributes (Phase 1),
-  not categories' `422` (`config/api-testing.config.md` quirk #33).
+  `POST /api/v3/products` — create a new product. Confirmed live 2026-09-07/08
+  against "David's Dev Account". See examples below for: full-featured create (201),
+  parent product for a variant flow (201), and missing required field (422).
+
+  ## Key findings
+
+  ### attributes are keyed by attribute NAME, not id
+  `{"attributes": {"wc_test_text": "..."}}` — confirmed via a scratch product
+  that the key is the attribute's name, not its Mongo `id`. The response's
+  `attributes` map also includes account-level system/completeness attributes
+  applied automatically to every product (`amazon_ready`,
+  `basic_information_completeness`, `website_ready`, etc.).
+
+  ### category_ids links on create — differs from assets
+  Unlike `POST /assets` (where `category_ids` is silently ignored on create),
+  it works immediately here: a follow-up `GET /products/{id}/categories` shows
+  both categories fully linked. Relationship-array fields on create are
+  resource-specific — don't assume either way.
+
+  ### thumbnail_id round-trips on create
+  This single-reference field persists in the create response. Contrast with
+  `category_ids` on assets, which does not.
+
+  ### 201 (not the spec's 200)
+  `openapi_pimv3.json` declares `200` only. Live: **201 Created**.
+
+  ### Not idempotent — 409 on duplicate SKU
+  Re-running once the fixture exists returns:
+  `409 Conflict {"errors":[{"name":"AlreadyExists","description":"product data
+  validation failed"}]}` — same `AlreadyExists` family as attribute groups
+  (Phase 1), not categories' `422` (quirk #33).
+
+  ### Parent/variant products (Flow 2, confirmed 2026-09-08)
+  A variant is created via a second `POST /products` with `parent_id` set to
+  the parent's id. After creating the variant:
+  - Re-fetching the parent: `product_level` flips from 0 (standalone) to 1
+    (parent); `num_variations` increments 0→1.
+  - The family's `total_products` count (`GET /product-families/{id}`)
+    updates live from 7 to 9.
+  - `overwritten_attributes` stays empty when no attribute values are set
+    on either product — attribute-inheritance-copying behaviour is not
+    exercised unless values are explicitly set.
+
+  ### 422 error envelope
+  `{"data":[],"errors":[{"name":"InputDTOValidationError","description":
+  "<field>: Field required"}]}` — a flat `errors` array of `{name, description}`
+  objects, with `description` naming the missing field directly. Not FastAPI's
+  default `HTTPValidationError` shape.
+}
+
+example {
+  name: 201 - Full Featured Product
+  description: Confirmed live 2026-09-08. Fixture kept as id 6aa022262b6fd055ffb7caa4. attributes keyed by name (not id). System completeness attributes appear automatically. category_ids links immediately (confirmed via GET /categories follow-up).
+
+  request: {
+    url: {{pim_base_url_v3}}/products
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "sku": "WC-TEST-FULL-001",
+        "label": "WC Test Full Product",
+        "category_ids": ["6a9f1b482b6fd055ffb7c7dc", "6a9f1b542b6fd055ffb7c7dd"],
+        "attributes": {"wc_test_text": "WC full-featured test value"},
+        "thumbnail_id": "6aa021b72b6fd055ffb7ca9f"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 201
+      text: Created
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6aa022262b6fd055ffb7caa4",
+            "account_id": "6a38f5d5c3d65a5f868b1869",
+            "sku": "WC-TEST-FULL-001",
+            "label": "WC Test Full Product",
+            "gtin": null,
+            "status": null,
+            "thumbnail_id": "6aa021b72b6fd055ffb7ca9f",
+            "attributes": {
+              "wc_test_text": "WC full-featured test value",
+              "amazon_ready": 0.0,
+              "basic_information_completeness": 0.0,
+              "english_content_completeness": 0.0,
+              "google_shopping_completeness": 0.0,
+              "marketing_ready": 0.0,
+              "product_specifications_completeness": 0.0,
+              "shopify_ready": 0.0,
+              "spanish_content_completeness": 0.0,
+              "website_ready": 0.0
+            },
+            "parent_id": null,
+            "num_variations": 0,
+            "product_level": 0,
+            "product_type": "SINGLE",
+            "product_family_id": null,
+            "product_family_model_id": null,
+            "overwritten_attributes": [],
+            "created": "2026-09-08T14:22:30.000000+00:00",
+            "modified": "2026-09-08T14:22:30.000000+00:00",
+            "created_user_audit": {
+              "type": "API",
+              "user_email": "TestDH",
+              "user_id": "6a96a370a3fb0431c692820d"
+            },
+            "modified_user_audit": {
+              "type": "API",
+              "user_email": "TestDH",
+              "user_id": "6a96a370a3fb0431c692820d"
+            }
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 201 - Parent Product (Variant Flow)
+  description: Confirmed live 2026-09-08 (USER_FLOWS.md Flow 2). product_level starts at 0 (standalone) and flips to 1 after a variant is created under it with parent_id set to this product's id. Both parent and variant were deleted in the same test run.
+
+  request: {
+    url: {{pim_base_url_v3}}/products
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "sku": "WC-TEST-PARENT-001",
+        "label": "WC Test Parent",
+        "product_family_id": "6a38f5d8c3d65a5f868b186e"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 201
+      text: Created
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6aa04a322b6fd055ffb7cae4",
+            "account_id": "6a38f5d5c3d65a5f868b1869",
+            "sku": "WC-TEST-PARENT-001",
+            "label": "WC Test Parent",
+            "gtin": null,
+            "status": null,
+            "thumbnail_id": null,
+            "attributes": {
+              "amazon_ready": 0.0,
+              "basic_information_completeness": 0.0,
+              "website_ready": 0.0
+            },
+            "parent_id": null,
+            "num_variations": 0,
+            "product_level": 0,
+            "product_type": "SINGLE",
+            "product_family_id": "6a38f5d8c3d65a5f868b186e",
+            "product_family_model_id": null,
+            "overwritten_attributes": [],
+            "created": "2026-09-08T15:10:00.000000+00:00",
+            "modified": "2026-09-08T15:10:00.000000+00:00",
+            "created_user_audit": {
+              "type": "API",
+              "user_email": "TestDH",
+              "user_id": "6a96a370a3fb0431c692820d"
+            },
+            "modified_user_audit": {
+              "type": "API",
+              "user_email": "TestDH",
+              "user_id": "6a96a370a3fb0431c692820d"
+            }
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 422 - Missing Required Field (sku)
+  description: Confirmed live 2026-09-07. Omitting sku triggers a 422 with Plytix's custom error envelope — a flat errors array of {name, description} objects, NOT FastAPI's default HTTPValidationError shape.
+
+  request: {
+    url: {{pim_base_url_v3}}/products
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "label": "Test No SKU"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 422
+      text: Unprocessable Entity
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "InputDTOValidationError",
+              "description": "sku: Field required"
+            }
+          ]
+        }
+      '''
+    }
+  }
 }

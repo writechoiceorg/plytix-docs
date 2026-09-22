@@ -21,12 +21,93 @@ assert {
 }
 
 docs {
-  Confirmed live 2026-09-08. The model belonging to the "Accessories"
-  family (`GET /product-family-models`, filtered to
-  `product_family_id: 6a38f5d8c3d65a5f868b186e`). Shape is richer than
-  `product-families` itself: `variant_attribute_labels`,
-  `parent_attribute_labels`, `no_level_attribute_labels` (each an array
-  of `"attributes.<name>"` strings) describe which attributes apply at
-  which level of the variation hierarchy -- matches
-  `ProductFamilyModelOutputDto`. Also read-only, no create endpoint.
+  Confirmed live 2026-09-08 against the "Accessories" family model. The model belongs
+  to the "Accessories" family (`product_family_id: 6a38f5d8c3d65a5f868b186e`). Shape is
+  richer than `product-families` itself: `variant_attribute_labels`,
+  `parent_attribute_labels`, `no_level_attribute_labels` (each an array of
+  `"attributes.<name>"` strings) describe which attributes apply at which level of the
+  variation hierarchy -- matches `ProductFamilyModelOutputDto`. Also read-only, no
+  create endpoint.
+
+  ## Finding from 2026-09-21 re-test
+  `GET /product-family-models/<family_id>` (using the family id directly) returned
+  `{"detail": "Not Found"}` -- the correct id to use here is the **model id**
+  (`6a38f5d8c3d65a5f868b1871`), not the family id. Discover the model id via
+  `GET /product-families/{id}` and use `total_models` to confirm one exists, then use
+  `GET /product-family-models` (if supported) or look up the model id from the
+  family's detail response. The family itself does not directly expose `model_id`
+  in its response shape -- this is a discovery gap to flag to Plytix.
+}
+
+example {
+  name: Get Product Family Model by ID - Success
+  description: Real response captured 2026-09-08 against the "Accessories" family model (id 6a38f5d8c3d65a5f868b1871).
+
+  request: {
+    url: {{pim_base_url_v3}}/product-family-models/6a38f5d8c3d65a5f868b1871
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6a38f5d8c3d65a5f868b1871",
+            "product_family_id": "6a38f5d8c3d65a5f868b186e",
+            "variant_attribute_labels": [],
+            "parent_attribute_labels": ["attributes.sku", "attributes.label"],
+            "no_level_attribute_labels": ["attributes.description", "attributes.thumbnail_id"]
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Get Product Family Model - Wrong ID Type (404)
+  description: Confirmed 2026-09-21 -- using the family id (not the model id) returns a bare 404 JSON, not the standard NotFoundError envelope.
+
+  request: {
+    url: {{pim_base_url_v3}}/product-family-models/6a38f5d8c3d65a5f868b186e
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 404
+      text: Not Found
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "detail": "Not Found"
+        }
+      '''
+    }
+  }
 }

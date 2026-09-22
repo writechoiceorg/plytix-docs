@@ -22,37 +22,183 @@ assert {
 }
 
 docs {
-  Confirmed live 2026-09-04 against "David's Dev Account" (see
-  `02-Products-v3/Get Access Token (Dev).bru`, in this same folder so a
-  folder-level `bru run "02-Products-v3/" --env "Dev"` covers both without
-  mixing in the Sandbox-only requests in `01-Authentication/`). Run with
-  `--env "Dev"`, after running that auth request first to populate
-  `access_token`.
-  
-  ## What it does
-  `GET /api/v3/products` with repeated `_fields` query params to select a
-  sparse field set, exactly as described by Plytix and by `API V3.md`'s
-  `_fields` section. Matches `openapi_pimv3.json`'s `SearchProductsResponse`
-  schema exactly: top-level `data` (array of product objects), `errors`
-  (array, empty on success), `pagination` (object with `next_page`, a full
-  URL for the next page -- confirms cursor/page-link style pagination, not
-  offset/limit params).
-  
+  `GET /api/v3/products` — search, filter, and page through products. All query
+  parameters (`_fields`, `_page`, `_page_size`, `_sort_by`, filter params) are
+  undeclared in `openapi_pimv3.json` but confirmed working live (2026-09-04/07
+  against "David's Dev Account"). See `config/api-testing.config.md` quirks #7-13.
+
   ## This resolves the v3-unreachable blocker
-  v3 is live and matches its documented shape. It was unreachable earlier
-  only because it was tested against the wrong host/account
-  (`pim.plytix.com` under the "API Docs" account) -- v3 for this engagement
-  is served from a separate DEV host/account. See
-  `config/api-testing.config.md` for the full history.
-  
-  ## Spec discrepancy found
-  `openapi_pimv3.json`'s `GET /api/v3/products` operation declares **zero**
-  query parameters -- no `_fields`, no pagination params. But `_fields`
-  demonstrably works live exactly as documented in `API V3.md` (the prose
-  doc, not the spec). Per this repo's trust order (verified live behavior >
-  raw materials > spec for *behavior*, but spec > prose for *shapes* where
-  they conflict) -- here they don't conflict on shape, only on
-  completeness: the spec is simply missing parameters that exist and work.
-  Flag to Plytix: `openapi_pimv3.json`'s parameter list for this endpoint
-  (and possibly others) is incomplete/stale relative to the real API.
+  v3 is live and matches its documented shape. It was unreachable earlier only
+  because it was tested against the wrong host/account (`pim.plytix.com` under the
+  "API Docs" account) — v3 for this engagement is served from a separate DEV
+  host/account. See `config/api-testing.config.md` for the full history.
+
+  ## Spec discrepancy — missing query parameters
+  `openapi_pimv3.json`'s `GET /api/v3/products` declares **zero** query params.
+  All of the following work live and must be flagged to Plytix:
+  - `_fields=<field>` (repeatable): sparse field selection.
+  - `_page` + `_page_size`: page-number pagination. Default page size is 25.
+  - `_sort_by=<field>`: ascending sort.
+  - `<field>=<value>`: plain field equality filter (e.g. `sku=BAG-10157`).
+  - `<field>[<op>]=<value>`: operator filter (e.g. `created[gt]=2026-01-01`).
+  - `<related>.<field>=<value>`: related-entity dot filter (e.g. `categories.name=Backpacks`).
+  - `attributes.<name>=<value>` / `attributes.<name>[<op>]=<value>`: custom attribute filters.
+
+  ## `_fields` / `_expand` edge cases
+  - `_fields=category_ids` **400s** (`HiddenFieldError: Field 'category_ids' does not
+    exist in model 'Product'`). Use `_fields=categories` — returns fully expanded
+    category objects.
+  - `_fields=relationships` is **silently dropped** (200, field absent). The real
+    field is `product_relationships`.
+  - `_expand=<relationship>` **400s** (`InvalidFieldError`). Expansion is automatic
+    per `_fields` value — no `_expand` needed.
+
+  ## Pagination (confirmed 2026-09-07)
+  - Default page size: 25. `pagination.next_page` is always a full URL (cursor style).
+  - `_page` + `_page_size`: works (see Pagination example below).
+  - `_offset` + `_limit`: **400** `InvalidFieldError` — not supported on this resource.
+
+  ## Filter dialect
+  `API V3.md` lists a JSON-object "Current" syntax and a query-string "Possible
+  Alternative". v3 implements the **query-string** dialect. Confirmed live: plain
+  field (`sku=BAG-10157`), operator (`created[gt]=2026-01-01`), related-entity dot
+  (`categories.name=Backpacks`), custom attribute (`attributes.brand[icontains]=Plytix`).
+
+  See examples below for representative responses for each scenario.
+}
+
+example {
+  name: Sparse Field Selection
+  description: Confirmed live 2026-09-04. Two _fields params return only sku and status per product; pagination.next_page carries the cursor forward.
+
+  request: {
+    url: {{pim_base_url_v3}}/products?_fields=sku&_fields=status
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [
+            {
+              "id": "6a38f614c3d65a5f868b1a06",
+              "sku": "BAG-10157",
+              "status": "Completed"
+            },
+            {
+              "id": "6aa022262b6fd055ffb7caa4",
+              "sku": "WC-TEST-FULL-001",
+              "status": null
+            }
+          ],
+          "errors": [],
+          "pagination": {
+            "next_page": "https://pim.dev.plytix.com/api/v3/products?_fields=sku&_fields=status&_page=2"
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Pagination - _page / _page_size
+  description: Confirmed live 2026-09-07. _page_size=2 returns exactly 2 items; pagination.next_page contains _page=2 and preserves all other query params. Note: _offset/_limit returns 400 InvalidFieldError and is not supported.
+
+  request: {
+    url: {{pim_base_url_v3}}/products?_fields=id&_fields=sku&_page=1&_page_size=2
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [
+            {
+              "id": "6a38f614c3d65a5f868b1a06",
+              "sku": "BAG-10157"
+            },
+            {
+              "id": "6a38f614c3d65a5f868b1a07",
+              "sku": "BAG-10158"
+            }
+          ],
+          "errors": [],
+          "pagination": {
+            "next_page": "https://pim.dev.plytix.com/api/v3/products?_fields=id&_fields=sku&_page=2&_page_size=2"
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Plain Field Filter - sku
+  description: Confirmed live 2026-09-07. sku=BAG-10157 returns exactly one matching product; pagination.next_page is null when the result set is exhausted. Operator (created[gt]=...) and related-entity dot (categories.name=Backpacks) filters also confirmed working in the same query-string dialect.
+
+  request: {
+    url: {{pim_base_url_v3}}/products?_fields=id&_fields=sku&sku=BAG-10157
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [
+            {
+              "id": "6a38f614c3d65a5f868b1a06",
+              "sku": "BAG-10157"
+            }
+          ],
+          "errors": [],
+          "pagination": {
+            "next_page": null
+          }
+        }
+      '''
+    }
+  }
 }

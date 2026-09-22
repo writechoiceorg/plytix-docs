@@ -5,7 +5,7 @@ meta {
 }
 
 get {
-  url: {{pim_base_url_v3}}/product-categories?_fields=id&_fields=name&_page_size=3
+  url: {{pim_base_url_v3}}/product-categories?_page_size=3
   body: none
   auth: none
 }
@@ -21,11 +21,87 @@ assert {
 }
 
 docs {
-  Confirmed live 2026-09-07 against "David's Dev Account".
+  `GET /api/v3/product-categories` -- list all product categories for the account.
 
-  `GET /api/v3/product-categories` -- `_fields` and `_page_size` both work
-  (same query-param behavior confirmed for `/products` in Phase 0).
-  Account already has real pre-existing categories (e.g. "Electronics",
-  "General Office Supplies", "Outerwear") -- read-only fixtures, not
-  created by this test.
+  Confirmed live 2026-09-07 against "David's Dev Account". `_fields` and
+  `_page_size` both work (same query-param behavior confirmed for `/products`
+  in Phase 0). Account already has real pre-existing categories (e.g.
+  "Electronics", "General Office Supplies", "Outerwear") -- read-only fixtures,
+  not created by this test.
+
+  Pagination follows the same `pagination.next_page` cursor pattern as
+  `/products` -- a full URL when more pages exist, null when exhausted.
+}
+
+example {
+  name: List Categories - Success (200, paginated)
+  description: Confirmed live 2026-09-21. _page_size=3 returns three categories; pagination.next_page carries a full cursor URL to page 2.
+
+  request: {
+    url: {{pim_base_url_v3}}/product-categories?_page_size=3
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [
+            {
+              "id": "6a38f5d8c3d65a5f868b182e",
+              "account_id": "6a38f5a5b22478f30bfd755c",
+              "name": "Website Taxonomy",
+              "path": ["Website Taxonomy"],
+              "slug": "website-taxonomy",
+              "order": 2,
+              "n_children": 4,
+              "created": "2026-06-22T08:44:08.293000",
+              "modified": "2026-06-22T08:44:08.293000"
+            },
+            {
+              "id": "6a38f5d8c3d65a5f868b182f",
+              "account_id": "6a38f5a5b22478f30bfd755c",
+              "name": "Shopping Totes",
+              "parent_id": "6a38f5d8c3d65a5f868b1830",
+              "path": ["Google Shopping Taxonomy", "Luggage & Bags", "Shopping Totes"],
+              "slug": "shopping-totes",
+              "order": 1,
+              "n_children": 0,
+              "created": "2026-06-22T08:44:08.293000",
+              "modified": "2026-06-22T08:44:08.293000"
+            },
+            {
+              "id": "6a38f5d8c3d65a5f868b1832",
+              "account_id": "6a38f5a5b22478f30bfd755c",
+              "name": "Electronics",
+              "parent_id": "6a38f5d8c3d65a5f868b1831",
+              "path": ["Google Shopping Taxonomy", "Electronics"],
+              "slug": "electronics",
+              "order": 2,
+              "n_children": 1,
+              "created": "2026-06-22T08:44:08.293000",
+              "modified": "2026-06-22T08:44:08.293000"
+            }
+          ],
+          "errors": [],
+          "pagination": {
+            "next_page": "https://pim.dev.plytix.com/api/v3/product-categories?_page_size=3&_page=2"
+          }
+        }
+      '''
+    }
+  }
 }

@@ -46,3 +46,48 @@ docs {
   to Plytix/the user: can this feature be enabled on "David's Dev
   Account" so PDF catalog creation can actually be tested?
 }
+
+example {
+  name: Create PDF Catalog - Feature Not Enabled (422)
+  description: Confirmed live 2026-09-08. Account-level feature gate; a valid request body still 422s when the pdfs feature is not enabled for the account.
+
+  request: {
+    url: {{pim_base_url_v3}}/pdf-catalogs
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "WC Test PDF Catalog"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 422
+      text: Unprocessable Entity
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "ValidationError",
+              "description": "Cannot create new items the feature pdfs for account 6a38f5a5b22478f30bfd755c"
+            }
+          ]
+        }
+      '''
+    }
+  }
+}

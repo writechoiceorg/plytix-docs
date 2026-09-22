@@ -1,7 +1,7 @@
 meta {
   name: Get Family Attributes Collection
   type: http
-  seq: 6
+  seq: 5
 }
 
 get {
@@ -21,30 +21,41 @@ assert {
 }
 
 docs {
-  Confirmed live 2026-09-15 against the real pre-existing "Accessories"
-  product family (id `6a38f5d8c3d65a5f868b186e`) on "David's Dev Account"
-  -- read-only `GET`, safe against real data. New in the 2026-09-15
-  `openapi_pimv3.json` refresh: `GET /product-families/{product_family_id}/attributes`
-  lists every attribute currently linked to that family, scoped
-  automatically by the path's `product_family_id` (unlike the top-level
-  `GET /family-attributes`, this nested collection endpoint is correctly
+  Confirmed live 2026-09-15 and 2026-09-21 against the real pre-existing "Accessories"
+  product family (id `6a38f5d8c3d65a5f868b186e`) on "David's Dev Account" -- read-only
+  `GET`, safe against real data.
+
+  ## GET collection: /product-families/{id}/attributes
+  New in the 2026-09-15 `openapi_pimv3.json` refresh. Lists every attribute currently
+  linked to that family, scoped automatically by the path's `product_family_id` (unlike
+  the top-level `GET /family-attributes`, this nested collection endpoint is correctly
   scoped -- no cross-tenant leak observed here).
 
-  ## Key fields
-  Same flat shape as the top-level endpoint: `account_id`, `level`,
-  `product_family_id`, `attribute_id` per entry. No pagination wrapper
-  observed on this nested collection (25 entries returned in one page for
-  "Accessories" with no `next_page`).
+  No pagination wrapper observed on this nested collection (25 entries returned in one
+  page for "Accessories" with no `next_page`). The spec declares this operation's
+  response schema as a bare empty `{}` -- no output DTO reference at all, unlike almost
+  every other list endpoint in the spec. Treat the shape confirmed here as ground truth
+  over the spec.
 
-  The spec (`openapi_pimv3.json`) declares this operation's response
-  schema as a bare empty `{}` -- no output DTO reference at all, unlike
-  almost every other list endpoint in the spec. Treat the shape confirmed
-  here as ground truth over the spec.
+  ## GET by ID: /product-families/{id}/attributes/{attribute_id}
+  New in the 2026-09-15 refresh. Fetches a single family<->attribute link record by both
+  path segments.
+
+  ## Key fields (both views)
+  Each record: `account_id`, `level` (`"parent_level"` / `"no_level"` / `null`),
+  `product_family_id`, `attribute_id`.
+
+  ## Subpath discovery on the family root resource
+  `GET /product-families/{id}/bogus_xyz` -- `400 {"errors":[{"name":"ValueError",
+  "description":"Field 'bogus_xyz' not found. Available fields: ['id','account_id',
+  'name','total_products','total_attributes','total_models','created','modified']"}]}`
+  -- matches `ProductFamilyOutputDto` exactly, no undocumented internal fields (same
+  clean pattern as `product-categories`/`relationships`, unlike products/assets).
 }
 
 example {
   name: Get Family Attributes Collection - Success
-  description: Real response captured 2026-09-15 against the real "Accessories" product family, trimmed to the first 5 of 25 entries for brevity (full response has no pagination and returns all 25).
+  description: Real response captured 2026-09-15 against the real "Accessories" product family, trimmed to 3 of 25 entries (full response has no pagination and returns all 25 at once).
 
   request: {
     url: {{pim_base_url_v3}}/product-families/6a38f5d8c3d65a5f868b186e/attributes
@@ -71,10 +82,47 @@ example {
           "data": [
             {"account_id": "6a38f5a5b22478f30bfd755c", "level": "no_level", "product_family_id": "6a38f5d8c3d65a5f868b186e", "attribute_id": "6a38f613c3d65a5f868b19b1"},
             {"account_id": "6a38f5a5b22478f30bfd755c", "level": "parent_level", "product_family_id": "6a38f5d8c3d65a5f868b186e", "attribute_id": "6a38f613c3d65a5f868b19b2"},
-            {"account_id": "6a38f5a5b22478f30bfd755c", "level": "parent_level", "product_family_id": "6a38f5d8c3d65a5f868b186e", "attribute_id": "6a38f613c3d65a5f868b19b3"},
-            {"account_id": "6a38f5a5b22478f30bfd755c", "level": "parent_level", "product_family_id": "6a38f5d8c3d65a5f868b186e", "attribute_id": "6a38f613c3d65a5f868b19b4"},
-            {"account_id": "6a38f5a5b22478f30bfd755c", "level": "parent_level", "product_family_id": "6a38f5d8c3d65a5f868b186e", "attribute_id": "6a38f613c3d65a5f868b19b8"}
+            {"account_id": "6a38f5a5b22478f30bfd755c", "level": "parent_level", "product_family_id": "6a38f5d8c3d65a5f868b186e", "attribute_id": "6a38f613c3d65a5f868b19b3"}
           ],
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Get Family Attribute by ID - Success
+  description: Real response captured 2026-09-15 and 2026-09-21 against a real pre-existing family<->attribute link on the "Accessories" family.
+
+  request: {
+    url: {{pim_base_url_v3}}/product-families/6a38f5d8c3d65a5f868b186e/attributes/6a38f613c3d65a5f868b19b1
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "account_id": "6a38f5a5b22478f30bfd755c",
+            "level": "no_level",
+            "product_family_id": "6a38f5d8c3d65a5f868b186e",
+            "attribute_id": "6a38f613c3d65a5f868b19b1"
+          },
           "errors": []
         }
       '''

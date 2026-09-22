@@ -21,8 +21,43 @@ assert {
 }
 
 docs {
-  Confirmed live 2026-09-08 against "David's Dev Account". `GET` works
-  fine (`200`, empty `data: []` -- this account has zero PDF catalogs).
-  See "Create Pdf Catalog - Feature Not Enabled (422).bru" for why none
-  can be created here.
+  Confirmed live 2026-09-08 and 2026-09-21 against "David's Dev Account".
+  `GET` works fine (`200`, empty `data: []` -- this account has zero PDF
+  catalogs because the feature is not enabled). See "Create Pdf Catalog -
+  Feature Not Enabled (422).bru" for why none can be created here.
+}
+
+example {
+  name: List PDF Catalogs - Feature Not Enabled (Empty)
+  description: Confirmed live 2026-09-08 and 2026-09-21. GET succeeds even when the PDF Catalogs feature is not enabled; returns empty data array.
+
+  request: {
+    url: {{pim_base_url_v3}}/pdf-catalogs
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [],
+          "pagination": {}
+        }
+      '''
+    }
+  }
 }

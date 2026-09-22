@@ -1,5 +1,5 @@
 meta {
-  name: Create Text Attribute
+  name: Create Product Attribute
   type: http
   seq: 2
 }
@@ -29,27 +29,411 @@ assert {
 }
 
 docs {
-  Confirmed live 2026-09-07 against "David's Dev Account". **Fixture
-  kept** -- id `6a9f1bf72b6fd055ffb7c7e1`, for Products (Phase 2b) to
-  reference in its `attributes` map.
+  `POST /api/v3/product-attributes` -- creates a product attribute of the
+  specified type.
 
-  `201 Created`. `label` defaults to the same value as `name` when
-  omitted (must match the `^[a-z0-9_]+$` pattern the spec declares for
-  `label`, so `name` values that are already lowercase/underscore-safe
-  work as a default label for free).
+  Confirmed live 2026-09-07/08 against "David's Dev Account". All tested types
+  returned `201 Created`.
 
-  Also confirmed: `group_ids: ["6a9f1b872b6fd055ffb7c7df"]` (referencing
-  `05-Product-Attribute-Groups`'s fixture) is **accepted without error**
-  on create, but is **not** reflected back in either the create response
-  or a subsequent `GET`/`_fields=group_ids` -- inconclusive whether the
-  group linkage actually persists. Flag as an open item; worth re-checking
-  from the attribute-group side (`GET
-  /product-attribute-groups/{id}/{path}` for a members-list-shaped
-  subpath) in a later session.
+  ## Fixture
+  `TextAttribute` "wc_test_text" kept -- id `6a9f1bf72b6fd055ffb7c7e1`, for
+  Products (Phase 2b) to reference in its `attributes` map.
+
+  ## Label defaulting
+  `label` defaults to the same value as `name` when omitted. Must match the
+  `^[a-z0-9_]+$` pattern the spec declares for `label`, so `name` values that
+  are already lowercase/underscore-safe work as a default label for free.
+
+  ## group_ids linkage -- open item
+  `group_ids: ["6a9f1b872b6fd055ffb7c7df"]` is accepted without error on create,
+  but is **not** reflected back in either the create response or a subsequent
+  `GET`/`_fields=group_ids`. Inconclusive whether the group linkage actually
+  persists -- worth re-checking from the attribute-group side in a later session.
 
   ## Not idempotent to re-run
-  Same `409 Conflict {"errors":[{"name":"AlreadyExists","description":"An
-  attribute with the same name already exists"}]}` behavior as
-  `05-Product-Attribute-Groups/Create Product Attribute Group.bru` once
-  the fixture already exists.
+  Re-running once the fixture exists returns `409 Conflict`
+  `{"errors":[{"name":"AlreadyExists","description":"An attribute with the same
+  name already exists"}]}` -- same status as attribute groups (not categories'
+  `422`).
+
+  ## GET /product-attributes listing -- CROSS-TENANT DATA LEAK (confirmed bug)
+  `GET /product-attributes` returns attributes from **other accounts**, not just
+  the authenticated account. This is a confirmed, reproducible data-isolation bug.
+  The listing endpoint must NOT be used in customer-facing workflows until Plytix
+  resolves it. Use `GET /product-attributes/{id}` (by known ObjectId) instead.
+  Flag to Plytix as a live security/privacy bug requiring immediate attention.
+  **Re-tested 2026-09-21**: still returning cross-tenant attribute records
+  (`account_id` values `5d0bae46c7ab750468a3d67e`, `60795dcd302a91ac42e7f5f9`).
+  Not fixed.
+
+  ## Supported attribute types (15 total, one undocumented)
+  `openapi_pimv3.json`'s `POST /product-attributes` `oneOf` declares 14 types.
+  The live API's pydantic validator recognizes **15** -- including
+  `HierarchyAttribute`, which is absent from the spec. All 9 "standard" types
+  below were smoke-tested successfully with minimal `{name, type}` bodies (plus
+  `options` for multi-select types):
+
+  | Type | Notes |
+  |---|---|
+  | `TextAttribute` | Fixture kept (`wc_test_text`, id `6a9f1bf72b6fd055ffb7c7e1`) |
+  | `MultilineAttribute` | No extra required fields |
+  | `BooleanAttribute` | No extra required fields |
+  | `DateAttribute` | `include_time` defaults `false` |
+  | `DecimalAttribute` | No extra required fields |
+  | `HtmlAttribute` | No extra required fields |
+  | `IntAttribute` | No extra required fields |
+  | `MediaGalleryAttribute` | No extra required fields |
+  | `UrlAttribute` | No extra required fields |
+  | `DropdownAttribute` | `options` array required; `manual_sorting`/`sort_ascending`/`restricted` get real server-side defaults (`true`, `true`, `false`) |
+  | `MultiSelectAttribute` | Same defaulting as `DropdownAttribute` |
+  | `MediaAttribute` | No extra required fields |
+  | `FormulaAttribute` | `formula_str` required; **account limit**: Dev account capped at 2 -- create path unconfirmed on a fresh account (only limit-enforcement 422 confirmed) |
+  | `CompletenessAttribute` | `attributes: []` works; `attributes: [{id: "..."}]` with real references **500s** (confirmed bug -- see example below) |
+  | `HierarchyAttribute` | Passes pydantic validation but **500s** on create -- unfinished/unexposed feature, not documentation-ready |
+
+  ## Re-test 2026-09-21 — both 500s persist
+  Re-tested `HierarchyAttribute` and `CompletenessAttribute`-with-real-refs against
+  the live API. Both still return `500 ConfigurationError`. Neither has been fixed
+  in the ~2 weeks since initial discovery. Flag to Plytix for resolution before
+  either type appears in customer-facing documentation.
+
+  ## _fields ignored on GET-by-id (new finding)
+  `GET /product-attributes/{id}?_fields=id` still returns the **full** shape.
+  `_fields` only applies to list/search endpoints, never to single-resource
+  `GET /{resource}/{id}` -- generalizes Phase 0's finding.
+}
+
+example {
+  name: Create TextAttribute - Success (201)
+  description: Confirmed live 2026-09-07. Minimal body; label defaults to name value. Fixture wc_test_text kept as Phase 2b dependency.
+
+  request: {
+    url: {{pim_base_url_v3}}/product-attributes
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "wc_test_text",
+        "type": "TextAttribute"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 201
+      text: Created
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6a9f1bf72b6fd055ffb7c7e1",
+            "name": "wc_test_text",
+            "label": "wc_test_text",
+            "description": null,
+            "status": "ACTIVE",
+            "type": "TextAttribute"
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Create DropdownAttribute - Success (201, with options)
+  description: Confirmed live 2026-09-07. options array required; boolean fields (manual_sorting, sort_ascending, restricted) receive real server-side defaults rather than being left null.
+
+  request: {
+    url: {{pim_base_url_v3}}/product-attributes
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "wc_test_dropdown",
+        "type": "DropdownAttribute",
+        "options": ["Small", "Medium", "Large"]
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 201
+      text: Created
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6a9f1bf72b6fd055ffb7c7e3",
+            "name": "wc_test_dropdown",
+            "label": "wc_test_dropdown",
+            "description": null,
+            "status": "ACTIVE",
+            "type": "DropdownAttribute",
+            "options": ["Small", "Medium", "Large"],
+            "manual_sorting": true,
+            "sort_ascending": true,
+            "restricted": false
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Create MediaAttribute - Success (201)
+  description: Confirmed live 2026-09-07. No type-specific optional fields beyond the common name/label/description.
+
+  request: {
+    url: {{pim_base_url_v3}}/product-attributes
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "wc_test_media",
+        "type": "MediaAttribute"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 201
+      text: Created
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6a9f1bf92b6fd055ffb7c7e5",
+            "name": "wc_test_media",
+            "label": "wc_test_media",
+            "description": null,
+            "status": "ACTIVE",
+            "type": "MediaAttribute"
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Create FormulaAttribute - Account Limit Reached (422)
+  description: Confirmed live 2026-09-07. Dev account capped at 2 formula attributes (already at limit). Request body is otherwise valid -- the create path for FormulaAttribute itself remains unconfirmed on a fresh account.
+
+  request: {
+    url: {{pim_base_url_v3}}/product-attributes
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "wc_test_formula",
+        "type": "FormulaAttribute",
+        "formula_str": "IF(price>0,\"has price\",\"no price\")"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 422
+      text: Unprocessable Entity
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "ValidationError",
+              "description": "This account reached the limit of 2 formula attributes"
+            }
+          ]
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Create Attribute - Invalid Type (422, full enum revealed)
+  description: Confirmed live 2026-09-07. The pydantic error message is an authoritative list of all 15 valid type tags the live API recognizes -- one more than the 14 in openapi_pimv3.json (HierarchyAttribute is undocumented in the spec).
+
+  request: {
+    url: {{pim_base_url_v3}}/product-attributes
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "wc_test_badtype",
+        "type": "NotARealType"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 422
+      text: Unprocessable Entity
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "InputDTOValidationError",
+              "description": "Input tag 'NotARealType' found using 'type' does not match any of the expected tags: 'TextAttribute', 'MultilineAttribute', 'BooleanAttribute', 'DateAttribute', 'DecimalAttribute', 'DropdownAttribute', 'FormulaAttribute', 'HierarchyAttribute', 'HtmlAttribute', 'IntAttribute', 'MediaAttribute', 'MediaGalleryAttribute', 'MultiSelectAttribute', 'UrlAttribute', 'CompletenessAttribute'"
+            }
+          ]
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Create HierarchyAttribute - Unimplemented (500)
+  description: Confirmed live 2026-09-07. HierarchyAttribute passes pydantic discriminator validation (it is a recognized type tag) but the create handler is not wired up -- do not build customer-facing docs around this type.
+
+  request: {
+    url: {{pim_base_url_v3}}/product-attributes
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "wc_test_hierarchy",
+        "type": "HierarchyAttribute"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 500
+      text: Internal Server Error
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "ConfigurationError",
+              "description": "There was an error processing your request. Please try again later"
+            }
+          ]
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Create CompletenessAttribute - With Real References (500, Bug)
+  description: Confirmed live 2026-09-08 (reproduced twice). CompletenessAttribute with an empty attributes array creates successfully (201), but providing real attribute references in the correct {id} object shape triggers a 500 -- a live bug blocking any real use of Completeness Attributes.
+
+  request: {
+    url: {{pim_base_url_v3}}/product-attributes
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "wc_test_completeness_real",
+        "type": "CompletenessAttribute",
+        "attributes": [{"id": "6a9f1bf72b6fd055ffb7c7e1"}]
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 500
+      text: Internal Server Error
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "ConfigurationError",
+              "description": "There was an error processing your request. Please try again later"
+            }
+          ]
+        }
+      '''
+    }
+  }
 }

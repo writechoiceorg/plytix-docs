@@ -1,5 +1,5 @@
 meta {
-  name: Create Static Product List
+  name: Create Product List
   type: http
   seq: 2
 }
@@ -57,4 +57,136 @@ docs {
   returns `422 {"errors":[{"name":"ValidationError","description":"A
   List with same name already exists"}]}` -- expected, not a bug
   (`config/api-testing.config.md` quirk #38a).
+
+  ## Smart list (absorbed from "Create Smart Product List.bru")
+  Confirmed live 2026-09-08. **Fixture kept** -- id
+  `6aa0322d2b6fd055ffb7cabb`, for Phase 4 via `product_list_id`.
+  `query` is a nested array-of-arrays of filter objects
+  (`operator`/`field`/`value`/`field_type`) -- matches
+  `ProductRelationshipAggregationFilterModel`/`FilterModel`'s shape in
+  the spec. Filters directly on `sku`, matching the kept product from
+  Phase 2b (`WC-TEST-FULL-001`). Not idempotent to re-run once the
+  fixture exists -- same `422` duplicate-name behavior.
+
+  Confirmed live 2026-09-21: new smart list created with id
+  `6ab19d713e4f2e9945fdf718` ("WC Test Smart List 2026-09-21"),
+  `query: [[{"operator":"like","field":"sku","value":"WC"}]]`. Valid
+  operators for Smart list `query` include: `exists`, `like`, `eq`, `gt`,
+  `gte`, `lt`, `lte`, `!exists`, `!like`, `!eq`, `in`, `!in`,
+  `text_search`, `last_days`, etc. The operator `icontains` is **NOT
+  valid** for stored queries (it is valid for live query-string filters
+  on search endpoints -- these are two different filter DSLs).
+
+  ## 422 -- missing required fields (absorbed from "Create Product List - Missing Fields (422).bru")
+  Confirmed live 2026-09-08. Empty body `{}` returns 422 with **two**
+  entries in `errors` (one per missing required field -- `name` and
+  `type` both required). First time this project has seen multiple entries
+  in the `errors` array at once; still the same flat `{name, description}`
+  envelope shape as every other 422 confirmed so far.
+}
+
+example {
+  name: Create Smart Product List
+  description: Confirmed live 2026-09-08 and 2026-09-21. query is a nested array-of-arrays of filter objects; valid operators include like, eq, in, exists, etc. (not icontains).
+
+  request: {
+    url: {{pim_base_url_v3}}/pim-product-lists
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "WC Test Smart List",
+        "type": "Smart",
+        "query": [[{"operator": "eq", "field": "sku", "value": "WC-TEST-FULL-001"}]]
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 201
+      text: Created
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6ab19d713e4f2e9945fdf718",
+            "account_id": "6a38f5a5b22478f30bfd755c",
+            "name": "WC Test Smart List 2026-09-21",
+            "type": "Smart",
+            "query": [
+              [
+                {
+                  "operator": "like",
+                  "field": "sku",
+                  "value": "WC",
+                  "field_type": null
+                }
+              ]
+            ],
+            "created": "2026-09-21T21:11:13.986497+00:00",
+            "modified": "2026-09-21T21:11:14.000299+00:00"
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Missing Required Fields (422)
+  description: Confirmed live 2026-09-08. Both name and type are required; missing either returns 422 with one errors entry per missing field.
+
+  request: {
+    url: {{pim_base_url_v3}}/pim-product-lists
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {}
+    }
+  }
+
+  response: {
+    status: {
+      code: 422
+      text: Unprocessable Entity
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "InputDTOValidationError",
+              "description": "name: Field required"
+            },
+            {
+              "name": "InputDTOValidationError",
+              "description": "type: Field required"
+            }
+          ]
+        }
+      '''
+    }
+  }
 }

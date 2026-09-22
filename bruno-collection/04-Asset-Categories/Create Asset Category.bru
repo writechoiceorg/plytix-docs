@@ -28,13 +28,163 @@ assert {
 }
 
 docs {
-  Confirmed live 2026-09-07 against "David's Dev Account". **Fixture kept**
-  -- id `6a9f1b862b6fd055ffb7c7de`, for Assets (Phase 2a) to reference via
-  `category_ids`.
+  `POST /api/v3/asset-categories` -- creates a root or child asset category.
 
-  Same shape/behavior as `03-Product-Categories/Create Product
-  Category.bru`: `201 Created` (not spec's `200`), same
-  `AssetCategoryCreateOutputDto` partial shape. Also not idempotent to
-  re-run once the fixture exists -- same `422` duplicate-name behavior
-  (`config/api-testing.config.md` quirk #25a).
+  Confirmed live 2026-09-07 against "David's Dev Account".
+
+  ## Fixture
+  "WC Test Asset Category" kept -- id `6a9f1b862b6fd055ffb7c7de`, for Assets
+  (Phase 2a) to reference via `category_ids`.
+
+  ## Shape and status code
+  Same shape/behavior as `03-Product-Categories/Create Product Category.bru`:
+  `201 Created` (not spec's `200`), same `AssetCategoryCreateOutputDto` partial
+  shape (missing `account_id`, `parent_id`, `created` vs. GET-by-id).
+
+  ## Nesting (parent_id)
+  Pass `parent_id` to create a child category. Same nesting behavior as product
+  categories -- `path` reflects full ancestry.
+
+  ## Not idempotent to re-run
+  Same `422` duplicate-name behavior as product categories once the fixture
+  already exists (`config/api-testing.config.md` quirk #25a).
+}
+
+example {
+  name: Create Root Asset Category - Success (201)
+  description: Confirmed live 2026-09-07. Minimal body with name only; 201 Created with partial shape (account_id, parent_id, created absent).
+
+  request: {
+    url: {{pim_base_url_v3}}/asset-categories
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "WC Test Asset Category"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 201
+      text: Created
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6aa98165a30ca5945169a243",
+            "name": "WC Test Asset Category",
+            "path": ["WC Test Asset Category"],
+            "slug": "wc-test-asset-category",
+            "order": 1,
+            "n_children": 0
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Create Child Asset Category - Success (201)
+  description: Confirmed live 2026-09-07. parent_id creates a nested child; path reflects full ancestry.
+
+  request: {
+    url: {{pim_base_url_v3}}/asset-categories
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "WC Test Child Asset Category",
+        "parent_id": "6a38f5d8c3d65a5f868b1823"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 201
+      text: Created
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6aa98166a30ca5945169a244",
+            "name": "WC Test Child Asset Category",
+            "parent_id": "6a38f5d8c3d65a5f868b1823",
+            "path": ["Packshots", "WC Test Child Asset Category"],
+            "slug": "wc-test-child-asset-category",
+            "order": 1,
+            "n_children": 0
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Create Asset Category - Missing Name (422)
+  description: Confirmed live 2026-09-07. Empty body triggers InputDTOValidationError; same 422 envelope shape as every other resource tested.
+
+  request: {
+    url: {{pim_base_url_v3}}/asset-categories
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {}
+    }
+  }
+
+  response: {
+    status: {
+      code: 422
+      text: Unprocessable Entity
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "InputDTOValidationError",
+              "description": "name: Field required"
+            }
+          ]
+        }
+      '''
+    }
+  }
 }

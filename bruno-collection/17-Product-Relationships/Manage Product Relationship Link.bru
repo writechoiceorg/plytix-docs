@@ -1,0 +1,243 @@
+meta {
+  name: Manage Product Relationship Link
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{pim_base_url_v3}}/products/REPLACE_WITH_PRODUCT_ID/relationships/REPLACE_WITH_RELATIONSHIP_ID
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Accept: application/json
+}
+
+assert {
+  res.status: eq 200
+  res.body.data.relationship_id: isString
+}
+
+docs {
+  Confirmed live 2026-09-15 against the same disposable scratch products
+  ("WC-TEST-REL-A" id `6aa97b2ca30ca5945169a23f`, "WC-TEST-REL-B" id
+  `6aa97b2da30ca5945169a240`) and relationship type (id `6aa97b2ca30ca5945169a23e`)
+  as "Get Product Relationships Collection.bru" on "David's Dev Account". Covers
+  three operations on the identity endpoint
+  `/products/{product_id}/relationships/{relationship_id}`.
+
+  ## GET by ID
+  Fetches one relationship link on a product by `relationship_id`. Same flat shape as
+  the collection view (`relationship_id`, `relationship_label`, `product_id`) -- still
+  no `related_product_id` visible here either.
+
+  ## Subpath discovery on the identity endpoint
+  `GET /products/{id}/relationships/{relationship_id}/bogus_xyz` -- `400
+  {"errors":[{"name":"ValueError","description":"Field 'bogus_xyz' not found.
+  Available fields: ['_id','product_id','account_id','relationship_id',
+  'relationship_label']"}]}` -- confirms the internal model has an `account_id` field
+  even though it's never surfaced in any response body seen this session.
+
+  ## PATCH (Update quantity)
+  Updates the `quantity` on an existing related-product link. The `related_products`
+  array accepts `[{"product_id": "...", "quantity": N}]` -- same shape as the
+  collection POST.
+
+  ## Notable PATCH response shape difference vs. GET
+  Unlike the flat `GET` (no `related_product_id` anywhere), this PATCH response's
+  `related_products` entries DO include both `product_id` and `related_product_id`
+  (identical value, oddly duplicated under two different key names in the same object)
+  -- confirming the identifying data genuinely exists server-side and is just missing
+  from some of this resource's other response shapes. This is a documented quirk worth
+  flagging to Plytix.
+
+  ## DELETE -- the first confirmed safe scoped unlink in this entire project
+  Every prior "remove one related thing from a product" mechanism tested in this
+  project has been actively dangerous: `DELETE /products/{id}/categories` (2-segment
+  subpath) deletes the ENTIRE product, not just the category link (quirk #31); the
+  newer 3-segment `DELETE /products/{id}/categories/{category_id}` does the exact
+  same thing (quirk #54). Both are open questions in `config/api-testing.config.md`.
+
+  **This DELETE is the answer, at least for relationships**: confirmed `204`, and a
+  follow-up `GET /products/{product_id}` shows the product fully intact (`sku`,
+  `label`, `status` all unchanged) with only `product_relationships` emptied to `[]`.
+  This is a real, properly-scoped removal -- the first one found in the whole API.
+  Worth highlighting prominently in how-to docs.
+
+  Note: this only removes the entire relationship-type link (all related products
+  under that `relationship_id` for this product), not one individual related product
+  out of a multi-product link. Removing a single related product from a multi-product
+  link requires PATCHing a reduced `related_products` array instead.
+}
+
+example {
+  name: Get Product Relationship by ID - Success
+  description: Real response captured 2026-09-15, immediately after Create Product Relationship Link created this link.
+
+  request: {
+    url: {{pim_base_url_v3}}/products/6aa97b2ca30ca5945169a23f/relationships/6aa97b2ca30ca5945169a23e
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "relationship_id": "6aa97b2ca30ca5945169a23e",
+            "relationship_label": "wc_test_product_relationship",
+            "product_id": "6aa97b2ca30ca5945169a23f"
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Update Product Relationship Quantity - Success (PATCH)
+  description: Real response captured 2026-09-15, bumping quantity from 1 to 5. Note related_product_id appears here but not in the GET response -- a documented quirk.
+
+  request: {
+    url: {{pim_base_url_v3}}/products/6aa97b2ca30ca5945169a23f/relationships/6aa97b2ca30ca5945169a23e
+    method: patch
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "related_products": [
+          { "product_id": "6aa97b2da30ca5945169a240", "quantity": 5 }
+        ]
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "product_id": "6aa97b2ca30ca5945169a23f",
+            "related_products": [
+              {
+                "last_modified": "2026-09-15T17:32:34.184000+00:00",
+                "product_id": "6aa97b2da30ca5945169a240",
+                "quantity": 5,
+                "related_product_id": "6aa97b2da30ca5945169a240"
+              }
+            ],
+            "relationship_id": "6aa97b2ca30ca5945169a23e",
+            "relationship_label": "wc_test_product_relationship"
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Delete Product Relationship - Success (204, Product Stays Intact)
+  description: Real response captured 2026-09-15. The product itself is confirmed intact after this DELETE -- first safe scoped unlink found in this entire project.
+
+  request: {
+    url: {{pim_base_url_v3}}/products/6aa97b2ca30ca5945169a23f/relationships/6aa97b2ca30ca5945169a23e
+    method: delete
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 204
+      text: No Content
+    }
+    headers: {
+    }
+    body: {
+      type: text
+      content: ''
+    }
+  }
+}
+
+example {
+  name: Get Product by ID - After Delete (Product Intact, Relationship Gone)
+  description: Real response captured 2026-09-15, follow-up GET on the PRODUCT (not the relationship) immediately after the DELETE above -- the product is fully present with product_relationships emptied to [].
+
+  request: {
+    url: {{pim_base_url_v3}}/products/6aa97b2ca30ca5945169a23f
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6aa97b2ca30ca5945169a23f",
+            "account_id": "6a38f5a5b22478f30bfd755c",
+            "sku": "WC-TEST-REL-A",
+            "label": "WC Test Relationship Product A",
+            "status": "Draft",
+            "attributes": {},
+            "thumbnail_id": null,
+            "parent_id": null,
+            "num_variations": 0,
+            "product_level": 0,
+            "product_family_id": null,
+            "overwritten_attributes": [],
+            "product_relationships": [],
+            "created": "2026-09-15T17:06:52.993000",
+            "modified": "2026-09-15T17:32:58.807000"
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}

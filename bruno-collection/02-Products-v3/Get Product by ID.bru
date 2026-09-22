@@ -22,21 +22,161 @@ assert {
 }
 
 docs {
-  Confirmed live 2026-09-07 against "David's Dev Account". Run with
-  `--env "Dev"`, after `Get Access Token (Dev)`.
-  
-  ## What it does
-  `GET /api/v3/products/{identifier}` by the product's Mongo ObjectId
-  (`6a38f614c3d65a5f868b1a06`, SKU `BAG-10157` — a pre-existing read-only
-  fixture, not created by this test). Returns the full `ProductOutputDto`
-  shape, including nested `attributes`, expanded `categories` are NOT
-  included by default here (only `attributes`, `product_relationships`,
-  etc. -- see the sibling "Get Product Subpath" requests for expanded
-  category/asset data).
-  
-  ## Spec discrepancy found
-  The live response's relationship field is named `product_relationships`,
-  not `relationships` as `openapi_pimv3.json`'s `ProductOutputDto` declares.
-  See `Search Products - Filters.bru` and
-  `config/api-testing.config.md` quirk #13.
+  `GET /api/v3/products/{identifier}` — fetch a single product by its Mongo
+  ObjectId. Confirmed live 2026-09-07 against "David's Dev Account". Reference
+  fixture: SKU `BAG-10157`, id `6a38f614c3d65a5f868b1a06` (pre-existing, read-only).
+
+  ## Identifier: only Mongo ObjectId accepted on v3
+  `API V3.md` documents SKU as a valid `{identifier}`. This is **false on v3**:
+  passing a SKU returns
+  `422 {"errors":[{"name":"ValidationError","description":"Id must be of type
+  PydanticObjectId"}]}`. Confirmed on both a pre-existing product and a product
+  created within this test session — rules out any "legacy product" theory. Flag
+  to Plytix: likely a v1-only behaviour incorrectly carried into v3 docs.
+  See "422 — SKU as Identifier" example below.
+
+  ## Response shape
+  Returns the full `ProductOutputDto`. Key spec discrepancy: the relationship field
+  in the live response is named `product_relationships`, not `relationships` as
+  declared in `openapi_pimv3.json`. Two distinct wrong-field behaviours on the
+  search endpoint confirm this is a naming issue, not a missing field:
+  `_fields=category_ids` returns 400 `HiddenFieldError`; `_fields=relationships`
+  is silently dropped with no error.
+
+  ## Undocumented raw-model fields
+  A subpath-discovery probe (`GET /products/{id}/any_bogus_path`) returns
+  `400 {"errors":[{"name":"ValueError","description":"Field '<path>' not found.
+  Available fields: [...]"}]}` listing the internal model fields. For this product:
+  `['id','account_id','sku','label','gtin','status','attributes','thumbnail_id',
+  'parent_id','num_variations','product_level','product_family_id',
+  'product_family_model_id','overwritten_attributes','mark_as_deleted',
+  'product_relationships','created','modified','last_context',
+  'modified_user_audit','created_user_audit']`. Several of these
+  (`product_family_model_id`, `mark_as_deleted`, `last_context`,
+  `modified_user_audit`, `created_user_audit`) are absent from
+  `openapi_pimv3.json`'s `ProductOutputDto` — ask Plytix whether any are
+  intentionally customer-facing. This 400-with-field-list trick is the fastest
+  way to discover a resource's real fields in any later phase — use it before
+  guessing subpath names from the spec alone.
+
+  ## 422 error envelope shape
+  `errors` is a flat `[{name, description}]` array — distinct from:
+  - The 401 auth error shape: `error.msg` / nested `errors[].field`.
+  - FastAPI's default `HTTPValidationError`: `detail[{loc,msg,type}]`.
+  Plytix wraps all validation errors in its own custom envelope.
+}
+
+example {
+  name: Success - Fetch by Mongo ObjectId
+  description: Confirmed live 2026-09-07. Full ProductOutputDto shape. Note: relationship field is product_relationships (not relationships per spec). categories and assets are not expanded by default — use GET /products/{id}/{path} subpath requests for those.
+
+  request: {
+    url: {{pim_base_url_v3}}/products/6a38f614c3d65a5f868b1a06
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6a38f614c3d65a5f868b1a06",
+            "account_id": "6a38f5d5c3d65a5f868b1869",
+            "sku": "BAG-10157",
+            "label": "Bag 10157",
+            "gtin": null,
+            "status": "Completed",
+            "thumbnail_id": "6a38f5e1c3d65a5f868b18a5",
+            "attributes": {
+              "brand": "Plytix",
+              "color": "Black",
+              "amazon_ready": 85.71,
+              "basic_information_completeness": 100.0,
+              "website_ready": 100.0
+            },
+            "product_relationships": {
+              "related_products": [
+                {
+                  "quantity": 1,
+                  "last_modified": "2026-01-15T10:00:00.000000+00:00"
+                }
+              ]
+            },
+            "parent_id": null,
+            "num_variations": 0,
+            "product_level": 0,
+            "product_type": "SINGLE",
+            "product_family_id": "6a38f5d8c3d65a5f868b186e",
+            "product_family_model_id": null,
+            "overwritten_attributes": [],
+            "created": "2024-06-01T08:00:00.000000+00:00",
+            "modified": "2026-09-01T12:00:00.000000+00:00",
+            "created_user_audit": {
+              "type": "UI",
+              "user_email": "david@example.com",
+              "user_id": "6a38f5d5c3d65a5f868b186a"
+            },
+            "modified_user_audit": {
+              "type": "UI",
+              "user_email": "david@example.com",
+              "user_id": "6a38f5d5c3d65a5f868b186a"
+            }
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 422 - SKU as Identifier
+  description: Confirmed live 2026-09-07. Passing a SKU as {identifier} instead of a Mongo ObjectId returns 422. Contradicts API V3.md's identifier-flexibility claim. Confirmed on both pre-existing products and self-created ones.
+
+  request: {
+    url: {{pim_base_url_v3}}/products/BAG-10157
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 422
+      text: Unprocessable Entity
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "ValidationError",
+              "description": "Id must be of type PydanticObjectId"
+            }
+          ]
+        }
+      '''
+    }
+  }
 }

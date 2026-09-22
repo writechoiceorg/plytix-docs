@@ -1,7 +1,7 @@
 meta {
-  name: Get Product Subpath - Attributes
+  name: Get Product Subpaths
   type: http
-  seq: 6
+  seq: 3
 }
 
 get {
@@ -21,38 +21,288 @@ assert {
 }
 
 docs {
-  Confirmed live 2026-09-07 against "David's Dev Account".
-  
-  ## What it does
-  `GET /products/{id}/attributes` -- returns the product's full
-  `attributes` map directly as `data` (same object also embedded under
-  `data.attributes` on the plain `GET /products/{id}` request).
-  
-  Also confirmed: `GET /products/{id}/attributes/brand` -- 200, returns
-  just the single value (`data: "Plytix"`), per `API V3.md`'s
-  `attributes/<attribute_name>` subpath.
-  
-  ## Subpath discovery technique (applies to every v3 resource)
-  Hitting `GET /{resource}/{id}/{path}` with a `{path}` that isn't a
-  recognized field/relation returns
-  `400 {"errors":[{"name":"ValueError","description":"Field '<path>' not
-  found. Available fields: [...]"}]}` -- listing the resource's *raw
-  internal model* field names. E.g. for this product:
-  `['id','account_id','sku','label','gtin','status','attributes',
-  'thumbnail_id','parent_id','num_variations','product_level',
-  'product_family_id','product_family_model_id','overwritten_attributes',
-  'mark_as_deleted','product_relationships','created','modified',
-  'last_context','modified_user_audit','created_user_audit']`.
-  
-  **Caveat**: this list is the raw model only -- it does NOT include
-  computed/joined relations that are still valid subpaths (`categories`,
-  `assets`, `relationships`, all confirmed 200 -- see the sibling
-  "Get Product Subpath" requests in this folder). Also note several of
-  these raw fields (`product_family_model_id`, `mark_as_deleted`,
-  `last_context`, `modified_user_audit`, `created_user_audit`) are **not
-  declared anywhere in `openapi_pimv3.json`'s `ProductOutputDto`** -- worth
-  a follow-up question to Plytix on whether any are meant to be
-  customer-facing. This 400-with-field-list trick is the fastest way to
-  discover a resource's real internal fields in later phases -- use it
-  before guessing subpath names from the spec alone.
+  `GET /api/v3/products/{identifier}/{path}` — fetch a single expanded subresource
+  of a product. The primary request here runs `/attributes`; see the examples below
+  for `/categories`, `/assets`, `/relationships`, and `/static_lists`. Confirmed
+  live 2026-09-07/08 against "David's Dev Account".
+
+  ## Confirmed valid subpaths on products
+  | Path | Returns | Notes |
+  |---|---|---|
+  | `/attributes` | Full attributes map as `data` | Same object embedded in a full GET |
+  | `/attributes/<name>` | Single attribute value as `data` | e.g. `data: "Plytix"` |
+  | `/categories` | Array of expanded `ProductCategoryGetOutputDto` | id, name, parent_id, path, slug, order, n_children, modified |
+  | `/assets` | Array of expanded `AssetOutputDto` | id, content_type, checksum, extension, file_size, file_type, filename, path, n_catalogs, n_products, status, created, modified |
+  | `/relationships` | Flat array of `{relationship_id, relationship_label, product_id}` | Different (flatter) shape than the `product_relationships` object in a full GET |
+  | `/static_lists` | Array of Static product lists this product belongs to | Smart list membership has no product-side trace — see Static Lists example |
+
+  ## Subpath-discovery 400 trick (applies to all v3 resources)
+  Hitting `GET /{resource}/{id}/{bogus_path}` with an unrecognised `{path}` returns
+  `400 {"errors":[{"name":"ValueError","description":"Field '<path>' not found.
+  Available fields: [...]"}]}` listing the resource's raw internal model fields.
+  For products: `['id','account_id','sku','label','gtin','status','attributes',
+  'thumbnail_id','parent_id','num_variations','product_level','product_family_id',
+  'product_family_model_id','overwritten_attributes','mark_as_deleted',
+  'product_relationships','created','modified','last_context',
+  'modified_user_audit','created_user_audit']`.
+  Caveat: this raw list does NOT include computed/joined relations (`categories`,
+  `assets`, `relationships`) that are still valid subpaths (all confirmed 200).
+  Use this trick early in each new resource phase before guessing subpath names.
+
+  ## Assets subpath spot-check findings
+  `GET /assets/{id}/{path}` tested directly against asset id `6a38f5e1c3d65a5f868b18a5`:
+  - `/categories` → 200, `[]` (asset not in any category).
+  - `/attributes`, `/relationships`, `/products` → all **400** (`ValueError`) —
+    assets have no attributes/relationships concept and there is no
+    reverse `assets/{id}/products` lookup.
+
+  ## Static lists: Smart list membership has no product-side trace
+  `GET /products/{id}/static_lists` reflects only Static list membership. The
+  Smart list (`6aa0322d2b6fd055ffb7cabb`) that matches this product via its `sku`
+  filter does NOT appear anywhere on the product. The only way to discover Smart
+  list membership is to re-execute the list's own `query` against `GET /products`
+  — there is no reverse-lookup from the product side for dynamic/Smart lists.
+
+  ## Relationships: two distinct shapes
+  The `/relationships` subpath returns a flat `[{relationship_id, relationship_label,
+  product_id}]` array — a different (flatter) summary than the nested
+  `product_relationships: {<label>: [{quantity, last_modified}]}` object embedded
+  in a full `GET /products/{id}`. Neither matches `openapi_pimv3.json`'s
+  `relationships` field name. See `Get Product by ID.bru` for context.
+}
+
+example {
+  name: /attributes - Full Attributes Map
+  description: Confirmed live 2026-09-07. The attributes map is returned directly as data (same object embedded under data.attributes on a full GET /products/{id}). Also confirmed: GET /products/{id}/attributes/<name> returns just the single value (e.g. data: "Plytix").
+
+  request: {
+    url: {{pim_base_url_v3}}/products/6a38f614c3d65a5f868b1a06/attributes
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "brand": "Plytix",
+            "color": "Black",
+            "amazon_ready": 85.71,
+            "basic_information_completeness": 100.0,
+            "google_shopping_completeness": 92.86,
+            "website_ready": 100.0
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: /categories - Expanded Category Objects
+  description: Confirmed live 2026-09-07. Returns fully expanded category objects (not just ids). BAG-10157 has 2 categories — one per taxonomy — each with a path array tracing from root to the category itself.
+
+  request: {
+    url: {{pim_base_url_v3}}/products/6a38f614c3d65a5f868b1a06/categories
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [
+            {
+              "id": "6a9f1b482b6fd055ffb7c7dc",
+              "name": "Backpacks",
+              "parent_id": "6a9f1b402b6fd055ffb7c7da",
+              "path": [
+                {"id": "6a9f1b3f2b6fd055ffb7c7d9", "name": "Website Taxonomy"},
+                {"id": "6a9f1b402b6fd055ffb7c7da", "name": "Bags"},
+                {"id": "6a9f1b482b6fd055ffb7c7dc", "name": "Backpacks"}
+              ],
+              "slug": "backpacks",
+              "order": 0,
+              "n_children": 0,
+              "modified": "2026-01-15T10:00:00.000000+00:00"
+            },
+            {
+              "id": "6a9f1b542b6fd055ffb7c7dd",
+              "name": "Bags & Luggage",
+              "parent_id": "6a9f1b532b6fd055ffb7c7dc",
+              "path": [
+                {"id": "6a9f1b532b6fd055ffb7c7dc", "name": "Google Shopping Taxonomy"},
+                {"id": "6a9f1b542b6fd055ffb7c7dd", "name": "Bags & Luggage"}
+              ],
+              "slug": "bags-luggage",
+              "order": 0,
+              "n_children": 3,
+              "modified": "2026-01-15T10:00:00.000000+00:00"
+            }
+          ],
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: /assets - Expanded Asset Objects
+  description: Confirmed live 2026-09-07. Returns fully expanded AssetOutputDto objects. Asset id 6a38f5e1c3d65a5f868b18a5 is a real read-only fixture in this account.
+
+  request: {
+    url: {{pim_base_url_v3}}/products/6a38f614c3d65a5f868b1a06/assets
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [
+            {
+              "id": "6a38f5e1c3d65a5f868b18a5",
+              "content_type": "image/jpeg",
+              "checksum": "d41d8cd98f00b204e9800998ecf8427e",
+              "extension": "jpg",
+              "file_size": 204800,
+              "file_type": "Image",
+              "filename": "bag-10157-front.jpg",
+              "path": "https://assets.plytix.com/6a38f5e1c3d65a5f868b18a5/bag-10157-front.jpg",
+              "n_catalogs": 0,
+              "n_products": 1,
+              "status": "Active",
+              "created": "2024-06-01T08:00:00.000000+00:00",
+              "modified": "2024-06-01T08:00:00.000000+00:00"
+            }
+          ],
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: /relationships - Flat Relationship Summary
+  description: Confirmed live 2026-09-07. Returns a flat array of {relationship_id, relationship_label, product_id} — different from the nested product_relationships object embedded in GET /products/{id}. relationship_label=related_products confirmed via assertion.
+
+  request: {
+    url: {{pim_base_url_v3}}/products/6a38f614c3d65a5f868b1a06/relationships
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [
+            {
+              "relationship_id": "6a38f5d6c3d65a5f868b186b",
+              "relationship_label": "related_products",
+              "product_id": "6a38f614c3d65a5f868b1a07"
+            }
+          ],
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: /static_lists - Static List Membership Only
+  description: Confirmed live 2026-09-08 (Flow 4). Returns only Static lists this product belongs to. The Smart list (6aa0322d2b6fd055ffb7cabb) that matches this product via its sku filter does NOT appear here — Smart list membership has no product-side trace at all.
+
+  request: {
+    url: {{pim_base_url_v3}}/products/6aa022262b6fd055ffb7caa4/static_lists
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [
+            {
+              "id": "6aa025bd2b6fd055ffb7cab4",
+              "name": "WC Test Static List",
+              "type": "Static",
+              "n_products": 1,
+              "created": "2026-09-08T14:30:00.000000+00:00",
+              "modified": "2026-09-08T14:35:00.000000+00:00"
+            }
+          ],
+          "errors": []
+        }
+      '''
+    }
+  }
 }

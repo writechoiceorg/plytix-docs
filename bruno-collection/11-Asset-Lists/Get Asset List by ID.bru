@@ -26,3 +26,54 @@ docs {
   `['id','account_id','name','query','created','modified',
   'modified_user_audit','created_user_audit','type']`.
 }
+
+example {
+  name: Get Static Asset List by ID - Success
+  description: Confirmed live 2026-09-21. Static list has an auto-generated query targeting its own id; field list matches product lists exactly.
+
+  request: {
+    url: {{pim_base_url_v3}}/asset-lists/6a38f612c3d65a5f868b19a0
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6a38f612c3d65a5f868b19a0",
+            "account_id": "6a38f5a5b22478f30bfd755c",
+            "name": "All Assets",
+            "type": "Static",
+            "query": [
+              [
+                {
+                  "operator": "in",
+                  "field": "static_lists",
+                  "value": ["6a38f612c3d65a5f868b19a0"],
+                  "field_type": null
+                }
+              ]
+            ],
+            "created": "2026-06-22T08:45:06.848000",
+            "modified": "2026-06-22T08:45:06.866000"
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}

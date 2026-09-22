@@ -22,11 +22,50 @@ assert {
 
 docs {
   Confirmed live 2026-09-08 against "David's Dev Account". Read-only
-  (`GET` only -- no create endpoint anywhere, matching `API V3.md`'s
-  claim that relationship *types* are configured in the web app, not this
-  API). Real pre-existing data: 2 relationship types exist ("Bundles" /
-  label `bundles`, "Cross-sell" / label `related_products`) -- the latter
-  is the one referenced by the Phase 2b kept product's
-  `product_relationships` field. `_fields` confirmed working on this
-  list endpoint too.
+  (`GET` only -- no create endpoint anywhere, matching `API V3.md`'s claim that
+  relationship *types* are configured in the web app, not this API). The 2026-09-15
+  `openapi_pimv3.json` refresh adds `POST /relationships` (and `PATCH`/`DELETE`) for the
+  first time -- see "Create Relationship.bru" and "Update and Delete Relationship.bru"
+  for those new capabilities. Real pre-existing data: 2 relationship types exist
+  ("Bundles" / label `bundles`, "Cross-sell" / label `related_products`) -- the latter
+  is the one referenced by the Phase 2b kept product's `product_relationships` field.
+  `_fields` confirmed working on this list endpoint too.
+}
+
+example {
+  name: List Relationships - Success
+  description: Real response captured 2026-09-21 against "David's Dev Account". Both relationship types pre-exist in this account.
+
+  request: {
+    url: {{pim_base_url_v3}}/relationships
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [
+            {"id": "6a38f5d8c3d65a5f868b186b", "account_id": "6a38f5a5b22478f30bfd755c", "name": "Bundles", "label": "bundles", "status": "ACTIVE", "created": "2026-06-22T08:44:08.719000", "modified": "2026-06-22T08:44:08.719000"},
+            {"id": "6a38f5d8c3d65a5f868b186c", "account_id": "6a38f5a5b22478f30bfd755c", "name": "Cross-sell", "label": "related_products", "status": "ACTIVE", "created": "2026-06-22T08:44:08.731000", "modified": "2026-06-22T08:44:08.731000"}
+          ],
+          "errors": [],
+          "pagination": {}
+        }
+      '''
+    }
+  }
 }

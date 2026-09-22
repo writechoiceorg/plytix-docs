@@ -1,7 +1,7 @@
 meta {
   name: Get Family Attributes (Top-Level)
   type: http
-  seq: 5
+  seq: 6
 }
 
 get {
@@ -51,6 +51,12 @@ docs {
   `?account_id=<your_account_id>` (confirmed working, as this request
   does) -- every record in this account then resolves to real
   product-family/attribute pairs.
+
+  ## Re-test 2026-09-21 — still leaking
+  Unfiltered `GET /family-attributes?_page_size=3` still returns
+  `account_id` values `60bf43f6097dd5dba9792edd` and
+  `5ee27f5db2a5094797405d9b` — neither belonging to this account. Not
+  fixed.
 
   ## Key fields
   Each record: `account_id`, `level` (`"parent_level"` / `"no_level"` /

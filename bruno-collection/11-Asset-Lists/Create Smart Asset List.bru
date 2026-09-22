@@ -1,5 +1,5 @@
 meta {
-  name: Create Smart Asset List
+  name: Create Asset List
   type: http
   seq: 2
 }
@@ -41,12 +41,77 @@ docs {
   `static_lists`-contains-self query; real membership would be set via
   `PATCH /assets/{id}` with `static_list_ids` (not tested further here,
   since the Smart list already covers this folder's needed fixture for
-  Phase 4 -- see `10-Pim-Product-Lists`'s docs for the full mechanism
-  (assumed to generalize given the identical schema and create-response
-  shape; the auto-generated-query detail specifically wasn't
-  re-inspected on this resource, only spot-checked that a `type:
-  "Static"` create succeeds).
+  Phase 4 -- see `10-Pim-Product-Lists`'s docs for the full mechanism).
 
   Not idempotent to re-run once the fixture exists -- same `422`
   duplicate-name behavior as product lists (quirk #38a).
+
+  ## GET by ID response shape (confirmed live 2026-09-21)
+  Real fixture `6a38f612c3d65a5f868b19a0` ("All Assets", Static):
+  `{"id":"6a38f612c3d65a5f868b19a0","account_id":"6a38f5a5b22478f30bfd755c",
+  "name":"All Assets","query":[[{"operator":"in","field":"static_lists",
+  "value":["6a38f612c3d65a5f868b19a0"],"field_type":null}]],
+  "created":"2026-06-22T08:45:06.848000",
+  "modified":"2026-06-22T08:45:06.866000","type":"Static"}`.
+
+  ## Filter operator vocabulary note
+  The list-`query` filter operator vocabulary (`like`/`!like`, `eq`/`!eq`,
+  `in`/`!in`, `exists`/`!exists`, etc.) is **different** from the
+  `icontains` operator confirmed in quirk #11/#53 for `GET /products`
+  query params -- these are two different filter DSLs: one for a stored
+  Smart-list `query` body, one for live `_fields`/filter query-string on
+  search endpoints. Do not assume the same operator vocabulary applies
+  to both.
+
+  ## 422 -- missing required fields (absorbed from "Create Asset List - Missing Fields (422).bru")
+  Confirmed live 2026-09-08. Empty body `{}` returns 422 with two
+  entries in `errors` array (same shape as `10-Pim-Product-Lists`'s
+  missing-fields 422 -- both `name` and `type` required).
+}
+
+example {
+  name: Missing Required Fields (422)
+  description: Confirmed live 2026-09-08. Both name and type are required; empty body returns 422 with two errors entries.
+
+  request: {
+    url: {{pim_base_url_v3}}/asset-lists
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {}
+    }
+  }
+
+  response: {
+    status: {
+      code: 422
+      text: Unprocessable Entity
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "InputDTOValidationError",
+              "description": "name: Field required"
+            },
+            {
+              "name": "InputDTOValidationError",
+              "description": "type: Field required"
+            }
+          ]
+        }
+      '''
+    }
+  }
 }

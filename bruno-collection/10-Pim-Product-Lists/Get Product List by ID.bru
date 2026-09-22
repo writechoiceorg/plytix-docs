@@ -1,7 +1,7 @@
 meta {
   name: Get Product List by ID
   type: http
-  seq: 4
+  seq: 3
 }
 
 get {
@@ -26,4 +26,74 @@ docs {
   'modified_user_audit','created_user_audit','type']` -- matches the spec
   closely, plus undocumented `modified_user_audit`/`created_user_audit`
   (same pattern seen on several other resources this project).
+
+  ## Sample account product lists (confirmed live 2026-09-21)
+  Four lists in account: "Accessories" (id `6a38f613c3d65a5f868b19fd`,
+  `query:[[]]`), "All Products" (id `6a38f613c3d65a5f868b19fe`, Static
+  self-referencing query), "Website Incomplete Products" (id
+  `6a38f613c3d65a5f868b1a00`, `!eq` operator on `attributes.website_ready`),
+  "Amazon Ready" (id `6a38f614c3d65a5f868b1a02`, `eq` on
+  `attributes.amazon_ready`). Pagination `next_page` present even with
+  only 4 results if page size is default.
+}
+
+example {
+  name: Get Smart Product List by ID - Success
+  description: Confirmed live 2026-09-08. Returns full list shape including query, type, and audit fields not in the spec.
+
+  request: {
+    url: {{pim_base_url_v3}}/pim-product-lists/6aa0322d2b6fd055ffb7cabb
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6aa0322d2b6fd055ffb7cabb",
+            "account_id": "6a38f5a5b22478f30bfd755c",
+            "name": "WC Test Smart List",
+            "type": "Smart",
+            "query": [
+              [
+                {
+                  "operator": "eq",
+                  "field": "sku",
+                  "value": "WC-TEST-FULL-001",
+                  "field_type": null
+                }
+              ]
+            ],
+            "created": "2026-09-08T00:00:00.000000",
+            "modified": "2026-09-08T00:00:00.000000",
+            "created_user_audit": {
+              "type": "API",
+              "user_email": "TestDH",
+              "user_id": "6a96a370a3fb0431c692820d"
+            },
+            "modified_user_audit": {
+              "type": "API",
+              "user_email": "TestDH",
+              "user_id": "6a96a370a3fb0431c692820d"
+            }
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
 }

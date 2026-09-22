@@ -5,7 +5,7 @@ meta {
 }
 
 get {
-  url: {{pim_base_url_v3}}/product-families?_page_size=2
+  url: {{pim_base_url_v3}}/product-families?_page_size=3
   body: none
   auth: none
 }
@@ -22,10 +22,54 @@ assert {
 }
 
 docs {
-  Confirmed live 2026-09-08 against "David's Dev Account". Read-only
-  (`GET` only in `openapi_pimv3.json` -- no create endpoint exists at
-  all). Real pre-existing data: this account has real product families
-  (e.g. "Accessories", "Apparel"), each with `total_products`,
-  `total_attributes`, `total_models` counts. No fixture creation needed
-  or possible for this resource.
+  Confirmed live 2026-09-08 and 2026-09-21 against "David's Dev Account". Read-only
+  (`GET` only in `openapi_pimv3.json` -- no create endpoint exists at all, per original
+  Phase 3 findings). The 2026-09-15 `openapi_pimv3.json` refresh adds `POST /product-families`
+  (and `PATCH`/`DELETE`) for the first time -- see "Create Product Family.bru" and
+  "Update and Delete Product Family.bru". Real pre-existing data: this account has 3
+  product families ("Office Supplies", "Accessories", "Apparel"), each with
+  `total_products`, `total_attributes`, `total_models` counts. No fixture creation
+  needed or possible for read-only testing -- the pre-existing families cover all
+  read scenarios.
+}
+
+example {
+  name: List Product Families - Page 1 (Success)
+  description: Real response captured 2026-09-21 against "David's Dev Account". Page 1 of 2 (3 families total, 3 per page requested).
+
+  request: {
+    url: {{pim_base_url_v3}}/product-families?_page_size=3
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [
+            {"id": "6a38f5d8c3d65a5f868b186d", "account_id": "6a38f5a5b22478f30bfd755c", "name": "Office Supplies", "total_products": 3, "total_attributes": 59, "total_models": 1, "created": "2026-06-22T08:44:08.740000", "modified": "2026-06-22T08:44:08.740000"},
+            {"id": "6a38f5d8c3d65a5f868b186e", "account_id": "6a38f5a5b22478f30bfd755c", "name": "Accessories", "total_products": 7, "total_attributes": 61, "total_models": 1, "created": "2026-06-22T08:44:08.740000", "modified": "2026-06-22T08:44:08.740000"},
+            {"id": "6a38f5d8c3d65a5f868b186f", "account_id": "6a38f5a5b22478f30bfd755c", "name": "Apparel", "total_products": 46, "total_attributes": 62, "total_models": 1, "created": "2026-06-22T08:44:08.740000", "modified": "2026-06-22T08:44:08.740000"}
+          ],
+          "errors": [],
+          "pagination": {
+            "next_page": "https://pim.dev.plytix.com/api/v3/product-families?_page_size=3&_page=2"
+          }
+        }
+      '''
+    }
+  }
 }

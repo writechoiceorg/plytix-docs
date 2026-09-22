@@ -1,7 +1,7 @@
 meta {
   name: Update List Products Subpath - Not Supported (Flow 5)
   type: http
-  seq: 7
+  seq: 5
 }
 
 patch {
@@ -48,4 +48,49 @@ docs {
   to manage membership at all**, confirming Flow 5's real answer: the
   only mechanism is `PATCH /products/{id}` with `static_list_ids` (see
   `02-Products-v3`), a product-side field, not anything on the list.
+}
+
+example {
+  name: PATCH /pim-product-lists/{id}/products - Extra Field Forbidden (422)
+  description: Confirmed live 2026-09-08. products is not a field on ProductListUpdateInputDto; the subpath PATCH mechanism 422s it as an unrecognized extra field.
+
+  request: {
+    url: {{pim_base_url_v3}}/pim-product-lists/6aa04ad02b6fd055ffb7cae8/products
+    method: patch
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "product_ids": ["6aa022262b6fd055ffb7caa4"]
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 422
+      text: Unprocessable Entity
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "ValidationError",
+              "description": "1 validation error for ProductListUpdateInputDto\nproducts\n  Extra inputs are not permitted [type=extra_forbidden, input_url=https://errors.pydantic.dev/2.6/v/extra_forbidden]"
+            }
+          ]
+        }
+      '''
+    }
+  }
 }

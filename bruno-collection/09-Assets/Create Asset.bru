@@ -1,7 +1,7 @@
 meta {
   name: Create Asset
   type: http
-  seq: 3
+  seq: 2
 }
 
 post {
@@ -49,4 +49,69 @@ docs {
   `category_ids` field on `POST /products` (Phase 2b) *does* link at
   create time -- don't assume this behavior generalizes across resources
   either way; test per-resource.
+
+  ## Required fields -- cross-field rule not in spec (absorbed from "Create Asset - Empty Body (422).bru")
+  Confirmed live 2026-09-08. `AssetCreateInputDto` marks **no** fields
+  required in `openapi_pimv3.json` (`url`, `content`, `filename`,
+  `alt_text`, `category_ids`, `static_list_ids` all optional) -- but the
+  live API still enforces a real cross-field rule not expressible in the
+  schema's `required` list: either `url` or `content` must be provided.
+  Empty body returns 422 with `{"data":[],"errors":[{"name":
+  "InputDTOValidationError","description":"Value error, Either 'url' or
+  'content' must be provided"}]}`.
+
+  ## GET by ID response shape (confirmed live 2026-09-21)
+  Real fixture `6a38f5d8c3d65a5f868b187a`:
+  `{"id":"6a38f5d8c3d65a5f868b187a","account_id":"6a38f5a5b22478f30bfd755c",
+  "assigned":true,"content_type":"image/jpeg",
+  "checksum":"13b0321c87707fe209f075e73a0f8cec75112c3690d3ab4544866e5ad0662230",
+  "extension":"jpg","file_size":229898,"file_type":"IMAGES",
+  "file_modified":"2025-04-01T16:27:25.911000",
+  "filename":"VST-59102_4.jpg",
+  "path":"public_files/pim/assets/a5/f5/38/6a/6a38f5a5b22478f30bfd755c/images/d8/f5/38/6a/6a38f5d8c3d65a5f868b187a/VST-59102_4.jpg",
+  "n_catalogs":0,"n_products":4,"status":"ACTIVE",
+  "created":"2026-06-22T08:44:10","modified":"2026-06-22T08:44:10.020000"}`.
+}
+
+example {
+  name: Empty Body (422)
+  description: Confirmed live 2026-09-08. Either url or content is required even though both are marked optional in the spec.
+
+  request: {
+    url: {{pim_base_url_v3}}/assets
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {}
+    }
+  }
+
+  response: {
+    status: {
+      code: 422
+      text: Unprocessable Entity
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "InputDTOValidationError",
+              "description": "Value error, Either 'url' or 'content' must be provided"
+            }
+          ]
+        }
+      '''
+    }
+  }
 }

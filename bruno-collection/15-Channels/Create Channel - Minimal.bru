@@ -1,5 +1,5 @@
 meta {
-  name: Create Channel - Minimal
+  name: Create Channel
   type: http
   seq: 2
 }
@@ -29,17 +29,296 @@ assert {
 }
 
 docs {
-  Confirmed live 2026-09-08 against "David's Dev Account". Created then
-  deleted in the same test run (id was `6aa047032b6fd055ffb7cad9`) -- the
-  richer "Create Channel - Full Featured.bru" in this folder is the kept
-  fixture instead.
+  Confirmed live 2026-09-08 against "David's Dev Account". `201 Created`. Response
+  reveals a large set of real defaults not sent in the request: `output_filename:
+  "plytix_feed"`, `column_separator: ","`, `text_delimiter: "\""`,
+  `process_products: "CREATED_OR_MODIFIED"`, `parent_include_criteria:
+  "ONLY_PARENT_IN_LIST"`, `active: false`, plus a `build_reference_date` already
+  set to the account's creation date. This is the confirmed real shape of
+  `ChannelCreateOutputDto` -- much richer than the spec's field list alone suggests.
 
-  `201 Created`. Response reveals a large set of real defaults not sent
-  in the request: `output_filename: "plytix_feed"`,
-  `column_separator: ","`, `text_delimiter: "\""`,
-  `process_products: "CREATED_OR_MODIFIED"`,
-  `parent_include_criteria: "ONLY_PARENT_IN_LIST"`, `active: false`, plus
-  a `build_reference_date` already set to the account's creation date.
-  This is the confirmed real shape of `ChannelCreateOutputDto` -- much
-  richer than the spec's field list alone suggests.
+  ## format field is validated against a fixed hidden set
+  `ChannelCreateInputDto.format`'s spec description calls it a free string ("CSV,
+  XLSX, XML, JSON, SHOPIFY, BIGCOMMERCE, etc." given only as examples). It's actually
+  validated against a hidden fixed set: `{"errors":[{"name":"ValidationError",
+  "description":"Field format is unknown"}]}`. Unlike Connections' equivalent error,
+  this one does NOT enumerate the valid values -- `CSV` and `XML` are both confirmed
+  valid; the full valid set wasn't exhaustively enumerated.
+
+  ## Full-featured create (also confirmed)
+  Sending optional fields `product_list_id`, `rebuild_periodically: true`,
+  `rebuild_feed_frequency`, `rebuild_feed_hod`, `rebuild_feed_moh`,
+  `rebuild_feed_timezone` all at once returns 201 with `active: true` (auto-flipped
+  when a complete rebuild schedule is set) and `rebuild_feed_next_build` computed
+  automatically. See the "Create Channel - Full Featured" example.
+
+  ## Opaque rebuild scheduling validation (confirmed bug)
+  `rebuild_periodically: true` alone (without `rebuild_feed_hod`/`moh`/`timezone`)
+  fails with `{"data":[],"errors":[{"name":"ValidationError","description":"Schema
+  validation error"}]}` -- no field named, unlike every other 422 in this project.
+  Worth flagging to Plytix as measurably worse error-message quality.
+
+  ## Not idempotent to re-run
+  Channel names are unique per account. Re-running returns `409 Conflict
+  {"errors":[{"name":"AlreadyExists","description":"A channel with the same name
+  already exists"}]}` -- same `409`/`AlreadyExists` family as attribute groups/
+  attributes/products, not lists' `422` family (quirk #45a).
+}
+
+example {
+  name: Create Channel - Minimal (Success)
+  description: Real response captured 2026-09-08, minimal body with just name and format. This particular channel was deleted after the test.
+
+  request: {
+    url: {{pim_base_url_v3}}/channels
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "WC Test Channel CSV",
+        "format": "CSV"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 201
+      text: Created
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6aa047032b6fd055ffb7cad9",
+            "account_id": "6a38f5a5b22478f30bfd755c",
+            "name": "WC Test Channel CSV",
+            "format": "CSV",
+            "active": false,
+            "output_filename": "plytix_feed",
+            "column_separator": ",",
+            "text_delimiter": "\"",
+            "process_products": "CREATED_OR_MODIFIED",
+            "parent_include_criteria": "ONLY_PARENT_IN_LIST",
+            "product_list_id": null,
+            "connections": [],
+            "columns": [],
+            "rebuild_periodically": false,
+            "running": false,
+            "created": "2026-09-08T00:00:00.000000",
+            "modified": "2026-09-08T00:00:00.000000"
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Create Channel - Full Featured (Success, Fixture Kept)
+  description: Real response captured 2026-09-08. Kept as a fixture (id 6aa047d52b6fd055ffb7cadd). active auto-flipped to true because a complete rebuild schedule was provided; rebuild_feed_next_build was computed automatically.
+
+  request: {
+    url: {{pim_base_url_v3}}/channels
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "WC Test Channel Full",
+        "format": "CSV",
+        "product_list_id": "6aa0322d2b6fd055ffb7cabb",
+        "rebuild_periodically": true,
+        "rebuild_feed_frequency": "DAILY",
+        "rebuild_feed_hod": 3,
+        "rebuild_feed_moh": 0,
+        "rebuild_feed_timezone": "UTC"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 201
+      text: Created
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6aa047d52b6fd055ffb7cadd",
+            "account_id": "6a38f5a5b22478f30bfd755c",
+            "name": "WC Test Channel Full",
+            "format": "CSV",
+            "active": true,
+            "output_filename": "plytix_feed",
+            "product_list_id": "6aa0322d2b6fd055ffb7cabb",
+            "rebuild_periodically": true,
+            "rebuild_feed_frequency": "DAILY",
+            "rebuild_feed_hod": 3,
+            "rebuild_feed_moh": 0,
+            "rebuild_feed_timezone": "UTC",
+            "rebuild_feed_next_build": "2026-09-09T03:00:00+00:00",
+            "connections": [],
+            "columns": [],
+            "running": false,
+            "created": "2026-09-08T00:00:00.000000",
+            "modified": "2026-09-08T00:00:00.000000"
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Create Channel - Missing Required Fields (422)
+  description: Real response captured 2026-09-08, empty body. Both name and format are flagged at once.
+
+  request: {
+    url: {{pim_base_url_v3}}/channels
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {}
+    }
+  }
+
+  response: {
+    status: {
+      code: 422
+      text: Unprocessable Entity
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {"name": "ValidationError", "description": "Field name is required"},
+            {"name": "ValidationError", "description": "Field format is required"}
+          ]
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Create Channel - Invalid Format (422)
+  description: Real response captured 2026-09-08. format is validated against a hidden fixed set; the error does NOT enumerate valid values.
+
+  request: {
+    url: {{pim_base_url_v3}}/channels
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "WC Test Bad Format",
+        "format": "NotARealFormat123"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 422
+      text: Unprocessable Entity
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "ValidationError",
+              "description": "Field format is unknown"
+            }
+          ]
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Create Channel - Duplicate Name (409)
+  description: Real response captured 2026-09-08, attempting to create a channel whose name already exists in the account.
+
+  request: {
+    url: {{pim_base_url_v3}}/channels
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "WC Test Channel Full",
+        "format": "CSV"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 409
+      text: Conflict
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "AlreadyExists",
+              "description": "A channel with the same name already exists"
+            }
+          ]
+        }
+      '''
+    }
+  }
 }

@@ -43,6 +43,11 @@ docs {
   **Workaround**: filter with `?account_id=<id>` (used in this file's
   base request) or `?product_id=<id>` -- both confirmed correctly scoped.
 
+  ## Re-test 2026-09-21 — still leaking
+  Unfiltered `GET /product-relationships?_page_size=3` still returns
+  `relationship_id 5de65201ac3fa1c04e8289cf` — not belonging to this
+  account. Not fixed.
+
   ## Real bug: filtering by `relationship_id` alone times out
   `GET /product-relationships?relationship_id=<real_id>` returned a raw
   `504 Gateway Time-out` HTML page (not even a JSON error envelope) after
@@ -50,6 +55,13 @@ docs {
   condition on repeated unexpected errors. Filtering by `product_id`
   instead works fine and is the safer/faster way to look up a specific
   product's relationships via this endpoint.
+
+  ## Re-test 2026-09-21 — still hanging, worse than before
+  Re-tested with `relationship_id=6a38f5d8c3d65a5f868b186c` (a real id in
+  this account). The request hung for the full 15-second curl timeout and
+  returned no response at all (no 504 HTML, no body, curl exit code 000).
+  The endpoint appears to have become slower or more broken since 2026-09-15 --
+  use `?product_id=` or `?account_id=` filters as the only safe alternatives.
 }
 
 example {

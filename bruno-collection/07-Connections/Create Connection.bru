@@ -1,7 +1,7 @@
 meta {
   name: Create Connection
   type: http
-  seq: 3
+  seq: 2
 }
 
 post {
@@ -29,12 +29,129 @@ assert {
 }
 
 docs {
-  Confirmed live 2026-09-07 against "David's Dev Account". Created then
-  deleted in the same test run (id was `6a9f1cc92b6fd055ffb7c7fe`) --
-  Connections has no downstream dependents in `TESTING_PLAN.md`, so this
-  scratch resource was cleaned up per the ground rules rather than kept.
+  `POST /api/v3/connections` -- creates an integration connection (FTP, SFTP,
+  or Dropbox).
 
-  `201 Created`. Response includes several `null`-defaulted FTP-specific
-  fields not sent in the request (`url`, `port`, `user`, `source`,
-  `last_processed`, `last_result_operation`) plus `use_tls: false`.
+  Confirmed live 2026-09-07 against "David's Dev Account". Created then deleted
+  in the same test run (id was `6a9f1cc92b6fd055ffb7c7fe`) -- Connections has no
+  downstream dependents in `TESTING_PLAN.md`, so this scratch resource was
+  cleaned up per the ground rules rather than kept.
+
+  `201 Created`. Response includes several null-defaulted FTP-specific fields
+  not sent in the request (`url`, `port`, `user`, `source`, `last_processed`,
+  `last_result_operation`) plus `use_tls: false`.
+
+  ## Spec discrepancy -- type is a fixed lowercase enum (not a free string)
+  `openapi_pimv3.json`'s description for `ConnectionCreateInputDto.type` calls
+  it a free string ("Dropbox, FTP, SFTP" given only as examples). **This is
+  false** -- `type` is validated against a fixed, lowercase enum:
+  `'dropbox'`, `'ftp'`, or `'sftp'`. Uppercase `"FTP"` also fails (case
+  matters). See the 422 example below for the exact error message.
+
+  ## Kept fixture (2026-09-21)
+  A live "WC Test FTP Connection" was retained during the Sept-21 session:
+  id `6aa98673a30ca5945169a25b`. GET by id confirms the null-defaulted fields
+  shape (`last_processed`, `last_result_operation`, `source`, `url`, `port`,
+  `user` all null; `use_tls: false`).
+}
+
+example {
+  name: Create FTP Connection - Success (201)
+  description: Confirmed live 2026-09-07. Minimal body with name and lowercase type; null-defaulted connection-specific fields appear in the response.
+
+  request: {
+    url: {{pim_base_url_v3}}/connections
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "WC Test FTP Connection",
+        "type": "ftp"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 201
+      text: Created
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6aa98673a30ca5945169a25b",
+            "account_id": "6a38f5a5b22478f30bfd755c",
+            "name": "WC Test FTP Connection",
+            "type": "ftp",
+            "last_processed": null,
+            "last_result_operation": null,
+            "source": null,
+            "url": null,
+            "port": null,
+            "user": null,
+            "use_tls": false,
+            "created": null,
+            "modified": "2026-09-15T17:54:59.811000+00:00"
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Create Connection - Invalid Type (422, enum revealed)
+  description: Confirmed live 2026-09-07. type is a fixed lowercase enum (dropbox, ftp, sftp) despite the spec describing it as a free string. Uppercase FTP also fails -- case matters.
+
+  request: {
+    url: {{pim_base_url_v3}}/connections
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "WC Test Nonsense Connection",
+        "type": "ThisIsNotARealType123"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 422
+      text: Unprocessable Entity
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "InputDTOValidationError",
+              "description": "type: Input should be 'dropbox', 'ftp' or 'sftp'"
+            }
+          ]
+        }
+      '''
+    }
+  }
 }

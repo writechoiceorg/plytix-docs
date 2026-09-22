@@ -28,17 +28,109 @@ assert {
 }
 
 docs {
-  Confirmed live 2026-09-07 against "David's Dev Account". **Fixture
-  kept** -- id `6a9f1b872b6fd055ffb7c7df`, referenced by Product Attributes
+  `POST /api/v3/product-attribute-groups` -- creates a product attribute group.
+
+  Confirmed live 2026-09-07 against "David's Dev Account". **Fixture kept** --
+  id `6a9f1b872b6fd055ffb7c7df`, referenced by Product Attributes
   (`06-Product-Attributes`) via `group_ids`.
 
-  `attribute_labels` defaults to `[]` when omitted (spec marks it
-  optional). `201 Created`, consistent with every other Phase 1 resource.
+  `attribute_labels` defaults to `[]` when omitted (spec marks it optional).
+  `201 Created`, consistent with every other Phase 1 resource.
 
-  ## Not idempotent to re-run -- different status than categories
+  ## Not idempotent -- different conflict status than categories
   Re-running once the fixture exists returns **`409 Conflict`**
-  `{"errors":[{"name":"AlreadyExists","description":"A group with the
-  same name already exists"}]}` -- note this is `409`/`AlreadyExists`,
-  not the `422`/`ValidationError` categories use for the same kind of
+  `{"errors":[{"name":"AlreadyExists","description":"A group with the same name
+  already exists"}]}` -- note this is `409`/`AlreadyExists`, not the
+  `422`/`ValidationError` that categories use for the same kind of
   duplicate-name conflict (`config/api-testing.config.md` quirk #25a).
+}
+
+example {
+  name: Create Attribute Group - Success (201)
+  description: Confirmed live 2026-09-07. Minimal body; attribute_labels defaults to empty array when omitted.
+
+  request: {
+    url: {{pim_base_url_v3}}/product-attribute-groups
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "WC Test Attribute Group"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 201
+      text: Created
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6aa020272b6fd055ffb7ca98",
+            "name": "WC Test Attribute Group",
+            "order": 1,
+            "attribute_labels": []
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Create Attribute Group - Duplicate Name (409)
+  description: Confirmed live 2026-09-07. Re-running after the fixture exists returns 409 AlreadyExists -- distinct from product categories which use 422 ValidationError for the same conflict.
+
+  request: {
+    url: {{pim_base_url_v3}}/product-attribute-groups
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "WC Test Attribute Group"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 409
+      text: Conflict
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "AlreadyExists",
+              "description": "A group with the same name already exists"
+            }
+          ]
+        }
+      '''
+    }
+  }
 }

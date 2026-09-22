@@ -21,14 +21,56 @@ assert {
 }
 
 docs {
-  Confirmed live 2026-09-08. This is the `product_family_id` already
-  present on the Phase 2b kept product (`WC-TEST-FULL-001`) even though
-  that product was created standalone with no explicit family wiring --
-  confirms Plytix auto-assigns a product to a family based on its
-  category/attributes, not something this test set up deliberately.
+  Confirmed live 2026-09-08 and 2026-09-21. This is the `product_family_id` already
+  present on the Phase 2b kept product (`WC-TEST-FULL-001`) even though that product
+  was created standalone with no explicit family wiring -- confirms Plytix auto-assigns
+  a product to a family based on its category/attributes, not something this test set
+  up deliberately.
 
-  Subpath discovery raw field list: `['id','account_id','name',
-  'total_products','total_attributes','total_models','created',
-  'modified']` -- matches the spec's `ProductFamilyOutputDto` exactly, no
-  undocumented fields.
+  Subpath discovery raw field list: `['id','account_id','name','total_products',
+  'total_attributes','total_models','created','modified']` -- matches the spec's
+  `ProductFamilyOutputDto` exactly, no undocumented fields.
+}
+
+example {
+  name: Get Product Family by ID - Success
+  description: Real response captured 2026-09-21 against the "Accessories" family (id 6a38f5d8c3d65a5f868b186e).
+
+  request: {
+    url: {{pim_base_url_v3}}/product-families/6a38f5d8c3d65a5f868b186e
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6a38f5d8c3d65a5f868b186e",
+            "account_id": "6a38f5a5b22478f30bfd755c",
+            "name": "Accessories",
+            "total_products": 7,
+            "total_attributes": 61,
+            "total_models": 1,
+            "created": "2026-06-22T08:44:08.740000",
+            "modified": "2026-06-22T08:44:08.740000"
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
 }
