@@ -1,0 +1,84 @@
+meta {
+  name: List Product Attribute Groups
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{pim_base_url_v3}}/product-attribute-groups?_fields=id&_fields=name&_fields=order&_page=1&_page_size=2&_sort_by=name
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Accept: application/json
+}
+
+assert {
+  res.status: eq 200
+  res.body.data: isArray
+}
+
+docs {
+  `GET /api/v3/product-attribute-groups` -- list all product attribute groups
+  for the account.
+
+  Confirmed live 2026-09-22 against "David's Dev Account". This request had
+  no prior coverage in the collection at all (only Create/Get-by-id/Delete
+  existed) -- added as part of the full-parameters testing pass.
+
+  Same undeclared-in-spec query-param behavior confirmed generally across
+  v3 list endpoints (see `config/api-testing.config.md` quirks #7-11):
+  repeatable `_fields`, `_page`/`_page_size`, `_sort_by` all work. Pagination
+  follows the same `pagination.next_page` cursor pattern as every other
+  resource.
+}
+
+example {
+  name: 200 - Full Parameters
+  description: Confirmed live 2026-09-22. Combines every confirmed-working query param at once -- multiple repeatable _fields, _page/_page_size, and _sort_by.
+
+  request: {
+    url: {{pim_base_url_v3}}/product-attribute-groups?_fields=id&_fields=name&_fields=order&_page=1&_page_size=2&_sort_by=name
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [
+            {
+              "id": "6a38f613c3d65a5f868b19af",
+              "name": "Amazon",
+              "order": 9
+            },
+            {
+              "id": "6a38f613c3d65a5f868b19a6",
+              "name": "Basic Information",
+              "order": 0
+            }
+          ],
+          "errors": [],
+          "pagination": {
+            "next_page": "http://pim.dev.plytix.com/api/v3/product-attribute-groups?_fields=id&_fields=name&_fields=order&_page=2&_page_size=2&_sort_by=name"
+          }
+        }
+      '''
+    }
+  }
+}

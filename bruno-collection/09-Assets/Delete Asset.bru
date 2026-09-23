@@ -32,7 +32,7 @@ docs {
 }
 
 example {
-  name: Delete Asset - Success (204, then 404 on follow-up GET)
+  name: 204 - Success (Then 404 on Follow-Up GET)
   description: Real response captured 2026-09-15 against a disposable scratch asset on "David's Dev Account", immediately after the PATCH in "Update Asset.bru" in this same folder.
 
   request: {
@@ -62,7 +62,7 @@ example {
 }
 
 example {
-  name: Get Asset by ID - After Delete (404)
+  name: 404 - Not Found After Delete
   description: Real response captured 2026-09-15, follow-up GET immediately after the DELETE above.
 
   request: {

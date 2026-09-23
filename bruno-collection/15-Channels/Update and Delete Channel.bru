@@ -38,7 +38,7 @@ docs {
 }
 
 example {
-  name: Update Channel - Success (PATCH)
+  name: 200 - Success
   description: Real response captured 2026-09-15 against a disposable scratch channel on "David's Dev Account".
 
   request: {
@@ -141,7 +141,133 @@ example {
 }
 
 example {
-  name: Delete Channel - Success (204, then 404 on follow-up GET)
+  name: 200 - Full Parameters (All Fields)
+  description: Real response captured 2026-09-22 against a disposable scratch channel (id 6ab2fec0125f1d0ceeeed6c8, same one from "Create Channel - Full Parameters"), exercising a broad spread of ChannelUpdateInputDto fields in one PATCH -- rename, active toggle, process/parent-include criteria (both main and on-demand), childs_first, and the store_title/store_link/store_description trio (unused elsewhere in this collection). Discovered live that parent_include_criteria/on_demand_parent_include_criteria only accept 'ONLY_PARENT_IN_LIST' or 'ALL_PARENT_IN_VARIANTS' (a 422 on 'ALL_PARENTS' revealed the real enum -- narrower than process_products' 4-value CREATED_OR_MODIFIED/CREATED/MODIFIED/ALL set).
+
+  request: {
+    url: {{pim_base_url_v3}}/channels/6ab2fec0125f1d0ceeeed6c8
+    method: patch
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "WC Test Full Params Channel Renamed",
+        "active": false,
+        "childs_first": true,
+        "process_products": "ALL",
+        "parent_include_criteria": "ALL_PARENT_IN_VARIANTS",
+        "on_demand_process_products": "ALL",
+        "on_demand_parent_include_criteria": "ALL_PARENT_IN_VARIANTS",
+        "store_title": "WC Test Store",
+        "store_link": "https://example.com/store",
+        "store_description": "WC test store description for full-parameter PATCH example"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "active": false,
+            "already_processed_through_integrations": true,
+            "attribute_sorting": null,
+            "build_reference_date": "2026-06-22T08:43:17",
+            "build_reference_date_timezone": "UTC",
+            "changes_required": false,
+            "childs_first": true,
+            "column_separator": ";",
+            "columns": [
+              {
+                "fill_values": "ALL",
+                "fill_values_vl3": ["PARENTS", "VARIANTS", "SUBVARIANTS"],
+                "format": {},
+                "formula_txt": null,
+                "id": "sku",
+                "internal_name": null,
+                "label": "SKU",
+                "output_label": "sku",
+                "source_type": "PIM",
+                "transformations": null,
+                "type": null
+              }
+            ],
+            "connections": [],
+            "created_at": "2026-09-22T22:18:40.840000+00:00",
+            "created_user_audit": {
+              "type": "API",
+              "user_email": "TestDH",
+              "user_id": "6a96a370a3fb0431c692820d"
+            },
+            "file_path": null,
+            "format": "CSV",
+            "id": "6ab2fec0125f1d0ceeeed6c8",
+            "is_fmt": false,
+            "last_run_by_user": null,
+            "last_run_ends_at": null,
+            "last_run_error": false,
+            "last_run_queue_at": null,
+            "last_run_start_at": null,
+            "modified": "2026-09-22T22:19:09.968287+00:00",
+            "modified_user_audit": {
+              "type": "API",
+              "user_email": "TestDH",
+              "user_id": "6a96a370a3fb0431c692820d"
+            },
+            "name": "WC Test Full Params Channel Renamed",
+            "on_demand_parent_include_criteria": "ALL_PARENT_IN_VARIANTS",
+            "on_demand_process_products": "ALL",
+            "output_filename": "wc_test_full_feed",
+            "output_filename_with_timestamp": true,
+            "parent_include_criteria": "ALL_PARENT_IN_VARIANTS",
+            "process_products": "ALL",
+            "processed_user_audit": null,
+            "product_list_id": "6aa0322d2b6fd055ffb7cabb",
+            "product_nodes": [],
+            "rebuild_feed_dom": null,
+            "rebuild_feed_dow": null,
+            "rebuild_feed_frequency": "DAILY",
+            "rebuild_feed_hod": 3,
+            "rebuild_feed_moh": 0,
+            "rebuild_feed_next_build": "2026-09-23T03:00:00",
+            "rebuild_feed_timezone": "UTC",
+            "rebuild_once": false,
+            "rebuild_once_at": null,
+            "rebuild_once_timezone": null,
+            "rebuild_periodically": true,
+            "running": false,
+            "shopify": null,
+            "store_description": "WC test store description for full-parameter PATCH example",
+            "store_link": "https://example.com/store",
+            "store_title": "WC Test Store",
+            "text_delimiter": "'",
+            "wayfair": null,
+            "webhook": null,
+            "xml_nodes": [],
+            "xml_output_attributes": []
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 204 - Success (Then 404 On Follow-Up GET)
   description: Real response captured 2026-09-15 against the same disposable scratch channel, immediately after the PATCH above.
 
   request: {
@@ -171,7 +297,7 @@ example {
 }
 
 example {
-  name: Get Channel by ID - After Delete (404)
+  name: 404 - After Delete
   description: Real response captured 2026-09-15, follow-up GET immediately after the DELETE above.
 
   request: {

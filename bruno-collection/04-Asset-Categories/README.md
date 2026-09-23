@@ -44,6 +44,25 @@ Category (Undeclared).bru". Retested fresh against a new disposable
 scratch category and captured real `example{}` blocks for both `PATCH`
 (200) and `DELETE` (204, then 404).
 
+## Update — 2026-09-22 (full-parameter examples for OpenAPI docs)
+
+Added new coverage (existing examples untouched):
+- **New file** `List Asset Categories.bru` — this endpoint had zero prior
+  coverage in the collection (only Create/Get-by-id/Update/Delete existed).
+  Confirmed `GET /api/v3/asset-categories` live with the same undeclared
+  query-param support as every other v3 list endpoint (`_fields`,
+  `_page`/`_page_size`, `_sort_by`); captured a "Full Parameters" example
+  combining all of them.
+- `Update and Delete Asset Category.bru`: new "Update Asset Category - Full
+  Parameters (PATCH, rename + re-parent)" example — `PATCH` with both
+  `name` and `parent_id` set together (the full
+  `AssetCategoryUpdateInputDto`), against two disposable scratch categories
+  (both deleted after capture). Same rename+re-parent behavior confirmed on
+  product categories.
+- `Create Asset Category.bru` was not touched — its existing "Create Child
+  Asset Category" example already exercises the full
+  `AssetCategoryCreateInputDto` (`name` + `parent_id`).
+
 ## Open items
 
 - [x] Same open question as `03-Product-Categories` re: whether undeclared

@@ -65,7 +65,7 @@ docs {
 }
 
 example {
-  name: Get Product Relationships - Filtered by account_id (Safe/Scoped)
+  name: 200 - Filtered by account_id (Safe/Scoped)
   description: Real response captured 2026-09-15, filtered to "David's Dev Account" to avoid the cross-tenant leak documented above.
 
   request: {
@@ -108,7 +108,48 @@ example {
 }
 
 example {
-  name: Get Product Relationships - No Filter (Cross-Tenant Data Leak, Bug)
+  name: 200 - Full Parameters (Filtered + Fields + Sort)
+  description: Real response captured 2026-09-22, combining the required safe account_id filter with sparse _fields selection, page-number pagination, and _sort_by in one call.
+
+  request: {
+    url: {{pim_base_url_v3}}/product-relationships?account_id=6a38f5a5b22478f30bfd755c&_fields=relationship_id&_fields=relationship_label&_fields=product_id&_page=1&_page_size=3&_sort_by=product_id
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [
+            {"relationship_id": "6a38f5d8c3d65a5f868b186c", "relationship_label": "related_products", "product_id": "6a38f614c3d65a5f868b1a06"},
+            {"relationship_id": "6a38f5d8c3d65a5f868b186c", "relationship_label": "related_products", "product_id": "6a38f614c3d65a5f868b1a07"},
+            {"relationship_id": "6a38f5d8c3d65a5f868b186b", "relationship_label": "bundles", "product_id": "6a38f614c3d65a5f868b1a07"}
+          ],
+          "errors": [],
+          "pagination": {
+            "next_page": "http://pim.dev.plytix.com/api/v3/product-relationships?account_id=6a38f5a5b22478f30bfd755c&_fields=relationship_id&_fields=relationship_label&_fields=product_id&_page=2&_page_size=3&_sort_by=product_id"
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 200 - No Filter (Cross-Tenant Leak, Bug)
   description: Real response captured 2026-09-15 with NO account filter applied -- the returned product_id/relationship_id values do not belong to "David's Dev Account".
 
   request: {
@@ -149,7 +190,7 @@ example {
 }
 
 example {
-  name: Get Product Relationships - Filtered by relationship_id (504 Timeout, Bug)
+  name: 504 - Filtered by relationship_id (Timeout, Bug)
   description: Real response captured 2026-09-15 -- a raw gateway timeout, not a JSON error envelope. Use the product_id filter instead when looking up a specific product/relationship pair.
 
   request: {

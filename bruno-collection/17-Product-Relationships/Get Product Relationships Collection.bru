@@ -66,7 +66,7 @@ docs {
 }
 
 example {
-  name: Get Product Relationships Collection - Empty (Before Linking)
+  name: 200 - Empty (Before Linking)
   description: Real response captured 2026-09-15 against a disposable scratch product before any relationship was linked.
 
   request: {
@@ -100,7 +100,7 @@ example {
 }
 
 example {
-  name: Get Product Relationships Collection - After Linking
+  name: 200 - After Linking
   description: Real response captured 2026-09-15, immediately after the Create Product Relationship Link call linked this product to a second scratch product.
 
   request: {
@@ -140,7 +140,7 @@ example {
 }
 
 example {
-  name: Create Product Relationship Link - Missing Fields (422)
+  name: 422 - Missing Fields
   description: Real response captured 2026-09-15, empty body -- reveals both required top-level fields and the DTO name.
 
   request: {
@@ -183,7 +183,7 @@ example {
 }
 
 example {
-  name: Create Product Relationship Link - Wrong Nested Field Name (422)
+  name: 422 - Wrong Nested Field Name
   description: Real response captured 2026-09-15, using "id" instead of "product_id" in related_products -- reveals the correct nested field name.
 
   request: {
@@ -231,7 +231,67 @@ example {
 }
 
 example {
-  name: Create Product Relationship Link - Success
+  name: 201 - Full Parameters (Multiple Related Products)
+  description: Real response captured 2026-09-22 against three disposable scratch products ("WC-TEST-FULLREL-A/B/C") and a disposable scratch relationship type ("WC Test Full Params Relationship", id 6ab2ffd3125f1d0ceeeed6c9), all deleted immediately after. Every prior example in this file links only one related product per call -- this demonstrates the related_products array accepting multiple entries with distinct quantity values in a single POST.
+
+  request: {
+    url: {{pim_base_url_v3}}/products/6ab2ffd8125f1d0ceeeed6ca/relationships
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "relationship_id": "6ab2ffd3125f1d0ceeeed6c9",
+        "related_products": [
+          { "product_id": "6ab2ffd9125f1d0ceeeed6cb", "quantity": 3 },
+          { "product_id": "6ab2ffda125f1d0ceeeed6cc", "quantity": 7 }
+        ]
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 201
+      text: Created
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "relationship_id": "6ab2ffd3125f1d0ceeeed6c9",
+            "relationship_label": "wc_test_full_params_relationship",
+            "related_products": [
+              {
+                "related_product_id": "6ab2ffd9125f1d0ceeeed6cb",
+                "quantity": 3,
+                "last_modified": "2026-09-22T22:23:35.620000+00:00"
+              },
+              {
+                "related_product_id": "6ab2ffda125f1d0ceeeed6cc",
+                "quantity": 7,
+                "last_modified": "2026-09-22T22:23:35.620000+00:00"
+              }
+            ],
+            "product_id": "6ab2ffd8125f1d0ceeeed6ca"
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 201 - Success
   description: Real response captured 2026-09-15, using the correct field name. quantity defaults to 1. related_product_id is present in the create response (unlike the GET collection).
 
   request: {

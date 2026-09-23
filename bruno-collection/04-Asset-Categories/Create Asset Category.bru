@@ -51,7 +51,7 @@ docs {
 }
 
 example {
-  name: Create Root Asset Category - Success (201)
+  name: 201 - Success (Root Category)
   description: Confirmed live 2026-09-07. Minimal body with name only; 201 Created with partial shape (account_id, parent_id, created absent).
 
   request: {
@@ -98,7 +98,7 @@ example {
 }
 
 example {
-  name: Create Child Asset Category - Success (201)
+  name: 201 - Success (Child Category)
   description: Confirmed live 2026-09-07. parent_id creates a nested child; path reflects full ancestry.
 
   request: {
@@ -147,7 +147,7 @@ example {
 }
 
 example {
-  name: Create Asset Category - Missing Name (422)
+  name: 422 - Missing Name
   description: Confirmed live 2026-09-07. Empty body triggers InputDTOValidationError; same 422 envelope shape as every other resource tested.
 
   request: {

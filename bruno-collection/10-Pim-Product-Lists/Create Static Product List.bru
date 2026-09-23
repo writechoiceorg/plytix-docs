@@ -86,7 +86,7 @@ docs {
 }
 
 example {
-  name: Create Smart Product List
+  name: 201 - Success (Smart List)
   description: Confirmed live 2026-09-08 and 2026-09-21. query is a nested array-of-arrays of filter objects; valid operators include like, eq, in, exists, etc. (not icontains).
 
   request: {
@@ -145,7 +145,73 @@ example {
 }
 
 example {
-  name: Missing Required Fields (422)
+  name: 201 - Full Parameters (Multi-Group Query)
+  description: Confirmed live 2026-09-22 against a disposable scratch Smart list (id 6ab2fa2c125f1d0ceeeed6b4, deleted after capture). ProductListCreateInputDto only has name/type/query fields, so "full parameters" means exercising query's full expressiveness -- outer array is OR-ed groups, inner array is AND-ed conditions within a group. This example combines two AND conditions in the first group with a second OR-ed group, across three different operators (eq, gt, like).
+
+  request: {
+    url: {{pim_base_url_v3}}/pim-product-lists
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "WC Test Full Params Smart List",
+        "type": "Smart",
+        "query": [
+          [
+            {"operator": "eq", "field": "status", "value": "Completed"},
+            {"operator": "gt", "field": "attributes.amazon_ready", "value": 50}
+          ],
+          [
+            {"operator": "like", "field": "sku", "value": "WC"}
+          ]
+        ]
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 201
+      text: Created
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6ab2fa2c125f1d0ceeeed6b4",
+            "account_id": "6a38f5a5b22478f30bfd755c",
+            "name": "WC Test Full Params Smart List",
+            "query": [
+              [
+                {"operator": "eq", "field": "status", "value": "Completed", "field_type": null},
+                {"operator": "gt", "field": "attributes.amazon_ready", "value": 50, "field_type": null}
+              ],
+              [
+                {"operator": "like", "field": "sku", "value": "WC", "field_type": null}
+              ]
+            ],
+            "created": "2026-09-22T21:59:08.221838+00:00",
+            "modified": "2026-09-22T21:59:08.233651+00:00",
+            "type": "Smart"
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 422 - Missing Required Fields (name, type)
   description: Confirmed live 2026-09-08. Both name and type are required; missing either returns 422 with one errors entry per missing field.
 
   request: {

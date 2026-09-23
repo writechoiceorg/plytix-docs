@@ -55,7 +55,83 @@ docs {
 }
 
 example {
-  name: Update Asset - Success (alt_text/filename)
+  name: 200 - Full Parameters
+  description: Confirmed live 2026-09-22 against a disposable scratch asset (6ab2fa20125f1d0ceeeed6ae) and a disposable scratch Static asset list (6ab2fe75125f1d0ceeeed6c0, created solely to have a valid static_list_ids target). All four AssetUpdateInputDto fields sent together. category_ids applies immediately and is visible in the response's categories field (shallow reference). static_list_ids also applies (confirmed via a follow-up GET /assets/{id}/static_lists returning the linked list) but, like category_ids on POST, is NOT reflected anywhere in this PATCH response body — the same silent-field pattern as quirk #13/#34. Both scratch resources were deleted after capture.
+
+  request: {
+    url: {{pim_base_url_v3}}/assets/6ab2fa20125f1d0ceeeed6ae
+    method: patch
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "filename": "wc_test_full_params_asset_renamed.jpg",
+        "alt_text": "WC test full-parameter asset UPDATED",
+        "category_ids": ["6a9f1b862b6fd055ffb7c7de"],
+        "static_list_ids": ["6ab2fe75125f1d0ceeeed6c0"]
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "alt_text": "WC test full-parameter asset UPDATED",
+            "assigned": false,
+            "categories": [
+              {
+                "id": "6a9f1b862b6fd055ffb7c7de"
+              }
+            ],
+            "content_type": "image/jpeg",
+            "created": "2026-09-22T21:58:56.967000+00:00",
+            "created_user_audit": {
+              "type": "API",
+              "user_email": "TestDH",
+              "user_id": "6a96a370a3fb0431c692820d"
+            },
+            "extension": "jpg",
+            "file_modified": "2026-09-22",
+            "file_size": 25905,
+            "file_type": "IMAGES",
+            "filename": "wc_test_full_params_asset_renamed.jpg",
+            "has_custom_thumb": false,
+            "id": "6ab2fa20125f1d0ceeeed6ae",
+            "modified": "2026-09-22T22:17:33.281820+00:00",
+            "modified_user_audit": {
+              "type": "API",
+              "user_email": "TestDH",
+              "user_id": "6a96a370a3fb0431c692820d"
+            },
+            "n_catalogs": 0,
+            "n_products": 0,
+            "status": "ACTIVE",
+            "thumbnail": "https://files.dev.plytix.com/api/v1.1/thumb/public_files/pim/assets/a5/f5/38/6a/6a38f5a5b22478f30bfd755c/images/20/fa/b2/6a/6ab2fa20125f1d0ceeeed6ae/wc_test_full_params_asset_renamed.jpg",
+            "url": "https://files.dev.plytix.com/api/v1.1/file/public_files/pim/assets/a5/f5/38/6a/6a38f5a5b22478f30bfd755c/images/20/fa/b2/6a/6ab2fa20125f1d0ceeeed6ae/wc_test_full_params_asset_renamed.jpg"
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 200 - Success (alt_text / filename)
   description: Real response captured 2026-09-15 against a disposable scratch asset on "David's Dev Account" (not the kept fixture).
 
   request: {

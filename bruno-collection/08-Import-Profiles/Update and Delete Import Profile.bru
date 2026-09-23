@@ -35,7 +35,7 @@ docs {
 }
 
 example {
-  name: Update Import Profile - Success (PATCH)
+  name: 200 - Success
   description: Real response captured 2026-09-15 against a disposable scratch import profile on "David's Dev Account".
 
   request: {
@@ -101,7 +101,7 @@ example {
 }
 
 example {
-  name: Delete Import Profile - Success (204, then 404 on follow-up GET)
+  name: 204 - Success (Then 404 on Follow-Up GET)
   description: Real response captured 2026-09-15 against the same disposable scratch import profile, immediately after the PATCH above.
 
   request: {
@@ -131,7 +131,7 @@ example {
 }
 
 example {
-  name: Get Import Profile by ID - After Delete (404)
+  name: 404 - Not Found After Delete
   description: Real response captured 2026-09-15, follow-up GET immediately after the DELETE above.
 
   request: {

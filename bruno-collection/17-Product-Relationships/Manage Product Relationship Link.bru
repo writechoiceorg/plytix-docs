@@ -73,7 +73,7 @@ docs {
 }
 
 example {
-  name: Get Product Relationship by ID - Success
+  name: 200 - Success (Get By ID)
   description: Real response captured 2026-09-15, immediately after Create Product Relationship Link created this link.
 
   request: {
@@ -111,7 +111,7 @@ example {
 }
 
 example {
-  name: Update Product Relationship Quantity - Success (PATCH)
+  name: 200 - Success (Quantity Update)
   description: Real response captured 2026-09-15, bumping quantity from 1 to 5. Note related_product_id appears here but not in the GET response -- a documented quirk.
 
   request: {
@@ -165,7 +165,7 @@ example {
 }
 
 example {
-  name: Delete Product Relationship - Success (204, Product Stays Intact)
+  name: 204 - Success (Product Stays Intact)
   description: Real response captured 2026-09-15. The product itself is confirmed intact after this DELETE -- first safe scoped unlink found in this entire project.
 
   request: {
@@ -193,7 +193,7 @@ example {
 }
 
 example {
-  name: Get Product by ID - After Delete (Product Intact, Relationship Gone)
+  name: 200 - After Delete (Product Intact, Relationship Gone)
   description: Real response captured 2026-09-15, follow-up GET on the PRODUCT (not the relationship) immediately after the DELETE above -- the product is fully present with product_relationships emptied to [].
 
   request: {

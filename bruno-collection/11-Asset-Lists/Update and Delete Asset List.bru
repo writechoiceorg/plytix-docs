@@ -42,7 +42,7 @@ docs {
 }
 
 example {
-  name: Update Asset List - Success (PATCH)
+  name: 200 - Success
   description: Real response captured 2026-09-15 against a disposable scratch Smart asset list on "David's Dev Account".
 
   request: {
@@ -109,7 +109,75 @@ example {
 }
 
 example {
-  name: Delete Asset List - Success (204, then 404 on follow-up GET)
+  name: 200 - Full Parameters (Rename + Query Replace)
+  description: Confirmed live 2026-09-22 against the scratch list created in "Create Smart Asset List.bru"'s full-parameters example (id 6ab2fe75125f1d0ceeeed6c1, deleted after capture). AssetListUpdateInputDto's query field is a SET-replace -- this example renames the list and fully replaces the query with a single-condition !exists filter (existence-check operator, matching quirk #53's pattern on live search endpoints, confirmed here to also work in the stored-query DSL).
+
+  request: {
+    url: {{pim_base_url_v3}}/asset-lists/6ab2fe75125f1d0ceeeed6c1
+    method: patch
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "WC Test Full Params Smart Asset List Renamed",
+        "query": [
+          [
+            {"operator": "!exists", "field": "alt_text", "value": true}
+          ]
+        ]
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "created_user_audit": {
+              "type": "API",
+              "user_email": "TestDH",
+              "user_id": "6a96a370a3fb0431c692820d"
+            },
+            "id": "6ab2fe75125f1d0ceeeed6c1",
+            "modified": "2026-09-22T22:17:31.659576+00:00",
+            "modified_user_audit": {
+              "type": "API",
+              "user_email": "TestDH",
+              "user_id": "6a96a370a3fb0431c692820d"
+            },
+            "name": "WC Test Full Params Smart Asset List Renamed",
+            "relationship_filters": [],
+            "type": "Smart",
+            "query": [
+              [
+                {"field": "alt_text", "operator": "!exists", "value": true}
+              ]
+            ],
+            "created": "2026-09-22T22:17:25.493000+00:00",
+            "account_id": "6a38f5a5b22478f30bfd755c"
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 204 - Success
   description: Real response captured 2026-09-15 against the same disposable scratch asset list, immediately after the PATCH above.
 
   request: {
@@ -139,7 +207,7 @@ example {
 }
 
 example {
-  name: Get Asset List by ID - After Delete (404)
+  name: 404 - Not Found After Delete
   description: Real response captured 2026-09-15, follow-up GET immediately after the DELETE above.
 
   request: {

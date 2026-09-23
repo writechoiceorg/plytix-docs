@@ -37,7 +37,7 @@ docs {
 }
 
 example {
-  name: Delete Product Attribute Group - Success (204, then 404 on follow-up GET)
+  name: 204 - Success
   description: Real response captured 2026-09-15 against a disposable scratch attribute group on "David's Dev Account".
 
   request: {
@@ -67,7 +67,7 @@ example {
 }
 
 example {
-  name: Get Product Attribute Group by ID - After Delete (404)
+  name: 404 - Not Found After Delete
   description: Real response captured 2026-09-15, follow-up GET immediately after the DELETE above, confirming a hard delete.
 
   request: {

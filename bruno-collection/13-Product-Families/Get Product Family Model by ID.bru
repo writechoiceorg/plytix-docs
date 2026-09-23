@@ -40,7 +40,7 @@ docs {
 }
 
 example {
-  name: Get Product Family Model by ID - Success
+  name: 200 - Success
   description: Real response captured 2026-09-08 against the "Accessories" family model (id 6a38f5d8c3d65a5f868b1871).
 
   request: {
@@ -80,7 +80,7 @@ example {
 }
 
 example {
-  name: Get Product Family Model - Wrong ID Type (404)
+  name: 404 - Wrong ID Type
   description: Confirmed 2026-09-21 -- using the family id (not the model id) returns a bare 404 JSON, not the standard NotFoundError envelope.
 
   request: {

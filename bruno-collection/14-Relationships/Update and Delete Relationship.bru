@@ -45,7 +45,7 @@ docs {
 }
 
 example {
-  name: Update Relationship - Success (PATCH)
+  name: 200 - Success (PATCH)
   description: Real response captured 2026-09-15 against the disposable scratch relationship, renaming it.
 
   request: {
@@ -93,7 +93,7 @@ example {
 }
 
 example {
-  name: Delete Relationship - Success (204, then 404 on follow-up GET)
+  name: 204 - Success (Then 404 on Follow-up GET)
   description: Real response captured 2026-09-15 against the same disposable scratch relationship, immediately after the PATCH above.
 
   request: {
@@ -123,7 +123,7 @@ example {
 }
 
 example {
-  name: Get Relationship by ID - After Delete (404)
+  name: 404 - After Delete
   description: Real response captured 2026-09-15, follow-up GET immediately after the DELETE above.
 
   request: {

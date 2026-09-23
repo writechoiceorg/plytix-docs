@@ -51,7 +51,7 @@ docs {
 }
 
 example {
-  name: PATCH /pim-product-lists/{id}/products - Extra Field Forbidden (422)
+  name: 422 - products Field Forbidden on PATCH
   description: Confirmed live 2026-09-08. products is not a field on ProductListUpdateInputDto; the subpath PATCH mechanism 422s it as an unrecognized extra field.
 
   request: {

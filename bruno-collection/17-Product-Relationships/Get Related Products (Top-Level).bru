@@ -62,7 +62,7 @@ docs {
 }
 
 example {
-  name: Get Related Products - Filtered by account_id (Safe/Scoped)
+  name: 200 - Filtered by account_id (Safe/Scoped)
   description: Real response captured 2026-09-15, filtered to "David's Dev Account" -- shows real relationship data for the kept fixture product `BAG-10157` (id `6a38f614c3d65a5f868b1a06`).
 
   request: {
@@ -105,7 +105,45 @@ example {
 }
 
 example {
-  name: Get Related Products - No Filter (Cross-Tenant Data Leak, Bug)
+  name: 200 - Full Parameters (Filtered + Fields + Sort)
+  description: Real response captured 2026-09-22, combining the safe product_id filter with sparse _fields selection, page-number pagination, and _sort_by in one call, against the kept fixture product BAG-10157.
+
+  request: {
+    url: {{pim_base_url_v3}}/related-products?product_id=6a38f614c3d65a5f868b1a06&_fields=product_id&_fields=related_product_id&_fields=quantity&_page=1&_page_size=3&_sort_by=related_product_id
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [
+            {"product_id": "6a38f614c3d65a5f868b1a06", "related_product_id": "6a38f615c3d65a5f868b1a1a", "quantity": 1},
+            {"product_id": "6a38f614c3d65a5f868b1a06", "related_product_id": "6a38f615c3d65a5f868b1a1b", "quantity": 1}
+          ],
+          "errors": [],
+          "pagination": {}
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 200 - No Filter (Cross-Tenant Leak, Bug)
   description: Real response captured 2026-09-15 with NO account filter applied -- account_id in every record is a different, real Plytix account, not "David's Dev Account".
 
   request: {
@@ -146,7 +184,7 @@ example {
 }
 
 example {
-  name: Get Related Products - Filtered by relationship_id (500, Bug)
+  name: 500 - Filtered by relationship_id (Bug)
   description: Real response captured 2026-09-15 -- a genuine HiddenFieldError leaking out as a 500 instead of a 400/422.
 
   request: {

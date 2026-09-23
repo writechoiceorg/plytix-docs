@@ -46,7 +46,7 @@ docs {
 }
 
 example {
-  name: Create Attribute Group - Success (201)
+  name: 201 - Success
   description: Confirmed live 2026-09-07. Minimal body; attribute_labels defaults to empty array when omitted.
 
   request: {
@@ -91,7 +91,53 @@ example {
 }
 
 example {
-  name: Create Attribute Group - Duplicate Name (409)
+  name: 201 - Full Parameters
+  description: Confirmed live 2026-09-22 (scratch group deleted after capture). Exercises every field on ProductAttributeGroupCreateInputDto at once -- name AND a populated attribute_labels array (real attribute labels from this account's "Amazon" group) -- unlike the minimal example above where attribute_labels defaults to [].
+
+  request: {
+    url: {{pim_base_url_v3}}/product-attribute-groups
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "WC Test Full Params Attribute Group",
+        "attribute_labels": ["condition", "vendor", "country_of_origin"]
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 201
+      text: Created
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6ab2fe7c125f1d0ceeeed6c3",
+            "name": "WC Test Full Params Attribute Group",
+            "order": 12,
+            "attribute_labels": ["condition", "vendor", "country_of_origin"]
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 409 - Duplicate Name
   description: Confirmed live 2026-09-07. Re-running after the fixture exists returns 409 AlreadyExists -- distinct from product categories which use 422 ValidationError for the same conflict.
 
   request: {

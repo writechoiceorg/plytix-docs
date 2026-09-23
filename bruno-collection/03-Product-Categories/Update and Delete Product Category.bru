@@ -44,7 +44,7 @@ docs {
 }
 
 example {
-  name: Update Product Category - Success (PATCH)
+  name: 200 - Success (PATCH)
   description: Real response captured 2026-09-15 against a disposable scratch category on "David's Dev Account".
 
   request: {
@@ -92,7 +92,57 @@ example {
 }
 
 example {
-  name: Delete Product Category - Success (204, then 404 on follow-up GET)
+  name: 200 - Full Parameters (Rename + Re-Parent)
+  description: Confirmed live 2026-09-22 against two disposable scratch categories ("WC Test Full Params Category A/B", both deleted after capture). Exercises every field on ProductCategoryUpdateInputDto at once -- name AND parent_id together -- moving category B under category A in the same call. path reflects the new ancestry immediately; order still comes back as a string on PATCH (same quirk noted elsewhere).
+
+  request: {
+    url: {{pim_base_url_v3}}/product-categories/6ab2fa2a125f1d0ceeeed6b2
+    method: patch
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "WC Test Full Params Category B Renamed",
+        "parent_id": "6ab2fa29125f1d0ceeeed6b1"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6ab2fa2a125f1d0ceeeed6b2",
+            "modified": "2026-09-22T22:17:04.118456+00:00",
+            "n_children": 0,
+            "name": "WC Test Full Params Category B Renamed",
+            "order": "1",
+            "path": ["WC Test Full Params Category A", "WC Test Full Params Category B Renamed"],
+            "slug": "wc-test-full-params-category-b-renamed",
+            "parent_id": "6ab2fa29125f1d0ceeeed6b1"
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 204 - Success
   description: Real response captured 2026-09-15 against the same disposable scratch category, immediately after the PATCH above.
 
   request: {
@@ -122,7 +172,7 @@ example {
 }
 
 example {
-  name: Get Product Category by ID - After Delete (404)
+  name: 404 - Not Found After Delete
   description: Real response captured 2026-09-15, follow-up GET on the same id immediately after the DELETE above, confirming a hard delete.
 
   request: {

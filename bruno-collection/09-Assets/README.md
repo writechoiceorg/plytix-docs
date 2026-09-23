@@ -55,8 +55,33 @@ block, retesting the same `alt_text`/`filename` PATCH behavior against a
 disposable scratch asset (not the kept fixture, to avoid mutating it
 further) — this file previously only had prose `docs{}`, no example.
 
+## Update — 2026-09-22 (full-parameter examples pass)
+
+Added two new `example{}` blocks:
+- "Create Asset.bru" → `201 - Full Parameters`: every `AssetCreateInputDto`
+  field sent together (`url`, `filename`, `alt_text`, `category_ids`,
+  `static_list_ids`). Reconfirms `category_ids`/`static_list_ids` are both
+  silently ignored on create (verified via follow-up `GET .../categories`
+  and `.../static_lists`, both empty).
+- "Update Asset.bru" → `200 - Full Parameters`: all four
+  `AssetUpdateInputDto` fields sent together in one `PATCH`. New finding
+  this pass: `static_list_ids` on `PATCH` *does* apply (confirmed via
+  `GET /assets/{id}/static_lists`) but, unlike `category_ids`, is not
+  reflected anywhere in the `PATCH` response body itself — a silent-field
+  pattern extending quirk #13/#34 to this field/resource combination.
+
+Both examples used disposable scratch resources (a scratch asset and a
+scratch Static-type asset list, created solely to have a valid
+`static_list_ids` target) — all deleted after capture, nothing kept.
+Existing examples were left untouched.
+
 ## Open items
 
 - [ ] Ask Plytix: is `category_ids` meant to work on `POST /assets`, or
       is `PATCH`-after-create the intended flow? (config open question,
       relates to #12/#13.)
+- [ ] New (2026-09-22): `static_list_ids` on `PATCH /assets/{id}` applies
+      but is never reflected in any response field on that same resource
+      (root `PATCH`, `POST`, or plain `GET`) — only discoverable via the
+      `/static_lists` subpath. Worth flagging alongside the existing
+      `category_ids` question since it's the same silent-field family.

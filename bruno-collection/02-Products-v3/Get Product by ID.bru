@@ -67,7 +67,7 @@ docs {
 }
 
 example {
-  name: Success - Fetch by Mongo ObjectId
+  name: 200 - Fetch by Mongo ObjectId
   description: Confirmed live 2026-09-07. Full ProductOutputDto shape. Note: relationship field is product_relationships (not relationships per spec). categories and assets are not expanded by default — use GET /products/{id}/{path} subpath requests for those.
 
   request: {
@@ -94,7 +94,7 @@ example {
         {
           "data": {
             "id": "6a38f614c3d65a5f868b1a06",
-            "account_id": "6a38f5d5c3d65a5f868b1869",
+            "account_id": "6a38f5a5b22478f30bfd755c",
             "sku": "BAG-10157",
             "label": "Bag 10157",
             "gtin": null,
@@ -143,6 +143,93 @@ example {
 }
 
 example {
+  name: 200 - _fields Ignored, Full Rich Product Returned
+  description: Confirmed live 2026-09-22 (re-confirms quirk #24 -- _fields is silently ignored on single-resource GET, only works on the search endpoint). Requesting _fields=sku&_fields=status still returns the complete ProductOutputDto with its full real attributes map (BAG-10157 has ~50 populated attributes in this account) and product_relationships. Also demonstrates a real, fully-populated attributes map for OpenAPI-example purposes -- more representative than the sparser scratch-fixture examples elsewhere in this file. Note: product_relationships here renders as a flat array of {relationship_id, relationship_label, related_products} entries -- a different shape than the nested {"related_products": [...]} object shown in the "Success - Fetch by Mongo ObjectId" example above (both captured against the same live product on different dates); worth flagging to Plytix as a possible in-flight shape change on this field.
+
+  request: {
+    url: {{pim_base_url_v3}}/products/6a38f614c3d65a5f868b1a06?_fields=sku&_fields=status
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6a38f614c3d65a5f868b1a06",
+            "account_id": "6a38f5a5b22478f30bfd755c",
+            "sku": "BAG-10157",
+            "label": "Plytix Backpack",
+            "gtin": "9780201379624",
+            "status": "Completed",
+            "attributes": {
+              "brand": "Plytix",
+              "color": ["Black"],
+              "material": ["Nylon", "Polyester"],
+              "price": 29.99,
+              "product_title": "Plytix Backpack",
+              "short_description": "A sleek, functional backpack designed for everyday use.",
+              "tags": ["Bag"],
+              "model": "Founder's Edition",
+              "asin_amazon_standard_identification_number": "B000139Q",
+              "country_of_origin": "Spain",
+              "vendor": "Plytix",
+              "published": true,
+              "published_scope": "web",
+              "gender": ["Unisex"],
+              "main_image": ["6a38f5f6c3d65a5f868b1912"],
+              "model_shots": ["6a38f5e1c3d65a5f868b18a7", "6a38f5e1c3d65a5f868b18a5"],
+              "product_classification": "Bag",
+              "google_shopping_completeness": 100.0,
+              "website_ready": 100.0,
+              "spanish_content_completeness": 100.0,
+              "english_content_completeness": 100.0,
+              "marketing_ready": 100.0,
+              "shopify_ready": 72.73,
+              "basic_information_completeness": 100.0,
+              "product_specifications_completeness": 71.43,
+              "amazon_ready": 81.82
+            },
+            "thumbnail_id": "6a38f5f2c3d65a5f868b1900",
+            "parent_id": null,
+            "num_variations": 0,
+            "product_level": 0,
+            "product_family_id": "6a38f5d8c3d65a5f868b186e",
+            "overwritten_attributes": [],
+            "product_relationships": [
+              {
+                "relationship_id": "6a38f5d8c3d65a5f868b186c",
+                "relationship_label": "related_products",
+                "related_products": [
+                  {"quantity": 1, "last_modified": "2025-02-26T14:45:06.971000"},
+                  {"quantity": 1, "last_modified": "2025-02-26T14:45:06.971000"}
+                ]
+              }
+            ],
+            "created": "2026-06-22T08:45:08.648000",
+            "modified": "2026-06-22T08:45:11.161000"
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
   name: 422 - SKU as Identifier
   description: Confirmed live 2026-09-07. Passing a SKU as {identifier} instead of a Mongo ObjectId returns 422. Contradicts API V3.md's identifier-flexibility claim. Confirmed on both pre-existing products and self-created ones.
 
@@ -173,6 +260,45 @@ example {
             {
               "name": "ValidationError",
               "description": "Id must be of type PydanticObjectId"
+            }
+          ]
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 404 - Not Found After Delete
+  description: Confirmed live 2026-09-23. Immediately after DELETE /products/{id} (see "Delete Product.bru"'s "204 - Standard Delete" example, same product id) returns 204, a follow-up GET on the same id returns 404 -- genuine hard delete, not soft-delete. Matches the "Get X by ID - After Delete" pattern used by every other resource folder in this collection.
+
+  request: {
+    url: {{pim_base_url_v3}}/products/6ab41b6debb26b08b2285ef2
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 404
+      text: Not Found
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "NotFoundError",
+              "description": "Document with id 6ab41b6debb26b08b2285ef2 not found"
             }
           ]
         }

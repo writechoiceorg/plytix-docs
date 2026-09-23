@@ -59,6 +59,25 @@ example rather than only prose in `docs{}`. One small new finding:
 unlike `POST`'s numeric `order` — a minor type inconsistency not
 previously noted.
 
+## Update — 2026-09-22 (full-parameter examples for OpenAPI docs)
+
+Added new `example{}` blocks (existing ones untouched) showing every
+parameter/field populated at once, for use as OpenAPI description examples:
+- `List Product Categories.bru`: new "List Categories - Full Parameters"
+  example combining repeatable `_fields`, `_page`/`_page_size`, `_sort_by`,
+  and a `name[icontains]` operator filter in one call — all confirmed
+  working together.
+- `Update and Delete Product Category.bru`: new "Update Product Category -
+  Full Parameters (PATCH, rename + re-parent)" example — `PATCH` with both
+  `name` and `parent_id` set together (the full
+  `ProductCategoryUpdateInputDto`), against two disposable scratch
+  categories (both deleted after capture). `path` reflects the new
+  ancestry immediately; `order` still comes back as a string on `PATCH`.
+- `Create Product Category.bru` was not touched — its existing "Create
+  Child Category" example already exercises the full
+  `ProductCategoryCreateInputDto` (`name` + `parent_id`), so there was no
+  gap to fill.
+
 ## Open items
 
 - [x] Ask Plytix whether undeclared PATCH/DELETE is a stable, intentional

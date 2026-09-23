@@ -70,7 +70,73 @@ docs {
 }
 
 example {
-  name: Missing Required Fields (422)
+  name: 201 - Full Parameters (Multi-Group Query)
+  description: Confirmed live 2026-09-22 against a disposable scratch Smart asset list (id 6ab2fe75125f1d0ceeeed6c1, deleted after capture). Same query expressiveness as product lists (outer array OR-ed, inner array AND-ed) -- this example combines two AND conditions in the first group with a second OR-ed group, across two operators (like, eq).
+
+  request: {
+    url: {{pim_base_url_v3}}/asset-lists
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "WC Test Full Params Smart Asset List",
+        "type": "Smart",
+        "query": [
+          [
+            {"operator": "like", "field": "filename", "value": "wc_test"},
+            {"operator": "eq", "field": "extension", "value": "jpg"}
+          ],
+          [
+            {"operator": "eq", "field": "filename", "value": "wc_test_asset_renamed.jpg"}
+          ]
+        ]
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 201
+      text: Created
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6ab2fe75125f1d0ceeeed6c1",
+            "account_id": "6a38f5a5b22478f30bfd755c",
+            "name": "WC Test Full Params Smart Asset List",
+            "query": [
+              [
+                {"operator": "like", "field": "filename", "value": "wc_test", "field_type": null},
+                {"operator": "eq", "field": "extension", "value": "jpg", "field_type": null}
+              ],
+              [
+                {"operator": "eq", "field": "filename", "value": "wc_test_asset_renamed.jpg", "field_type": null}
+              ]
+            ],
+            "created": "2026-09-22T22:17:25.493688+00:00",
+            "modified": "2026-09-22T22:17:25.506896+00:00",
+            "type": "Smart"
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 422 - Missing Required Fields (name, type)
   description: Confirmed live 2026-09-08. Both name and type are required; empty body returns 422 with two errors entries.
 
   request: {

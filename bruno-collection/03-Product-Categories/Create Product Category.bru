@@ -64,7 +64,7 @@ docs {
 }
 
 example {
-  name: Create Root Category - Success (201)
+  name: 201 - Success (Root Category)
   description: Confirmed live 2026-09-07. Minimal body with only name; create-response shape omits account_id, parent_id, and created compared to GET-by-id.
 
   request: {
@@ -111,7 +111,7 @@ example {
 }
 
 example {
-  name: Create Child Category - Success (201)
+  name: 201 - Success (Child Category)
   description: Confirmed live 2026-09-07. parent_id links to an existing root category; path reflects full ancestry and parent n_children increments to 1 after creation.
 
   request: {
@@ -160,7 +160,7 @@ example {
 }
 
 example {
-  name: Create Category - Missing Name (422)
+  name: 422 - Missing Name
   description: Confirmed live 2026-09-07. Empty body triggers InputDTOValidationError; same 422 envelope shape as every other resource tested.
 
   request: {

@@ -24,17 +24,46 @@ docs {
   `GET /api/v3/products/{identifier}/{path}` — fetch a single expanded subresource
   of a product. The primary request here runs `/attributes`; see the examples below
   for `/categories`, `/assets`, `/relationships`, and `/static_lists`. Confirmed
-  live 2026-09-07/08 against "David's Dev Account".
+  live 2026-09-07/08 against "David's Dev Account"; re-verified (and a critical
+  regression found) 2026-09-23.
+
+  ## ⚠️ CRITICAL, confirmed 2026-09-23 — `/categories`, `/assets`, `/static_lists` subpaths are broken
+  All three now reliably return `{"data": [], "errors": []}` — **always empty** —
+  regardless of real, confirmed linkage. Reproduced on multiple products, including
+  a fresh scratch product created and linked in the same test run (categories and
+  a thumbnail asset both set on `POST`, confirmed present via `_fields` immediately
+  after), and against the long-lived reference fixture `BAG-10157`, which still
+  genuinely has 2 categories and 11 assets (confirmed via the workaround below) —
+  its subpath responses are just as broken as the fresh product's.
+
+  **Confirmed correct workaround**: request the same data via `_fields` on the
+  search/list endpoint instead of the dedicated subpath —
+  `GET /products?_fields=categories&_fields=assets&_fields=static_lists&sku=...`
+  (or filtered any other way) returns the real, fully expanded data every time.
+  See `List Products.bru`'s "Full Parameters (Relationship Fields Expanded)"
+  example for a captured response.
+
+  **Why this matters for docs**: the dedicated `/{identifier}/{path}` subpath
+  route — previously documented as the way to fetch expanded relationship data —
+  can no longer be recommended for `categories`, `assets`, or `static_lists`.
+  This caused a real, documented false-positive earlier in this project: an
+  earlier session concluded `static_list_ids` silently no-ops on `PATCH` because
+  it checked via `GET /products/{id}/static_lists` (empty) instead of `_fields`
+  (which correctly shows the link) — see `Update Product (PATCH).bru`'s
+  corrected "200 - Full Parameters" example. Report this to Plytix as a
+  regression; `/relationships` and `/attributes` (both confirmed still working
+  below) show the subpath *mechanism* itself isn't gone, just these three
+  specific relations.
 
   ## Confirmed valid subpaths on products
-  | Path | Returns | Notes |
+  | Path | Returns | Status as of 2026-09-23 |
   |---|---|---|
-  | `/attributes` | Full attributes map as `data` | Same object embedded in a full GET |
-  | `/attributes/<name>` | Single attribute value as `data` | e.g. `data: "Plytix"` |
-  | `/categories` | Array of expanded `ProductCategoryGetOutputDto` | id, name, parent_id, path, slug, order, n_children, modified |
-  | `/assets` | Array of expanded `AssetOutputDto` | id, content_type, checksum, extension, file_size, file_type, filename, path, n_catalogs, n_products, status, created, modified |
-  | `/relationships` | Flat array of `{relationship_id, relationship_label, product_id}` | Different (flatter) shape than the `product_relationships` object in a full GET |
-  | `/static_lists` | Array of Static product lists this product belongs to | Smart list membership has no product-side trace — see Static Lists example |
+  | `/attributes` | Full attributes map as `data` | ✅ Working |
+  | `/attributes/<name>` | Single attribute value as `data` | ✅ Working — e.g. `data: "Plytix"` |
+  | `/categories` | Array of expanded `ProductCategoryGetOutputDto` | ❌ Broken — always empty (Bug). Use `_fields=categories` on search instead. |
+  | `/assets` | Array of expanded `AssetOutputDto` | ❌ Broken — always empty (Bug). Use `_fields=assets` on search instead. |
+  | `/relationships` | Flat array of `{relationship_id, relationship_label, product_id}` | ✅ Working — different (flatter) shape than the `product_relationships` object in a full GET |
+  | `/static_lists` | Array of Static product lists this product belongs to | ❌ Broken — always empty (Bug). Use `_fields=static_lists` on search instead. Smart list membership still has no product-side trace at all (a separate, non-bug limitation) — see Static Lists example. |
 
   ## Subpath-discovery 400 trick (applies to all v3 resources)
   Hitting `GET /{resource}/{id}/{bogus_path}` with an unrecognised `{path}` returns
@@ -72,7 +101,7 @@ docs {
 }
 
 example {
-  name: /attributes - Full Attributes Map
+  name: 200 - Attributes Subpath (Full Map)
   description: Confirmed live 2026-09-07. The attributes map is returned directly as data (same object embedded under data.attributes on a full GET /products/{id}). Also confirmed: GET /products/{id}/attributes/<name> returns just the single value (e.g. data: "Plytix").
 
   request: {
@@ -113,8 +142,8 @@ example {
 }
 
 example {
-  name: /categories - Expanded Category Objects
-  description: Confirmed live 2026-09-07. Returns fully expanded category objects (not just ids). BAG-10157 has 2 categories — one per taxonomy — each with a path array tracing from root to the category itself.
+  name: 200 - Categories Subpath (Broken, Always Empty) (Bug)
+  description: CONFIRMED HAZARD, live 2026-09-23. BAG-10157 genuinely has 2 categories (confirmed via GET /products?_fields=categories&sku=BAG-10157 — see List Products.bru) but this dedicated subpath returns an empty array regardless. Superseded 2026-09-07 example claimed 2 expanded category objects — that was accurate at the time but no longer reflects live behavior. Do not use this subpath for categories; use _fields=categories on the search endpoint instead.
 
   request: {
     url: {{pim_base_url_v3}}/products/6a38f614c3d65a5f868b1a06/categories
@@ -138,35 +167,7 @@ example {
       type: json
       content: '''
         {
-          "data": [
-            {
-              "id": "6a9f1b482b6fd055ffb7c7dc",
-              "name": "Backpacks",
-              "parent_id": "6a9f1b402b6fd055ffb7c7da",
-              "path": [
-                {"id": "6a9f1b3f2b6fd055ffb7c7d9", "name": "Website Taxonomy"},
-                {"id": "6a9f1b402b6fd055ffb7c7da", "name": "Bags"},
-                {"id": "6a9f1b482b6fd055ffb7c7dc", "name": "Backpacks"}
-              ],
-              "slug": "backpacks",
-              "order": 0,
-              "n_children": 0,
-              "modified": "2026-01-15T10:00:00.000000+00:00"
-            },
-            {
-              "id": "6a9f1b542b6fd055ffb7c7dd",
-              "name": "Bags & Luggage",
-              "parent_id": "6a9f1b532b6fd055ffb7c7dc",
-              "path": [
-                {"id": "6a9f1b532b6fd055ffb7c7dc", "name": "Google Shopping Taxonomy"},
-                {"id": "6a9f1b542b6fd055ffb7c7dd", "name": "Bags & Luggage"}
-              ],
-              "slug": "bags-luggage",
-              "order": 0,
-              "n_children": 3,
-              "modified": "2026-01-15T10:00:00.000000+00:00"
-            }
-          ],
+          "data": [],
           "errors": []
         }
       '''
@@ -175,8 +176,8 @@ example {
 }
 
 example {
-  name: /assets - Expanded Asset Objects
-  description: Confirmed live 2026-09-07. Returns fully expanded AssetOutputDto objects. Asset id 6a38f5e1c3d65a5f868b18a5 is a real read-only fixture in this account.
+  name: 200 - Assets Subpath (Broken, Always Empty) (Bug)
+  description: CONFIRMED HAZARD, live 2026-09-23. BAG-10157 genuinely has 11 assets (confirmed via GET /products?_fields=assets&sku=BAG-10157 — see List Products.bru) but this dedicated subpath returns an empty array regardless. Superseded 2026-09-07 example claimed 1 expanded asset object — that was accurate at the time but no longer reflects live behavior. Do not use this subpath for assets; use _fields=assets on the search endpoint instead.
 
   request: {
     url: {{pim_base_url_v3}}/products/6a38f614c3d65a5f868b1a06/assets
@@ -200,23 +201,7 @@ example {
       type: json
       content: '''
         {
-          "data": [
-            {
-              "id": "6a38f5e1c3d65a5f868b18a5",
-              "content_type": "image/jpeg",
-              "checksum": "d41d8cd98f00b204e9800998ecf8427e",
-              "extension": "jpg",
-              "file_size": 204800,
-              "file_type": "Image",
-              "filename": "bag-10157-front.jpg",
-              "path": "https://assets.plytix.com/6a38f5e1c3d65a5f868b18a5/bag-10157-front.jpg",
-              "n_catalogs": 0,
-              "n_products": 1,
-              "status": "Active",
-              "created": "2024-06-01T08:00:00.000000+00:00",
-              "modified": "2024-06-01T08:00:00.000000+00:00"
-            }
-          ],
+          "data": [],
           "errors": []
         }
       '''
@@ -225,8 +210,8 @@ example {
 }
 
 example {
-  name: /relationships - Flat Relationship Summary
-  description: Confirmed live 2026-09-07. Returns a flat array of {relationship_id, relationship_label, product_id} — different from the nested product_relationships object embedded in GET /products/{id}. relationship_label=related_products confirmed via assertion.
+  name: 200 - Relationships Subpath (Flat Summary)
+  description: Confirmed live 2026-09-07, re-verified live 2026-09-23 -- still working (unlike /categories, /assets, /static_lists above). Returns a flat array of {relationship_id, relationship_label, product_id}, different from the nested product_relationships object embedded in GET /products/{id}. relationship_label=related_products confirmed via assertion. Note: relationship_id and product_id both drifted from the original 2026-09-07 capture (was relationship_id ...186b / product_id ...1a07) to the current values below, including product_id now matching BAG-10157's own id (self-referential) -- captured verbatim as the current live ground truth, not corrected or interpreted.
 
   request: {
     url: {{pim_base_url_v3}}/products/6a38f614c3d65a5f868b1a06/relationships
@@ -252,9 +237,9 @@ example {
         {
           "data": [
             {
-              "relationship_id": "6a38f5d6c3d65a5f868b186b",
+              "relationship_id": "6a38f5d8c3d65a5f868b186c",
               "relationship_label": "related_products",
-              "product_id": "6a38f614c3d65a5f868b1a07"
+              "product_id": "6a38f614c3d65a5f868b1a06"
             }
           ],
           "errors": []
@@ -265,8 +250,8 @@ example {
 }
 
 example {
-  name: /static_lists - Static List Membership Only
-  description: Confirmed live 2026-09-08 (Flow 4). Returns only Static lists this product belongs to. The Smart list (6aa0322d2b6fd055ffb7cabb) that matches this product via its sku filter does NOT appear here — Smart list membership has no product-side trace at all.
+  name: 200 - static_lists Subpath (Broken, Always Empty) (Bug)
+  description: CONFIRMED HAZARD, live 2026-09-23. WC-TEST-FULL-001 genuinely IS a member of "WC Test Static List" (confirmed via GET /products?_fields=static_lists&sku=WC-TEST-FULL-001 — see List Products.bru) but this dedicated subpath returns an empty array regardless. Superseded 2026-09-08 example claimed 1 Static list membership — that was accurate at the time but no longer reflects live behavior. This is the same bug that earlier caused a false-positive report that PATCH's static_list_ids silently no-ops (see Update Product (PATCH).bru's corrected full-parameters example). Do not use this subpath for static list membership; use _fields=static_lists on the search endpoint instead. Smart list membership still has no product-side trace at all regardless (a separate, pre-existing, non-bug limitation).
 
   request: {
     url: {{pim_base_url_v3}}/products/6aa022262b6fd055ffb7caa4/static_lists
@@ -290,16 +275,7 @@ example {
       type: json
       content: '''
         {
-          "data": [
-            {
-              "id": "6aa025bd2b6fd055ffb7cab4",
-              "name": "WC Test Static List",
-              "type": "Static",
-              "n_products": 1,
-              "created": "2026-09-08T14:30:00.000000+00:00",
-              "modified": "2026-09-08T14:35:00.000000+00:00"
-            }
-          ],
+          "data": [],
           "errors": []
         }
       '''

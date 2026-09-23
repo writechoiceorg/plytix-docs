@@ -33,7 +33,7 @@ docs {
 }
 
 example {
-  name: List Relationships - Success
+  name: 200 - Success
   description: Real response captured 2026-09-21 against "David's Dev Account". Both relationship types pre-exist in this account.
 
   request: {
@@ -64,6 +64,45 @@ example {
           ],
           "errors": [],
           "pagination": {}
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 200 - Full Parameters
+  description: Real response captured 2026-09-22 against "David's Dev Account". Combines _fields (all 6 record fields), _sort_by, _page/_page_size, and a status filter in one query.
+
+  request: {
+    url: {{pim_base_url_v3}}/relationships?_fields=id&_fields=name&_fields=label&_fields=status&_fields=created&_fields=modified&_sort_by=name&_page=1&_page_size=1&status=ACTIVE
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [
+            {"id": "6a38f5d8c3d65a5f868b186b", "name": "Bundles", "label": "bundles", "status": "ACTIVE", "created": "2026-06-22T08:44:08.719000", "modified": "2026-06-22T08:44:08.719000"}
+          ],
+          "errors": [],
+          "pagination": {
+            "next_page": "http://pim.dev.plytix.com/api/v3/relationships?_fields=id&_fields=name&_fields=label&_fields=status&_fields=created&_fields=modified&_sort_by=name&_page=2&_page_size=1&status=ACTIVE"
+          }
         }
       '''
     }

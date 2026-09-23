@@ -56,7 +56,7 @@ docs {
 }
 
 example {
-  name: Update Product Family - Success (PATCH root)
+  name: 200 - Success (Root PATCH)
   description: Real response captured 2026-09-15 against the disposable scratch family, renaming it.
 
   request: {
@@ -115,7 +115,7 @@ example {
 }
 
 example {
-  name: Update Product Family - Success (PATCH generic subpath /name)
+  name: 200 - Success (Generic Subpath /name)
   description: Real response captured 2026-09-15, using the generic subpath-write mechanism instead of the root PATCH -- same effect.
 
   request: {
@@ -172,7 +172,7 @@ example {
 }
 
 example {
-  name: POST on Generic Subpath - Not Allowed (405, Spec Mismatch)
+  name: 405 - Not Allowed (Spec Mismatch)
   description: Real response captured 2026-09-15 -- the spec declares POST as valid on this path but it 405s for every path tried.
 
   request: {
@@ -215,7 +215,7 @@ example {
 }
 
 example {
-  name: Delete Product Family - Success (204, then 404 on follow-up GET)
+  name: 204 - Success (Then 404 on Follow-up GET)
   description: Real response captured 2026-09-15, cleaning up the disposable scratch family used across this session's Product Families testing.
 
   request: {
@@ -245,7 +245,7 @@ example {
 }
 
 example {
-  name: Get Product Family by ID - After Delete (404)
+  name: 404 - After Delete
   description: Real response captured 2026-09-15, follow-up GET immediately after the DELETE above.
 
   request: {

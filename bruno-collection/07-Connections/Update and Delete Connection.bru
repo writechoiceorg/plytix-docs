@@ -35,7 +35,7 @@ docs {
 }
 
 example {
-  name: Update Connection - Success (PATCH)
+  name: 200 - Success
   description: Real response captured 2026-09-15 against a disposable scratch FTP connection on "David's Dev Account".
 
   request: {
@@ -90,7 +90,65 @@ example {
 }
 
 example {
-  name: Delete Connection - Success (204, then 404 on follow-up GET)
+  name: 200 - Full Parameters (FTP)
+  description: Confirmed live 2026-09-22 against a disposable scratch FTP connection (created via the "Full Parameters" example in Create Connection.bru, id 6ab2fe65125f1d0ceeeed6ba, deleted after capture). Sets every field ConnectionUpdateInputDto exposes at once (name, url, port, user, password, use_tls). password is write-only, same as on create -- confirmed absent from the PATCH response too.
+
+  request: {
+    url: {{pim_base_url_v3}}/connections/6ab2fe65125f1d0ceeeed6ba
+    method: patch
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "WC Test Full FTP Connection Renamed",
+        "url": "ftp2.example.com",
+        "port": 2121,
+        "user": "wc_ftp_user_updated",
+        "password": "wc_ftp_password_updated",
+        "use_tls": false
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "created_at": "2026-09-22T22:17:09.560000+00:00",
+            "id": "6ab2fe65125f1d0ceeeed6ba",
+            "last_processed": null,
+            "last_result_operation": null,
+            "modified": "2026-09-22T22:17:21.218143+00:00",
+            "name": "WC Test Full FTP Connection Renamed",
+            "port": 2121,
+            "source": null,
+            "type": "ftp",
+            "url": "ftp2.example.com",
+            "use_tls": false,
+            "user": "wc_ftp_user_updated"
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 204 - Success
   description: Real response captured 2026-09-15 against the same disposable scratch connection, immediately after the PATCH above.
 
   request: {
@@ -120,7 +178,7 @@ example {
 }
 
 example {
-  name: Get Connection by ID - After Delete (404)
+  name: 404 - Not Found After Delete
   description: Real response captured 2026-09-15, follow-up GET immediately after the DELETE above.
 
   request: {

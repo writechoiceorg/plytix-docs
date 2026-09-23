@@ -58,8 +58,32 @@ methods remain formally declared but **entirely untestable in this
 account**, for the same underlying reason creation is (see status-gating
 #3). No new `.bru` files were added for `PATCH`/`DELETE` as a result.
 
+## Update — 2026-09-22 (full-parameter examples for OpenAPI docs)
+
+Added new `example{}` blocks (purely additive, no existing examples
+touched) capturing every field at once, for use as OpenAPI description
+examples:
+
+- `Get Ecatalog by ID.bru`: "Full Parameters (All Fields, Representative
+  Nested Entries)" — the complete top-level field set (previously the only
+  example truncated `output_attributes`/`assets`/`settings` to placeholder
+  strings), with large arrays trimmed to one representative entry per
+  distinct shape. Staff email addresses in `notification_list` were
+  redacted to `teammate1@example.com`/`teammate2@example.com` before
+  capture. **New finding**: this single-resource `GET` returns
+  `created: null` for the "Plytix Brand Portal" fixture — differs from
+  this same file's older "Top-Level Fields Only" example and from `List
+  Ecatalogs`' example, both of which show a real `created` date. Worth
+  asking Plytix whether `created` is meant to populate on this endpoint,
+  or is a resource-specific gap.
+- `List Ecatalogs.bru`: "Full Query Parameters" — combines `_fields`,
+  `_page`/`_page_size`, and `_sort_by` in one call.
+
 ## Open items
 
 - [ ] Ask Plytix: can Ecatalogs (and PDF Catalogs) be enabled on this Dev
       account? (Config open question #16.) This now also covers testing
       the newly-declared `PATCH`/`DELETE`.
+- [ ] New 2026-09-22: is `created: null` on `GET /ecatalogs/{id}` expected,
+      given the list endpoint and an older capture of the same endpoint
+      both show a real `created` date for this same ecatalog?

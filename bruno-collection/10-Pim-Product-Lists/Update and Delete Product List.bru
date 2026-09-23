@@ -35,7 +35,7 @@ docs {
 }
 
 example {
-  name: Update Product List - Success (PATCH)
+  name: 200 - Success
   description: Real response captured 2026-09-15 against a disposable scratch static product list on "David's Dev Account".
 
   request: {
@@ -103,7 +103,75 @@ example {
 }
 
 example {
-  name: Delete Product List - Success (204, then 404 on follow-up GET)
+  name: 200 - Full Parameters (Rename + Query Replace)
+  description: Confirmed live 2026-09-22 against the same scratch Smart list created in "Create Static Product List.bru"'s full-parameters example (id 6ab2fa2c125f1d0ceeeed6b4, deleted after capture). ProductListUpdateInputDto's query field is a SET-replace, not a merge -- this example renames the list and fully replaces its query with a new single-condition filter using the in operator (a multi-value array).
+
+  request: {
+    url: {{pim_base_url_v3}}/pim-product-lists/6ab2fa2c125f1d0ceeeed6b4
+    method: patch
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "WC Test Full Params Smart List Renamed",
+        "query": [
+          [
+            {"operator": "in", "field": "status", "value": ["Completed", "Draft"]}
+          ]
+        ]
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "created_user_audit": {
+              "type": "API",
+              "user_email": "TestDH",
+              "user_id": "6a96a370a3fb0431c692820d"
+            },
+            "id": "6ab2fa2c125f1d0ceeeed6b4",
+            "modified": "2026-09-22T22:17:01.312213+00:00",
+            "modified_user_audit": {
+              "type": "API",
+              "user_email": "TestDH",
+              "user_id": "6a96a370a3fb0431c692820d"
+            },
+            "name": "WC Test Full Params Smart List Renamed",
+            "relationship_filters": [[]],
+            "type": "Smart",
+            "query": [
+              [
+                {"field": "status", "field_type": null, "operator": "in", "value": ["Completed", "Draft"]}
+              ]
+            ],
+            "created": "2026-09-22T21:59:08.221000+00:00",
+            "account_id": "6a38f5a5b22478f30bfd755c"
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 204 - Success
   description: Real response captured 2026-09-15 against the same disposable scratch list, immediately after the PATCH above.
 
   request: {
@@ -133,7 +201,7 @@ example {
 }
 
 example {
-  name: Get Product List by ID - After Delete (404)
+  name: 404 - Not Found After Delete
   description: Real response captured 2026-09-15, follow-up GET immediately after the DELETE above.
 
   request: {

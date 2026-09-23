@@ -40,7 +40,7 @@ docs {
 }
 
 example {
-  name: Update Asset Category - Success (PATCH)
+  name: 200 - Success (PATCH)
   description: Real response captured 2026-09-15 against a disposable scratch asset category on "David's Dev Account".
 
   request: {
@@ -89,7 +89,58 @@ example {
 }
 
 example {
-  name: Delete Asset Category - Success (204, then 404 on follow-up GET)
+  name: 200 - Full Parameters (Rename + Re-Parent)
+  description: Confirmed live 2026-09-22 against two disposable scratch asset categories ("WC Test Full Params Asset Category A/B", both deleted after capture). Exercises every field on AssetCategoryUpdateInputDto at once -- name AND parent_id together, same pattern confirmed on product-categories.
+
+  request: {
+    url: {{pim_base_url_v3}}/asset-categories/6ab2fe6d125f1d0ceeeed6be
+    method: patch
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "WC Test Full Params Asset Category B Renamed",
+        "parent_id": "6ab2fe6c125f1d0ceeeed6bd"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6ab2fe6d125f1d0ceeeed6be",
+            "modified": "2026-09-22T22:17:23.579757+00:00",
+            "n_children": 0,
+            "name": "WC Test Full Params Asset Category B Renamed",
+            "order": "1",
+            "path": ["WC Test Full Params Asset Category A", "WC Test Full Params Asset Category B Renamed"],
+            "slug": "wc-test-full-params-asset-category-b-renamed",
+            "parent_id": "6ab2fe6c125f1d0ceeeed6bd",
+            "account_id": "6a38f5a5b22478f30bfd755c"
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 204 - Success
   description: Real response captured 2026-09-15 against the same disposable scratch asset category, immediately after the PATCH above.
 
   request: {
@@ -119,7 +170,7 @@ example {
 }
 
 example {
-  name: Get Asset Category by ID - After Delete (404)
+  name: 404 - Not Found After Delete
   description: Real response captured 2026-09-15, follow-up GET immediately after the DELETE above, confirming a hard delete.
 
   request: {

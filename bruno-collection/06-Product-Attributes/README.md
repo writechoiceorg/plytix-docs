@@ -83,11 +83,38 @@ prominently. Use `name` to rename an attribute instead; renaming via
 findings are captured with real `example{}` blocks (a rejected attempt
 and a successful one).
 
+## Update — 2026-09-22 (full-parameter examples for OpenAPI docs)
+
+Added new `example{}` blocks to both `.bru` files in this folder, each
+populating every optional field for its type, so they can seed OpenAPI
+description examples. Nothing pre-existing was removed or changed.
+
+- `Create Text Attribute.bru`: full-parameter creates for `TextAttribute`
+  (adds `character_limit`), `DateAttribute` (adds `include_time: true`),
+  `DropdownAttribute` (adds `options` + all three sorting/restriction
+  booleans set to non-defaults), `CompletenessAttribute` (full common
+  fields + empty `attributes`), and `FormulaAttribute` (full request shape
+  captured against its known account-limit 422, since a 201 is unreachable
+  on this account).
+- `Update and Delete Product Attribute.bru`: one full-parameter `PATCH`
+  example setting `name`, `description`, `options`, `manual_sorting`,
+  `sort_ascending`, and `restricted` together on a `DropdownAttribute`.
+- All scratch attributes created for these examples were deleted
+  immediately after capture — no new fixtures kept.
+
+**Real finding — resolves open question #11**: `group_ids` on create DOES
+link the attribute to the group. It's still invisible from the attribute's
+own `GET`/create response (confirmed again), but a follow-up
+`GET /product-attribute-groups/{id}` showed the group's `attribute_labels`
+array gain each new attribute's label immediately after create. The
+linkage is real, just one-directional in what each side's response shows.
+
 ## Open items
 
 - [ ] **Report to Plytix as a bug**: `CompletenessAttribute` 500s on real
       attribute references (config open question #18).
-- [ ] Confirm `group_ids` actually links (config open question #11).
+- [x] Confirm `group_ids` actually links (config open question #11) —
+      resolved 2026-09-22, see above.
 - [ ] Confirm whether `FormulaAttribute`'s create path itself works, if
       the account limit can ever be raised (config open question #9).
 - [ ] Ask Plytix about `HierarchyAttribute`'s status (config open

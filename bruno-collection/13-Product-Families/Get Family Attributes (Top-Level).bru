@@ -67,7 +67,7 @@ docs {
 }
 
 example {
-  name: Get Family Attributes - Filtered by account_id (Safe/Scoped)
+  name: 200 - Filtered by account_id (Safe/Scoped)
   description: Real response captured 2026-09-15, filtered to "David's Dev Account" to avoid the cross-tenant leak documented above.
 
   request: {
@@ -110,7 +110,7 @@ example {
 }
 
 example {
-  name: Get Family Attributes - No Filter (Cross-Tenant Data Leak, Bug)
+  name: 200 - No Filter (Cross-Tenant Data Leak, Bug)
   description: Real response captured 2026-09-15 with NO account filter applied -- documents the data-isolation gap above. account_id values here belong to other Plytix accounts, not "David's Dev Account".
 
   request: {
@@ -143,6 +143,47 @@ example {
           "errors": [],
           "pagination": {
             "next_page": "http://pim.dev.plytix.com/api/v3/family-attributes?_page_size=3&_page=2"
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 200 - Full Parameters (Filtered, Fielded, Paged)
+  description: Real response captured 2026-09-22 against "David's Dev Account". Combines account_id + product_family_id filters (safe/scoped, avoiding the cross-tenant leak above) with _fields (all 4 record fields) and _page/_page_size in one query.
+
+  request: {
+    url: {{pim_base_url_v3}}/family-attributes?account_id=6a38f5a5b22478f30bfd755c&_fields=account_id&_fields=level&_fields=product_family_id&_fields=attribute_id&_page=1&_page_size=3&product_family_id=6a38f5d8c3d65a5f868b186e
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [
+            {"account_id": "6a38f5a5b22478f30bfd755c", "level": "parent_level", "product_family_id": "6a38f5d8c3d65a5f868b186e", "attribute_id": "6a38f613c3d65a5f868b19d1"},
+            {"account_id": "6a38f5a5b22478f30bfd755c", "level": "parent_level", "product_family_id": "6a38f5d8c3d65a5f868b186e", "attribute_id": "6a38f613c3d65a5f868b19cd"},
+            {"account_id": "6a38f5a5b22478f30bfd755c", "level": "parent_level", "product_family_id": "6a38f5d8c3d65a5f868b186e", "attribute_id": "6a38f613c3d65a5f868b19ef"}
+          ],
+          "errors": [],
+          "pagination": {
+            "next_page": "http://pim.dev.plytix.com/api/v3/family-attributes?account_id=6a38f5a5b22478f30bfd755c&_fields=account_id&_fields=level&_fields=product_family_id&_fields=attribute_id&_page=2&_page_size=3&product_family_id=6a38f5d8c3d65a5f868b186e"
           }
         }
       '''

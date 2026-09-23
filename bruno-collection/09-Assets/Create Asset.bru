@@ -74,7 +74,64 @@ docs {
 }
 
 example {
-  name: Empty Body (422)
+  name: 201 - Full Parameters
+  description: Confirmed live 2026-09-22. Every AssetCreateInputDto field populated at once (url, filename, alt_text, category_ids, static_list_ids). Note category_ids/static_list_ids are still silently ignored here — confirmed via follow-up GET /assets/{id}/categories and /static_lists, both returning []. Use PATCH after create to actually apply them (see "Update Asset.bru"'s Full Parameters example). Scratch asset (6ab2fa20125f1d0ceeeed6ae) was deleted after capture.
+
+  request: {
+    url: {{pim_base_url_v3}}/assets
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "url": "https://picsum.photos/id/238/300/300.jpg",
+        "filename": "wc_test_full_params_asset.jpg",
+        "alt_text": "WC test full-parameter asset",
+        "category_ids": ["6a9f1b862b6fd055ffb7c7de"],
+        "static_list_ids": ["6ab2fe75125f1d0ceeeed6c0"]
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 201
+      text: Created
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6ab2fa20125f1d0ceeeed6ae",
+            "assigned": false,
+            "content_type": "image/jpeg",
+            "extension": "jpg",
+            "file_size": 25905,
+            "file_type": "IMAGES",
+            "file_modified": "2026-09-22T00:00:00",
+            "filename": "wc_test_full_params_asset.jpg",
+            "n_catalogs": 0,
+            "n_products": 0,
+            "alt_text": "WC test full-parameter asset",
+            "status": "ACTIVE"
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 422 - Missing Required Field (url or content)
   description: Confirmed live 2026-09-08. Either url or content is required even though both are marked optional in the spec.
 
   request: {

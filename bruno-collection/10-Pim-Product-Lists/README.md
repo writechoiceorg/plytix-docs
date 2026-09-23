@@ -60,6 +60,35 @@ against a new disposable scratch static list, renamed the file to drop
 "(Undeclared)", and captured real `example{}` blocks for both (rename
 via `PATCH`, then `204`/`404` on `DELETE`).
 
+## Update — 2026-09-22 (full-parameter examples for OpenAPI docs)
+
+Added new `example{}` blocks (existing ones untouched) to give the docs
+team maximal-parameter references:
+
+- **New file `List Product Lists.bru`** — the collection `GET
+  /pim-product-lists` endpoint had no dedicated `.bru` file before (only
+  `GET .../{identifier}` was covered). Adds a full-parameter search
+  example (`_fields` × 6, `_page`+`_page_size`, `_sort_by`,
+  `name[icontains]`) plus a 400 example showing `_fields=type` is
+  rejected on search even though `type` is a real field on the
+  single-item `GET`. New finding: the search endpoint's valid `_fields`
+  set (`_created_at, _id, account_id, created, created_user_audit, id,
+  modified, modified_user_audit, name, query, revision_id`) does not
+  include `type` — narrower than the full resource shape. `revision_id`
+  is accepted in `_fields` but silently absent from the response (same
+  silent-drop pattern as quirks #13/#25/#26).
+- **`Create Static Product List.bru`** — added a full-parameter Smart
+  list create demonstrating `query`'s full expressiveness: two AND-ed
+  conditions in one OR-group plus a second OR-ed group, across three
+  operators (`eq`, `gt`, `like`).
+- **`Update and Delete Product List.bru`** — added a full-parameter PATCH
+  example combining a rename with a full `query` replace (confirms
+  `query` on `PATCH` is SET-replace, not merge).
+
+Fixture used (`6ab2fa2c125f1d0ceeeed6b4`, "WC Test Full Params Smart
+List") was disposable — created, PATCHed, and deleted in the same
+session; not kept.
+
 ## Open items
 
 - [ ] Ask Plytix: is the Static-list-via-product-field mechanism

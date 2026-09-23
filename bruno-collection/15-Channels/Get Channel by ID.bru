@@ -34,7 +34,57 @@ docs {
 }
 
 example {
-  name: Get Channel by ID - Success (Google Shopping, simplified)
+  name: 200 - Full Parameters (List Channels)
+  description: Real response captured 2026-09-22 against "David's Dev Account", combining sparse _fields, page-number pagination, _sort_by, and a plain field filter in one GET /channels call.
+
+  request: {
+    url: {{pim_base_url_v3}}/channels?_fields=id&_fields=name&_fields=format&_fields=active&_page=1&_page_size=2&_sort_by=name&format=CSV
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [
+            {
+              "id": "6a38f615c3d65a5f868b1a40",
+              "name": "Amazon Seller Central",
+              "format": "CSV",
+              "active": false
+            },
+            {
+              "id": "6a38f615c3d65a5f868b1a3f",
+              "name": "City Stone Apparel Co.",
+              "format": "CSV",
+              "active": false
+            }
+          ],
+          "errors": [],
+          "pagination": {
+            "next_page": "http://pim.dev.plytix.com/api/v3/channels?_fields=id&_fields=name&_fields=format&_fields=active&_page=2&_page_size=2&_sort_by=name&format=CSV"
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 200 - Success (Google Shopping, Simplified)
   description: Real response captured 2026-09-21 against a pre-existing Google Shopping channel. Truncated to key fields only -- the full response includes many column definitions.
 
   request: {

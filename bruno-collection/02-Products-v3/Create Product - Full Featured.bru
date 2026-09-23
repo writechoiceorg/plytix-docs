@@ -83,7 +83,7 @@ docs {
 }
 
 example {
-  name: 201 - Full Featured Product
+  name: 201 - Full Parameters (Standalone)
   description: Confirmed live 2026-09-08. Fixture kept as id 6aa022262b6fd055ffb7caa4. attributes keyed by name (not id). System completeness attributes appear automatically. category_ids links immediately (confirmed via GET /categories follow-up).
 
   request: {
@@ -120,7 +120,7 @@ example {
         {
           "data": {
             "id": "6aa022262b6fd055ffb7caa4",
-            "account_id": "6a38f5d5c3d65a5f868b1869",
+            "account_id": "6a38f5a5b22478f30bfd755c",
             "sku": "WC-TEST-FULL-001",
             "label": "WC Test Full Product",
             "gtin": null,
@@ -166,7 +166,7 @@ example {
 }
 
 example {
-  name: 201 - Parent Product (Variant Flow)
+  name: 201 - Parent Product (Pre-Variant Setup)
   description: Confirmed live 2026-09-08 (USER_FLOWS.md Flow 2). product_level starts at 0 (standalone) and flips to 1 after a variant is created under it with parent_id set to this product's id. Both parent and variant were deleted in the same test run.
 
   request: {
@@ -201,7 +201,7 @@ example {
         {
           "data": {
             "id": "6aa04a322b6fd055ffb7cae4",
-            "account_id": "6a38f5d5c3d65a5f868b1869",
+            "account_id": "6a38f5a5b22478f30bfd755c",
             "sku": "WC-TEST-PARENT-001",
             "label": "WC Test Parent",
             "gtin": null,
@@ -231,6 +231,80 @@ example {
               "user_email": "TestDH",
               "user_id": "6a96a370a3fb0431c692820d"
             }
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 201 - Full Parameters (Variant)
+  description: Confirmed live 2026-09-22, re-verified 2026-09-23. sku, label, gtin, status, attributes, thumbnail_id, category_ids, parent_id, and static_list_ids sent together on a variant create (parent_id set to a disposable scratch parent, both deleted at the end of this test run) -- ALL of them genuinely apply, confirmed via GET /products?_fields=categories&_fields=static_lists&sku=... immediately after create. CORRECTION (2026-09-23): a 2026-09-22 version of this note wrongly claimed category_ids/static_list_ids are silently ignored when parent_id is set -- that was a false positive from checking via the GET .../categories and .../static_lists SUBPATHS, which are confirmed broken (always return [] regardless of real linkage; see "Get Product Subpath - Attributes.bru"). There is no create-vs-patch split for these fields on variants. Separately, still true: sending product_family_id together with parent_id on the same create call returns a vague 422 {"errors":[{"name":"ValidationError","description":"product data validation failed"}]} with no field named; omit product_family_id when parent_id is set (also confirmed to apply to PATCH now, see "Update Product (PATCH).bru").
+
+  request: {
+    url: {{pim_base_url_v3}}/products
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "sku": "WC-TEST-MAXPARAMS-002",
+        "label": "WC Test Max Params Variant 2",
+        "gtin": "01234567890128",
+        "status": "Draft",
+        "attributes": {"wc_test_text": "WC max-params test value"},
+        "thumbnail_id": "6aa021b72b6fd055ffb7ca9f",
+        "category_ids": ["6a9f1b482b6fd055ffb7c7dc", "6a9f1b542b6fd055ffb7c7dd"],
+        "parent_id": "6ab2fa2b125f1d0ceeeed6b3",
+        "static_list_ids": ["6aa025bd2b6fd055ffb7cab4"]
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 201
+      text: Created
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6ab2fe88125f1d0ceeeed6c6",
+            "sku": "WC-TEST-MAXPARAMS-002",
+            "label": "WC Test Max Params Variant 2",
+            "gtin": "01234567890128",
+            "status": "Draft",
+            "attributes": {
+              "amazon_ready": 0.0,
+              "basic_information_completeness": 0.0,
+              "english_content_completeness": 0.0,
+              "google_shopping_completeness": 0.0,
+              "marketing_ready": 0.0,
+              "product_specifications_completeness": 0.0,
+              "shopify_ready": 0.0,
+              "wc_test_text": "WC max-params test value",
+              "spanish_content_completeness": 0.0,
+              "website_ready": 21.43
+            },
+            "thumbnail_id": "6aa021b72b6fd055ffb7ca9f",
+            "parent_id": "6ab2fa2b125f1d0ceeeed6b3",
+            "num_variations": 0,
+            "product_level": 2,
+            "product_family_id": null,
+            "overwritten_attributes": [],
+            "created": "2026-09-22T22:17:44.776000+00:00",
+            "modified": "2026-09-22T22:17:44.942000+00:00"
           },
           "errors": []
         }

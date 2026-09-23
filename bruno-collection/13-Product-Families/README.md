@@ -79,6 +79,43 @@ up — no new fixtures kept for this resource (the real pre-existing
 "Accessories"/"Apparel"/"Office Supplies" families still cover every
 read-only need).
 
+## Update — 2026-09-22 (full-parameter examples for OpenAPI descriptions)
+
+Added new `example{}` blocks (existing examples untouched) to
+`Create Product Family.bru`, `List Product Families.bru`, and
+`Get Family Attributes (Top-Level).bru`, each exercising every optional
+field/query-param at once, for use as OpenAPI request/response examples:
+
+- **`Create Product Family.bru`**: a full-parameter create populating
+  `attributes` with 3 real attribute refs (one custom, two system) in
+  consistent `{id,label}` object form — `201`, all 3 linked at
+  `level: "no_level"` (confirmed via a follow-up `GET .../attributes`).
+  Two **new findings** captured as their own examples: (1) attribute
+  references across `attributes`/`parent_attributes`/`variant_attributes`
+  must be **all** plain-ID strings or **all** `{id,label}` objects —
+  mixing forms across the three fields → `422 InputDTOValidationError`;
+  (2) `parent_attributes`/`variant_attributes` on **create** are blocked
+  by the *same* "Automatic inheritance is not available for this account"
+  `403` that blocks the `PATCH` level-change endpoint — this account can
+  only populate the plain `attributes` array (always links at
+  `no_level`), not the parent/variant tiers, at create time either.
+- **`List Product Families.bru`**: a full-parameter query combining
+  `_fields` (5 fields), `_sort_by`, `_page`/`_page_size`, and a
+  `name[icontains]` filter in one call — `200`, all confirmed working
+  together.
+- **`Get Family Attributes (Top-Level).bru`**: a full-parameter query
+  combining the safe `account_id` filter with `product_family_id`,
+  `_fields` (all 4 record fields), and `_page`/`_page_size` — `200`.
+
+`Create Family Attribute Link.bru`'s existing "Success" example
+(`attribute_id` + `level`) already exercises 100% of
+`FamilyAttributeLinkInputDto`'s fields — no new example needed there.
+Scratch family created for this session (`6ab2fe5c125f1d0ceeeed6b8`,
+"WC Test Full Params Family") was deleted immediately after capture, not
+kept as a fixture.
+
+New quirks/findings logged in `config/api-testing.config.md`.
+
 ## Open items
 
 - [ ] Report the `GET /family-attributes` cross-tenant data leak to
@@ -87,5 +124,7 @@ read-only need).
 - [ ] Ask Plytix whether the `POST`-405-on-subpath spec mismatch for
       `/product-families/{id}/{path}` is expected.
 - [ ] Ask Plytix whether "automatic inheritance" (the `403` on
-      family-attribute `level` changes) can be enabled on this Dev
-      account so the `PATCH` success shape can finally be captured.
+      family-attribute `level` changes, now confirmed to also block
+      create-time `parent_attributes`/`variant_attributes`) can be
+      enabled on this Dev account so those success shapes can finally be
+      captured.

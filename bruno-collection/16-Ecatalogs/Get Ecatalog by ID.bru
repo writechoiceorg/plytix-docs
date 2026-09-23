@@ -41,7 +41,251 @@ docs {
 }
 
 example {
-  name: Get Ecatalog by ID - Success (Top-Level Fields Only)
+  name: 200 - Full Parameters (All Fields, Nested Entries)
+  description: Real response captured 2026-09-22 against the "Plytix Brand Portal" ecatalog. Every top-level field is shown untruncated (unlike the "Top-Level Fields Only" example above, which omits output_attributes/assets/settings entirely) -- output_attributes/assets/settings' larger arrays are trimmed to one representative entry per distinct shape (noted inline via _*_note keys, NOT real API fields) since the full arrays run 30+ entries. Staff email addresses in notification_list were redacted to teammate1@example.com/teammate2@example.com; every other value is verbatim. New finding: this single-resource GET returns created: null, differing from the List example below (and the older "Top-Level Fields Only" example's placeholder date) -- worth flagging as a possible field-population gap on this resource.
+
+  request: {
+    url: {{pim_base_url_v3}}/ecatalogs/6a38f615c3d65a5f868b1a41
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6a38f615c3d65a5f868b1a41",
+            "account_id": "6a38f5a5b22478f30bfd755c",
+            "name": "Plytix Brand Portal",
+            "logo": "public_files/pim/e_catalogs/6a38f615c3d65a5f868b1a42/catalog_logo/logo_1743676207.png",
+            "product_list_id": "6a38f613c3d65a5f868b19fe",
+            "asset_list_id": "6a38f612c3d65a5f868b19a0",
+            "output_attributes": [
+              {
+                "id": "67bf363745f5adf8841cd8f",
+                "label": "label",
+                "type": "TextAttribute",
+                "source_type": "PIM",
+                "labels": ["label"],
+                "formula": "{{ label }}",
+                "formatter": {},
+                "output_label": "label",
+                "formula_txt": null,
+                "internal_name": null
+              },
+              {
+                "id": "67bf368a45f5adf8841cd819",
+                "label": "attributes.price",
+                "type": "DecimalAttribute",
+                "source_type": "PIM",
+                "labels": ["attributes.price"],
+                "formula": "{{ attributes.price }}",
+                "formatter": {"DECIMAL_FORMAT": [{"PRECISION": ["{{ formula_result }}", 2]}, "."]},
+                "output_label": "Pricing",
+                "formula_txt": null,
+                "internal_name": null
+              },
+              {
+                "id": "67bf368a45f5adf8841cd81a",
+                "label": "attributes.material",
+                "type": "MultiSelectAttribute",
+                "source_type": "PIM",
+                "labels": ["attributes.material"],
+                "formula": "{{ attributes.material }}",
+                "formatter": {"JOIN": ["{{ formula_result }}", ","]},
+                "output_label": "Material",
+                "formula_txt": null,
+                "internal_name": null
+              },
+              {
+                "id": "67bf368a45f5adf8841cd825",
+                "label": "relationships.related_products",
+                "type": "RelationshipAttribute",
+                "source_type": "PIM",
+                "labels": ["sku", "relationships.related_products", "quantity"],
+                "formula": "{{ relationships.related_products }}",
+                "formatter": {"JOIN": [{"RESOLVE_RELATIONSHIPS": ["{{ formula_result }}", ["{{ sku }}", "#", "{{ quantity }}"]]}, ", "]},
+                "output_label": "You may also like",
+                "formula_txt": null,
+                "internal_name": null
+              },
+              {
+                "id": "67bf368a45f5adf8841cd826",
+                "label": "categories",
+                "type": "HierarchyAttribute",
+                "source_type": "PIM",
+                "labels": ["categories"],
+                "formula": {"FULL_PATH": ["{{ categories }}"]},
+                "formatter": {"JOIN": [{"HIERARCHY_SEPARATOR": ["{{ formula_result }}", ">"]}, ","]},
+                "output_label": "Categories",
+                "formula_txt": null,
+                "internal_name": null
+              }
+            ],
+            "_output_attributes_note": "showing 5 of 30 entries, one per distinct formula/formatter pattern found -- NOT a real API field",
+            "assets": [
+              {
+                "uuid": "0337e210ebe54fa39519ea564335e6de",
+                "path": "public_files/pim/e_catalogs/6a38f615c3d65a5f868b1a41/assets/0337e210ebe54fa39519ea564335e6de/plytix-blog-avatar.png"
+              }
+            ],
+            "_assets_note": "showing 1 of 6 entries -- NOT a real API field",
+            "settings": {
+              "general": {
+                "font": "Noto Sans",
+                "title_color": "#000000",
+                "text_color": "#000000",
+                "link_color": "#37404A",
+                "theme_manually": true,
+                "picker_mode": "HEX",
+                "theme_color": {"hue": "270", "saturation": "65", "luminosity": "32"},
+                "brand_color": {"hue": "254", "saturation": "100", "luminosity": "66"}
+              },
+              "header": {
+                "active": true,
+                "logo_uuid": "4f434c63b23d4cbfadce540265883f5a",
+                "title": "Plytix Brand Portal",
+                "subtitle": "All your favorite Plytix products in one place",
+                "background_image_uuid": "2709b2c3042c4758aa3276d2d6124b2c",
+                "share_button": true,
+                "share_description": null,
+                "share_image_uuid": null
+              },
+              "footer": {
+                "active": false,
+                "logo_uuid": null,
+                "background_color": null,
+                "links": [],
+                "text_color": null,
+                "social": [
+                  {"network": "Facebook", "url": "https://www.facebook.com/plytix/"},
+                  {"network": "Linkedin", "url": "https://www.linkedin.com/company/plytix/posts/?feedView=all"},
+                  {"network": "Youtube", "url": "https://www.youtube.com/channel/UC2dNxluXutX8vabK_eO1k5Q"},
+                  {"network": "Instagram", "url": "https://www.instagram.com/plytix/"}
+                ],
+                "social_color": null
+              },
+              "product_filters": {
+                "active": true,
+                "show_expanded": true,
+                "filters": [
+                  {
+                    "label": "Categories",
+                    "attribute": "categories",
+                    "appearance": "tree",
+                    "show_expanded": false,
+                    "attribute_class": "HierarchyAttribute",
+                    "category_id": "67d1a42374f4153810f19f74",
+                    "minimum_value": null,
+                    "maximum_value": null,
+                    "true_value": null,
+                    "false_value": null
+                  }
+                ]
+              },
+              "file_filters": {
+                "active": true,
+                "show_expanded": true,
+                "filters": [
+                  {
+                    "label": "Categories",
+                    "attribute": "categories",
+                    "appearance": "tree",
+                    "show_expanded": true,
+                    "attribute_class": "HierarchyAttribute",
+                    "category_id": null,
+                    "minimum_value": null,
+                    "maximum_value": null,
+                    "true_value": null,
+                    "false_value": null
+                  }
+                ]
+              },
+              "product_sorting": {"active": false, "options": [], "default_attribute": null, "default_order": "desc"},
+              "file_sorting": {"active": false, "options": [], "default_attribute": null, "default_order": "desc"},
+              "product_search": {"active": true, "text": "Search products", "attributes": ["attributes.product_title", "attributes.product_classification"]},
+              "file_search": {"active": true, "text": "Search files", "attributes": []},
+              "product_overview": {
+                "group_variations": true,
+                "grid_size": "small",
+                "gallery_attribute": "67bf368a45f5adf8841cd82c",
+                "thumbnail_attribute": null,
+                "title_attribute": "67bf368a45f5adf8841cd829",
+                "extra_attributes": ["67bf368a45f5adf8841cd828", "67bf389345f5adf8841cd82d"]
+              },
+              "file_overview": {"grid_size": "small"},
+              "product_page": {
+                "auto_fill": false,
+                "auto_fill_group_attributes": true,
+                "components": [
+                  {
+                    "type": "Attributes grid",
+                    "title": "More Information",
+                    "design": "Table",
+                    "attributes": ["67bf368a45f5adf8841cd82b", "67bf368a45f5adf8841cd815", "67bf368a45f5adf8841cd822"],
+                    "thumbnail_attribute": null,
+                    "product_title_attribute": null,
+                    "variations_attributes": null,
+                    "relationship_id": null,
+                    "show": null,
+                    "attribute": null
+                  }
+                ]
+              },
+              "attribute_usages": ["67d2e38b9beb83b6ffeb3e8e", "67bf368a45f5adf8841cd822", "67bf368a45f5adf8841cd82b"]
+            },
+            "is_public": false,
+            "password_required": false,
+            "data_sheet_active": true,
+            "pds_active": false,
+            "pdf_active": false,
+            "quote_active": false,
+            "specification_sheet_active": true,
+            "price_list_active": true,
+            "pds_template_id": null,
+            "price_list_id": "6a38f617c3d65a5f868b1a43",
+            "specification_sheet_id": "6a38f617c3d65a5f868b1a44",
+            "pdf_catalog_id": null,
+            "exportable_attributes": [
+              "67bf363745f5adf8841cd8d",
+              "67bf363745f5adf8841cd8e",
+              "67bf368a45f5adf8841cd828",
+              "67bf368a45f5adf8841cd82b",
+              "67bf389345f5adf8841cd82d",
+              "67bf368a45f5adf8841cd821",
+              "67bf368a45f5adf8841cd829"
+            ],
+            "notification_list": [
+              {"email": "teammate1@example.com", "datasheet_downloads": false, "pdf_downloads": false, "quotes": false},
+              {"email": "teammate2@example.com", "datasheet_downloads": true, "pdf_downloads": true, "quotes": true}
+            ],
+            "quote_request_output_attributes": [],
+            "notification_active": false,
+            "created": null,
+            "modified": "2026-06-22T08:45:11.113000"
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 200 - Success (Top-Level Fields Only)
   description: Real response captured 2026-09-21 against the "Plytix Brand Portal" ecatalog. Top-level fields only -- output_attributes (30 columns), assets, and settings are omitted for brevity; they exist and were confirmed in the full live response.
 
   request: {

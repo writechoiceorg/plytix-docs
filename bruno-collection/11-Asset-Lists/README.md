@@ -37,6 +37,26 @@ the list-`query` body's filter operator vocabulary is `like`/`!like`
 etc., not the `icontains` operator confirmed for live `GET` query-string
 filters (quirk #11/#53) — two different filter DSLs, don't conflate them.
 
+## Update — 2026-09-22 (full-parameter examples for OpenAPI docs)
+
+Added new `example{}` blocks (existing ones untouched), mirroring
+`10-Pim-Product-Lists`'s same-day update:
+
+- **New file `List Asset Lists.bru`** — the collection `GET
+  /asset-lists` endpoint had no dedicated `.bru` file before. Adds a
+  full-parameter search example (`_fields` × 5, `_page`+`_page_size`,
+  `_sort_by`, `name[icontains]`).
+- **`Create Smart Asset List.bru`** — added a full-parameter create
+  demonstrating `query`'s multi-group/multi-condition expressiveness
+  (two AND-ed conditions in one group, a second OR-ed group).
+- **`Update and Delete Asset List.bru`** — added a full-parameter PATCH
+  example combining a rename with a full `query` replace using the
+  `!exists` operator.
+
+Fixture used (`6ab2fe75125f1d0ceeeed6c1`, "WC Test Full Params Smart
+Asset List") was disposable — created, PATCHed, and deleted in the same
+session; not kept.
+
 ## Open items
 
 - None specific to this folder — see `10-Pim-Product-Lists`'s open item.

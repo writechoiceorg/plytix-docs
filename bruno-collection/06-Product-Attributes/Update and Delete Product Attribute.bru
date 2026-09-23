@@ -48,7 +48,7 @@ docs {
 }
 
 example {
-  name: Update Product Attribute - Rejected (label is not patchable, 422)
+  name: 422 - label Not Patchable
   description: Real response captured 2026-09-15 -- documents the label-vs-name gotcha above.
 
   request: {
@@ -93,7 +93,7 @@ example {
 }
 
 example {
-  name: Update Product Attribute - Success (PATCH via name/description/character_limit)
+  name: 200 - Success (name, description, character_limit)
   description: Real response captured 2026-09-15 against a second disposable scratch text attribute, using the correct patchable fields.
 
   request: {
@@ -156,7 +156,76 @@ example {
 }
 
 example {
-  name: Delete Product Attribute - Success (204, then 404 on follow-up GET)
+  name: 200 - Full Parameters (DropdownAttribute)
+  description: Confirmed live 2026-09-22 against a disposable scratch DropdownAttribute (created via the "Full Parameters" example in Create Text Attribute.bru, id 6ab2fa16125f1d0ceeeed6a9, deleted after capture). Sets name, description, options, manual_sorting, sort_ascending, and restricted together in one PATCH -- the fullest set of patchable fields confirmed applicable to a single attribute type at once (label and group_ids remain not patchable, per the docs above).
+
+  request: {
+    url: {{pim_base_url_v3}}/product-attributes/6ab2fa16125f1d0ceeeed6a9
+    method: patch
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "wc_test_full_dropdown_renamed",
+        "description": "WC full-parameter dropdown, updated",
+        "options": ["Small", "Medium", "Large", "XL", "XXL"],
+        "manual_sorting": true,
+        "sort_ascending": true,
+        "restricted": false
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "created": "2026-09-22T21:58:46.734000+00:00",
+            "created_at": "2026-09-22T21:58:46.734000+00:00",
+            "created_user_audit": {
+              "type": "USER",
+              "user_email": "TestDH",
+              "user_id": "6a96a370a3fb0431c692820d"
+            },
+            "description": "WC full-parameter dropdown, updated",
+            "filter_type": "TextAttribute",
+            "id": "6ab2fa16125f1d0ceeeed6a9",
+            "label": "wc_test_full_dropdown_label",
+            "manual_sorting": true,
+            "modified": "2026-09-22T21:59:01.429071+00:00",
+            "modified_user_audit": {
+              "type": "API",
+              "user_email": "TestDH",
+              "user_id": "6a96a370a3fb0431c692820d"
+            },
+            "name": "wc_test_full_dropdown_renamed",
+            "options": ["Small", "Medium", "Large", "XL", "XXL"],
+            "restricted": false,
+            "sort_ascending": true,
+            "type": "DropdownAttribute"
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 204 - Success
   description: Real response captured 2026-09-15 against the same disposable scratch attribute, immediately after the PATCH above.
 
   request: {
@@ -186,7 +255,7 @@ example {
 }
 
 example {
-  name: Get Product Attribute by ID - After Delete (404)
+  name: 404 - Not Found After Delete
   description: Real response captured 2026-09-15, follow-up GET immediately after the DELETE above.
 
   request: {

@@ -1,0 +1,97 @@
+meta {
+  name: List Asset Lists
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{pim_base_url_v3}}/asset-lists?_fields=id&_fields=name&_fields=query&_page=1&_page_size=10&_sort_by=name
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Accept: application/json
+}
+
+assert {
+  res.status: eq 200
+  res.body.data: isArray
+}
+
+docs {
+  `GET /api/v3/asset-lists` — search/page through asset lists. Confirmed
+  live 2026-09-22 against "David's Dev Account". Same shape/behavior as
+  `10-Pim-Product-Lists/List Product Lists.bru` — no dedicated `.bru` file
+  previously existed for this collection endpoint (only
+  `GET .../{identifier}` was covered).
+
+  ## Confirmed working query params (maximal combination)
+  `_fields` (repeatable), `_page`+`_page_size`, `_sort_by`, and a plain/
+  operator filter on `name` (e.g. `name[icontains]=<substr>`) — all
+  combine correctly in a single request, same pattern as products/product
+  lists.
+}
+
+example {
+  name: 200 - Full Parameters
+  description: Confirmed live 2026-09-22. Combines every confirmed-working query param in one request against real account data (All Assets/Branding/Tech Packs lists).
+
+  request: {
+    url: {{pim_base_url_v3}}/asset-lists?_fields=id&_fields=account_id&_fields=name&_fields=query&_fields=created&_fields=modified&_page=1&_page_size=3&_sort_by=name&name[icontains]=a
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [
+            {
+              "id": "6a38f612c3d65a5f868b19a0",
+              "account_id": "6a38f5a5b22478f30bfd755c",
+              "name": "All Assets",
+              "query": [[{"operator": "in", "field": "static_lists", "value": ["6a38f612c3d65a5f868b19a0"], "field_type": null}]],
+              "created": "2026-06-22T08:45:06.848000",
+              "modified": "2026-06-22T08:45:06.866000"
+            },
+            {
+              "id": "6a38f612c3d65a5f868b19a3",
+              "account_id": "6a38f5a5b22478f30bfd755c",
+              "name": "Branding",
+              "query": [[{"operator": "in", "field": "static_lists", "value": ["6a38f612c3d65a5f868b19a3"], "field_type": null}]],
+              "created": "2026-06-22T08:45:06.899000",
+              "modified": "2026-06-22T08:45:06.907000"
+            },
+            {
+              "id": "6a38f612c3d65a5f868b19a5",
+              "account_id": "6a38f5a5b22478f30bfd755c",
+              "name": "Tech Packs",
+              "query": [[{"operator": "in", "field": "static_lists", "value": ["6a38f612c3d65a5f868b19a5"], "field_type": null}]],
+              "created": "2026-06-22T08:45:06.929000",
+              "modified": "2026-06-22T08:45:06.936000"
+            }
+          ],
+          "errors": [],
+          "pagination": {
+            "next_page": "http://pim.dev.plytix.com/api/v3/asset-lists?_fields=id&_fields=account_id&_fields=name&_fields=query&_fields=created&_fields=modified&_page=2&_page_size=3&_sort_by=name&name%5Bicontains%5D=a"
+          }
+        }
+      '''
+    }
+  }
+}

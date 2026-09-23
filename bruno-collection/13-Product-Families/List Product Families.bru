@@ -34,7 +34,7 @@ docs {
 }
 
 example {
-  name: List Product Families - Page 1 (Success)
+  name: 200 - Success (Page 1)
   description: Real response captured 2026-09-21 against "David's Dev Account". Page 1 of 2 (3 families total, 3 per page requested).
 
   request: {
@@ -67,6 +67,46 @@ example {
           "errors": [],
           "pagination": {
             "next_page": "https://pim.dev.plytix.com/api/v3/product-families?_page_size=3&_page=2"
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 200 - Full Parameters
+  description: Real response captured 2026-09-22. Combines _fields (5 fields), _sort_by, _page/_page_size, and a name[icontains] filter in one query -- all confirmed working together against "David's Dev Account".
+
+  request: {
+    url: {{pim_base_url_v3}}/product-families?_fields=id&_fields=name&_fields=total_products&_fields=total_attributes&_fields=total_models&_sort_by=name&_page=1&_page_size=2&name[icontains]=a
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [
+            {"id": "6a38f5d8c3d65a5f868b186e", "name": "Accessories", "total_products": 7, "total_attributes": 61, "total_models": 1},
+            {"id": "6a38f5d8c3d65a5f868b186f", "name": "Apparel", "total_products": 46, "total_attributes": 62, "total_models": 1}
+          ],
+          "errors": [],
+          "pagination": {
+            "next_page": "http://pim.dev.plytix.com/api/v3/product-families?_fields=id&_fields=name&_fields=total_products&_fields=total_attributes&_fields=total_models&_sort_by=name&_page=2&_page_size=2&name[icontains]=a"
           }
         }
       '''

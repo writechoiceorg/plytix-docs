@@ -68,7 +68,7 @@ docs {
 }
 
 example {
-  name: Create Product Family - Success
+  name: 201 - Success
   description: Real response captured 2026-09-15 on "David's Dev Account" -- this family was renamed and deleted later in the same session, not kept as a fixture.
 
   request: {
@@ -116,7 +116,156 @@ example {
 }
 
 example {
-  name: Create Product Family - Duplicate Name (409)
+  name: 201 - Full Parameters
+  description: Real response captured 2026-09-22. Exercises every field on ProductFamilyCreateInputDto (name + attributes) in one call. Deleted immediately after capture, not kept as a fixture. See two new findings in the docs block above: (1) attribute references across attributes/parent_attributes/variant_attributes must be ALL plain-ID strings or ALL {id,label} objects -- mixing forms across the three fields 422s; (2) parent_attributes/variant_attributes are blocked by the same "Automatic inheritance is not available for this account" 403 that blocks the PATCH level-change endpoint (see "Update Family Attribute Level.bru") -- only attributes (which always link at no_level) can be populated on this account. All three attribute refs used here (one custom text attribute, two real system attributes) resolved to real attribute_id/level=no_level links, confirmed via a follow-up GET on the attributes collection subpath.
+
+  request: {
+    url: {{pim_base_url_v3}}/product-families
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "WC Test Full Params Family",
+        "attributes": [
+          {"id": "6a9f1bf72b6fd055ffb7c7e1", "label": "wc_test_text"},
+          {"id": "6a38f613c3d65a5f868b19d1", "label": "adult"},
+          {"id": "6a38f613c3d65a5f868b19cd", "label": "age_group"}
+        ]
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 201
+      text: Created
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6ab2fe5c125f1d0ceeeed6b8",
+            "name": "WC Test Full Params Family",
+            "total_products": 0,
+            "total_attributes": 7,
+            "total_models": 1,
+            "created": "2026-09-22T22:17:00.683000+00:00",
+            "modified": "2026-09-22T22:17:00.797000+00:00"
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 422 - Mixed Attribute Reference Forms
+  description: Real response captured 2026-09-22. attributes as plain ID strings mixed with parent_attributes/variant_attributes as {id,label} objects -- rejected. New finding, not previously documented in this collection.
+
+  request: {
+    url: {{pim_base_url_v3}}/product-families
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "WC Test Full Params Family",
+        "attributes": ["6a9f1bf72b6fd055ffb7c7e1"],
+        "parent_attributes": [{"id": "6a38f613c3d65a5f868b19d1", "label": "adult"}],
+        "variant_attributes": [{"label": "age_group"}]
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 422
+      text: Unprocessable Entity
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "InputDTOValidationError",
+              "description": "Value error, attributes: attribute references must be either all IDs or all {id, label} objects, not mixed across attributes, parent_attributes, variant_attributes"
+            }
+          ]
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 403 - parent_attributes Blocked by Inheritance Gate
+  description: Real response captured 2026-09-22, using consistent {id,label} object form across all three arrays (avoiding the mixed-form 422 above). New finding -- the "Automatic inheritance is not available for this account" gate (previously only confirmed on the PATCH level-change endpoint, see status-gating rule #4 in config/api-testing.config.md) also blocks create-time parent_attributes/variant_attributes, not just the level-change PATCH.
+
+  request: {
+    url: {{pim_base_url_v3}}/product-families
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "WC Test Full Params Family",
+        "attributes": [{"id": "6a9f1bf72b6fd055ffb7c7e1", "label": "wc_test_text"}],
+        "parent_attributes": [{"id": "6a38f613c3d65a5f868b19d1", "label": "adult"}],
+        "variant_attributes": [{"id": "6a38f613c3d65a5f868b19cd", "label": "age_group"}]
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 403
+      text: Forbidden
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "PermissionError",
+              "description": "Automatic inheritance is not available for this account"
+            }
+          ]
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 409 - Duplicate Name
   description: Real response captured 2026-09-15, re-creating a family with a name that already existed in this account at the time.
 
   request: {

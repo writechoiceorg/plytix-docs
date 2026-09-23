@@ -50,7 +50,48 @@ docs {
 }
 
 example {
-  name: List Ecatalogs - Success (Key Fields Only)
+  name: 200 - Full Parameters
+  description: Real response captured 2026-09-22 against "David's Dev Account", combining sparse _fields, page-number pagination, and _sort_by in one GET /ecatalogs call. Only one ecatalog exists in this account, so pagination.next_page is correctly empty even with _page_size=5.
+
+  request: {
+    url: {{pim_base_url_v3}}/ecatalogs?_fields=id&_fields=name&_fields=is_public&_page=1&_page_size=5&_sort_by=name
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [
+            {
+              "id": "6a38f615c3d65a5f868b1a41",
+              "name": "Plytix Brand Portal",
+              "is_public": false
+            }
+          ],
+          "errors": [],
+          "pagination": {}
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 200 - Success (Key Fields Only)
   description: Real response captured 2026-09-21 against "David's Dev Account". One ecatalog exists. Key fields only shown -- the full response object is very large (output_attributes, assets, settings arrays).
 
   request: {

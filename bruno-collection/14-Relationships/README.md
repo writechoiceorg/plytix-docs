@@ -49,6 +49,19 @@ still cover every read-only need). A second scratch relationship type was
 also created here and used to test the new product-linking endpoints in
 `17-Product-Relationships/`.
 
+## Update — 2026-09-22 (full-parameter examples for OpenAPI descriptions)
+
+Added a new `example{}` block (existing examples untouched) to
+`List Relationships.bru`: a full-parameter query combining `_fields`
+(all 6 record fields), `_sort_by`, `_page`/`_page_size`, and a `status`
+filter in one call — `200`, confirmed working together.
+
+`Create Relationship.bru` and `Update and Delete Relationship.bru`'s
+existing examples already exercise 100% of `RelationshipCreateInputDto`
+(`name` is its only field) and `RelationshipUpdateInputDto` (`name` is
+its only patchable field) respectively — no new example needed for
+either, since there are no additional parameters to populate.
+
 ## Open items
 
 - None.

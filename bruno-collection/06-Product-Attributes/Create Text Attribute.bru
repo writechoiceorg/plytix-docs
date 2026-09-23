@@ -44,11 +44,16 @@ docs {
   `^[a-z0-9_]+$` pattern the spec declares for `label`, so `name` values that
   are already lowercase/underscore-safe work as a default label for free.
 
-  ## group_ids linkage -- open item
-  `group_ids: ["6a9f1b872b6fd055ffb7c7df"]` is accepted without error on create,
-  but is **not** reflected back in either the create response or a subsequent
-  `GET`/`_fields=group_ids`. Inconclusive whether the group linkage actually
-  persists -- worth re-checking from the attribute-group side in a later session.
+  ## group_ids linkage -- RESOLVED 2026-09-22, it DOES link
+  `group_ids: ["..."]` is accepted without error on create, and is still
+  **not** reflected back in the create response or a subsequent
+  `GET`/`_fields=group_ids` on the attribute itself. But checking from the
+  *group's* side resolves it: `GET /product-attribute-groups/{id}`
+  immediately after creating 4 attributes with that group's id in
+  `group_ids` showed all 4 labels added to the group's `attribute_labels`
+  array. The linkage is real -- it's just one-directional in the API's
+  responses (visible from the group, invisible from the attribute).
+  Resolves config open question #11.
 
   ## Not idempotent to re-run
   Re-running once the fixture exists returns `409 Conflict`
@@ -104,7 +109,7 @@ docs {
 }
 
 example {
-  name: Create TextAttribute - Success (201)
+  name: 201 - Success (TextAttribute)
   description: Confirmed live 2026-09-07. Minimal body; label defaults to name value. Fixture wc_test_text kept as Phase 2b dependency.
 
   request: {
@@ -152,7 +157,7 @@ example {
 }
 
 example {
-  name: Create DropdownAttribute - Success (201, with options)
+  name: 201 - Success (DropdownAttribute, With Options)
   description: Confirmed live 2026-09-07. options array required; boolean fields (manual_sorting, sort_ascending, restricted) receive real server-side defaults rather than being left null.
 
   request: {
@@ -205,7 +210,7 @@ example {
 }
 
 example {
-  name: Create MediaAttribute - Success (201)
+  name: 201 - Success (MediaAttribute)
   description: Confirmed live 2026-09-07. No type-specific optional fields beyond the common name/label/description.
 
   request: {
@@ -253,7 +258,7 @@ example {
 }
 
 example {
-  name: Create FormulaAttribute - Account Limit Reached (422)
+  name: 422 - FormulaAttribute Account Limit Reached
   description: Confirmed live 2026-09-07. Dev account capped at 2 formula attributes (already at limit). Request body is otherwise valid -- the create path for FormulaAttribute itself remains unconfirmed on a fresh account.
 
   request: {
@@ -300,7 +305,7 @@ example {
 }
 
 example {
-  name: Create Attribute - Invalid Type (422, full enum revealed)
+  name: 422 - Invalid Type (Full Enum Revealed)
   description: Confirmed live 2026-09-07. The pydantic error message is an authoritative list of all 15 valid type tags the live API recognizes -- one more than the 14 in openapi_pimv3.json (HierarchyAttribute is undocumented in the spec).
 
   request: {
@@ -346,7 +351,7 @@ example {
 }
 
 example {
-  name: Create HierarchyAttribute - Unimplemented (500)
+  name: 500 - HierarchyAttribute Unimplemented (Bug)
   description: Confirmed live 2026-09-07. HierarchyAttribute passes pydantic discriminator validation (it is a recognized type tag) but the create handler is not wired up -- do not build customer-facing docs around this type.
 
   request: {
@@ -392,7 +397,279 @@ example {
 }
 
 example {
-  name: Create CompletenessAttribute - With Real References (500, Bug)
+  name: 201 - Full Parameters (TextAttribute)
+  description: Confirmed live 2026-09-22. Every optional common field populated (label, description, group_ids, plus TextAttribute's character_limit). Real finding, resolves config open question #11 -- group_ids DOES link, confirmed via a follow-up GET on the attribute group showing this attribute's label added to attribute_labels. Scratch resource deleted after capture.
+
+  request: {
+    url: {{pim_base_url_v3}}/product-attributes
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "wc_test_full_text",
+        "label": "wc_test_full_text_label",
+        "description": "WC full-parameter text attribute example",
+        "group_ids": ["6a9f1b872b6fd055ffb7c7df"],
+        "type": "TextAttribute",
+        "character_limit": 250
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 201
+      text: Created
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6ab2fa0c125f1d0ceeeed6a6",
+            "name": "wc_test_full_text",
+            "label": "wc_test_full_text_label",
+            "description": "WC full-parameter text attribute example",
+            "created": "2026-09-22T21:58:36.615000+00:00",
+            "modified": "2026-09-22T21:58:36.615000+00:00",
+            "type": "TextAttribute",
+            "character_limit": 250
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 201 - Full Parameters (DateAttribute)
+  description: Confirmed live 2026-09-22. Every optional common field populated (label, description, group_ids) plus DateAttribute's include_time set to true. Scratch resource deleted after capture.
+
+  request: {
+    url: {{pim_base_url_v3}}/product-attributes
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "wc_test_full_date",
+        "label": "wc_test_full_date_label",
+        "description": "WC full-parameter date attribute example",
+        "group_ids": ["6a9f1b872b6fd055ffb7c7df"],
+        "type": "DateAttribute",
+        "include_time": true
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 201
+      text: Created
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6ab2fa15125f1d0ceeeed6a7",
+            "name": "wc_test_full_date",
+            "label": "wc_test_full_date_label",
+            "description": "WC full-parameter date attribute example",
+            "created": "2026-09-22T21:58:45.894000+00:00",
+            "modified": "2026-09-22T21:58:45.894000+00:00",
+            "type": "DateAttribute",
+            "include_time": true
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 201 - Full Parameters (DropdownAttribute)
+  description: Confirmed live 2026-09-22. Every optional field populated -- label, description, group_ids, options, and all three sorting/restriction booleans explicitly set to non-default values (manual_sorting/sort_ascending false, restricted true). Note the returned options array order does not match input order or a simple alpha sort when manual_sorting is false -- server-side ordering logic, not documented anywhere. Scratch resource deleted after capture.
+
+  request: {
+    url: {{pim_base_url_v3}}/product-attributes
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "wc_test_full_dropdown",
+        "label": "wc_test_full_dropdown_label",
+        "description": "WC full-parameter dropdown attribute example",
+        "group_ids": ["6a9f1b872b6fd055ffb7c7df"],
+        "type": "DropdownAttribute",
+        "options": ["Small", "Medium", "Large", "XL"],
+        "manual_sorting": false,
+        "sort_ascending": false,
+        "restricted": true
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 201
+      text: Created
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6ab2fa16125f1d0ceeeed6a9",
+            "name": "wc_test_full_dropdown",
+            "label": "wc_test_full_dropdown_label",
+            "description": "WC full-parameter dropdown attribute example",
+            "created": "2026-09-22T21:58:46.734000+00:00",
+            "modified": "2026-09-22T21:58:46.734000+00:00",
+            "type": "DropdownAttribute",
+            "options": ["XL", "Small", "Medium", "Large"],
+            "manual_sorting": false,
+            "sort_ascending": false,
+            "restricted": true
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 201 - Full Parameters (CompletenessAttribute, Empty Attributes)
+  description: Confirmed live 2026-09-22. Every optional common field populated (label, description, group_ids) with an empty attributes array -- the only attributes value confirmed NOT to 500 (see the "With Real References" 500-bug example below for the broken non-empty case). Scratch resource deleted after capture.
+
+  request: {
+    url: {{pim_base_url_v3}}/product-attributes
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "wc_test_full_completeness",
+        "label": "wc_test_full_completeness_label",
+        "description": "WC full-parameter completeness attribute example",
+        "group_ids": ["6a9f1b872b6fd055ffb7c7df"],
+        "type": "CompletenessAttribute",
+        "attributes": []
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 201
+      text: Created
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6ab2fa17125f1d0ceeeed6aa",
+            "name": "wc_test_full_completeness",
+            "label": "wc_test_full_completeness_label",
+            "description": "WC full-parameter completeness attribute example",
+            "created": "2026-09-22T21:58:47.639000+00:00",
+            "modified": "2026-09-22T21:58:47.639000+00:00",
+            "type": "CompletenessAttribute",
+            "attributes": []
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 422 - FormulaAttribute Full Parameters Request Shape (Account Limit)
+  description: Confirmed live 2026-09-22. Documents the full request shape (label, description, group_ids, formula_str) for OpenAPI purposes -- the account limit of 2 formula attributes (already reached) blocks the actual 201 success response from ever being captured on this account. See the account-limit example above for the base case; this one just shows every optional field populated in the request.
+
+  request: {
+    url: {{pim_base_url_v3}}/product-attributes
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "wc_test_full_formula",
+        "label": "wc_test_full_formula_label",
+        "description": "WC full-parameter formula attribute example",
+        "group_ids": ["6a9f1b872b6fd055ffb7c7df"],
+        "type": "FormulaAttribute",
+        "formula_str": "CONCAT(sku,\" - \",label)"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 422
+      text: Unprocessable Entity
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "ValidationError",
+              "description": "This account reached the limit of 2 formula attributes"
+            }
+          ]
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 500 - CompletenessAttribute With Real References (Bug)
   description: Confirmed live 2026-09-08 (reproduced twice). CompletenessAttribute with an empty attributes array creates successfully (201), but providing real attribute references in the correct {id} object shape triggers a 500 -- a live bug blocking any real use of Completeness Attributes.
 
   request: {

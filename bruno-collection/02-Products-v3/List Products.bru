@@ -64,11 +64,20 @@ docs {
   field (`sku=BAG-10157`), operator (`created[gt]=2026-01-01`), related-entity dot
   (`categories.name=Backpacks`), custom attribute (`attributes.brand[icontains]=Plytix`).
 
+  ## ⚠️ Preferred way to get expanded categories/assets/static_lists (2026-09-23)
+  The dedicated subpaths (`GET /products/{id}/categories`, `.../assets`,
+  `.../static_lists`) are confirmed BROKEN as of 2026-09-23 -- always empty
+  regardless of real linkage. `_fields=categories`/`_fields=assets`/
+  `_fields=static_lists` on THIS endpoint is the confirmed correct way to get
+  the same expanded data. See "200 - Full Parameters (Relationship Fields
+  Expanded)" below, and `Get Product Subpath - Attributes.bru` for the full bug
+  writeup.
+
   See examples below for representative responses for each scenario.
 }
 
 example {
-  name: Sparse Field Selection
+  name: 200 - Sparse Field Selection
   description: Confirmed live 2026-09-04. Two _fields params return only sku and status per product; pagination.next_page carries the cursor forward.
 
   request: {
@@ -116,7 +125,7 @@ example {
 }
 
 example {
-  name: Pagination - _page / _page_size
+  name: 200 - Pagination (_page / _page_size)
   description: Confirmed live 2026-09-07. _page_size=2 returns exactly 2 items; pagination.next_page contains _page=2 and preserves all other query params. Note: _offset/_limit returns 400 InvalidFieldError and is not supported.
 
   request: {
@@ -162,7 +171,169 @@ example {
 }
 
 example {
-  name: Plain Field Filter - sku
+  name: 200 - Full Parameters
+  description: Confirmed live 2026-09-22. Combines every confirmed-working query parameter dialect in one request for OpenAPI-example purposes -- five _fields entries, _page/_page_size, _sort_by, a plain field filter (status=Draft) and an operator filter (created[gt]=2024-01-01) together. All compose without conflict.
+
+  request: {
+    url: {{pim_base_url_v3}}/products?_fields=id&_fields=sku&_fields=label&_fields=status&_fields=created&_page=1&_page_size=5&_sort_by=sku&status=Draft&created[gt]=2024-01-01
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [
+            {
+              "id": "6aa022262b6fd055ffb7caa4",
+              "sku": "WC-TEST-FULL-001",
+              "label": "WC Test Full Product",
+              "status": "Draft",
+              "created": "2026-09-08T14:56:38.319000"
+            },
+            {
+              "id": "6ab2fa2b125f1d0ceeeed6b3",
+              "sku": "WC-TEST-MAXPARAMS-PARENT",
+              "label": "WC Test Max Params Parent",
+              "status": "Draft",
+              "created": "2026-09-22T21:59:07.781000"
+            }
+          ],
+          "errors": [],
+          "pagination": {}
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 200 - Full Parameters (Relationship Fields Expanded)
+  description: Confirmed live 2026-09-23. _fields=categories&_fields=assets&_fields=static_lists combined against BAG-10157, which has 2 real categories, 11 real assets, and 1 real static list membership ("All Products", an account-level default list). This is the CONFIRMED CORRECT way to get expanded relationship data for a product -- the equivalent dedicated subpaths (GET /products/{id}/categories, .../assets, .../static_lists) are all confirmed BROKEN as of 2026-09-23, always returning an empty array regardless of real linkage (see "Get Product Subpath - Attributes.bru" for the full writeup and captured broken-subpath examples). assets array trimmed from 11 to 2 entries here for brevity -- full entries share the same shape.
+
+  request: {
+    url: {{pim_base_url_v3}}/products?_fields=sku&_fields=categories&_fields=assets&_fields=static_lists&sku=BAG-10157
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [
+            {
+              "id": "6a38f614c3d65a5f868b1a06",
+              "sku": "BAG-10157",
+              "assets": [
+                {
+                  "id": "6a38f5e1c3d65a5f868b18a5",
+                  "account_id": "6a38f5a5b22478f30bfd755c",
+                  "assigned": true,
+                  "content_type": "image/jpeg",
+                  "extension": "jpg",
+                  "file_size": 559164,
+                  "file_type": "IMAGES",
+                  "filename": "BAG-10157_10.jpg",
+                  "path": "public_files/pim/assets/a5/f5/38/6a/6a38f5a5b22478f30bfd755c/images/e1/f5/38/6a/6a38f5e1c3d65a5f868b18a5/BAG-10157_10.jpg",
+                  "n_catalogs": 0,
+                  "n_products": 1,
+                  "alt_text": null,
+                  "status": "ACTIVE",
+                  "created": "2026-06-22T08:44:19.008000",
+                  "modified": "2026-06-22T08:44:19.046000"
+                },
+                {
+                  "id": "6a38f5e1c3d65a5f868b18a6",
+                  "account_id": "6a38f5a5b22478f30bfd755c",
+                  "assigned": true,
+                  "content_type": "image/jpeg",
+                  "extension": "jpg",
+                  "file_size": 798520,
+                  "file_type": "IMAGES",
+                  "filename": "BAG-10157_11.jpg",
+                  "path": "public_files/pim/assets/a5/f5/38/6a/6a38f5a5b22478f30bfd755c/images/e1/f5/38/6a/6a38f5e1c3d65a5f868b18a6/BAG-10157_11.jpg",
+                  "n_catalogs": 0,
+                  "n_products": 1,
+                  "alt_text": null,
+                  "status": "ACTIVE",
+                  "created": "2026-06-22T08:44:18.978000",
+                  "modified": "2026-06-22T08:44:18.990000"
+                }
+              ],
+              "categories": [
+                {
+                  "id": "6a38f5d8c3d65a5f868b185b",
+                  "account_id": "6a38f5a5b22478f30bfd755c",
+                  "name": "Backpacks",
+                  "parent_id": "6a38f5d8c3d65a5f868b1856",
+                  "path": ["Website Taxonomy", "Bags & Luggage", "Backpacks"],
+                  "slug": "backpacks",
+                  "order": 1,
+                  "n_children": 0,
+                  "created": "2026-06-22T08:44:08.298000",
+                  "modified": "2026-06-22T08:44:08.298000"
+                },
+                {
+                  "id": "6a38f5d8c3d65a5f868b1868",
+                  "account_id": "6a38f5a5b22478f30bfd755c",
+                  "name": "Backpacks",
+                  "parent_id": "6a38f5d8c3d65a5f868b1830",
+                  "path": ["Google Shopping Taxonomy", "Luggage & Bags", "Backpacks"],
+                  "slug": "backpacks",
+                  "order": 2,
+                  "n_children": 0,
+                  "created": "2026-06-22T08:44:08.300000",
+                  "modified": "2026-06-22T08:44:08.300000"
+                }
+              ],
+              "static_lists": [
+                {
+                  "id": "6a38f613c3d65a5f868b19fe",
+                  "account_id": "6a38f5a5b22478f30bfd755c",
+                  "name": "All Products",
+                  "query": [[{"operator": "in", "field": "static_lists", "value": ["6a38f613c3d65a5f868b19fe"], "field_type": "PimProductAttribute.ObjectIdAttribute"}]],
+                  "created": "2026-06-22T08:45:07.936000",
+                  "modified": "2026-06-22T08:45:07.948000"
+                }
+              ]
+            }
+          ],
+          "errors": [],
+          "pagination": {}
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 200 - Plain Field Filter (sku)
   description: Confirmed live 2026-09-07. sku=BAG-10157 returns exactly one matching product; pagination.next_page is null when the result set is exhausted. Operator (created[gt]=...) and related-entity dot (categories.name=Backpacks) filters also confirmed working in the same query-string dialect.
 
   request: {

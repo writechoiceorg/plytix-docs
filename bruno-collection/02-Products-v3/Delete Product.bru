@@ -17,7 +17,8 @@ headers {
 
 docs {
   `DELETE /api/v3/products/{identifier}` — delete a product by Mongo ObjectId.
-  Confirmed live 2026-09-08 against disposable products on "David's Dev Account".
+  Confirmed live 2026-09-08 against disposable products on "David's Dev Account";
+  re-verified with fresh live tests 2026-09-23.
 
   ## 204 (not the spec's 200)
   `openapi_pimv3.json` declares `200` only. Live: **204 No Content**. A follow-up
@@ -30,30 +31,43 @@ docs {
   identifier-flexibility claim from `API V3.md` applies to v3 (see `Get Product
   by ID.bru`).
 
-  ## ⚠️ Critical hazard — DELETE /products/{id}/{path} deletes the entire product
-  `DELETE /products/{identifier}/{path}` does **not** scope the delete to `{path}`.
-  It deletes the **entire product** regardless of what `{path}` is. Confirmed two
-  ways:
-  1. `PATCH`'d `category_ids` onto a disposable product (confirmed linked via
-     `GET .../categories`), then called `DELETE .../products/{id}/categories`
-     expecting only the category links to be removed — instead the whole product
-     was deleted (204, then `GET /products/{id}` returned 404, not an empty list).
-  2. Repeated with a completely made-up subpath (`/totally_made_up_path_xyz`) on
-     a second disposable product — same result: 204, whole product gone. The
-     `{path}` segment is not inspected by the delete handler at all.
+  ## ✅ RESOLVED 2026-09-23 — the "whole-product-delete" subpath hazard is fixed
+  Every `.bru` file across this collection has repeatedly warned that
+  `DELETE /products/{identifier}/{path}` ignored `{path}` entirely and deleted
+  the **entire product** (originally confirmed 2026-09-08, quirk #31; the
+  officially-documented "1:M Unlink" pattern `DELETE /products/{id}/categories/{category_id}`
+  was independently confirmed to have the identical hazard, quirk #54). **This is
+  no longer reproducible as of 2026-09-23** — Plytix appears to have fixed the
+  handler. Re-tested three ways on a fresh disposable product with a real, confirmed
+  category link:
+  1. `DELETE /products/{id}/categories` (a recognized collection name) →
+     `405 Method Not Allowed` — `{"errors":[{"name":"MethodNotAllowed",
+     "description":"'delete' is not allowed on the 'categories' collection: no
+     single well-defined write target."}]}`. Product confirmed fully intact via
+     follow-up `GET` (200, all fields unchanged).
+  2. `DELETE /products/{id}/totally_made_up_path_xyz` (an unrecognized field
+     name) → `404 Not Found` — `{"errors":[{"name":"NotFoundError",
+     "description":"Product has no field 'totally_made_up_path_xyz'"}]}`.
+  3. `DELETE /products/{id}/categories/{category_id}` (the "1:M Unlink" 3-segment
+     pattern) → `404 Not Found` — `{"errors":[{"name":"NotFoundError",
+     "description":"Product has no field 'categories/<id>'"}]}`. Not currently a
+     working unlink mechanism, but importantly SAFE — no data loss either way.
 
-  **Implication for docs**: never document or suggest
-  `DELETE /products/{id}/{subpath}` as a way to unassign a category, remove an
-  asset, or clear any field. Flag to Plytix as a likely bug — a scoped-removal
-  endpoint that isn't scoped. See "Subpath Delete Hazard" example below.
+  **Implication for docs**: the old warning against ever using
+  `DELETE /products/{id}/{subpath}` no longer needs to gate any docs — the
+  endpoint now fails safely (405/404) instead of silently destroying data. Still
+  true that neither pattern provides a working scoped-unlink mechanism; `PATCH`
+  with a reduced `category_ids`/relationship array remains the only confirmed way
+  to remove a single relationship. See the updated examples below, and
+  `config/api-testing.config.md`'s quirks #31/#54 (both now marked resolved).
 }
 
 example {
   name: 204 - Standard Delete
-  description: Confirmed live 2026-09-08 against disposable product WC-TEST-DISPOSABLE-003 (id 6aa022d82b6fd055ffb7caa8, since deleted). 204 No Content with empty body. A follow-up GET on the same id returns 404.
+  description: Confirmed live 2026-09-23 against a fresh disposable product WC-TEST-DELETE-CONFIRM-404 (id 6ab41b6debb26b08b2285ef2, created and deleted in the same test run). 204 No Content with an empty body -- correct per HTTP semantics, there is nothing to show beyond the status code. The follow-up GET on this same id, confirming the deletion with a real captured 404, is in "Get Product by ID.bru"'s "404 - Not Found After Delete" example -- see that file for the paired confirmation, matching the convention used by every other resource folder in this collection (e.g. "Delete Asset - Success" / "Get Asset by ID - After Delete").
 
   request: {
-    url: {{pim_base_url_v3}}/products/6aa022d82b6fd055ffb7caa8
+    url: {{pim_base_url_v3}}/products/6ab41b6debb26b08b2285ef2
     method: delete
     mode: none
     headers: {
@@ -76,11 +90,11 @@ example {
 }
 
 example {
-  name: 204 - Subpath Delete Hazard (Entire Product Deleted)
-  description: CONFIRMED HAZARD live 2026-09-08. Despite the /categories path segment, the entire product is deleted — not just its category links. Identical 204 is returned for any subpath value, including completely made-up ones. Do not use this pattern to unassign categories or assets.
+  name: 405 - Subpath DELETE Rejected (Hazard Fixed)
+  description: Confirmed live 2026-09-23 against a fresh disposable product with a REAL, confirmed category link (verified via GET /products?_fields=categories&sku=... beforehand -- the dedicated /categories subpath itself is separately confirmed broken/always-empty, see "Get Product Subpath - Attributes.bru", so it cannot be used to verify linkage). This SUPERSEDES a 2026-09-08 finding that this exact call deleted the entire product (204) -- that hazard is no longer reproducible as of 2026-09-23. The endpoint now correctly rejects the request instead of destroying data; a follow-up GET confirmed the product (and its category link) fully intact. An unrecognized subpath name (e.g. /totally_made_up_path_xyz) returns 404 "Product has no field '...'" instead -- also safe, no deletion. Neither path provides a working scoped-unlink mechanism; use PATCH with a reduced category_ids array to remove a single category instead.
 
   request: {
-    url: {{pim_base_url_v3}}/products/6aa022442b6fd055ffb7caa5/categories
+    url: {{pim_base_url_v3}}/products/REPLACE_WITH_PRODUCT_ID/categories
     method: delete
     mode: none
     headers: {
@@ -91,13 +105,64 @@ example {
 
   response: {
     status: {
-      code: 204
-      text: No Content
+      code: 405
+      text: Method Not Allowed
     }
-    headers: {}
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
     body: {
-      type: text
-      content: ''
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "MethodNotAllowed",
+              "description": "'delete' is not allowed on the 'categories' collection: no single well-defined write target."
+            }
+          ]
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 404 - 1:M Unlink Pattern Rejected (Hazard Fixed)
+  description: Confirmed live 2026-09-23. The officially-documented "1:M Unlink" pattern (DELETE /products/{id}/categories/{category_id}, a 3-segment path naming a specific linked category) is tested here against a real, confirmed category link. This SUPERSEDES a 2026-09-08 finding (quirk #54) that this exact call also deleted the entire product -- no longer reproducible. The 3-segment path is now treated as a single unrecognized field name and rejected with a clean 404, not executed as a delete. Product and its category link both confirmed fully intact via a follow-up GET. This pattern is not currently a working scoped-unlink mechanism (it 404s rather than actually removing just the one category), but it is now safe -- no data loss.
+
+  request: {
+    url: {{pim_base_url_v3}}/products/REPLACE_WITH_PRODUCT_ID/categories/REPLACE_WITH_CATEGORY_ID
+    method: delete
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 404
+      text: Not Found
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "NotFoundError",
+              "description": "Product has no field 'categories/6a9f1b482b6fd055ffb7c7dc'"
+            }
+          ]
+        }
+      '''
     }
   }
 }

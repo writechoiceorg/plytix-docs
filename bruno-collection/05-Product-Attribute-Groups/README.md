@@ -41,6 +41,20 @@ resource touched in this refresh, `PATCH` is still NOT declared** for
 combined update+delete file. Retested `DELETE` fresh against a new
 disposable scratch group and captured a real `example{}` (204, then 404).
 
+## Update — 2026-09-22 (full-parameter examples for OpenAPI docs)
+
+Added new coverage (existing examples untouched):
+- **New file** `List Product Attribute Groups.bru` — this endpoint had zero
+  prior coverage (only Create/Get-by-id/Delete existed). Confirmed
+  `GET /api/v3/product-attribute-groups` live with the same undeclared
+  query-param support as other v3 list endpoints; captured a "Full
+  Parameters" example combining `_fields`, `_page`/`_page_size`, `_sort_by`.
+- `Create Product Attribute Group.bru`: new "Create Attribute Group - Full
+  Parameters" example — `POST` with both `name` and a populated
+  `attribute_labels` array (the full `ProductAttributeGroupCreateInputDto`),
+  vs. the existing minimal example where `attribute_labels` defaults to
+  `[]`. Scratch group deleted after capture.
+
 ## Open items
 
 - [ ] Confirm whether `group_ids` sent on a `product-attributes` create

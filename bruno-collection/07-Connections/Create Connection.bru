@@ -53,10 +53,18 @@ docs {
   id `6aa98673a30ca5945169a25b`. GET by id confirms the null-defaulted fields
   shape (`last_processed`, `last_result_operation`, `source`, `url`, `port`,
   `user` all null; `use_tls: false`).
+
+  ## Full-parameter coverage added 2026-09-22, including first-ever Dropbox test
+  Added full-parameter create examples for all three connection types below.
+  `password` (ftp/sftp) and `token`/`token_type`/`refresh_token` (dropbox) are
+  all **write-only** -- accepted on create/update but never echoed back in any
+  response, confirmed across all three types. `email` is the only Dropbox
+  field that round-trips. This is the first live test of `type: "dropbox"`
+  in this project -- prior sessions only tested `ftp`.
 }
 
 example {
-  name: Create FTP Connection - Success (201)
+  name: 201 - Success (FTP)
   description: Confirmed live 2026-09-07. Minimal body with name and lowercase type; null-defaulted connection-specific fields appear in the response.
 
   request: {
@@ -111,7 +119,177 @@ example {
 }
 
 example {
-  name: Create Connection - Invalid Type (422, enum revealed)
+  name: 201 - Full Parameters (FTP)
+  description: Confirmed live 2026-09-22. Every FTP-relevant optional field populated (url, port, user, password, use_tls). password is write-only -- accepted on create but never echoed back in the response, same pattern confirmed for Dropbox's token fields below. Scratch resource deleted after capture.
+
+  request: {
+    url: {{pim_base_url_v3}}/connections
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "WC Test Full FTP Connection",
+        "type": "ftp",
+        "url": "ftp.example.com",
+        "port": 21,
+        "user": "wc_ftp_user",
+        "password": "wc_ftp_password",
+        "use_tls": true
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 201
+      text: Created
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6ab2fe65125f1d0ceeeed6ba",
+            "name": "WC Test Full FTP Connection",
+            "type": "ftp",
+            "last_processed": null,
+            "last_result_operation": null,
+            "source": null,
+            "url": "ftp.example.com",
+            "port": 21,
+            "user": "wc_ftp_user",
+            "use_tls": true,
+            "modified": "2026-09-22T22:17:09.560161+00:00"
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 201 - Full Parameters (SFTP)
+  description: Confirmed live 2026-09-22. Same full-parameter shape as FTP, type sftp instead. password is write-only, same as FTP. Scratch resource deleted after capture.
+
+  request: {
+    url: {{pim_base_url_v3}}/connections
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "WC Test Full SFTP Connection",
+        "type": "sftp",
+        "url": "sftp.example.com",
+        "port": 22,
+        "user": "wc_sftp_user",
+        "password": "wc_sftp_password",
+        "use_tls": false
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 201
+      text: Created
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6ab2fe66125f1d0ceeeed6bb",
+            "name": "WC Test Full SFTP Connection",
+            "type": "sftp",
+            "last_processed": null,
+            "last_result_operation": null,
+            "source": null,
+            "url": "sftp.example.com",
+            "port": 22,
+            "user": "wc_sftp_user",
+            "use_tls": false,
+            "modified": "2026-09-22T22:17:10.374574+00:00"
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 201 - Full Parameters (Dropbox)
+  description: Confirmed live 2026-09-22. Populates Dropbox's OAuth-shaped fields (token_type, token, refresh_token, email) with placeholder values -- the API accepts them without validating against a real Dropbox OAuth flow. token_type, token, and refresh_token are all write-only (accepted, never echoed back); only email round-trips. This is the first live confirmation of Dropbox-specific fields in this project -- prior coverage only tested type: "ftp". Scratch resource deleted after capture.
+
+  request: {
+    url: {{pim_base_url_v3}}/connections
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "WC Test Full Dropbox Connection",
+        "type": "dropbox",
+        "token_type": "bearer",
+        "token": "wc_fake_access_token",
+        "refresh_token": "wc_fake_refresh_token",
+        "email": "wc-test@example.com"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 201
+      text: Created
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6ab2fe67125f1d0ceeeed6bc",
+            "name": "WC Test Full Dropbox Connection",
+            "type": "dropbox",
+            "last_processed": null,
+            "last_result_operation": null,
+            "source": null,
+            "email": "wc-test@example.com",
+            "modified": "2026-09-22T22:17:11.171664+00:00"
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 422 - Invalid Type (Enum Revealed)
   description: Confirmed live 2026-09-07. type is a fixed lowercase enum (dropbox, ftp, sftp) despite the spec describing it as a free string. Uppercase FTP also fails -- case matters.
 
   request: {

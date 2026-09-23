@@ -90,6 +90,28 @@ other under one of those types.
 - ✅ **Found genuinely good**: the new dedicated `DELETE` is the first
   safe, scoped unlink mechanism confirmed anywhere in this API.
 
+## Update — 2026-09-22 (full-parameter examples for OpenAPI docs)
+
+Added new `example{}` blocks (purely additive, no existing examples
+touched) for use as OpenAPI description examples:
+
+- `Get Product Relationships Collection.bru`: "Create Product Relationship
+  Link - Full Parameters (Multiple Related Products)" — every prior
+  example in this file links a single related product per call; this one
+  links two at once in the same `related_products` array with distinct
+  `quantity` values, against three fresh disposable scratch products and a
+  disposable relationship type, all cleaned up afterward.
+- `Get Product Relationships (Top-Level).bru`: "Full Query Parameters
+  (Filtered + Fields + Sort)" — combines the required safe `account_id`
+  filter with `_fields`, `_page`/`_page_size`, and `_sort_by`.
+- `Get Related Products (Top-Level).bru`: "Full Query Parameters (Filtered
+  + Fields + Sort)" — same combination, filtered by `product_id` against
+  the kept `BAG-10157` fixture.
+
+No new quirks found — the PATCH/DELETE full-parameter shapes were already
+well covered by this file's existing examples (the `related_products`
+entry DTO only has `product_id`/`quantity`, both already exercised).
+
 ## Open items
 
 - [ ] Report the cross-tenant data leak on `GET /product-relationships`

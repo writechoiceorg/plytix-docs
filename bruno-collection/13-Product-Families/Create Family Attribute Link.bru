@@ -73,7 +73,7 @@ docs {
 }
 
 example {
-  name: Create Family Attribute Link - Missing attribute_id (422)
+  name: 422 - Missing attribute_id
   description: Real response captured 2026-09-15, revealing the DTO name and required field.
 
   request: {
@@ -116,7 +116,7 @@ example {
 }
 
 example {
-  name: Create Family Attribute Link - Success
+  name: 201 - Success
   description: Real response captured 2026-09-15, linking the Phase 1 kept text-attribute fixture to a disposable scratch product family.
 
   request: {
@@ -162,7 +162,7 @@ example {
 }
 
 example {
-  name: Link Family Attribute via Identity POST - Already Linked (409)
+  name: 409 - Already Linked (Identity POST)
   description: Real response captured 2026-09-15 against a second disposable scratch family -- confirms the identity endpoint's POST verb is an idempotent link, not a distinct action.
 
   request: {
@@ -205,7 +205,7 @@ example {
 }
 
 example {
-  name: Delete Family Attribute Link - Success (204)
+  name: 204 - Success
   description: Real response captured 2026-09-15, unlinking the attribute linked above. A follow-up GET returns 404 with the specific "Association not found" error shape.
 
   request: {
@@ -233,7 +233,7 @@ example {
 }
 
 example {
-  name: Get Family Attribute by ID - After Delete (404, Association Not Found)
+  name: 404 - After Delete (Association Not Found)
   description: Real response captured 2026-09-15, follow-up GET immediately after the DELETE above -- note the more specific "Association (...) not found" error shape (more descriptive than the generic "Document with id ... not found" seen on other resources).
 
   request: {

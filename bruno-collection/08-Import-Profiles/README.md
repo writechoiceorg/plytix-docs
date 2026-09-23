@@ -46,6 +46,19 @@ tested). Combined into "Update and Delete Import Profile.bru", replacing
 disposable scratch profile — `name` confirmed patchable; the full
 `settings` object round-trips unchanged when omitted from the patch body.
 
+## Update — 2026-09-22 (full-parameter examples pass)
+
+Added a new `example{}` block to "Create Import Profile.bru" (`201 - Full
+Parameters`) exercising every `ProfileSettingsCreateInputDto` field at once
+(`import_action`, `import_assets_action`, `import_decimal_separator`,
+`new_products_status`, `charset`, `column_separator`, `text_delimiter`,
+`create_static_list`, `family_options` with both sub-fields, and a
+`column_matches` entry). Confirmed live `201` against a scratch profile
+(`6ab2fa16125f1d0ceeeed6a8`), deleted immediately after capture — no
+downstream dependents. Note: a `column_matches` entry round-trips with
+`formatters: []` and `relationship: null` defaulted in even when omitted
+from the request. Existing examples were left untouched.
+
 ## Open items
 
 - None specific to this folder.

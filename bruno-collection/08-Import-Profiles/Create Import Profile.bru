@@ -66,7 +66,7 @@ docs {
 }
 
 example {
-  name: Create with Full Settings
+  name: 201 - Partial Settings (Defaults Merged)
   description: Confirmed live 2026-09-07. Partial settings object is merged with defaults; only sent fields are overridden.
 
   request: {
@@ -125,7 +125,97 @@ example {
 }
 
 example {
-  name: Missing Name (422)
+  name: 201 - Full Parameters
+  description: Confirmed live 2026-09-22. Every ProfileSettingsCreateInputDto field populated at once, including nested family_options and a column_matches entry. Created then deleted in the same run (scratch id 6ab2fa16125f1d0ceeeed6a8) — no downstream dependents. Note column_matches entries round-trip with formatters:[] and relationship:null defaulted in even though not sent.
+
+  request: {
+    url: {{pim_base_url_v3}}/import-profiles
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "WC Test Import Profile Full Params",
+        "settings": {
+          "import_action": "UPDATE",
+          "import_assets_action": "ALL",
+          "import_decimal_separator": ",",
+          "new_products_status": "Draft",
+          "charset": "UTF-8",
+          "column_separator": ";",
+          "text_delimiter": "\"",
+          "create_static_list": true,
+          "family_options": {
+            "out_of_the_family_attributes": "UPDATE",
+            "overwritten_attributes": "OVERWRITE"
+          },
+          "column_matches": [
+            {
+              "attr_label": "SKU",
+              "column_label": "sku",
+              "empty_values": "SKIP",
+              "new_values": "CREATE"
+            }
+          ]
+        }
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 201
+      text: Created
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": "6ab2fa16125f1d0ceeeed6a8",
+            "name": "WC Test Import Profile Full Params",
+            "settings": {
+              "import_action": "UPDATE",
+              "import_assets_action": "ALL",
+              "import_decimal_separator": ",",
+              "new_products_status": "Draft",
+              "charset": "UTF-8",
+              "column_separator": ";",
+              "text_delimiter": "\"",
+              "create_static_list": true,
+              "family_options": {
+                "out_of_the_family_attributes": "UPDATE",
+                "overwritten_attributes": "OVERWRITE"
+              },
+              "column_matches": [
+                {
+                  "attr_label": "SKU",
+                  "column_label": "sku",
+                  "empty_values": "SKIP",
+                  "new_values": "CREATE",
+                  "formatters": [],
+                  "relationship": null
+                }
+              ]
+            },
+            "modified": "2026-09-22T21:58:46.314395+00:00"
+          },
+          "errors": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 422 - Missing Required Field (name)
   description: Confirmed live 2026-09-07. Empty body triggers 422; name is required.
 
   request: {

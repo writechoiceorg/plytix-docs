@@ -49,6 +49,19 @@ remain formally declared but **entirely untestable in this account**, for
 the same underlying reason creation is (see status-gating #2). No new
 `.bru` files were added for `PATCH`/`DELETE` as a result.
 
+## Update — 2026-09-22 (full-parameter GET example for OpenAPI docs)
+
+Added one new `example{}` block to `List Pdf Catalogs.bru` (existing
+example untouched): a maximal-parameter GET (`_fields` including the
+never-tested `output_attributes`/`pages`/`settings`, `_page`+`_page_size`,
+`_sort_by`, `name[icontains]`) — confirms all of these are valid,
+accepted query params (no `HiddenFieldError`) even though the result set
+is always empty on this account. **Create/update/delete remain untested
+for full parameters** — creation is still entirely feature-gated off
+(status-gating rule #2, re-confirmed, not re-tested this session since
+it's a known, stable account-level gate), so there is nothing to target
+for full-parameter `POST`/`PATCH`/`DELETE` examples.
+
 ## Open items
 
 - [ ] Ask Plytix: can the PDF Catalogs feature be enabled on this Dev

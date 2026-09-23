@@ -28,7 +28,42 @@ docs {
 }
 
 example {
-  name: List PDF Catalogs - Feature Not Enabled (Empty)
+  name: 200 - Full Parameters (Empty Result)
+  description: Confirmed live 2026-09-22. All query params -- including _fields values for the never-tested output_attributes/pages/settings fields -- are accepted without error (no HiddenFieldError), even though this account's feature gate means the result set is always empty. Confirms the params are valid syntax; the create-side shapes remain unconfirmed per status-gating rule #2.
+
+  request: {
+    url: {{pim_base_url_v3}}/pdf-catalogs?_fields=id&_fields=name&_fields=output_attributes&_fields=pages&_fields=settings&_page=1&_page_size=5&_sort_by=name&name[icontains]=catalog
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json; charset=utf-8
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [],
+          "pagination": {}
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 200 - Empty List (Feature Not Enabled)
   description: Confirmed live 2026-09-08 and 2026-09-21. GET succeeds even when the PDF Catalogs feature is not enabled; returns empty data array.
 
   request: {

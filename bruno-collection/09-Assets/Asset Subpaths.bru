@@ -51,7 +51,7 @@ docs {
 }
 
 example {
-  name: GET /assets/{id}/categories - Categories Linked
+  name: 200 - Categories Subpath (Linked)
   description: Confirmed live 2026-09-08. Returns fully expanded category objects after PATCH-applied linkage.
 
   request: {
@@ -91,7 +91,7 @@ example {
 }
 
 example {
-  name: GET /assets/{id}/categories - Not In Any Category (Empty)
+  name: 200 - Categories Subpath (Empty)
   description: Confirmed live 2026-09-21 against asset 6a38f5d8c3d65a5f868b187a. Returns empty data array.
 
   request: {
@@ -125,7 +125,7 @@ example {
 }
 
 example {
-  name: PATCH /assets/{id}/alt_text - Update Single Field via Subpath
+  name: 200 - alt_text Subpath (Single Field Update)
   description: Confirmed live 2026-09-08. Body is the raw new value for the named field, not a JSON object. Response is the full updated asset.
 
   request: {

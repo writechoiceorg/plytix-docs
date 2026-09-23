@@ -63,7 +63,35 @@ project's create-response documentation: `is_fmt` and the
 `rebuild_once`/`rebuild_once_at`/`rebuild_once_timezone` trio (alongside
 the already-documented `rebuild_periodically` family, quirk #40).
 
+## Update — 2026-09-22 (full-parameter examples for OpenAPI docs)
+
+Added new `example{}` blocks (purely additive, no existing examples
+touched) for use as OpenAPI description examples, all against disposable
+scratch channels (deleted at the end of the run):
+
+- `Create Channel - Minimal.bru`: "Create Channel - Full Parameters (All
+  Fields)" — exercises every documented `ChannelCreateInputDto` field at
+  once: full rebuild schedule, `product_list_id`, `output_filename`(+
+  timestamp flag), `build_reference_date_timezone`, a full `columns` entry,
+  `childs_first`, `column_separator`, `text_delimiter`.
+- `Update and Delete Channel.bru`: "Update Channel - Full Parameters (All
+  Fields)" — a broad `PATCH` spread (rename, `active`, `childs_first`,
+  `process_products`/`parent_include_criteria` for both main and on-demand
+  variants, `store_title`/`store_link`/`store_description`). **New
+  finding**: `parent_include_criteria`/`on_demand_parent_include_criteria`
+  are validated against a hidden fixed 2-value enum
+  (`ONLY_PARENT_IN_LIST`/`ALL_PARENT_IN_VARIANTS`) — a 422 on the
+  natural-guess value `ALL_PARENTS` revealed it, same hidden-enum pattern
+  as `format` (quirk #39) but on a different field, not previously
+  documented.
+- `Get Channel by ID.bru`: "List Channels - Full Query Parameters" —
+  combines `_fields`, `_page`/`_page_size`, `_sort_by`, and a plain
+  `format` filter.
+
 ## Open items
 
 - [ ] Flag the vague rebuild-scheduling 422 to Plytix as a DX
       inconsistency (config open question #17).
+- [ ] New 2026-09-22: document `parent_include_criteria`'s real enum
+      (`ONLY_PARENT_IN_LIST`/`ALL_PARENT_IN_VARIANTS`) — the spec calls it
+      a free string, same pattern as `format`.
