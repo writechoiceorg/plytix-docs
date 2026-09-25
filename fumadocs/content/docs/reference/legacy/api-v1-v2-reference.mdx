@@ -1,0 +1,64 @@
+---
+title: "API v1/v2 Reference"
+description: "Endpoint reference for teams still integrating against v1/v2, alongside guidance on moving to v3 over time."
+---
+
+import {
+  Key,
+  Building2,
+  Image,
+  FolderTree,
+  Box,
+  Beaker,
+  Link as LinkIcon,
+  Layers,
+  Tag,
+  Tags,
+  Filter,
+} from 'lucide-react';
+
+This is the reference for Plytix's **v1** API, plus the small set of **v2 (beta)** endpoints that mirror some v1 product operations with a slightly different shape. New integrations should use [API Reference (v3)](/docs/reference/v3) — see [Choosing Between v1/v2 and v3](/docs/guides/choosing-api-version) for what's different and when to migrate.
+
+Every request here uses the same bearer-token authentication as v3: get a token from [`POST /auth/api/get-token`](/docs/reference/legacy/authentication/retrievesAnAuthenticationToken_auth_api_get_token_post) and send it as `Authorization: Bearer <token>`.
+
+## Available services
+
+<Cards>
+  <Card icon={<Key />} title="Authentication" href="/docs/reference/legacy/authentication/retrievesAnAuthenticationToken_auth_api_get_token_post">
+    Get a bearer token from the v1 auth endpoint.
+  </Card>
+  <Card icon={<Building2 />} title="Accounts" href="/docs/reference/legacy/accounts/apiCredentialSearch_api_v1_accounts_api_credentials_search_post">
+    Search account memberships and API credentials.
+  </Card>
+  <Card icon={<Image />} title="Assets" href="/docs/reference/legacy/assets/addNewAssets_api_v1_assets_post">
+    Upload, search, update, and delete digital assets.
+  </Card>
+  <Card icon={<FolderTree />} title="Categories" href="/docs/reference/legacy/categories/addNewFileCategory_api_v1_categories_file_post">
+    Manage both asset and product category trees.
+  </Card>
+  <Card icon={<Box />} title="Products (v1)" href="/docs/reference/legacy/products/addNewProducts_api_v1_products_post">
+    Create, update, delete, and search products, plus their variants, assets, categories, and relationships.
+  </Card>
+  <Card icon={<Beaker />} title="Products (v2 beta)" href="/docs/reference/legacy/products-v2-beta/addNewProducts_api_v2_products_post">
+    The same product operations under `/api/v2`, with minor request/response differences from v1.
+  </Card>
+  <Card icon={<LinkIcon />} title="Relationships" href="/docs/reference/legacy/relationships/addNewRelationship_api_v1_relationships_post">
+    Create and manage relationships between products.
+  </Card>
+  <Card icon={<Layers />} title="Product Families" href="/docs/reference/legacy/product-families/addNewFamily_api_v1_product_families_post">
+    Manage product families and the attributes linked to them.
+  </Card>
+  <Card icon={<Tag />} title="Product Attributes" href="/docs/reference/legacy/product-attributes/addNewProductAttribute_api_v1_attributes_product_post">
+    Create and manage custom product attributes.
+  </Card>
+  <Card icon={<Tags />} title="Product Attribute Groups" href="/docs/reference/legacy/product-attribute-groups/addNewProductAttributeGroup_api_v1_attribute_groups_product_post">
+    Organize product attributes into groups.
+  </Card>
+  <Card icon={<Filter />} title="Available Filters" href="/docs/reference/legacy/available-filters/getAvailableAssetFilters_api_v1_filters_asset_get">
+    Look up which fields are filterable for assets, products, and relationships.
+  </Card>
+</Cards>
+
+## About this reference
+
+This reference was generated from Plytix's internal v1 Postman collection, not from a machine-readable spec, so request/response schemas and examples are inferred from that collection's saved examples rather than a live source of truth. Cross-check against the live API with a real request before relying on an exact field name or type.

@@ -1,0 +1,6 @@
+{
+  "title": "Authentication",
+  "pages": [
+    "retrievesAnAuthenticationToken_auth_api_get_token_post"
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "title": "Categories",
+  "pages": [
+    "addNewFileCategory_api_v1_categories_file_post",
+    "assetCategoriesSearch_api_v1_categories_file_search_post",
+    "addNewFileSubcategory_api_v1_categories_file_category_id_post",
+    "modifyCategoryAttributes_api_v1_categories_file_category_id_patch",
+    "deleteCategory_api_v1_categories_file_category_id_delete",
+    "addNewProductCategory_api_v1_categories_product_post",
+    "productCategoriesSearch_api_v1_categories_product_search_post",
+    "addNewProductSubcategory_api_v1_categories_product_category_id_post",
+    "modifyCategoryAttributes_api_v1_categories_product_category_id_patch",
+    "deleteCategory_api_v1_categories_product_category_id_delete"
+  ]
+}
