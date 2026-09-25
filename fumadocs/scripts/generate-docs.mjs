@@ -39,10 +39,6 @@ await generateFiles({
   per: 'operation',
   groupBy: 'tag',
   meta: true,
-  // Render the operation description inside the page body via <OpenAPIPage
-  // showDescription /> (proper Markdown) instead of dumping the raw
-  // Markdown string into frontmatter `description`, where <DocsDescription>
-  // renders it as unprocessed plain text.
   includeDescription: true,
   beforeWrite(files) {
     for (const file of files) {
