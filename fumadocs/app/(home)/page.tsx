@@ -17,7 +17,7 @@ const cards = [
     description:
       'Explore the resources the API exposes, with parameters, request bodies, and example responses for every endpoint.',
     bullets: ['Products, assets, and categories', 'Authentication and status codes'],
-    href: '/docs/reference/api-reference-overview',
+    href: '/docs/reference/v3',
     linkLabel: 'Browse the reference',
   },
   {

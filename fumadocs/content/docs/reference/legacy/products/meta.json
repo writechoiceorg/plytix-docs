@@ -1,0 +1,27 @@
+{
+  "title": "Products (v1)",
+  "pages": [
+    "addNewProducts_api_v1_products_post",
+    "productSearch_api_v1_products_search_post",
+    "unlinkAVariantOfAProduct_api_v1_products_parent_product_id_variant_variant_id_delete",
+    "addAVariantOfAProduct_api_v1_products_parent_product_id_variants_post",
+    "resyncVariants_api_v1_products_parent_product_id_variants_resync_post",
+    "getProductData_api_v1_products_product_id_get",
+    "modifySelectedAttributesOfAProduct_api_v1_products_product_id_patch",
+    "removesProductFromTheSystem_api_v1_products_product_id_delete",
+    "getProductSRelatedAssets_api_v1_products_product_id_assets_get",
+    "linkAnExistingAssetToAProductMediaAttribute_api_v1_products_product_id_assets_post",
+    "getAnAssetOfThisProduct_api_v1_products_product_id_assets_asset_id_get",
+    "unbindAssetFromProduct_api_v1_products_product_id_assets_asset_id_delete",
+    "getProductSRelatedCategories_api_v1_products_product_id_categories_get",
+    "linkAnExistingCategoryToProduct_api_v1_products_product_id_categories_post",
+    "getACategoryOfThisProduct_api_v1_products_product_id_categories_category_id_get",
+    "unbindCategoryFromProduct_api_v1_products_product_id_categories_category_id_delete",
+    "assignFamily_api_v1_products_product_id_family_post",
+    "assignProductsToRelationship_api_v1_products_product_id_relationships_relationship_id_post",
+    "modifyRelationshipAttributes_api_v1_products_product_id_relationships_relationship_id_product_related_product_id_patch",
+    "removeProductsFromARelationship_api_v1_products_product_id_relationships_relationship_id_unlink_post",
+    "linkVariantToAProduct_api_v1_products_product_id_variant_variant_id_post",
+    "getProductSRelatedVariants_api_v1_products_product_id_variants_get"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "title": "Product Families",
+  "pages": [
+    "addNewFamily_api_v1_product_families_post",
+    "searchFamilies_api_v1_product_families_search_post",
+    "getFamilyData_api_v1_product_families_product_family_id_get",
+    "editFamilyName_api_v1_product_families_product_family_id_patch",
+    "removeFamily_api_v1_product_families_product_family_id_delete",
+    "getFamilyAttributesIncludingSystemAttributes_api_v1_product_families_product_family_id_all_attributes_get",
+    "editProductFamilyAttributesIncludingSystemAttributes_api_v1_product_families_product_family_id_all_attributes_edit_post",
+    "getFamilyAttributes_api_v1_product_families_product_family_id_attributes_get",
+    "editProductFamilyAttributesInheritance_api_v1_product_families_product_family_id_attributes_edit_post",
+    "addAttributeToProductFamily_api_v1_product_families_product_family_id_attributes_link_post",
+    "unlinkAttributeFromProductFamily_api_v1_product_families_product_family_id_attributes_unlink_post"
+  ]
+}

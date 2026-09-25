@@ -1,0 +1,645 @@
+---
+title: Product search
+full: true
+_openapi:
+  preload:
+    - ./openapi-v1v2.json
+  method: POST
+  webhook: false
+  toc: []
+  structuredData:
+    headings: []
+    contents:
+      - content: >-
+          Filter product by multiple criteria
+
+
+          Filter structure and format is described under [Resources](#resources)
+          section in this guide
+
+
+          Product search has also support to filter products based on
+          relationship properties. Relationship filter structure and format is
+          described later in this document.
+
+
+          **Please take notice of the use of attribute labels instead of
+          attribute names in the request** (see more examples below)
+
+
+          Also **take into account that the response now will not return the
+          media or categories structure**. To get that info, you have to use the
+          specific endpoints for that
+
+
+          # Restrictions
+
+
+          - Search requests
+              
+              - Requests are limited to 50 attributes (plus ID and SKU which are always returned). Attributes (both system and user) and properties count in this limit. Requests having more than 50 attributes will be rejected and a 422 code will be returned from API
+                  
+              - **User attributes MUST be prefixed with “attributes.” (including the dot at the end) + the label of the attribute** . So for example, if there is an attribute named “In Stock” and labeled as "in_stock" we MUST add it to the request as “attributes.in_stock”. **Attribute names and labels** can be obtained by  
+                  means of the filters/product endpoint
+                  
+              - **Relationship columns can also be requested. These MUST be prefixed with “relationships.” (including the dot at the end) + the label of the relationship** (response is described in later in this section). Examples:
+                  
+                  - relationships.gift_basket
+                      
+                  - relationships.recommended_products
+                      
+              - Search filters MUST include all necessary columns. If an attribute is not explicitly requested it won’t be returned by the API.  
+                  Available attributes can be obtained by means of the available [https://pim.plytix.com/api/v1/filters/](https://pim.plytix.com/api/v1/filters/) endpoint. “key” value is what MUST be used in requests.  
+                  Requesting non-existing attributes will return a 422 error code  
+                  You are allowed to sort by columns not included in “attributes” field however this attribute won’t be returned **User attributes MUST be prefixed with “attributes.” (including the dot at the end) + the label of the attribute**
+                  
+              - Search filters will return a 422 error code if any of the following conditions are met:  
+                  a) The field does not exist  
+                  b) Operator is not allowed for the given field (available operators and fields can be obtained using /filters/{item} endpoint)  
+                  c) Value has no meaning for the given operator. The arity of available operators can be found in API documentation
+                  
+              - Search filters will return a 428 status code if the filtered results include more than 10000 products and the order field is filled.
+                  
+              - Pagination: the number of items that can be requested (pagination.page_size) is limited to a maximum of 100 items. A 422 code will be returned from API if this limit is exceeded. If pagination is omitted 25 items of the first page will be returned
+                  
+              - Only one relationship can be selected in filters
+
+                  
+
+          # Relationship information in responses
+
+
+          When relationship columns are requested, product response will include
+          a new field named ‘relationships’ with the following structure
+
+
+          | **Field** | **Description** | **Type** |
+
+          | --- | --- | --- |
+
+          | relationships | relationship array | array of relationship
+          information |
+
+
+          Relationship information
+
+
+          | **Field** | **Description** | **Type** |
+
+          | --- | --- | --- |
+
+          | relationship_id | relationship id | string |
+
+          | label | relationship label | string |
+
+          | related_products | related products | Array of product relationship
+          data |
+
+
+          Relationship Data
+
+
+          | **Field** | **Description** | **Type** |
+
+          | --- | --- | --- |
+
+          | product_id | product ID | string |
+
+          | quantity | quantity | number |
+
+
+          ```
+
+          Attributes: ["categories", "label", "attributes.color",
+          "relationships.gift_basket"]
+
+          {
+               "id": "5d8200527313382d939838c4",
+               "sku": "1234567890",
+               "categories": [],
+               "label": "Strawberry_soap",
+               "attributes": {
+                   "color": "red" 
+               },
+               "relationships": [
+                 {
+                   "relationship_id": "5ddbf89efbe0f86e3c1574c6",
+                   "label": "gift_basket",
+                   "related_products": [
+                     {
+                       "product_id": "5c98ef754a6c252c96793574",
+                       "quantity": 1
+                     }
+                   ]
+                 }
+               ],
+             }
+
+           ```
+
+          # Relationship filters
+
+
+          This section describes the structure and format for relationship
+          filters. A Relationship filter is compound of several fields, some of
+          them are mandatory while others depend on the values and options
+          selected.
+
+
+          ## Structure
+
+
+          | **Field** | **Description** | **Mandatory** | **Type** |
+
+          | --- | --- | --- | --- |
+
+          | relationship_id | relationship Identifier | YES | string |
+
+          | operator | only ‘exists’ and ‘!exists’ are supported | YES | string
+          |
+
+          | product_ids | list of product constraints | NO | Array of object
+          (only for “exists” operator) |
+
+
+          Complex filters can be built defining additional constraints on
+          relationship quantity operator when relationship “exists” operator is
+          selected. Please check the examples section.
+
+
+          ### Product_ids structure
+
+
+          | **Field** | **Description** | **Mandatory** | **Type** |
+
+          | --- | --- | --- | --- |
+
+          | id | product id | YES | string |
+
+          | qty_operator | quantity operator | YES | string |
+
+          | value | filter value | string | array of integer |
+
+
+          Available operators:
+
+
+          | Operator | Arity | Type | Description |
+
+          | --- | --- | --- | --- |
+
+          | exists | Unary | \- | Existence check.  <br>True when the item has
+          its value defined |
+
+          | !exists | Unary | \- | Non-existence check.  <br>True when the item
+          has its value undefined |
+
+          | eq | Binary | value | Equality check.  <br>True if the item has the
+          same value as the one provided  <br>When applied to a text value, the
+          comparison ignores case |
+
+          | in | Binary | list | Match check.  <br>Determines if the value
+          matches any of the values specified in the list  <br>**Note**:
+          Multiselect and Dropdown attributes are case sensitive |
+
+          | gt | Binary | value | Greater than.  <br>True if items' value is
+          greater than provided |
+
+          | gte | Binary | value | Greater than or equal to.  <br>True if item's
+          value is greater than or equal to provided |
+
+          | lt | Binary | value | Less than.  <br>True if item's value is less
+          than provided |
+
+          | lte | Binary | value | Less than or equal to.  <br>True if item's
+          value is less than or equal to provided |
+
+          | bte | Binary | value | Between. Requires two values  <br>True if
+          item's value is between provided values |
+
+          | last_days | Unary | value | Date is greater than the given days
+          check.  <br>The filter will only take into account full days (current
+          time is dismissed) |
+
+
+          # Examples
+
+
+          1.- Return default page (1) with default items per page (25) using
+          default order (no order)  
+
+          Note that this query will return just ID and SKU as no _attributes_
+          have been provided
+
+
+          ``` json
+           {
+               "filters":[
+                  [
+                      {"field":"modified","operator":"gt","value":"2018-11-01"},
+                      {"field":"modified","operator":"lt","value":"2018-11-30"}
+                  ],
+                  [
+                      {"field":"attributes.name","operator":"like","value":"unicorn"}
+                  ]
+                  ]
+           }
+
+           ```
+
+          2.- Return default page (1) with default items per page (25) using
+          default order (no order) of product attributes SKU, Label and user
+          attributes "In Stock" and "Volumen (liters)". **Please take notice of
+          the the use of attribute labels instead of attribute names in the
+          request**
+
+
+          ``` json
+           {
+               "attributes":["sku", "label", "attributes.in_stock", "attributes.volume_liters"]
+           }
+
+           ```
+
+          3.- Return page 3 of products modified \[ between November the 1st AND
+          November the 30th\] OR \[ contains the literal 'unicorn' \] ordered by
+          SKU descending  
+
+          returning system_attributes: id, sku, created, and user attribute "In
+          Stock", "Product name", "Quantity" (labels: in_stock, name, qty)
+
+
+          ``` json
+           {
+              "filters":[
+                  [
+                      {"field":"modified","operator":"gt","value":"2018-11-01"},
+                      {"field":"modified","operator":"lt","value":"2018-11-30"}
+                  ],
+                  [
+                      {"field":"attributes.name","operator":"like","value":"unicorn"}
+                  ]
+                  ],
+              "pagination":{"order":"-sku","page":3,"page_size":25},
+              "attributes":["created", "attributes.in_stock", "attributes.name", "attributes.qty"]
+          }
+
+           ```
+
+          # Relationship filter examples
+
+
+          The following examples assume that:
+
+
+          - There is a Symmetrical relationship named ‘Recommended
+          products’.RP-001 is recommended with RP-002 (quantity 2) and RP-003
+          (quantity 3).  
+              So RP-002 is recommended with RP-001, and RP-003 is recommended with RP-001, however RP-002 is not related to RP-003.
+
+              
+          - There is an Asymmetrical relationship named “Gift basket”.  
+              Product GF-Basket ‘includes’ GF-Wine (2 bottles), GF-Chocolates (3 packs), GF-Emmental (1 piece)
+
+              
+
+          1. Find products where the “recommended products” relationship is
+          defined (exists).
+              
+              ```
+                    {
+                     "attributes":["relationships.recommended_products"],
+                     "filters":[],
+                     "relationship_filters":[[
+                       {
+                         "relationship_id":"5d89c6c696c8f4a322df4bbc",
+                         "operator":"exists",
+                         "product_ids":[],
+                       }]],
+                     "pagination": {
+                       "order":"",
+                       "page":1,
+                       "page_size":25
+                     }
+                    }
+              
+               ```
+              
+              The response should include RP-001, RP-002, and RP-003
+
+              
+          2. Find products where “recommended products” is not defined
+          (!exists).
+              
+              ```
+                    {
+                     "attributes":["relationships.recommended_products"],
+                     "filters":[],
+                     "relationship_filters":[[
+                       {
+                         "relationship_id":"5d89c6c696c8f4a322df4bbc",
+                         "operator":"!exists",
+                         "product_ids":[]
+                       }]],
+                       "pagination":{
+                         "order":"",
+                         "page":1,
+                         "page_size":25
+                       }
+                    }
+              
+               ```
+              
+              The response should not include RP-001, RP-002 or RP-003
+
+              
+          3. Find the products for which the “recommended products” relationship
+          is defined (a.k.a exists) with the RP-002 product
+              
+              ```
+                    {
+                     "filters":[],
+                     "attributes":["relationships.recommended_products"],
+                     "relationship_filters":[[
+                       {
+                         "product_ids":[
+                         {
+                           "id":"5d89c68596c8f4a322df4bb9",
+                           "qty_operator":"exists",
+                           "value":null
+                         }],
+                         "relationship_id":"5d89c6c696c8f4a322df4bbc",
+                         "operator":"exists"
+                       }]],
+                     "pagination": {
+                       "order":null,
+                       "page":1,
+                       "page_size":25
+                     }
+                    }
+              
+               ```
+              
+              Response should include RP-001
+              
+              ```
+                    {
+                     "data": [
+                       {
+                         "attributes": {},
+                         "id": "5d89c67796c8f4a322df4bb8",
+                         "sku": "RP-001",
+                         "relationships": [
+                            {
+                                "relationship_id": "5d89c6c696c8f4a322df4bbc",
+                                "label": "recommended_products",
+                                "related_products": [
+                                    {
+                                        "product_id": "5d89c68596c8f4a322df4bb9",
+                                        "quantity: "2"
+                                    },
+                                    {
+                                        "product_id": "5d89c69496c8f4a322df4bba",
+                                        "quantity: "3"
+                                    }
+                                ]
+                            }
+                         ]
+                       }
+                     ],
+                     "pagination": {
+                       "count": 1,
+                       "order": null,
+                       "page": 1,
+                       "page_size": 25,
+                       "total_count": 3
+                     }
+                    }
+              
+               ```
+
+              
+          4. Filter the products for which the relationship with the product
+          RP-001 is defined and whose quantity is greater than 2Please, note
+          that the "value" field is an array of one element
+              
+              ```
+                    {
+                       "filters": [],
+                       "attributes": [
+                           "relationships.recommended_products"
+                       ],
+                       "relationship_filters": [
+                           [
+                               {
+                                   "product_ids": [
+                                       {
+                                           "id": "5d89c67796c8f4a322df4bb8",
+                                           "qty_operator": "gt",
+                                           "value": [
+                                               2
+                                           ]
+                                       }
+                                   ],
+                                   "relationship_id": "5d89c6c696c8f4a322df4bbc",
+                                   "operator": "exists"
+                               }
+                           ]
+                       ],
+                       "pagination": {
+                           "order": null,
+                           "page": 1,
+                           "page_size": 25
+                       }
+                    }
+              
+               ```
+              
+              Response should exclude RP-002, due to its quantity being 2, and include RP-003
+              
+              ```
+                    {
+                     "data": [
+                       {
+                         "attributes": {},
+                         "id": "5d89c69496c8f4a322df4bba",
+                         "sku": "RP-003",
+                         "relationships": [
+                            {
+                                "relationship_id": "5d89c6c696c8f4a322df4bbc",
+                                "label": "recommended_products",
+                                "related_products": [
+                                    {
+                                        "product_id": "5d89c67796c8f4a322df4bb8",
+                                        "quantity: "3"
+                                    }
+                                ]
+                            }
+                         ]
+                       }
+                     ],
+                     "pagination": {
+                       "count": 1,
+                       "order": null,
+                       "page": 1,
+                       "page_size": 25,
+                       "total_count": 3
+                     }
+                    }
+              
+               ```
+
+              
+          5. Filter the products for which the relationship is defined with the
+          product RP-001 and whose quantity is between 1 and 2Please, notice
+          that the "value" field in this case, value array must include both
+          values, i.e. \[1, 2\]
+              
+              ```
+                    {
+                       "filters": [],
+                       "attributes": [
+                           "relationships.recommended_products"
+                       ],
+                       "relationship_filters": [
+                           [
+                               {
+                                   "product_ids": [
+                                       {
+                                           "id": "5d89c67796c8f4a322df4bb8",
+                                           "qty_operator": "bte",
+                                           "value": [
+                                               1,
+                                               2
+                                           ]
+                                       }
+                                   ],
+                                   "relationship_id": "5d89c6c696c8f4a322df4bbc",
+                                   "operator": "exists"
+                               }
+                           ]
+                       ],
+                       "pagination": {
+                           "order": null,
+                           "page": 1,
+                           "page_size": 25
+                       }
+                    }
+              
+               ```
+              
+              Response should exclude RP-003, which has a quantity of 3, and include RP-002
+              
+              ```
+                    {
+                     "data": [
+                       {
+                         "attributes": {},
+                         "id": "5d89c68596c8f4a322df4bb9",
+                         "sku": "RP-002",
+                         "relationships": [
+                            {
+                                "relationship_id": "5d89c6c696c8f4a322df4bbc",
+                                "label": "recommended_products",
+                                "related_products": [
+                                    {
+                                        "product_id": "5d89c68596c8f4a322df4bb9",
+                                        "quantity: "2"
+                                    }
+                                ]
+                            }
+                         ]         
+                       }
+                     ],
+                     "pagination": {
+                       "order": null,
+                       "page": 1,
+                       "page_size": 25,
+                     }
+                    }
+              
+               ```
+
+              
+          6. Find all products where ‘Gift basket’ is defined
+              
+              ```
+                    {
+                       "filters": [],
+                       "attributes": [
+                           "relationships.gift_basket"
+                       ],
+                       "relationship_filters": [
+                           [
+                               {
+                                   "product_ids": [],
+                                   "relationship_id": "5d89d4fd96c8f4a322df4bc0",
+                                   "operator": "exists"
+                               }
+                           ]
+                       ],
+                       "pagination": {
+                           "order": null,
+                           "page": 1,
+                           "page_size": 25
+                       }
+                    }
+              
+               ```
+              
+              The response should include 'GF-Basket' product.
+              
+              ```
+                    {
+                       "data": [
+                           {
+                               "attributes": {},
+                               "id": "5d89d51a96c8f4a322df4bc1",
+                               "sku": "GF-Basket",
+                               "relationships": [
+                                    {
+                                        "relationship_id": "5d89d4fd96c8f4a322df4bc0",
+                                        "label": "gift_basket",
+                                        "related_products": [
+                                            {
+                                                "product_id": "5d89d51a96c8f4a322df4bc2",
+                                                "quantity: "2"
+                                            },
+                                            {
+                                                "product_id": "5d89d52f96c8f4a322df4bc3",
+                                                "quantity: "3"
+                                            },
+                                            {
+                                                "product_id": "5d89d54396c8f4a322df4bc4",
+                                                "quantity: "1"
+                                            }                            
+                                        ]
+                                    }
+                                ]               
+                           }
+                       ],
+                       "pagination": {
+                           "count": 1,
+                           "order": null,
+                           "page": 1,
+                           "page_size": 25,
+                           "total_count": 7
+                       }
+                    }
+              
+               ```
+---
+
+{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
+
+export default function Layout(props) {
+  const { APIPage, OpenAPIPage } = props.components ?? {};
+  // "APIPage" is the old name from v10, this allows both for backward compatibility
+  const Comp = OpenAPIPage ?? APIPage;
+  return (
+    <>
+      {props.children}
+      <Comp document="./openapi-v1v2.json" operations={[{"path":"/api/v2/products/search","method":"post"}]} showDescription preloaded={props.preloaded} />
+    </>
+  );
+}

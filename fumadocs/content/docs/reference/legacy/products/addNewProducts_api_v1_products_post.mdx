@@ -1,0 +1,182 @@
+---
+title: Add new products
+full: true
+_openapi:
+  preload:
+    - ./openapi-v1v2.json
+  method: POST
+  webhook: false
+  toc: []
+  structuredData:
+    headings: []
+    contents:
+      - content: >-
+          Creates a product
+
+
+          There's only a mandatory parameter, _sku_ of the product. Readonly and
+          unknown parameters will be  
+
+          ignored from request data.
+
+
+          **Note**: This method does not allow the creation of new attributes,
+          categories or assets.
+
+
+          | Parameter | Type | Mandatory |
+
+          | --- | --- | --- |
+
+          | _**sku**_ | string | **yes** |
+
+
+          Custom product attributes are located under “attributes” parameter.
+          Thumbnail, assets, categories, media and media galleries  
+
+          can be _linked_ to a product.
+
+
+          Upon successful creation, a 201 http status code will be returned, the
+          new product  
+
+          will be in the response body of the request and it resource identifier
+          could be found  
+
+          in response headers.
+
+
+          ### Thumbnail, assets and media attribute linking
+
+
+          You are not allowed to upload any new assets to your PIM account using
+          this resource, thats Asset's endpoint business, but  
+
+          you are allowed to _link_ existing assets into your product.  
+
+          To link an existing asset to any of this kind of attribute, only asset
+          identifier is mandatory
+
+
+          ### Media gallery
+
+
+          Media gallery contains a collection of medias, so in this case you
+          need to indicate an array of _asset_ objects.  
+
+          All constraints described in asset linking section apply.
+
+
+          ### Categories linking
+
+
+          All constrains described in asset linking section apply to categories.
+          Only _id_ of the category is mandatory.
+
+
+          ### Example 1. Product creation
+
+
+          POST /api/v1/products/
+
+
+          ``` json
+
+          {
+             "sku": "blue adventure mug S023",
+             "label": "Adventure mug",
+             "attributes" : {
+                    "stock" : 123,
+                    "vendor_url": "http://acme.com",
+                    "since": "2015-03-28",
+                    "Media_gallery":[
+                          {"id":"5bfaced551e7590001486763"},
+                          {"id":"5bfaced551e7590001486765"}
+                    ],
+                      "media_single_1": {"id":"5bfaced551e7590001486764"},
+                },
+              "categories": [
+                     {
+                         "id": "5bfa91ab8544120001bd9078"
+                     }
+              ]
+          }
+
+           ```
+
+          ``` json
+
+          201 CREATED
+
+          HEADER
+
+          Location
+          →https://pim.plytix.com/api/v1/products/5bfad5ca5b84b100017a8f5a
+
+          BODY
+
+          {
+              "data": [
+                  {
+                      "assets": [],
+                      "attributes": {
+                        "since": "2015-03-28",
+                        "stock" : "123",
+                        "vendor_url": "http://acme.com",
+                        "media_gallery": [
+                              {
+                                  "filename": "1.jpeg",
+                                  "id": "5bfaced551e7590001486763",
+                                  "thumb": "https://files.plytix.com/api/v1.0/thumb/public_files/pim/assets/d1/6d/8e/5b/5b8e6dd17f7f46000c7e9629/images/d5/ce/fa/5b/5bfaced551e7590001486763/1.jpeg",
+                                  "url": "https://files.plytix.com/api/v1.0/file/public_files/pim/assets/d1/6d/8e/5b/5b8e6dd17f7f46000c7e9629/images/d5/ce/fa/5b/5bfaced551e7590001486763/1.jpeg"
+                              },
+                              {
+                                  "filename": "3.jpeg",
+                                  "id": "5bfaced551e7590001486765",
+                                  "thumb": "https://files.plytix.com/api/v1.0/thumb/public_files/pim/assets/d1/6d/8e/5b/5b8e6dd17f7f46000c7e9629/images/d5/ce/fa/5b/5bfaced551e7590001486765/3.jpeg",
+                                  "url": "https://files.plytix.com/api/v1.0/file/public_files/pim/assets/d1/6d/8e/5b/5b8e6dd17f7f46000c7e9629/images/d5/ce/fa/5b/5bfaced551e7590001486765/3.jpeg"
+                              }
+                          ],
+                          "media_single_1": {
+                              "filename": "2.jpeg",
+                              "id": "5bfaced551e7590001486764",
+                              "path": "assets/d1/6d/8e/5b/5b8e6dd17f7f46000c7e9629/images/d5/ce/fa/5b/5bfaced551e7590001486764/2.jpeg",
+                              "thumb": "https://files.plytix.com/api/v1.0/thumb/public_files/pim/assets/d1/6d/8e/5b/5b8e6dd17f7f46000c7e9629/images/d5/ce/fa/5b/5bfaced551e7590001486764/2.jpeg"
+                          },
+                      },
+                      "categories": [
+                             {
+                                 "id": "5bfa91ab8544120001bd9078",
+                                 "name" : "Mugs",
+                                 "path": [ "Mugs" , "Ceramic"  ]
+                             }
+                      ],
+                      "id": "5bfad5ca5b84b100017a8f5a",
+                      "created": "2018-11-25T17:03:06.596000+00:00",
+                      "modified": "2018-11-25T17:03:06.628000+00:00",
+                      "sku": " blue adventure mug S023",
+                      "label": "Adventure mug",
+                      "status": "Draft",
+                      "num_variations": 0,
+                      "thumbnail": null,
+                      "assets": [ { "id":"..." }, { "id":"..." }]
+                  }
+              ]
+          }
+
+           ```
+---
+
+{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
+
+export default function Layout(props) {
+  const { APIPage, OpenAPIPage } = props.components ?? {};
+  // "APIPage" is the old name from v10, this allows both for backward compatibility
+  const Comp = OpenAPIPage ?? APIPage;
+  return (
+    <>
+      {props.children}
+      <Comp document="./openapi-v1v2.json" operations={[{"path":"/api/v1/products","method":"post"}]} showDescription preloaded={props.preloaded} />
+    </>
+  );
+}

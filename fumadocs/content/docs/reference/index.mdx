@@ -1,0 +1,19 @@
+---
+title: API Reference
+description: Choose an API version to browse its endpoint reference.
+---
+
+import { Rocket, History } from 'lucide-react';
+
+Plytix's API is available in two versions. Use the switcher at the top of this section (or the cards below) to move between them.
+
+<Cards>
+  <Card icon={<Rocket />} title="v3 (Current)" href="/docs/reference/v3">
+    The current REST API. Use this for all new integrations.
+  </Card>
+  <Card icon={<History />} title="Legacy (v1/v2)" href="/docs/reference/legacy/api-v1-v2-reference">
+    Reference for teams still integrating against v1, plus the small set of v2 (beta) endpoints.
+  </Card>
+</Cards>
+
+See [Choosing Between v1/v2 and v3](/docs/guides/choosing-api-version) for guidance on which version to use and how to migrate.

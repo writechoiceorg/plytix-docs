@@ -1,0 +1,10 @@
+{
+  "title": "Product Attributes",
+  "pages": [
+    "addNewProductAttribute_api_v1_attributes_product_post",
+    "productAttributeSearch_api_v1_attributes_product_search_post",
+    "getProductAttribute_api_v1_attributes_product_product_attribute_id_get",
+    "modifyAttribute_api_v1_attributes_product_product_attribute_id_patch",
+    "deleteProductAttribute_api_v1_attributes_product_product_attribute_id_delete"
+  ]
+}
