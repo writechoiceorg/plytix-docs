@@ -21,7 +21,7 @@ export default function Layout(props) {
   return (
     <>
       {props.children}
-      <Comp document="./openapi.json" operations={[{"path":"/api/v3/assets/{identifier}/{path}","method":"patch"}]} preloaded={props.preloaded} />
+      <Comp document="./openapi.json" operations={[{"path":"/api/v3/assets/{identifier}/{path}","method":"patch"}]} showDescription preloaded={props.preloaded} />
     </>
   );
 }

@@ -1,6 +1,5 @@
 ---
 title: Metrics
-description: Endpoint that serves Prometheus metrics.
 full: true
 _openapi:
   preload:
@@ -23,7 +22,7 @@ export default function Layout(props) {
   return (
     <>
       {props.children}
-      <Comp document="./openapi.json" operations={[{"path":"/metrics","method":"get"}]} preloaded={props.preloaded} />
+      <Comp document="./openapi.json" operations={[{"path":"/metrics","method":"get"}]} showDescription preloaded={props.preloaded} />
     </>
   );
 }

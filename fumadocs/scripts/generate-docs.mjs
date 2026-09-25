@@ -39,6 +39,7 @@ await generateFiles({
   per: 'operation',
   groupBy: 'tag',
   meta: true,
+  includeDescription: true,
   beforeWrite(files) {
     for (const file of files) {
       if (!file.path.endsWith('.mdx')) continue;
