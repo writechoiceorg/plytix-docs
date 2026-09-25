@@ -6,13 +6,13 @@
   },
   "paths": {
     "/api/v3/products": {
-      "get": {
+      "get": {  
         "tags": [
           "products"
         ],
-        "summary": "Search-Products",
-        "operationId": "search_products_api_v3_products_get",
-        "description": "Search and list the products in your catalog. With no filters, this returns every product in the account.\n\nNarrow the results with query-string filters, for example `sku=BAG-10157` or `categories.name=Backpacks`. See [Filtering and query syntax reference](/docs/reference/filtering-query-syntax) for the full set of operators.\n\nUse `_fields` (repeatable) to select only the fields you need. Requesting a relationship field such as `categories` or `assets` returns it fully expanded, with no extra call and no `_expand` parameter needed.\n\nResults are paginated at 25 products per page by default. Set `_page_size` to change that, and follow the `next_page` link in the response's `pagination` object to get the next page instead of building your own offset logic.",
+        "summary": "Search Products",
+        "operationId": "search_products",
+        "description": "Search and list the products in your catalog. With no filters, this returns every product in the account.\n\nNarrow the results with query-string filters, for example `sku=BAG-10157` or `categories.name=Backpacks`. See [Filtering and query syntax reference](/docs/reference/v3/filtering-query-syntax) for the full set of operators.\n\nUse `_fields` (repeatable) to select only the fields you need. Requesting a relationship field such as `categories` or `assets` returns it fully expanded, with no extra call and no `_expand` parameter needed.\n\nResults are paginated at 25 products per page by default. Set `_page_size` to change that, and follow the `next_page` link in the response's `pagination` object to get the next page instead of building your own offset logic.",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -74,7 +74,7 @@
         ],
         "summary": "Get-Products",
         "operationId": "get_products_api_v3_products__identifier__get",
-        "description": "Fetch a single product by its Plytix product `id`. This always returns the full product record. It doesn't support `_fields` filtering the way [Search-Products](/docs/reference/products/search_products_api_v3_products_get) does.\n\nThe `identifier` must be the product's Plytix ID, not its SKU, even though SKU is the natural key for most catalogs. If you only have a SKU, look it up first with [Search-Products](/docs/reference/products/search_products_api_v3_products_get) (filter on `sku=<value>` with `_fields=id`), then use the returned `id` here.",
+        "description": "Fetch a single product by its Plytix product `id`. This always returns the full product record. It doesn't support `_fields` filtering the way [Search-Products](/docs/reference/v3/products/search_products) does.\n\nThe `identifier` must be the product's Plytix ID, not its SKU, even though SKU is the natural key for most catalogs. If you only have a SKU, look it up first with [Search-Products](/docs/reference/v3/products/search_products) (filter on `sku=<value>` with `_fields=id`), then use the returned `id` here.",
         "parameters": [
           {
             "name": "identifier",
@@ -115,7 +115,7 @@
         ],
         "summary": "Delete-Products",
         "operationId": "delete_products_api_v3_products__identifier__delete",
-        "description": "Permanently delete a single product by its Plytix product `id`. This can't be undone: once deleted, the product's data and its links to categories, assets, and relationships are gone.\n\nUse the product's Plytix ID here, not its SKU. If you only have a SKU, look it up first with [Search-Products](/docs/reference/products/search_products_api_v3_products_get).",
+        "description": "Permanently delete a single product by its Plytix product `id`. This can't be undone: once deleted, the product's data and its links to categories, assets, and relationships are gone.\n\nUse the product's Plytix ID here, not its SKU. If you only have a SKU, look it up first with [Search-Products](/docs/reference/v3/products/search_products).",
         "parameters": [
           {
             "name": "identifier",

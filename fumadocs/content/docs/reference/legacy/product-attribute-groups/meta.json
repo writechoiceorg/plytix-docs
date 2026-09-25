@@ -1,0 +1,9 @@
+{
+  "title": "Product Attribute Groups",
+  "pages": [
+    "addNewProductAttributeGroup_api_v1_attribute_groups_product_post",
+    "productAttributeGroupsSearch_api_v1_attribute_groups_product_search_post",
+    "modifyAttributeGroup_api_v1_attribute_groups_product_attribute_group_id_patch",
+    "removeGroup_api_v1_attribute_groups_product_attribute_group_id_delete"
+  ]
+}

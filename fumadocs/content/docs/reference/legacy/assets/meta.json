@@ -1,0 +1,11 @@
+{
+  "title": "Assets",
+  "pages": [
+    "addNewAssets_api_v1_assets_post",
+    "assetSearch_api_v1_assets_search_post",
+    "getAccountSAsset_api_v1_assets_asset_id_get",
+    "modifySelectedAttributesOfAnAsset_api_v1_assets_asset_id_patch",
+    "removeAssetFromAccount_api_v1_assets_asset_id_delete",
+    "replaceAssetContent_api_v1_assets_asset_id_content_put"
+  ]
+}

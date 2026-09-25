@@ -1,0 +1,8 @@
+{
+  "title": "Available Filters",
+  "pages": [
+    "getAvailableAssetFilters_api_v1_filters_asset_get",
+    "getAvailableProductFilters_api_v1_filters_product_get",
+    "getAvailableRelationshipsFilters_api_v1_filters_relationships_get"
+  ]
+}

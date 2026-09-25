@@ -7,7 +7,7 @@ const openapi = createOpenAPI({
   input: ['./openapi.json'],
 });
 
-const referenceDir = './content/docs/reference';
+const referenceDir = './content/docs/reference/v3';
 const stagingDir = path.join(referenceDir, 'endpoints');
 
 // Nicer group titles than the auto-generated per-tag titles (which are just
@@ -39,6 +39,11 @@ await generateFiles({
   per: 'operation',
   groupBy: 'tag',
   meta: true,
+  // Render the operation description inside the page body via <OpenAPIPage
+  // showDescription /> (proper Markdown) instead of dumping the raw
+  // Markdown string into frontmatter `description`, where <DocsDescription>
+  // renders it as unprocessed plain text.
+  includeDescription: true,
   beforeWrite(files) {
     for (const file of files) {
       if (!file.path.endsWith('.mdx')) continue;
@@ -53,7 +58,7 @@ await generateFiles({
 });
 
 // Move each per-tag folder up to be a real page group directly under
-// content/docs/reference/ (a folder, not a flattened separator) — "Endpoints"
+// content/docs/reference/v3/ (a folder, not a flattened separator) — "Endpoints"
 // itself is a section header (see reference/meta.json below), but each
 // resource inside it stays a collapsible group of its operation pages.
 const stagingMeta = JSON.parse(await readFile(path.join(stagingDir, 'meta.json'), 'utf-8'));
@@ -98,4 +103,4 @@ await writeFile(
   ) + '\n',
 );
 
-console.log(`Generated ${tagFolders.length} endpoint groups directly under content/docs/reference/.`);
+console.log(`Generated ${tagFolders.length} endpoint groups directly under content/docs/reference/v3/.`);

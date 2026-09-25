@@ -1,0 +1,21 @@
+{
+  "title": "Legacy (v1/v2)",
+  "root": true,
+  "icon": "Code",
+  "pages": [
+    "---Overview---",
+    "api-v1-v2-reference",
+    "---Endpoints---",
+    "accounts",
+    "assets",
+    "product-attribute-groups",
+    "product-attributes",
+    "categories",
+    "available-filters",
+    "product-families",
+    "products",
+    "relationships",
+    "products-v2-beta",
+    "authentication"
+  ]
+}

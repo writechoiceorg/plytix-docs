@@ -1,0 +1,10 @@
+{
+  "title": "Relationships",
+  "pages": [
+    "addNewRelationship_api_v1_relationships_post",
+    "searchRelationships_api_v1_relationships_search_post",
+    "getRelationshipData_api_v1_relationships_relationship_id_get",
+    "modifyAttributesOfARelationship_api_v1_relationships_relationship_id_patch",
+    "removeRelationshipsFromAccount_api_v1_relationships_relationship_id_delete"
+  ]
+}
