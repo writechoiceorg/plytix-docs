@@ -63,33 +63,17 @@ Example response for a request that fails with a 404:
 }
 ```
 
-<Accordions type="multiple">
-  <Accordion title="errors — Error object">
-    Each entry in `errors` is an `Error` object:
+Each entry in `errors` is an `Error` object:
 
-    | Field | Type | Required | Description |
-    |---|---|---|---|
-    | `name` | string | Yes | Error name. |
-    | `description` | string | Yes | Error description. |
-  </Accordion>
+ | Field | Type | Required | Description |
+ |---|---|---|---|
+ | `name` | string | Yes | Error name. |
+ | `description` | string | Yes | Error description. |
   
+<Accordions type="single">
   <Accordion title="422 responses — HTTPValidationError / ValidationError">
     For 422 responses, the body uses a different shape, `HTTPValidationError`, with a `detail` array instead of `errors`:
-
-    | Field | Type | Required | Description |
-    |---|---|---|---|
-    | `detail` | array of validation errors | No | List of validation errors. |
-
-    Each entry in `detail` is a `ValidationError`:
-
-    | Field | Type | Required | Description |
-    |---|---|---|---|
-    | `loc` | array of string or integer | Yes | Location of the invalid field. |
-    | `msg` | string | Yes | Validation error message. |
-    | `type` | string | Yes | Validation error type. |
-
-    Example 422 response:
-    ```json
+  ```json
     {
       "detail": [
         {
@@ -99,7 +83,13 @@ Example response for a request that fails with a 404:
         }
       ]
     }
-    ```
+  ```
+    Each entry in `detail` is a `ValidationError`:
+    | Field | Type | Required | Description |
+    |---|---|---|---|
+    | `loc` | array of string or integer | Yes | Location of the invalid field. |
+    | `msg` | string | Yes | Validation error message. |
+    | `type` | string | Yes | Validation error type. |
   </Accordion>
 </Accordions>
 
