@@ -3,7 +3,7 @@
   "info": {
     "title": "Plytix PIM API v1",
     "version": "1.0.0",
-    "description": "Converted from the Plytix PIM API v1 Postman collection (materials/api-references/Plytix_pimv1.postman_collection.json). Endpoint shapes, request/response schemas, and examples were inferred from the collection's saved example bodies/responses and have not been independently verified against the live API — cross-check with endpoint-tester before treating as ground truth."
+    "description": "Converted from the Plytix PIM API v1 Postman collection (materials/api-references/Plytix_pimv1.postman_collection.json). Endpoint shapes, request/response schemas, and examples were inferred from the collection's saved example bodies/responses and have not been independently verified against the live API; cross-check with endpoint-tester before treating as ground truth."
   },
   "servers": [
     {

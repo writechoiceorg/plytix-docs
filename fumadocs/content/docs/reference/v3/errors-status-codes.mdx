@@ -7,16 +7,16 @@ import { BookOpen, Rocket, Gauge } from 'lucide-react';
 
 This page documents the HTTP status codes and error response formats you'll encounter when calling the Plytix API.
 
-## Deprecation notices
-
+<Callout type="note">
 The API sends a custom `X-Plytix-Deprecation` header in the response when the endpoint you're calling is scheduled for deprecation soon.
+</Callout>
 
 ## HTTP status codes
 
 The API returns the following standard HTTP status codes, grouped by class:
 
 <Accordions type="multiple">
-  <Accordion title="200 — Success">
+  <Accordion title="200 - Success">
     | Status code | Meaning |
     |---|---|
     | 200 OK | The request has succeeded. The response body usually contains a representation of the resource. |
@@ -24,7 +24,7 @@ The API returns the following standard HTTP status codes, grouped by class:
     | 202 ACCEPTED | The request has been accepted but will be completed at some point in the future. |
     | 204 NO CONTENT | The request has been fulfilled. There's no response body. |
   </Accordion>
-  <Accordion title="400 — Client errors">
+  <Accordion title="400 - Client errors">
     | Status code | Meaning |
     |---|---|
     | 400 BAD REQUEST | The request has invalid syntax. |
@@ -37,7 +37,7 @@ The API returns the following standard HTTP status codes, grouped by class:
     | 428 PRECONDITION REQUIRED | The request can't be processed because some conditions aren't met. |
     | 429 TOO MANY REQUESTS | The API rate limit has been exceeded. |
   </Accordion>
-  <Accordion title="500 — Server errors">
+  <Accordion title="500 - Server errors">
     | Status code | Meaning |
     |---|---|
     | 500 SERVER ERROR | The server wasn't able to fulfill the request. You can repeat the request later. |
@@ -64,7 +64,7 @@ Example response for a request that fails with a 404:
 ```
 
 <Accordions type="multiple">
-  <Accordion title="errors — Error object">
+  <Accordion title="errors: Error object">
     Each entry in `errors` is an `Error` object:
 
     | Field | Type | Required | Description |
@@ -73,7 +73,7 @@ Example response for a request that fails with a 404:
     | `description` | string | Yes | Error description. |
   </Accordion>
   
-  <Accordion title="422 responses — HTTPValidationError / ValidationError">
+  <Accordion title="422 responses: HTTPValidationError / ValidationError">
     For 422 responses, the body uses a different shape, `HTTPValidationError`, with a `detail` array instead of `errors`:
 
     | Field | Type | Required | Description |
@@ -102,8 +102,6 @@ Example response for a request that fails with a 404:
     ```
   </Accordion>
 </Accordions>
-
-Note: earlier design drafts of the API described a single `error` object, with `name` and `description`, for all 4xx and 5xx responses. The current specification instead returns an `errors` array on every response, as documented above.
 
 ## Related resources
 

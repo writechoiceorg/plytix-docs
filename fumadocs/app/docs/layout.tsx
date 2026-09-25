@@ -15,7 +15,7 @@ export default function Layout({ children }: LayoutProps<'/docs'>) {
       tabs={{
         // v3/legacy are their own root folders (so the sidebar shows only the
         // active version's pages), but the navbar should always show Guides
-        // and API Reference, never the version switch — that's handled by
+        // and API Reference, never the version switch: that's handled by
         // <ReferenceVersionSwitcher /> in the sidebar instead.
         transform: (option) => {
           if (
@@ -26,7 +26,7 @@ export default function Layout({ children }: LayoutProps<'/docs'>) {
           }
           // The "API Reference" tab's own landing page is just plumbing (it
           // gives the reference folder a resolvable url so this tab exists
-          // and stays active across every /docs/reference/** page) — send
+          // and stays active across every /docs/reference/** page). Send
           // clicks straight to the v3 overview instead of that landing page.
           if (option.url === '/docs/reference') {
             return { ...option, url: '/docs/reference/v3' };
