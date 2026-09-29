@@ -22,7 +22,7 @@ export default function Layout({ children }: LayoutProps<'/docs'>) {
             option.url.startsWith('/docs/reference/v3') ||
             option.url.startsWith('/docs/reference/legacy')
           ) {
-            return undefined;
+            return null;
           }
           // The "API Reference" tab's own landing page is just plumbing (it
           // gives the reference folder a resolvable url so this tab exists
