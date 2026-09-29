@@ -24,7 +24,7 @@ Before loading references or writing anything, identify the source material and 
 
 | Source type | How to read it |
 |---|---|
-| **Knowledge extract** from `extract-meeting-knowledge` | Read the **Global Documentation Directives** section first — apply those rules before loading `ProjectConvention.md`. Then use Concepts, Processes, Constraints, and Emphasis Flags as your primary content source. |
+| **Knowledge extract** from `extract-meeting-knowledge` | Read the **Global Documentation Directives** section first — apply those rules before loading `projectConvention.md`. Then use Concepts, Processes, Constraints, and Emphasis Flags as your primary content source. |
 | **Meeting summary** from `summarize-meeting` | Extract key decisions and action items relevant to the feature being documented. Treat open questions as flags. |
 | **Spec, feature description, or PRD** | Read in full. Note any stated constraints, terminology, or sequencing requirements as you would documentation directives. |
 | **Content provided directly by the user** | Take it as-is. Clarify ambiguities before writing rather than interpreting silently. |
@@ -62,9 +62,9 @@ Provides language, tone, voice, and writing rules that apply across all pages. T
 Provides the structure template for each page type: concept, how-to guide, reference, and tutorial. Load only the page type relevant to the current task.
 
 ### Platform components & formatting
-→ See [`references/ProjectConvention.md`](references/ProjectConvention.md)
+→ See [`references/projectConvention.md`](references/projectConvention.md)
 
-Provides MDX/frontmatter syntax, structural rules, and callout types for the project. When a platform MCP is connected, prefer the MCP — it reflects the current state of the component library. Use `ProjectConvention.md` as fallback or to resolve conflicts.
+Provides MDX/frontmatter syntax, structural rules, and callout types for the project. When a platform MCP is connected, prefer the MCP — it reflects the current state of the component library. Use `projectConvention.md` as fallback or to resolve conflicts.
 
 ### Information architecture
 → See [`references/information-architecture.md`](references/information-architecture.md)
@@ -80,7 +80,7 @@ Use after writing each page to confirm output quality before closing the task.
 
 1. Terminology (`glossary.md`) — establishes the vocabulary you must use throughout
 2. Style guide (`style-guide.md`) — establishes tone and writing rules
-3. Platform components (MCP or `ProjectConvention.md`) — establishes what you can build with
+3. Platform components (MCP or `projectConvention.md`) — establishes what you can build with
 4. Page types (`page-types.md`) — load only the relevant type
 5. IA structure (`information-architecture.md`) — establishes where the output lives
 
@@ -122,7 +122,7 @@ With context confirmed, references loaded, and scope filtered, write the page.
 1. Open `references/page-types.md` and load the structure for the identified page type. Load only the relevant type — do not load all four.
 2. Open `references/style-guide.md` and apply all default rules plus any project-specific overrides.
 3. Write the full page following the loaded structure. Do not skip sections — if a section cannot be written due to missing information, raise a flag at that point and continue with the rest.
-4. Apply frontmatter as defined in `references/ProjectConvention.md`. Do not omit required fields.
+4. Apply frontmatter as defined in `references/projectConvention.md`. Do not omit required fields.
 5. Raise flags inline as you encounter them — do not batch them at the end.
 
 Do not mark the page as done if it contains unresolved flags.

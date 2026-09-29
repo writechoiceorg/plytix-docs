@@ -24,13 +24,13 @@ Terminology
 
 Structure
 [ ] Page type structure is correctly applied per page-types.md
-[ ] H1 title is present and accurate
+[ ] Frontmatter `title` is present and accurate (it renders as the H1; no `# H1` in the body)
 [ ] No headings deeper than H3
 [ ] Numbered steps used for sequential instructions; bullets for non-sequential items
 
 Formatting
-[ ] Frontmatter is complete and matches ProjectConvention.md
-[ ] All platform components used are listed in ProjectConvention.md
+[ ] Frontmatter is complete and matches projectConvention.md (no fields Fumadocs strips, such as `slug`)
+[ ] All platform components used are listed in projectConvention.md, and every Lucide icon is imported
 [ ] UI labels are bold; file paths and code values are in code style
 [ ] All code blocks include a language identifier
 
@@ -45,7 +45,7 @@ Style
 [ ] Any humor/wit is capped at one "wink" per page and isn't forced
 
 Output
-[ ] Page saved to the correct path per information-architecture.md
+[ ] Page saved to the correct path per information-architecture.md, and listed in its folder's `meta.json`
 [ ] Path confirmed in the response after saving
 ```
 

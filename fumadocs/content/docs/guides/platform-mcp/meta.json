@@ -1,0 +1,10 @@
+{
+  "title": "Plytix Platform MCP",
+  "pages": [
+    "authentication-and-oauth-setup",
+    "supported-clients",
+    "available-tools",
+    "permissions-and-security",
+    "practical-examples"
+  ]
+}

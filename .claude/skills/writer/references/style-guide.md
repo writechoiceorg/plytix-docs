@@ -185,7 +185,7 @@ Available callout types:
 | `warning` | Actions that may cause data loss or unexpected results |
 | `danger` | Irreversible actions or serious consequences |
 
-> Check `ProjectConvention.md` for the exact callout syntax used by this project's platform.
+> Check `projectConvention.md` for the exact callout syntax used by this project's platform.
 
 ---
 
@@ -262,8 +262,9 @@ Avoid the following in all documentation:
 |---|---|
 | `title` | 60 characters or fewer. Start with the task or concept. Avoid duplicating titles across the same section. |
 | `description` | One concise sentence, 120–155 characters. Begin with an action verb: "Learn how to…" or "Reference for…". |
-| `keywords` | 3–6 singular nouns or phrases. Lowercase. Reuse terms already present in the page headings. |
-| `slug` | Lowercase, hyphenated, no special characters. |
+| URL | Comes from the file name (Fumadocs has no `slug` field). Lowercase, hyphenated, no special characters, per `projectConvention.md`'s file naming rules. |
+
+> **Updated 2026-09-29:** `keywords` and `slug` rows removed. Fumadocs strips frontmatter fields it doesn't define, so neither would reach the page. Put search terms in headings and the first paragraph instead.
 
 ### Answer-engine formatting (AEO)
 
@@ -291,7 +292,7 @@ When a guide needs a "Related articles" section, follow this content pattern:
 - One card per related guide, each with a single sentence describing what the user will learn.
 - Cap at 3 cards per row.
 
-Use the exact `CardList`/`Card` tag syntax and available icon names defined in `ProjectConvention.md`'s Components table — do not redefine the syntax here.
+Use the exact `Cards`/`Card` tag syntax and icon import pattern defined in `projectConvention.md`'s Components table — do not redefine the syntax here.
 
 ---
 

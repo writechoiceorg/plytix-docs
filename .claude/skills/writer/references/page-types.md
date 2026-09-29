@@ -17,6 +17,8 @@
 
 > One URL, one page type. Do not mix tutorial content with reference tables, or concept explanations with how-to steps.
 
+> **Frontmatter and H1 (Fumadocs):** only `title` and `description` go in frontmatter for every page type below; Fumadocs strips unknown fields such as `slug` or `audience` (see `projectConvention.md`). The URL comes from the file path. The frontmatter `title` renders as the page H1, so the `# ...` line in each structure template shows what the title should say. Do not add it to the page body. Audience, time to complete, and prerequisites go in the body.
+
 ---
 
 ## Concept page
@@ -31,7 +33,6 @@
 ---
 title: "{Concept name}"
 description: "{Why this concept matters — one sentence}"
-slug: /concepts/{slug}
 ---
 ```
 
@@ -67,7 +68,7 @@ Concrete examples that illustrate the concept in context.
 
 ## Related articles
 
-Use the CardList and Card components as defined in style-guide.md and ProjectConvention.md.
+Use the `Cards` and `Card` components as defined in style-guide.md and projectConvention.md.
 ```
 
 ### Notes
@@ -87,8 +88,6 @@ Use the CardList and Card components as defined in style-guide.md and ProjectCon
 ---
 title: "{How-to title — starts with an imperative verb}"
 description: "{Specific problem this guide solves}"
-slug: /guides/{slug}
-audience: "{role + assumed experience level}"
 ---
 ```
 
@@ -131,7 +130,7 @@ Paragraph explaining the step in detail.
 
 ## Related articles (optional)
 
-Use the CardList and Card components as defined in style-guide.md and ProjectConvention.md.
+Use the `Cards` and `Card` components as defined in style-guide.md and projectConvention.md.
 
 ## What's next (optional)
 
@@ -145,7 +144,7 @@ and include a link.
 
 **Goal:** Provide definitive, structured, scannable facts. Answer "what exactly."
 
-> Reference pages are often auto-generated from code or schemas. If this project auto-generates reference content, set `generated: true` in the frontmatter and note the source.
+> Endpoint reference pages are auto-generated from the OpenAPI specs by `fumadocs-openapi` (they carry `_openapi` frontmatter). Don't hand-write or hand-edit them; this template is for hand-written reference pages such as pagination, filtering, or error codes.
 
 ### Frontmatter
 
@@ -153,8 +152,6 @@ and include a link.
 ---
 title: "{Component / API / Field catalogue}"
 description: "{Scope of this reference — one sentence}"
-slug: /reference/{slug}
-generated: false   # set to true if auto-generated
 ---
 ```
 
@@ -202,12 +199,6 @@ Links to tutorials or how-to guides that use this reference material.
 ---
 title: "{Tutorial title}"
 description: "{One-sentence elevator pitch}"
-slug: /tutorials/{slug}
-time_to_complete: "≈ {NN} min"
-audience: "{e.g. new users | data admins}"
-prerequisites:
-  - "{e.g. SDK installed}"
-  - "{e.g. Sample dataset downloaded}"
 ---
 ```
 
@@ -251,7 +242,7 @@ explanation than how-to guides — the goal is learning, not just doing.
 
 ## Related articles (optional)
 
-Use the CardList and Card components as defined in style-guide.md and ProjectConvention.md.
+Use the `Cards` and `Card` components as defined in style-guide.md and projectConvention.md.
 ```
 
 ### Notes

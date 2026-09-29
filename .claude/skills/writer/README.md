@@ -29,7 +29,7 @@ This skill depends on the following files in the `references/` folder. Before us
 | [`references/glossary.md`](references/glossary.md) | Approved product terminology, definitions, and capitalisation rules |
 | [`references/style-guide.md`](references/style-guide.md) | Writing rules, tone, voice, and language standards — shared with the Reviewer skill |
 | [`references/page-types.md`](references/page-types.md) | Structure templates for each page type (concept, how-to, reference, tutorial) |
-| [`references/ProjectConvention.md`](references/ProjectConvention.md) | Platform-specific formatting: frontmatter, MDX components, callout types |
+| [`references/projectConvention.md`](references/projectConvention.md) | Platform-specific formatting: frontmatter, MDX components, callout types |
 | [`references/information-architecture.md`](references/information-architecture.md) | IA map and file paths — where each page lives in the documentation structure |
 | [`references/checklist.md`](references/checklist.md) | Post-writing verification checklist — used before closing any writing task |
 
@@ -40,7 +40,7 @@ This skill depends on the following files in the `references/` folder. Before us
 1. **Glossary** — Replace placeholder entries with the product's approved terms. Add definitions as they are discovered during testing or writing.
 2. **Style guide** — Review default rules and update any that conflict with the client's requirements (e.g. title case preference, specific tone adjustments). This is the single source of truth — do not create a separate override file.
 3. **Page types** — The default structures are generic. Adjust section names or required fields if the project's documentation framework has specific expectations.
-4. **ProjectConvention.md** — Fill in the platform details: frontmatter schema, available components, callout syntax. If a platform MCP is available, note it here so the skill knows to prefer it.
+4. **projectConvention.md** — Fill in the platform details: frontmatter schema, available components, callout syntax. If a platform MCP is available, note it here so the skill knows to prefer it.
 5. **Information architecture** — Map out the documentation structure before writing begins. The skill will not save a file to a path that is not listed here.
 6. **Checklist** — Adjust the verification criteria if the project has specific quality gates.
 
