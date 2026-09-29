@@ -7,7 +7,7 @@ import { BookOpen, Rocket, Gauge } from 'lucide-react';
 
 This page documents the HTTP status codes and error response formats you'll encounter when calling the Plytix API.
 
-<Callout type="note">
+<Callout type="warning" title="Deprecation notice">
 The API sends a custom `X-Plytix-Deprecation` header in the response when the endpoint you're calling is scheduled for deprecation soon.
 </Callout>
 
@@ -73,8 +73,7 @@ Each entry in `errors` is an `Error` object:
  | `name` | string | Yes | Error name. |
  | `description` | string | Yes | Error description. |
   
-<Accordions type="single">
-  <Accordion title="422 responses — HTTPValidationError / ValidationError">
+</Accordion>
   <Accordion title="422 responses: HTTPValidationError / ValidationError">
     For 422 responses, the body uses a different shape, `HTTPValidationError`, with a `detail` array instead of `errors`:
   ```json
