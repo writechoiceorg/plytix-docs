@@ -50,7 +50,7 @@ These are the only components registered in `fumadocs/components/mdx.tsx`, on to
 | Component | Usage | Syntax |
 |---|---|---|
 | `Callout` | Notes, tips, warnings, and writer flags. See Callout types below. | `<Callout type="info" title="...">...</Callout>` |
-| `Cards` | Wrapper for a group of `Card` components, used in the "Related articles" section | `<Cards>...</Cards>`. Lays out cards in a grid; keep to 3 cards or fewer per section. |
+| `Cards` | Wrapper for a group of `Card` components, used in the "Related articles" section | `<Cards>...</Cards>`. Lays out cards in a grid; use exactly 2 cards in a "Related articles" or "Related resources" section (see `style-guide.md`). Landing and section-index pages use `Cards` for navigation and aren't capped. |
 | `Card` | A single related article card with title, icon, link, and short description | `<Card icon={<Search />} title="..." href="/docs/guides/...">Description.</Card>` |
 | `Steps` / `Step` | Visual step layout. Available, but how-to procedures use numbered lists per `style-guide.md`. Use only for tutorial milestones if the project lead approves. | `<Steps><Step>...</Step></Steps>` |
 | `Tabs` / `Tab` | Alternatives the reader picks one of (for example, v1/v2 vs. v3 samples, or curl vs. Python) | `<Tabs items={['v3', 'v1/v2']}><Tab value="v3">...</Tab><Tab value="v1/v2">...</Tab></Tabs>` |

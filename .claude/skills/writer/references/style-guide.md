@@ -290,7 +290,9 @@ When a guide needs a "Related articles" section, follow this content pattern:
 
 - Open with one sentence: "Now that you know how to [complete the main task of this guide], you can explore these related guides."
 - One card per related guide, each with a single sentence describing what the user will learn.
-- Cap at 3 cards per row.
+- **Use exactly 2 cards** (decided 2026-09-29). Two cards fill the row evenly and read better than three. Pick the two most closely related pages, and drop generic entry points such as the Quickstart unless the page has no closer match.
+
+> This applies to "Related articles" and "Related resources" sections only. Landing and section-index pages (`index.mdx`) use `Cards` as primary navigation and are not capped.
 
 Use the exact `Cards`/`Card` tag syntax and icon import pattern defined in `projectConvention.md`'s Components table — do not redefine the syntax here.
 
