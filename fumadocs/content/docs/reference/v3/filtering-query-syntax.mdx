@@ -1,8 +1,185 @@
 ---
-title: "Filtering and Query Syntax Reference"
-description: "The full set of filter operators, grouping, and related-entity filtering."
+title: "Filtering and Query Syntax"
+description: "Reference for v3's query syntax: filter operators, boolean grouping, functions, field selection, and filtering on attributes and related entities."
 ---
 
-**Content type:** Reference
+import { ListOrdered, ArrowRightLeft } from 'lucide-react';
 
-_Placeholder page: content coming soon. This page will cover: The full set of filter operators, grouping, and related-entity filtering._
+In v3, you filter a search by adding query parameters to the URL. This page documents the operators, how to combine them, and how to filter on custom attributes and related entities.
+
+<Callout type="warn" title="FLAG">
+  **Source limitation:** `openapi_pimv3.json` and `fumadocs/openapi.json` declare no query parameters on any search operation, so the syntax below comes from `API V3.md`. That document is a design specification with approved, rejected, and postponed options, and only the approved forms are reproduced here. Verify each operator against a live account with the `endpoint-tester` skill before publishing, and remove this callout once the syntax is confirmed.
+</Callout>
+
+Key points on this page:
+
+- A filter is `field[operator]=value`, and equality needs no operator at all.
+- `&` combines filters with AND. OR uses an indexed `_or[#]` prefix on each filter it joins.
+- Custom attributes are addressed as `attributes.<name>`.
+- `_fields` controls which fields come back, and it's repeated once per field.
+
+## How a filter is written
+
+A filter names a field, an operator in brackets, and a value:
+
+```text
+status[eq]=Draft
+```
+
+Equality is the default, so the operator can be left out:
+
+```text
+status=Draft
+```
+
+A search with no filter parameters returns every record. Filters apply to fields only.
+
+## Equality and comparison
+
+| Meaning | Syntax |
+|---|---|
+| Equals | `field=value` or `field[eq]=value` |
+| Not equal | `field[!eq]=value` |
+| In a set | `field[in]=value1&field[in]=value2` |
+| Not in a set | `field[!in]=value1&field[!in]=value2` |
+| Greater than | `field[gt]=value` |
+| Greater than or equal | `field[gte]=value` |
+| Less than | `field[lt]=value` |
+| Less than or equal | `field[lte]=value` |
+| Between two values | `field[gte]=<low>&field[lte]=<high>` |
+
+## Existence and null
+
+Plytix distinguishes a field that holds no value from a field that was never set, and the operators reflect that.
+
+| Meaning | Syntax |
+|---|---|
+| Field is null | `field[null]` |
+| Field is not null | `field[!null]` |
+| Field is undefined, meaning it doesn't exist | `field[!exists]` |
+| Field is defined | `field[exists]` |
+| Field is an empty string or empty list | `field[len]=0` |
+| Field has content | `field[len][gt]=0` |
+
+<Callout type="info" title="Not-equal excludes empty fields">
+  `field[!eq]=value` matches only records where the field has a value that differs. Records where the field is null or undefined aren't included, because there's nothing to compare. To catch those too, combine the conditions with OR:
+
+  ```text
+  _or[0]field[!eq]=value&_or[0]field[!exists]&_or[0]field[!null]
+  ```
+
+  This is the pattern behind most completeness questions, such as finding products that are missing a description.
+</Callout>
+
+## Text and arrays
+
+| Meaning | Syntax |
+|---|---|
+| Contains, ignoring case | `field[contains:ignorecase]=value` |
+| Contains, case-sensitive | `field[contains]=value` |
+| Arrays share at least one value | `field[intersects]=value` |
+| Arrays share no values | `field[!intersects]=value` |
+
+## Functions
+
+A function goes in its own bracket before the filter bracket, in the form `field[function][operator]=value`.
+
+| Function | What it does | Example |
+|---|---|---|
+| `length` | Compares the length of a string or list | `countries[length][gt]=1`, `description[length][lte]=256` |
+| `days_passed` | Counts whole days from the field's date to now, in UTC | `creation_date[days_passed][gt]=7` |
+| `days_passed:<timezone>` | The same, in a named timezone | `last_update[days_passed:Europe/Madrid][lt]=1` |
+
+## Combine filters
+
+| Logic | Syntax |
+|---|---|
+| A AND B | `A&B` |
+| A OR B | `_or[0]A&_or[0]B` |
+| (A OR B) AND (C OR D) | `_or[0]A&_or[0]B&_or[1]C&_or[1]D` |
+| NOT (A OR B) | `_!or[0]A&_!or[0]B` |
+
+Filters joined by `&` combine with AND, so grouping only needs a prefix when you want OR. The index in brackets is the group number: filters sharing an index belong to the same OR group, and separate indexes are ANDed together.
+
+For example, products that are either a draft or under review, and that also sit in one of two categories:
+
+```text
+_or[0]status=Draft&_or[0]status=Review&_or[1]categories[in]=<id1>&_or[1]categories[in]=<id2>
+```
+
+## Filter on custom attributes
+
+Custom attributes are addressed by name under `attributes`:
+
+```text
+attributes.color[eq]=blue
+attributes.weight[gt]=10
+```
+
+<Callout type="info" title="Attribute names starting with an underscore">
+  Field names beginning with `_` are reserved, and names containing `.`, `[`, or `|` aren't valid. Attribute names are the one exception to the underscore rule, because an attribute is always reached through the `attributes.` prefix, which removes the ambiguity. An attribute named `_internal` is addressed as `attributes._internal`.
+</Callout>
+
+## Filter on related entities
+
+A related entity's fields are reachable through a dotted path:
+
+```text
+related-entity.attribute[operator]=value
+```
+
+For product relationships, the relationship and the related product are separate parameters:
+
+| Goal | Syntax |
+|---|---|
+| Products in a given relationship | `product_relationships.relationship_id=<relationship_id>` |
+| Products linked to a specific product | `product_relationships.relationship_id=<id>&product_relationships.related_product_id=<product_id>` |
+| Linked with a quantity above a threshold | `product_relationships.related_products.quantity[gt]=2` |
+
+<Callout type="warn" title="One restriction on relationship filters">
+  `API V3.md` restricts the negated-existence form for the public v3 API: `_!exists` is allowed only on `relationships.id` or `relationships.label`, and only when it isn't grouped inside `_and` or `_or`. Deeper negated joins were held back from the 3.0 release.
+</Callout>
+
+## Choose which fields come back
+
+`_fields` selects the fields in the response, repeated once per field:
+
+```text
+_fields=sku&_fields=label&_fields=status
+```
+
+| Goal | Syntax |
+|---|---|
+| Selected fields | `_fields=<field1>&_fields=<field2>` |
+| All fields | Default when `_fields` is absent, or `_fields=*` |
+| Fields on a related entity | `_fields=<entity>.<field>` |
+| All fields on a related entity | `_fields=<entity>.*` |
+
+Requesting a related entity's fields expands that entity in the response. `_fields=<entity>` and `_fields=<entity>.*` return the same thing.
+
+<Callout type="info" title="Unfiltered related records">
+  When a filter narrows a related entity and you still want the full set of related records back, `_include_unfiltered_entities=<subentity>` returns all of them rather than only the matching ones. Use one parameter per subentity.
+</Callout>
+
+## Reserved and forbidden names
+
+| Rule | Applies to |
+|---|---|
+| Names starting with `_` are reserved | All fields and entities, except attribute names reached through `attributes.` |
+| Names starting with `.` or `__` are reserved | All fields and entities |
+| Names containing `.`, `[`, or `|` are not valid | All fields and entities |
+
+Values in a query string follow normal URL encoding. Spaces become `+` or `%20`, and `=`, `&`, `?`, `#`, and `%` carry meaning in a URL, so encode them when they appear inside a value.
+
+## Related resources
+
+Now that you can filter a search, you can explore these related pages.
+
+<Cards>
+  <Card icon={<ListOrdered />} title="Pagination" href="/docs/reference/v3/pagination">
+    Page through a filtered result set and read the pagination block.
+  </Card>
+  <Card icon={<ArrowRightLeft />} title="Migration reference" href="/docs/guides/migrating-to-v3/migration-reference">
+    Map v1's JSON filter objects to the syntax on this page.
+  </Card>
+</Cards>

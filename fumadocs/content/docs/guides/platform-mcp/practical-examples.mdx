@@ -1,8 +1,162 @@
 ---
 title: "Practical examples"
-description: "Common agent workflows built on top of the Plytix Platform MCP."
+description: "Walk through common agent workflows on the Plytix Platform MCP: auditing data quality, curating imports, exporting slices, and cleaning up safely."
 ---
 
-**Content type:** How-to Guide
+import { Wrench, ShieldCheck } from 'lucide-react';
 
-_Placeholder page: content coming soon. This page will cover: Common agent workflows built on top of the Plytix Platform MCP._
+This page shows four workflows you can hand to an AI assistant once it's connected to the Plytix Platform MCP, and what to check after each one. Every workflow here is a task the documentation already covers as code, so you can compare the two routes and pick whichever fits the job.
+
+<Callout type="warn" title="FLAG">
+  The Plytix Platform MCP is a roadmap feature and is not live yet (see `glossary.md`, "MCP Server"). The workflows below are built from confirmed Plytix API behavior and from stakeholder-stated use cases in `materials/transcripts/kick_off_2.md`, but no prompt on this page has been run against a working server. Re-test every example and replace the sample responses with real output before publishing.
+</Callout>
+
+## Prerequisites
+
+Before you start, you need:
+
+- A Plytix account with data in it. These examples read and change real products, so use a test account first.
+- An AI assistant connected to the Platform MCP. See [Supported clients](/docs/guides/platform-mcp/supported-clients) and [Authentication and OAuth setup](/docs/guides/platform-mcp/authentication-and-oauth-setup).
+- Permission to write, for the examples that create or change data. Read-only access covers the first and third workflows only. See [Permissions and security considerations](/docs/guides/platform-mcp/permissions-and-security).
+
+<Callout type="warn" title="Writes happen immediately">
+  An agent calling a write tool changes your catalog the moment it runs, and there's no undo. Ask for a plan before you ask for the change, and keep write access off the accounts you can't afford to have edited.
+</Callout>
+
+## How to read these examples
+
+Each workflow gives you a prompt to adapt, the work the assistant does behind it, and a verification step. The prompts are starting points, not magic words. Assistants vary, and a prompt that names the data you care about beats a vague one every time.
+
+<Callout type="warn" title="FLAG">
+  **Insufficient source:** the tool names an agent calls are not confirmed, because [Available tools](/docs/guides/platform-mcp/available-tools) hasn't been written against a live server. This page deliberately describes what the assistant does in plain language instead of naming tools. Once the tool list is confirmed, add the specific tool each step calls.
+</Callout>
+
+## Audit product data quality
+
+Find the products that are missing the attributes you care about, without writing a filter payload by hand. This is the workflow stakeholders described as the most common first use of the MCP: ask a question about the catalog, get an answer back.
+
+1. **Ask for the gap, not the query.** Name the attributes and the scope:
+
+   ```text
+   Using Plytix, list the products in the Outdoor Furniture category that are
+   missing a description, a primary image, or a GTIN. Group them by which
+   field is missing and give me the SKUs.
+   ```
+
+2. **Review the filter the assistant used.** Ask it to show you the filter it built. Plytix supports OR logic and completeness filters that are underused because they're hard to discover, so this is worth reading once to learn the pattern.
+
+3. **Verify a sample by hand.** Open two or three of the returned SKUs in Plytix and confirm the fields really are empty. If they aren't, the assistant likely filtered on the wrong attribute name.
+
+4. **Ask for the fix as a separate step.** Don't combine the audit and the correction in one prompt. Get the list, check it, then ask for changes.
+
+For the same audit as code, see [Audit product data quality with filters](/docs/guides/auditing-product-data-quality-with-filters).
+
+## Curate a batch of products before importing them
+
+This is the workflow Plytix stakeholders called out as the reason the MCP matters: you bring product data from somewhere else, have the assistant clean it against your own catalog's rules, and create the products without building an integration first.
+
+1. **Give the assistant the source data and the rules.** Paste or attach the raw data, then state what "correct" means in your catalog:
+
+   ```text
+   Here's a spreadsheet of 40 products from our supplier. Before creating
+   anything in Plytix, check each row against our catalog: match the category
+   names to existing Plytix categories, flag any SKU that already exists, and
+   tell me which required attributes are missing. Don't create anything yet.
+   ```
+
+2. **Read the plan.** The assistant should come back with matched categories, duplicate SKUs, and gaps. Fix the source data or answer its questions before going further.
+
+3. **Approve the write explicitly.** Only then ask it to create the products, and say how you want conflicts handled:
+
+   ```text
+   Create the 31 products that passed the check. Skip the duplicates.
+   Assign each one to the category you matched earlier.
+   ```
+
+4. **Confirm the count.** Ask how many products it created and compare that number against your source. Then spot-check a few in Plytix.
+
+<Callout type="info" title="Pace matters more than you'd think">
+  Rate limits vary by account and are carried in your access token's claims. An assistant creating products one at a time can reach that limit on a large batch, which shows up as failures partway through. For anything past a few dozen items, see [Bulk operations for large catalogs](/docs/guides/bulk-operations-for-large-catalogs) and run it as code instead.
+</Callout>
+
+## Export a slice of the catalog
+
+Pull a filtered set of products into a format you can hand to someone else, such as a marketplace listing sheet or a review document.
+
+1. **Describe the slice and the shape you want:**
+
+   ```text
+   Using Plytix, get every product in the Spring 2026 family that's marked
+   ready for launch, with its SKU, title, price, and primary image URL.
+   Give it to me as CSV.
+   ```
+
+2. **Check the row count against Plytix.** Run the same filter in the Plytix interface and compare totals. A mismatch usually means the assistant stopped at the first page of results rather than paging through all of them.
+
+3. **Ask it to page explicitly** if the count is short:
+
+   ```text
+   That looks like only the first page. Page through all results and give me
+   the complete set.
+   ```
+
+<Callout type="info" title="Channels are set up in Plytix">
+  Channels (Shopify, BigCommerce, and feed exports) are configured in the Plytix interface, not through the API, so an agent can't create one or publish to a storefront for you. What it can do is assemble the product set and check it before you send it. To work with channel-eligible products programmatically, use Destinations instead.
+</Callout>
+
+For a fuller treatment, see [Export your full catalog](/docs/guides/exporting-your-full-catalog) and [Build a marketplace-specific product feed](/docs/guides/building-marketplace-specific-product-feeds).
+
+## Clean up categories, assets, or relationships
+
+Removing a link in Plytix can affect more than the one product in front of you, which makes it a good fit for an assistant that can check the blast radius first and a bad fit for an unsupervised one.
+
+1. **Ask what would be affected, before anything changes:**
+
+   ```text
+   Using Plytix, if I remove the "Clearance" category, which products lose it
+   and do any of them have no other category left? Don't change anything yet.
+   ```
+
+2. **Read the impact list.** Products left with no category are the ones to handle deliberately, because they can drop out of filtered views and feeds.
+
+3. **Scope the change narrowly.** Name the exact set rather than describing it loosely:
+
+   ```text
+   Remove the "Clearance" category from the 18 products you listed, except
+   the 3 that would be left with no category at all.
+   ```
+
+4. **Verify in Plytix.** Confirm the count changed by exactly what you expected, and that the excluded products kept their category.
+
+See [Safely remove categories, assets, or relationships](/docs/guides/safely-removing-categories-assets-or-relationships) for the rules behind this workflow.
+
+## Troubleshooting
+
+- **Problem:** The assistant answers about your catalog without calling Plytix, and the numbers look invented.
+  - **Solution:** Name the source in your prompt: "Using Plytix, …". Then ask it to cite the SKUs it retrieved, so you can check them.
+  - **Prevention:** Open every catalog prompt with the source named. Most clients only reach for a tool when the request makes the need obvious.
+
+- **Problem:** A batch of writes stops partway through.
+  - **Solution:** Ask which items succeeded before retrying, then retry only the rest. Re-running the whole batch can create duplicates.
+  - **Prevention:** For batches past a few dozen items, run the job as code with paced requests rather than through an agent.
+
+- **Problem:** Results are short, and the totals don't match what Plytix shows.
+  - **Solution:** Ask the assistant to page through all results. Agents often stop at the first page.
+  - **Prevention:** Include the expected count in your prompt when you know it.
+
+- **Problem:** The assistant changed something you didn't intend.
+  - **Solution:** There's no undo, so fix it forward. Ask the assistant for the exact list of what it changed, then correct those records.
+  - **Prevention:** Split every workflow into a read prompt and a write prompt, and grant write access only where you need it.
+
+## Related articles
+
+Now that you know how to run these workflows, you can explore these related pages.
+
+<Cards>
+  <Card icon={<Wrench />} title="Available tools" href="/docs/guides/platform-mcp/available-tools">
+    See the full set of Plytix actions an agent can call.
+  </Card>
+  <Card icon={<ShieldCheck />} title="Permissions and security considerations" href="/docs/guides/platform-mcp/permissions-and-security">
+    Learn which scopes each workflow needs, and where the access boundaries sit.
+  </Card>
+</Cards>

@@ -1,8 +1,134 @@
 ---
 title: "Working with Updates and Deletes"
-description: "A resource-by-resource reference for which update and delete operations are available."
+description: "Reference for how v3 handles writes: which method to use, what each returns, how empty values are stored, and what DELETE actually removes."
 ---
 
-**Content type:** Reference
+import { TriangleAlert, BookOpen } from 'lucide-react';
 
-_Placeholder page: content coming soon. This page will cover: A resource-by-resource reference for which update and delete operations are available._
+v3 changed how write operations behave. This page documents which method to use for each kind of change, what comes back in the response, how empty values are treated, and what DELETE removes.
+
+Key points on this page:
+
+- Write endpoints don't return the modified record. Read it back if you need the resulting values.
+- PATCH is the standard way to change a record, because it touches only the fields you name.
+- An empty string or empty list is stored as a value, not treated as a deletion.
+- DELETE erases a field or record rather than setting it to null, which can let an inherited value take over.
+
+## Choose a method
+
+| Goal | Method | Path |
+|---|---|---|
+| Create a record | POST | `/api/v3/<entities>` |
+| Change some fields on a record | PATCH | `/api/v3/<entities>/<identifier>` |
+| Remove a record | DELETE | `/api/v3/<entities>/<identifier>` |
+| Read, create, or remove a single field | GET, POST, DELETE | `/api/v3/<entities>/<identifier>/<field>` |
+| Link a related record | POST | `/api/v3/<entities>/<identifier>/<related-entities>` |
+| Change a link | PATCH | `/api/v3/<entities>/<identifier>/<related-entities>/<linked_id>` |
+| Remove a link | DELETE | `/api/v3/<entities>/<identifier>/<related-entities>/<linked_id>` |
+
+`<identifier>` is usually the record's ID. For products, a URL-encoded SKU works too.
+
+<Callout type="info" title="Why PATCH rather than PUT">
+  PATCH names only the fields you're changing, which reduces the risk of overwriting a field you didn't mean to touch and makes concurrent edits safer. `API V3.md` records this as the recommended standard for modifications in v3.
+</Callout>
+
+<Callout type="warn" title="FLAG">
+  `API V3.md` also specifies PUT for whole-record replacement, but no PUT operation appears in `openapi_pimv3.json` or `fumadocs/openapi.json`. Per the trust order the spec wins, so this page documents PATCH only. Confirm whether PUT is planned, and add it here if it ships.
+</Callout>
+
+## What a write returns
+
+Write endpoints don't return the modified record. This is the change most likely to break code carried over from v1, because the request still succeeds and only the response body is different.
+
+| Operation | Status | Body |
+|---|---|---|
+| Create | `201` | The ID of the created record |
+| Update | `204` | None |
+| Delete | `204` | None |
+| Accepted for async processing | `202` | A `process_id` for tracking |
+
+If you need the resulting record, read it back with a GET after the write.
+
+<Callout type="warn" title="FLAG">
+  **Conflict on declared status codes.** The status codes above come from `API V3.md`'s response conventions. The OpenAPI spec declares only `200` for success and `422` for validation errors on every operation, which [Errors and Status Codes](/docs/reference/v3/errors-status-codes) already documents. A FastAPI export often under-declares response codes, so this may be a gap in the spec rather than a behavioral difference. Confirm the real codes with the `endpoint-tester` skill before publishing.
+
+  `API V3.md` is also internally inconsistent here: its general conventions section says `201` is returned for a successful creation *or modification*, while its endpoint table says PATCH returns `204`. The table is reproduced above because it's more specific.
+</Callout>
+
+## How empty values are treated
+
+An empty string or an empty list is a value in v3, not an instruction to remove something.
+
+| Operation | Empty value behavior |
+|---|---|
+| POST | `""` and `[]` are stored verbatim |
+| PATCH | `""` and `[]` are stored verbatim |
+| DELETE | Erases the field or record |
+
+So `{"description": ""}` sets the description to an empty string. It doesn't remove the field. To remove it, use DELETE on the field path.
+
+## What DELETE removes
+
+DELETE erases the thing it's applied to. It doesn't set the value to null and it doesn't restore a default.
+
+```bash
+# Removes the record
+curl --request DELETE \
+  --url 'https://<v3-base-url>/api/v3/products/<identifier>' \
+  --header 'Authorization: Bearer <token>'
+```
+
+<Callout type="warn" title="Erasing a field can change what the record shows">
+  Because DELETE erases rather than nulls, removing a field can let an inherited value resolve in its place. A product that inherits from a family may show the family's value once its own is gone, so the field doesn't go empty, it changes. Check on a test record before running a delete across a catalog.
+</Callout>
+
+Field-level creation and deletion apply to attributes only. You can POST or DELETE a single attribute on a record through its field path; other fields are changed with PATCH on the record.
+
+## Change a single field
+
+v3 exposes fields as paths under a record, so you can read or change one field without sending the whole record:
+
+```bash
+# Read one field
+curl --request GET \
+  --url 'https://<v3-base-url>/api/v3/products/<identifier>/<field>' \
+  --header 'Authorization: Bearer <token>'
+```
+
+The same path pattern extends through related entities, in the form `/api/v3/<entities>/<identifier>/<subentity>/<identifier>/<field>`.
+
+## Advanced updates
+
+For changes that a simple field assignment can't express, such as inserting into a specific position in a list, `API V3.md` specifies JSON Patch: send a PATCH with the content type `application/json-patch+json` and a body following RFC 6902.
+
+<Callout type="warn" title="FLAG">
+  `[PENDING]` JSON Patch support isn't declared in the spec. Confirm before documenting it as available.
+</Callout>
+
+## Async operations
+
+An operation that can't complete within the request returns `202` with a `process_id` rather than a result. Track it through the Process Manager API, and the record changes once processing finishes.
+
+<Callout type="warn" title="FLAG">
+  `[PENDING]` `API V3.md` describes a Process Manager API exposing full CRUD for processes, with process transitions handled by dedicated endpoints rather than PATCHes to a status field, but its paths are listed as undecided and no process endpoint appears in the spec. Document the tracking flow once the paths are confirmed.
+</Callout>
+
+## Write safely
+
+- **Read before you write.** Confirm which records match your filter before applying a change to them.
+- **Test deletes on one record.** Erasure and inheritance interact in ways that are hard to predict from a filter alone.
+- **Don't parse a write response for values.** Read the record back instead.
+- **Pace a long run of writes.** v3 has no bulk write endpoints, so a large change is many single requests. See [Bulk operations for large catalogs](/docs/guides/bulk-operations-for-large-catalogs).
+
+## Related resources
+
+Now that you know how v3 handles writes, you can explore these related pages.
+
+<Cards>
+  <Card icon={<TriangleAlert />} title="Errors and Status Codes" href="/docs/reference/v3/errors-status-codes">
+    Read the status codes and error shapes a failed write returns.
+  </Card>
+  <Card icon={<BookOpen />} title="Safely remove categories, assets, or relationships" href="/docs/guides/safely-removing-categories-assets-or-relationships">
+    Apply these delete rules to a real cleanup task.
+  </Card>
+</Cards>

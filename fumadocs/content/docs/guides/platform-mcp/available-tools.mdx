@@ -1,8 +1,113 @@
 ---
 title: "Available tools"
-description: "The full set of platform tools exposed through the MCP (e.g., product search, catalog queries)."
+description: "Reference for the Plytix resources an agent can reach through the Platform MCP, which ones support writes, and which are read-only."
 ---
 
-**Content type:** Reference
+import { ListChecks, ShieldCheck } from 'lucide-react';
 
-_Placeholder page: content coming soon. This page will cover: The full set of platform tools exposed through the MCP (e.g., product search, catalog queries)._
+This page documents the Plytix resources an agent can work with through the Platform MCP, which operations each one supports, and which are read-only.
+
+<Callout type="warn" title="FLAG">
+  **Insufficient source:** the Plytix Platform MCP is a roadmap feature and is not live yet (see `glossary.md`, "MCP Server"), and no tool list has been published. This page documents the PIM v3 API surface from `openapi_pimv3.json`, which is ground truth for what the platform can do, but the mapping from API operations to MCP tools is unconfirmed. Before publishing, get answers to:
+
+  - What are the tool names, and does one tool cover a resource or a single operation?
+  - Does every resource below get a tool, or is the first release a subset?
+  - Do tools accept the same filter and pagination parameters as the v3 search endpoints?
+  - Are there tools with no API equivalent, such as a combined search across entity types?
+
+  Until those are answered, this page names resources rather than tools. Don't invent tool names to fill the gap.
+</Callout>
+
+Key points on this page:
+
+- The Plytix PIM v3 API covers 18 resource groups, spanning products, assets, and outputs.
+- Most groups support full read and write. Two are read-only, and one has no update operation.
+- An agent's access to any of them is still bounded by its role. Reaching a resource and being allowed to change it are separate questions.
+- Search operations are where filtering and pagination happen, and they're what an agent uses most.
+
+## How resources map to tools
+
+The Platform MCP is expected to sit on top of the PIM v3 API, so the resources below are the surface an agent works with. `[PENDING]`
+
+Each group follows the same shape in v3. A search operation returns a filtered, paged collection. A get operation returns one record by identifier. Create, update, and delete operate on single records. There are no bulk write operations in v3, which is why a large batch runs as many single calls and needs pacing. See [Bulk operations for large catalogs](/docs/guides/bulk-operations-for-large-catalogs).
+
+## Product data
+
+The core of the PIM, and where most agent work happens.
+
+| Resource | Read | Write | Covers |
+|---|---|---|---|
+| Products | Search, get | Create, update, delete | Product records and their attribute values |
+| Product attributes | Search, get | Create, update, delete | Attribute definitions available to products |
+| Product attribute groups | Search, get | Create, delete | Groupings of attributes. No update operation |
+| Product categories | Search, get | Create, update, delete | The category tree and its entries |
+| Product families | Search, get | Create, update, delete | Families and the variant structure under them |
+| Family attributes | Search, get | Create, update, delete | Which attributes belong to a given family |
+| Product family models | Search, get | None | Family model definitions. Read-only |
+| Relationships | Search, get | Create, update, delete | Relationship type definitions |
+| Product relationships | Search, get | Create, update, delete | Relationships attached to a specific product |
+| Related products | Search, get | None | The products on the far side of a relationship. Read-only |
+| Product lists | Search, get | Create, update, delete | Saved product lists |
+
+<Callout type="info" title="Two of these are read-only">
+  Product family models and related products expose no create, update, or delete operations in v3. An agent can read them to understand your structure, and it changes that structure through product families and product relationships instead.
+</Callout>
+
+## Assets
+
+Digital assets and the ways they're organized.
+
+| Resource | Read | Write | Covers |
+|---|---|---|---|
+| Assets | Search, get | Create, update, delete | Asset records and their metadata |
+| Asset categories | Search, get | Create, update, delete | The asset category tree |
+| Asset lists | Search, get | Create, update, delete | Saved asset lists |
+
+## Outputs, imports, and connections
+
+These groups exist in the v3 spec but are the least settled part of this page. Read the callout below before relying on them.
+
+| Resource | Read | Write | Covers |
+|---|---|---|---|
+| Channels | Search, get | Create, update, delete | Channel records `[CONFLICT]` |
+| Connections | Search, get | Create, update, delete | Dropbox and FTP connections |
+| Import profiles | Search, get | Create, update, delete | Import profile definitions |
+| Ecatalogs | Search, get | Create, update, delete | Brand Portal catalogs |
+| PDF catalogs | Search, get | Create, update, delete | Product Data Sheet catalogs |
+
+<Callout type="warn" title="FLAG">
+  **Cross-page conflict on Channels.** `openapi_pimv3.json` defines full CRUD at `/api/v3/channels`, but the project's source materials state that Channels are configured only in the Plytix interface, and the standing rule in `information-architecture.md` (Notes, flagged 2026-09-29) is that guides keep following the interface-only claim until Plytix confirms otherwise. A spec entry doesn't prove an endpoint is live or supported.
+
+  This page lists the resource because the spec is the higher-trust source, and marks it so no reader treats it as settled. Resolve this with Plytix or with the `endpoint-tester` skill before publishing, and make sure the answer lands on this page, [Practical examples](/docs/guides/platform-mcp/practical-examples), and [Permissions and security considerations](/docs/guides/platform-mcp/permissions-and-security) at the same time, since all three currently describe Channels as interface-only.
+</Callout>
+
+## Searching and paging
+
+Search operations are what an agent calls most, because nearly every request starts with finding the right records. Two behaviors are worth knowing, since both show up as wrong answers rather than errors:
+
+- **Results are paged.** An agent that stops at the first page reports a count lower than the truth. If a total looks short, ask it to page through everything.
+- **Filters support more than equality.** Plytix supports OR logic and completeness filters, which is what makes questions like "which products are missing a description or an image" answerable in one pass. See [Audit product data quality with filters](/docs/guides/auditing-product-data-quality-with-filters).
+
+For the full parameter list on any of these operations, see the [v3 API reference](/docs/reference/v3).
+
+## What has no tool
+
+No tool exists for something the API doesn't expose. Two gaps come up often enough to state directly:
+
+- **Account administration**, including users, roles, and API keys, is an Owner and Admin task in the Plytix interface.
+- **Channel configuration**, per the standing rule above, is done in the Plytix interface. Use Destinations to work with channel-eligible products programmatically.
+
+Reaching a resource also isn't the same as being allowed to change it. An agent's role decides that, and a tool it can't use will fail rather than quietly do nothing. See [Permissions and security considerations](/docs/guides/platform-mcp/permissions-and-security).
+
+## Related resources
+
+Now that you know which resources an agent can reach, you can explore these related pages.
+
+<Cards>
+  <Card icon={<ListChecks />} title="Practical examples" href="/docs/guides/platform-mcp/practical-examples">
+    See these resources used in four common agent workflows.
+  </Card>
+  <Card icon={<ShieldCheck />} title="Permissions and security considerations" href="/docs/guides/platform-mcp/permissions-and-security">
+    Learn what bounds an agent's access to each resource.
+  </Card>
+</Cards>

@@ -1,8 +1,185 @@
 ---
 title: "Migrating to v3"
-description: "Step-by-step guide for teams moving an existing v1/v2 integration to v3, covering auth changes, endpoint mapping, and breaking differences."
+description: "Learn how to move an existing v1/v2 integration to v3, from converting searches and pagination through handling v3's new response conventions."
 ---
 
-**Content type:** How-to Guide
+import { Table2, BookOpen } from 'lucide-react';
 
-_Placeholder page: content coming soon. This page will cover: Step-by-step guide for teams moving an existing v1/v2 integration to v3, covering auth changes, endpoint mapping, and breaking differences._
+This guide walks through moving an existing v1 or v2 integration to v3: checking what v3 covers, converting your searches and pagination to the new query syntax, updating endpoint paths, and adjusting how your code reads responses.
+
+The good news first: your authentication doesn't change. The work is concentrated in how you search and how you read write responses.
+
+<Callout type="warn" title="FLAG">
+  **Conflict on v3 write parity.** `before-writing.md` (§3) states that v1/v2 endpoints remain required for any workflow that creates, updates, or deletes products, because v3 doesn't have write parity yet. But `openapi_pimv3.json` defines POST, PATCH, and DELETE across every resource group, and `information-architecture.md` already carries this as an open conflict (Notes, flagged 2026-09-29).
+
+  Per the project's trust order the spec outranks the prose, but a spec entry doesn't prove an endpoint is live. This guide describes the write path because the spec documents it, and marks it here so nobody plans a cutover on an unverified assumption. Confirm with Plytix or with the `endpoint-tester` skill before publishing, and if v3 writes aren't live, this page becomes "migrate your reads, keep your writes on v1/v2."
+</Callout>
+
+## Prerequisites
+
+Before you start, you need:
+
+- **A working v1 or v2 integration**, and access to its source. This guide assumes you're changing existing code, not starting fresh.
+- **A test account or a safe dataset.** Write behavior differs between versions in ways that are hard to spot until something is already deleted.
+- **Your current API credentials.** They keep working, so you don't need new ones.
+
+## Migrate your integration
+
+1. **Check what v3 covers before you plan the move.**
+
+   v3 reorganized the API rather than replicating it, and a few v1 endpoints have no direct v3 equivalent in the spec. Check whether your integration depends on any of these:
+
+   | v1 capability | Status in the v3 spec |
+   |---|---|
+   | `GET /api/v1/filters/product` and the other filter-discovery endpoints | Not present |
+   | `PUT /api/v1/assets/{asset_id}/content` (asset content upload) | Not present |
+   | `POST /api/v1/products/{parent_product_id}/variants` and variant resync | Not present as variant endpoints. v3 models this through product families and product family models |
+   | `POST /api/v1/accounts/api-credentials/search` | Not present |
+   | Bulk create, update, and delete | Not present `[CONFLICT]` |
+
+   <Callout type="warn" title="FLAG">
+     `[CONFLICT]` on bulk: `API V3.md` specifies a full bulk API at `api/v3/-/bulk/<entities>` with job tracking, but no bulk path exists in `openapi_pimv3.json`, and [Bulk operations for large catalogs](/docs/guides/bulk-operations-for-large-catalogs) states there are no bulk endpoints today. `API V3.md` is a design document with approved, rejected, and postponed options, so parts of it describe intended rather than shipped behavior. Treat the spec as current and confirm the bulk timeline with Plytix.
+   </Callout>
+
+2. **Keep your authentication as it is.**
+
+   Both versions use the same auth service. You exchange your API key and password once, then send the token as a bearer header:
+
+   ```bash
+   curl --request POST \
+     --url https://auth.plytix.com/auth/api/get-token \
+     --header 'Content-Type: application/json' \
+     --data '{
+       "api_key": "your.api.key",
+       "api_password": "your.secret.api.password"
+     }'
+   ```
+
+   Your existing credentials, their roles, and your token-refresh logic all carry over. See [Quickstart](/docs/guides/quickstart) for the full flow.
+
+   <Callout type="warn" title="FLAG">
+     `[PENDING]` Confirm that v3 accepts tokens from the same auth service and that token lifetime is unchanged. `roadmap.md` records the short token lifetime as a known pain point for long-running integrations, and [quickstart.mdx](/docs/guides/quickstart) currently carries a "Redo" note about the auth service move, so this step needs verifying against a live v3 call before publishing.
+   </Callout>
+
+3. **Convert your searches from a POST body to a GET query.**
+
+   This is the largest change. In v1, a search is a POST with a JSON body. In v3, it's a GET with query parameters, and the filters move into the URL.
+
+   <Tabs items={['v1', 'v3']}>
+     <Tab value="v1">
+       ```bash
+       curl --request POST \
+         --url https://pim.plytix.com/api/v1/products/search \
+         --header 'Authorization: Bearer <token>' \
+         --header 'Content-Type: application/json' \
+         --data '{
+           "filters": [
+             [
+               {"field": "status", "operator": "eq", "value": "Draft"},
+               {"field": "categories", "operator": "in", "value": ["5c4ed7f62f0985001c233274"]}
+             ]
+           ],
+           "attributes": ["label", "status", "categories"],
+           "pagination": {"order": "sku", "page": 1, "page_size": 25}
+         }'
+       ```
+     </Tab>
+     <Tab value="v3">
+       ```bash
+       curl --request GET \
+         --url 'https://<v3-base-url>/api/v3/products?status=Draft&categories[in]=5c4ed7f62f0985001c233274&_fields=label&_fields=status&_fields=categories&_sort_by=sku&_page=1&_page_size=25' \
+         --header 'Authorization: Bearer <token>'
+       ```
+     </Tab>
+   </Tabs>
+
+   Three parts of the body become three kinds of parameter:
+
+   | v1 body key | v3 equivalent |
+   |---|---|
+   | `filters` | Query parameters in bracket syntax, such as `status=Draft` or `categories[in]=<id>` |
+   | `attributes` | `_fields=<name>`, repeated once per field |
+   | `pagination` | `_page`, `_page_size`, and `_sort_by` |
+
+   The operators change shape but not meaning. `{"operator": "eq"}` becomes `field=value` or `field[eq]=value`, `!exists` becomes `field[!exists]`, `in` becomes `field[in]=value` repeated per value, and the comparison operators become `field[gt]`, `field[gte]`, `field[lt]`, and `field[lte]`.
+
+   Boolean grouping changes too. In v1, filters nest as arrays: items inside one array combine with AND, and the outer arrays combine with OR. In v3, `&` is AND, and OR uses an indexed prefix:
+
+   ```text
+   _or[0]status=Draft&_or[0]status=Review
+   ```
+
+   Custom attributes are addressed directly rather than through a field name string: `attributes.name[eq]=value`. [Migration reference](/docs/guides/migrating-to-v3/migration-reference) carries the full operator mapping.
+
+   <Callout type="warn" title="FLAG">
+     `[PENDING]` The v3 base URL isn't confirmed. v1 and v2 are served from `https://pim.plytix.com`, and this guide uses `<v3-base-url>` as a placeholder. Also confirm the v1 grouping semantics (AND within an inner array, OR between outer arrays) with `endpoint-tester` before publishing, since `openapi_pimv1.json` was converted from a Postman collection and its own description says the shapes haven't been verified against the live API.
+   </Callout>
+
+4. **Update your endpoint paths.**
+
+   v3 names resources consistently: plural, kebab-case, and resource-first, rather than a type appended to a generic path. A few common moves:
+
+   | v1 | v3 |
+   |---|---|
+   | `/api/v1/attributes/product` | `/api/v3/product-attributes` |
+   | `/api/v1/attribute-groups/product` | `/api/v3/product-attribute-groups` |
+   | `/api/v1/categories/product` | `/api/v3/product-categories` |
+   | `/api/v1/categories/file` | `/api/v3/asset-categories` |
+   | `/api/v1/product_families` | `/api/v3/product-families` |
+
+   Two changes are worth calling out beyond the renaming:
+
+   - **Products accept more than one identifier.** In v3, both the product ID and the SKU work in the path, as long as the SKU is URL-encoded. That removes a lookup step for integrations keyed on SKU.
+   - **Related data comes back with the record.** Where v1 has separate calls such as `GET /api/v1/products/{product_id}/assets`, v3 returns related entities through field selection and expansion on the product itself.
+
+   See [Migration reference](/docs/guides/migrating-to-v3/migration-reference) for the complete mapping.
+
+5. **Change how your code reads write responses.**
+
+   In v3, write endpoints don't return the modified entity. Code that reads the response body to get updated values will break quietly, because the request still succeeds.
+
+   | Operation | v3 response |
+   |---|---|
+   | Create | `201` with the ID of the created entity |
+   | Update (PATCH) | `204` with no body |
+   | Delete | `204` with no body |
+   | Accepted for async processing | `202` with a `process_id` to track |
+
+   If you need the resulting record, read it back with a GET after the write.
+
+6. **Re-check your delete logic before you run it.**
+
+   In v3, DELETE erases the entity or the field it's applied to. It doesn't set the value to null or reset it to a default, and removing a field can cause inheritance to resolve for it instead. Confirm on a test record that a delete does what your v1 code assumed.
+
+7. **Run both versions side by side before cutting over.**
+
+   Point a copy of your integration at v3 while the v1 one keeps running, and compare the results: record counts from the same filter, the fields that come back, and the totals in the pagination block. A count that differs usually means a filter didn't translate the way you expected, and it's far cheaper to find that in a comparison than in production.
+
+## Troubleshooting
+
+- **Problem:** A v3 search returns everything, ignoring your filter.
+  - **Solution:** Check the bracket syntax and the URL encoding. An unrecognized parameter is easy to produce by hand, and a search with no recognized filter means "get all."
+  - **Prevention:** Compare counts against the same v1 filter before trusting a converted query.
+
+- **Problem:** Your code breaks after a successful update.
+  - **Solution:** v3 returns `204` with no body on PATCH. Read the record back with a GET if you need the updated values.
+  - **Prevention:** Audit every place your v1 code uses a write response body before you switch versions.
+
+- **Problem:** Results are missing fields you used to get.
+  - **Solution:** Add them with `_fields`, repeated once per field. Field selection moved from the `attributes` body key to query parameters.
+
+- **Problem:** A field is gone rather than empty after a delete.
+  - **Solution:** That's v3's behavior. DELETE erases rather than nulls. Restore the value with a PATCH, and use PATCH rather than DELETE when you meant to clear a value.
+
+## Related articles
+
+Now that you know how to move an integration to v3, you can explore these related pages.
+
+<Cards>
+  <Card icon={<Table2 />} title="Migration reference" href="/docs/guides/migrating-to-v3/migration-reference">
+    Look up the full endpoint, operator, and response mapping side by side.
+  </Card>
+  <Card icon={<BookOpen />} title="v3 API reference" href="/docs/reference/v3">
+    Browse the v3 resources and their parameters in detail.
+  </Card>
+</Cards>

@@ -1,8 +1,147 @@
 ---
 title: "Permissions and security considerations"
-description: "Required OAuth scopes, access boundaries, and security guidance."
+description: "Reference for the OAuth scopes, role and permission boundaries, and security practices that apply when an AI agent acts on your Plytix account."
 ---
 
-**Content type:** Reference
+import { KeyRound, ListChecks } from 'lucide-react';
 
-_Placeholder page: content coming soon. This page will cover: Required OAuth scopes, access boundaries, and security guidance._
+This page documents what an AI agent connected to the Plytix Platform MCP can reach, what limits that reach, and the practices worth adopting before you grant one write access.
+
+<Callout type="warn" title="FLAG">
+  The Plytix Platform MCP is a roadmap feature and is not live yet (see `glossary.md`, "MCP Server"). The permission model below is Plytix's existing role model, sourced from the help center, which documents the Plytix interface and API keys. Whether the Platform MCP inherits that model is unconfirmed. Every section marked `[PENDING]` needs an answer from the product team before this page is published.
+</Callout>
+
+Key points on this page:
+
+- An agent's reach is bounded by a Plytix role, the same way a user's or an API key's reach is. `[PENDING]`
+- Plytix has four system roles and supports up to 15 custom team roles with per-area permissions.
+- Attribute-level permissions don't apply to imports, which is the one gap worth checking before you trust a restricted role.
+- Writes are immediate and there's no undo, so read and write belong in separate steps.
+- Product data an agent reads can carry instructions the agent acts on. Treat supplier-supplied text as untrusted.
+
+## OAuth scopes
+
+<Callout type="warn" title="FLAG">
+  **Insufficient source:** no scope list exists. The outline (`plytix-outline-canvas.md`) specifies this section as "Required OAuth scopes," but no spec, scope name, or authorization flow has been shared, and nothing in `materials/` or `openapi_pimv3.json` describes one. This section can't be written without answers to:
+
+  - What scopes does the Platform MCP define, and what does each one permit?
+  - Are scopes granted per tool, per entity (products, assets, categories), or per operation (read, write)?
+  - Does the agent act as the authorizing user, inheriting that user's role, or as a separate credential with its own role, the way API keys work today?
+  - Can a user grant read-only access without an administrator creating a dedicated role first?
+
+  Do not publish a scope table assembled from guesswork. An incorrect scope table on a security page is worse than an absent one.
+</Callout>
+
+## Access boundaries
+
+Plytix limits access by role, not by user. You assign permissions to a role, then assign that role to a person or an API key. If the Platform MCP follows the same pattern, the agent's reach is whatever its role allows, and nothing more.
+
+<Callout type="warn" title="FLAG">
+  **Unconfirmed applicability:** the tables in this section describe the role model as it works in the Plytix interface and for API keys (sourced from `materials/help-center/system-roles.md`, `team-roles/permissions.md`, and `api.md`). Per the project's trust order, help center content ranks below verified API findings. Confirm that MCP access resolves through the same roles before publishing.
+</Callout>
+
+### System roles
+
+Every Plytix account has four system roles. All of them except Blocked can view and edit every PIM section, so they're a coarse control, not a precise one.
+
+| Role | PIM access | Account administration | Notes |
+|---|---|---|---|
+| Owner | View and edit all sections | View and edit all sections | Can delete the account and transfer ownership |
+| Admin | View and edit all sections | View and edit all sections | Can create and manage API keys |
+| User | View and edit all sections | Account Summary only | No access to the rest of account administration |
+| Blocked | None | Account Summary only | Cannot access the PIM at all |
+
+If you connect an agent under a system role other than Blocked, it can edit everything in the PIM. To narrow that, you need a custom team role.
+
+### Team roles
+
+Team roles are a paid feature that lets an administrator build custom permission sets. An account supports up to 15 custom roles. Each area is set to Edit, View, or in some cases None.
+
+| Permission type | What it allows |
+|---|---|
+| Edit | Add and delete information |
+| View | Read information, and for products, export and filter it |
+| None | No visibility into the area at all |
+
+These are the PIM areas you can set:
+
+| Area | Options | Covers |
+|---|---|---|
+| Products | Edit, View | All product management and product lists |
+| Attributes (product level) | Edit, View | Whether attribute values can be changed or only read |
+| Families (product level) | Edit, View | The families and variants tab |
+| Categories (product level) | Edit, View | Assigning products to categories, and changing those assignments |
+| Relationships (product level) | Edit, View | Adding and removing product relationships |
+| Import | Edit, View, None | Imports, feeds, profiles, and logs |
+| Settings Management | Edit, None | The Settings tab under Automations |
+| Assets | Edit, View | Asset and asset list management |
+| Asset categories | Edit, None | Asset category settings |
+| Connections | Edit, None | Dropbox and FTP connections |
+| Automations | Edit, View, None | Condition-based automated actions |
+| Brand Portals, Channels, Product Data Sheets | Edit, View, None | Add-on settings, shown only for add-ons active on your account |
+
+### Attribute-level permissions
+
+Beyond the area level, an administrator can set View or Edit per individual attribute, per custom role. This is how you lock a price or a compliance field while still letting a role edit descriptions.
+
+<Callout type="warn" title="Attribute permissions don't cover imports">
+  Attribute-level permissions limit editing in the Plytix interface, but not in the importer. A role with View rights on an attribute and Edit rights on Import can still change that attribute through an import. To close the gap, set Import to View or None on that role.
+
+  This matters more for an agent than for a person, because an agent may reach for an import to complete a bulk request. Confirm how the Platform MCP writes data before relying on attribute-level permissions to protect a field. `[PENDING]`
+</Callout>
+
+### What sits outside the API
+
+Some parts of Plytix are configured in the interface and have no API surface, so no scope or role grants an agent access to them.
+
+- **Channels**, including Shopify, BigCommerce, and feed exports, are set up in the Plytix interface. An agent can prepare and check the product set, and you use Destinations to work with channel-eligible products programmatically.
+- **Account administration**, including creating users, roles, and API keys, is an Owner and Admin task in the interface.
+
+## Security practices
+
+### Grant the narrowest role that completes the job
+
+Create a dedicated team role for the agent rather than connecting it under an Owner or Admin account. Start with View across the board, then turn on Edit only for the areas the agent's actual work needs. A read-only agent covers auditing, exporting, and answering questions about the catalog, which is most of what people ask an agent to do.
+
+### Keep read and write in separate steps
+
+Writes take effect the moment the agent calls them, and Plytix has no undo for them. Ask for a plan, review it, then approve the change as a second prompt. This is the discipline every workflow in [Practical examples](/docs/guides/platform-mcp/practical-examples) follows.
+
+### Treat product data as untrusted input
+
+An agent reading your catalog is reading text that came from suppliers, importers, and integrations. If that text contains something shaped like an instruction, an agent may act on it. This is a general risk for any agent that reads data and can also write it, not a Plytix-specific flaw, and the practical defense is the same one as above: don't let a single prompt both read unfamiliar data and write changes.
+
+### Protect the connection itself
+
+The authorization token lives in your client, in whatever way that client stores it. That storage is worth a look before you connect an account with write access.
+
+- Check whether your client writes its configuration into a file that gets committed to a repository or synced across machines.
+- Disconnect the server when you stop using it, and revoke the authorization on the Plytix side rather than only removing it from the client. `[PENDING]`
+- Name the connection after the person or tool using it, following the same practice Plytix recommends for API keys, so you can tell later who had access.
+
+### Watch the pace
+
+Rate limits vary by account and are carried in your access token's claims. An agent working through a large batch one item at a time can reach the limit and fail partway through, which leaves a job half done rather than cleanly failed. For anything past a few dozen items, see [Bulk operations for large catalogs](/docs/guides/bulk-operations-for-large-catalogs).
+
+## Auditing what an agent did
+
+Plytix records processing events in the Process Log, reachable from the icon next to your account name. The **Activity** section lists the last 25 completed events, each with an action, the user who ran it, and a timestamp. Imports, exports, feed and channel processing, bulk updates, and post-calculated attribute edits all appear there.
+
+Twenty-five events is a short history for an agent working through a batch, so export or note what you need before it scrolls away.
+
+<Callout type="warn" title="FLAG">
+  **Insufficient source:** it's unconfirmed whether MCP actions appear in the Process Log at all, and if they do, which user they're attributed to. Ask the product team whether agent activity is distinguishable from the authorizing user's own activity. Without that, an audit can't answer "did a person or an agent change this?"
+</Callout>
+
+## Related resources
+
+Now that you know where the access boundaries sit, you can explore these related pages.
+
+<Cards>
+  <Card icon={<KeyRound />} title="Authentication and OAuth setup" href="/docs/guides/platform-mcp/authentication-and-oauth-setup">
+    Authorize a client to act on your Plytix account.
+  </Card>
+  <Card icon={<ListChecks />} title="Practical examples" href="/docs/guides/platform-mcp/practical-examples">
+    See the read-then-write pattern applied to four common workflows.
+  </Card>
+</Cards>

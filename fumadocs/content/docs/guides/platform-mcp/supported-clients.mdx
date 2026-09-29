@@ -1,8 +1,89 @@
 ---
 title: "Supported clients"
-description: "Which AI assistants and agent frameworks are compatible with the Plytix Platform MCP."
+description: "Reference for which AI assistants and agent frameworks can connect to the Plytix Platform MCP, and what each client needs to sign in."
 ---
 
-**Content type:** Reference
+import { KeyRound, Wrench } from 'lucide-react';
 
-_Placeholder page: content coming soon. This page will cover: Which AI assistants and agent frameworks are compatible with the Plytix Platform MCP._
+This page lists the AI assistants and agent frameworks that can connect to the Plytix Platform MCP, and what each one needs in order to sign in.
+
+<Callout type="warn" title="FLAG">
+  The Plytix Platform MCP is a roadmap feature and is not live yet (see `glossary.md`, "MCP Server"). Nothing on this page has been confirmed against a running server. Every Plytix-side detail below is marked as unconfirmed and must be verified with the product team before this page is published.
+</Callout>
+
+## Before you use this page
+
+A client is compatible with the Plytix Platform MCP when it can do two things: connect to a remote MCP server over HTTP, and complete an OAuth sign-in to that server.
+
+<Callout type="warn" title="FLAG">
+  **Insufficient source:** the transport and authorization method are assumed, not confirmed. The outline for this section (`plytix-outline-canvas.md`) pairs this page with "Authentication and OAuth Setup," which implies a remote server using OAuth, but no spec, endpoint URL, or protocol version has been shared. Confirm the following before publishing:
+
+  - Is the Platform MCP served over HTTP at a public endpoint, and what is that URL?
+  - Does it use OAuth, and which OAuth flow and protocol version?
+  - Is a local (stdio) option offered as well?
+</Callout>
+
+| Requirement | What it means | Confirmed? |
+|---|---|---|
+| Remote HTTP transport | The client can register a server by URL, rather than running one on your machine | No `[PENDING]` |
+| OAuth sign-in | The client can open a browser, complete authorization, and store the returned token | No `[PENDING]` |
+| Tool calling | The model behind the client can call tools, not only read text | Yes, standard across the clients listed |
+
+## AI assistants
+
+These assistants connect to remote MCP servers directly, with no code to write.
+
+<Callout type="warn" title="FLAG">
+  MCP client support changes fast, and the table below reflects client capabilities at the time of writing, not a test against a Plytix server. Re-verify each row against the client's own documentation on the day this page ships, and again at each review cycle.
+</Callout>
+
+| Client | Remote HTTP servers | OAuth sign-in | Where you add the server |
+|---|---|---|---|
+| Claude Code | Yes | Yes | `claude mcp add --transport http`, then `/mcp` to authorize |
+| Claude Desktop | Yes | Yes | **Settings > Connectors > Add custom connector** |
+| Cursor | Yes | Yes | `.cursor/mcp.json`, or **Settings > MCP** |
+| VS Code (GitHub Copilot) | Yes | Yes | `.vscode/mcp.json`, using the `servers` key and `"type": "http"` |
+| ChatGPT | Yes | Yes | Connector settings, on plans that allow custom connectors |
+| Windsurf | Yes | Verify | `mcp_config.json` |
+| Gemini CLI | Yes | Verify | `settings.json` |
+
+The two columns marked "Verify" are the ones to test first: both clients read remote servers, but their OAuth handling has changed between releases, and neither has been tested against a Plytix endpoint.
+
+## Agent frameworks and SDKs
+
+If you're building an agent rather than using an assistant, you connect through an MCP client library. Each of these speaks the same protocol, so the Platform MCP looks the same from all of them.
+
+| Framework or SDK | Language | Notes |
+|---|---|---|
+| MCP Python SDK | Python | Reference implementation, with a streamable HTTP client and an OAuth client provider |
+| MCP TypeScript SDK | TypeScript | Reference implementation, same transports as the Python SDK |
+| OpenAI Agents SDK | Python, TypeScript | Connects to a remote MCP server and exposes its tools to the agent |
+| LangChain and LangGraph | Python, TypeScript | Uses the MCP adapter package to turn MCP tools into framework tools |
+| Vercel AI SDK | TypeScript | MCP client with HTTP transport, for agents running in a web app |
+
+<Callout type="warn" title="FLAG">
+  **Insufficient source:** framework rows describe each library's general MCP support, not verified interoperability with Plytix. Once the server is live, test at least one assistant and one framework end to end, and replace this callout with the tested versions.
+</Callout>
+
+## Clients that only run local servers
+
+Some clients run MCP servers as local processes and can't register a URL. You can still reach a remote server from them by putting a local bridge in front of it, which runs on your machine and forwards requests to the remote endpoint over HTTP.
+
+This is a general MCP technique rather than a Plytix feature, and it adds a component that Plytix doesn't support or maintain. If your client offers native remote support in a newer version, upgrading is the better route.
+
+<Callout type="info" title="Reading the docs is a separate connection">
+  The [Documentation MCP](/docs/guides/documentation-mcp) is a different server that reads these documentation pages and needs no account or token. Its client requirements are lower, because it has no sign-in step. Connecting one server doesn't connect the other.
+</Callout>
+
+## Related resources
+
+Now that you know which client to use, you can explore these related guides.
+
+<Cards>
+  <Card icon={<KeyRound />} title="Authentication and OAuth setup" href="/docs/guides/platform-mcp/authentication-and-oauth-setup">
+    Authorize your client to act on a Plytix account.
+  </Card>
+  <Card icon={<Wrench />} title="Available tools" href="/docs/guides/platform-mcp/available-tools">
+    See which Plytix actions an agent can call once it's connected.
+  </Card>
+</Cards>

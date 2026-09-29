@@ -1,8 +1,109 @@
 ---
-title: "Pagination Reference"
-description: "How to page through large result sets."
+title: "Pagination"
+description: "Reference for how v3 pages search results, what the pagination block contains, and how to loop through a full result set safely."
 ---
 
-**Content type:** Reference
+import { Filter, Layers } from 'lucide-react';
 
-_Placeholder page: content coming soon. This page will cover: How to page through large result sets._
+Search endpoints return results in pages. This page documents the pagination block in the response, how to walk through a result set, and the request parameters that control page size and sort order.
+
+Key points on this page:
+
+- Every search response carries a `pagination` object alongside `data` and `errors`.
+- The confirmed way to page is to follow `next_page` until it comes back null.
+- `pagination` is null on responses that aren't searches, such as getting one record.
+- Request parameters for page size and sorting aren't in the spec yet, so treat them as unconfirmed.
+
+## The search response envelope
+
+Every search response uses the same envelope:
+
+```json
+{
+  "data": [],
+  "errors": [],
+  "pagination": {
+    "next_page": null,
+    "previous_page": null
+  }
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `data` | array | The records matching your query |
+| `errors` | array of `Error` | Always present, empty when there's nothing to report |
+| `pagination` | object or null | Present on searches, null on operations that return a single record |
+
+The `pagination` object has two fields, both of which can be null:
+
+| Field | Type | Description |
+|---|---|---|
+| `next_page` | string or null | URL of the next page. Null on the last page |
+| `previous_page` | string or null | URL of the previous page. Null on the first page |
+
+## Page through a result set
+
+v3 returns page URLs rather than a page number to increment. Request the first page, then follow `next_page` until it's null:
+
+```bash
+# First page
+curl --request GET \
+  --url 'https://<v3-base-url>/api/v3/products?status=Draft' \
+  --header 'Authorization: Bearer <token>'
+
+# Then request the URL in pagination.next_page, and repeat
+# until next_page comes back null.
+```
+
+A loop in pseudocode:
+
+```text
+url = "/api/v3/products?status=Draft"
+while url is not null:
+    response = GET url
+    process(response.data)
+    url = response.pagination.next_page
+```
+
+<Callout type="info" title="Follow the URL, don't rebuild it">
+  `next_page` carries your filters and sort order forward. Rebuilding the URL by incrementing a page number risks dropping a parameter, and it breaks if Plytix changes the paging mechanism later. Use the URL you're given.
+</Callout>
+
+## Request parameters
+
+<Callout type="warn" title="FLAG">
+  **Insufficient source:** the parameters below come from `API V3.md`, a design document with approved, rejected, and postponed options. Neither `openapi_pimv3.json` nor `fumadocs/openapi.json` declares any query parameter on any search operation, so none of these is confirmed. Verify with the `endpoint-tester` skill before publishing, and drop any that the live API doesn't accept.
+</Callout>
+
+| Parameter | Type | Description |
+|---|---|---|
+| `_page` | integer | The page to return `[PENDING]` |
+| `_page_size` | integer | Records per page `[PENDING]` |
+| `_sort_by` | string | Field to sort by `[PENDING]` |
+| `_filtered_count` | boolean | Include the count of records matching the filter `[PENDING]` |
+| `_total_count` | boolean | Include the total count of records `[PENDING]` |
+
+<Callout type="warn" title="FLAG">
+  **Conflict on counts.** `API V3.md` describes a pagination block containing `filtered_count` and `total_count`, but the `Pagination` schema in `fumadocs/openapi.json` defines only `next_page` and `previous_page`. Per the trust order the spec wins, so this page documents the two URL fields as the confirmed shape. If counts are available, add them here and correct the response tables above.
+</Callout>
+
+## Page without surprises
+
+- **Don't assume a total.** The confirmed pagination block carries no count, so the only reliable way to know how many records matched is to page to the end and tally as you go.
+- **Watch the request rate.** Paging through a large result set is many requests in quick succession. Rate limits vary by account and are carried in your access token's claims, so pace a long loop and back off on `429`. See [Rate limits](/docs/reference/v3/rate-limits).
+- **Ask for fewer fields.** `_fields` narrows each record to what you need, which makes a long paging run noticeably cheaper. See [Filtering and Query Syntax](/docs/reference/v3/filtering-query-syntax).
+- **Expect the set to shift under you.** A catalog that changes mid-run can move records between pages. For an export that has to be internally consistent, filter on a stable field such as a date range rather than paging an unfiltered set.
+
+## Related resources
+
+Now that you can page through results, you can explore these related pages.
+
+<Cards>
+  <Card icon={<Filter />} title="Filtering and Query Syntax" href="/docs/reference/v3/filtering-query-syntax">
+    Narrow a result set before you page through it.
+  </Card>
+  <Card icon={<Layers />} title="Bulk operations for large catalogs" href="/docs/guides/bulk-operations-for-large-catalogs">
+    Apply paging and pacing to a full-catalog job.
+  </Card>
+</Cards>

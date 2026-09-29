@@ -1,8 +1,87 @@
 ---
 title: "Plytix Platform MCP"
-description: "What the Plytix Platform MCP is, how it differs from the Documentation MCP, and what agents can do with it."
+description: "Learn what the Plytix Platform MCP is, how it differs from the Documentation MCP, and when to use an agent instead of writing code."
 ---
 
-**Content type:** Concept
+import { KeyRound, Plug, Wrench, ShieldCheck, ListChecks } from 'lucide-react';
 
-_Placeholder page: content coming soon. This page will cover: What the Plytix Platform MCP is, how it differs from the Documentation MCP, and what agents can do with it._
+The Plytix Platform MCP is a server that lets an AI assistant work with the data in your Plytix account: reading your catalog, answering questions about it, and making changes you approve. This page explains what it is, how it differs from the Documentation MCP, and when reaching for an agent beats writing code.
+
+<Callout type="warn" title="FLAG">
+  The Plytix Platform MCP is a roadmap feature and is not live yet (see `glossary.md`, "MCP Server"). This page and its child pages were written ahead of release from source materials and from the confirmed PIM v3 API surface. Everything marked `[PENDING]` needs confirmation from the product team before publishing.
+</Callout>
+
+Key points on this page:
+
+- The Platform MCP connects an AI assistant to your Plytix account data, not to the documentation.
+- It lowers the bar for building on Plytix: you describe what you want in plain language instead of writing an integration first.
+- An agent's reach is bounded by a Plytix role, the same way a person's or an API key's reach is.
+- Use an agent for work you supervise, and write code for work that runs unattended or repeats.
+
+## What it is
+
+Model Context Protocol (MCP) is an open standard for connecting AI assistants to outside systems. A system exposes a set of tools, the assistant decides which to call, and the results come back into the conversation. The assistant does the reasoning, and the MCP server does the work.
+
+The Plytix Platform MCP applies that to your PIM. Once it's connected and authorized, an assistant such as Claude, ChatGPT, or Gemini can search your products, read your categories and attributes, and change data within the limits of its role. You ask for what you need in plain language, and the assistant works out which calls to make.
+
+The point of it, as Plytix describes it, is that you no longer need to build something before you can do something. The agent already knows the path to create a product or a category, so a task that used to mean writing an integration can start as a request instead. Plytix expects that to widen who builds on the platform, from developers and agencies to people who are comfortable with AI tools but don't write integrations.
+
+## How it differs from the Documentation MCP
+
+Plytix runs two MCP servers, and they do different jobs. Connecting one doesn't connect the other.
+
+| | [Documentation MCP](/docs/guides/documentation-mcp) | Platform MCP |
+|---|---|---|
+| What it reaches | These published documentation pages | The data in your Plytix account |
+| Sign-in | None | Required `[PENDING]` |
+| Can it change anything | No, it's read-only | Yes, within the limits of its role `[PENDING]` |
+| Who can use it | Anyone | Plytix account holders |
+| What it's for | Answering questions about the API from current docs | Working with your catalog |
+
+A useful way to keep them straight: the Documentation MCP helps your assistant write correct code against Plytix, and the Platform MCP lets your assistant skip the code. Many people will want both connected at once.
+
+## What an agent can do with it
+
+The Platform MCP covers the PIM v3 resource surface, which spans product data, assets, and outputs. In practice, that supports work like:
+
+- **Answering questions about the catalog**, such as which products are missing a description or an image.
+- **Curating data before it lands in Plytix**, checking a supplier's spreadsheet against your categories and required attributes before anything is created.
+- **Preparing a slice of the catalog** for a marketplace, a review, or a report.
+
+[Available tools](/docs/guides/platform-mcp/available-tools) lists every resource and which operations it supports, and [Practical examples](/docs/guides/platform-mcp/practical-examples) walks through four of these workflows.
+
+## When to use an agent, and when to write code
+
+Both routes reach the same API, so the question is which suits the job.
+
+**Use an agent** for work you're supervising: one-off questions, audits, exploratory work, curating a batch before importing it, or anything where you want to see the result before committing to it. The agent's advantage is that you don't have to know the endpoint names or the filter syntax in advance.
+
+**Write code** for work that runs unattended or repeats identically: scheduled syncs, large catalogs, and anything where a half-finished run is a problem. The v3 API has no bulk write operations, so a large batch is many single calls that need pacing against your account's rate limit, and that's a job for a script rather than a conversation. See [Bulk operations for large catalogs](/docs/guides/bulk-operations-for-large-catalogs).
+
+## What it doesn't change
+
+Connecting an agent doesn't move any of the boundaries that already exist on your account.
+
+- **Permissions still apply.** An agent acts under a Plytix role, and it can't reach what that role can't reach. See [Permissions and security considerations](/docs/guides/platform-mcp/permissions-and-security).
+- **Writes are still immediate.** There's no undo, which is why the workflows in this section separate reading from writing.
+- **Parts of Plytix stay in the interface.** Channels and account administration are configured in Plytix, so an agent can prepare work for them but can't set them up.
+
+## In this section
+
+<Cards>
+  <Card icon={<KeyRound />} title="Authentication and OAuth setup" href="/docs/guides/platform-mcp/authentication-and-oauth-setup">
+    Authorize a client to act on your Plytix account, and revoke it when you're done.
+  </Card>
+  <Card icon={<Plug />} title="Supported clients" href="/docs/guides/platform-mcp/supported-clients">
+    Check which assistants and frameworks can connect, and what each one needs.
+  </Card>
+  <Card icon={<Wrench />} title="Available tools" href="/docs/guides/platform-mcp/available-tools">
+    See every Plytix resource an agent can reach, and which support writes.
+  </Card>
+  <Card icon={<ShieldCheck />} title="Permissions and security considerations" href="/docs/guides/platform-mcp/permissions-and-security">
+    Understand the role model behind an agent's access, and the practices worth adopting.
+  </Card>
+  <Card icon={<ListChecks />} title="Practical examples" href="/docs/guides/platform-mcp/practical-examples">
+    Follow four common agent workflows, from auditing to cleanup.
+  </Card>
+</Cards>
