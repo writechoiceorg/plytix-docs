@@ -227,4 +227,80 @@
 **Definition:** Describes the correct use of the term.
 **Notes:** Not "api key" or "Api Key"
 
+---
+
+> **Data model terms added 2026-09-29** while writing `guides/data-model.mdx`. Definitions are derived from `openapi_pimv3.json` (authoritative for field shapes) and `materials/help-center/`, not from the content-guidelines PDF. Capitalization is marked `[PENDING]` throughout — confirm against in-product labels before publishing.
+
+---
+
+### Asset
+
+**Capitalisation:** Asset `[PENDING]`
+**Definition:** A file stored in Plytix DAM (image, video, document, spreadsheet, or other file type). Assets exist independently of products; linking one to a product is a separate action from uploading it.
+**Notes:** Assets have their own category tree ([[Product Category]] nodes are not shared with asset categories). The v1 API calls these "files" in places, and the help center uses "files" in article titles. Prefer "asset" in API documentation.
+
+---
+
+### Attribute Group
+
+**Capitalisation:** Attribute Group `[PENDING]`
+**Definition:** A display grouping for product attributes. Controls dashboard layout only, not what a product can store.
+**Notes:** Distinct from [[Product Family]], which controls which attributes apply to a product.
+
+---
+
+### Product
+
+**Capitalisation:** product (lowercase in running text)
+**Definition:** A single item in a Plytix catalog, identified by its SKU. The central entity of the data model: attributes describe it, categories and lists group it, assets and relationships link to it.
+**Notes:** `sku` is the only field required to create one. SKUs are unique per account, case sensitive, and capped at 100 characters.
+
+---
+
+### Product Attribute
+
+**Capitalisation:** Product Attribute `[PENDING]`
+**Definition:** A reusable field definition (for example, "Material" or "Care instructions") with a type that determines what it can hold and how it can be filtered. A product's values for custom attributes live in its `attributes` map, keyed by attribute name.
+**Notes:** Distinct from System Attributes, which sit at the top level of the product object and can't be renamed or deleted. See [[System Attribute]].
+
+---
+
+### Product Category
+
+**Capitalisation:** Product Category `[PENDING]`
+**Definition:** A node in a hierarchical tree that products are filed under. Carries a `parent_id`, a `path` array of names, a `slug`, and an `n_children` count. A product can belong to more than one category.
+**Notes:** Not the same as an asset category; the two trees are separate. Not a [[Smart List]] — categories are structural, lists are selections.
+
+---
+
+### Product Family
+
+**Capitalisation:** Product Family `[PENDING]`
+**Definition:** The set of attributes that applies to one type of product, plus the inheritance rules that pass values from a parent product down to its variants and sub-variants.
+**Notes:** **API constraint:** creating a family, choosing its attributes, and configuring inheritance are dashboard-only. The API can assign a product into an existing family via `product_family_id` but can't build one. Confirmed by this project's endpoint testing.
+
+---
+
+### Relationship
+
+**Capitalisation:** Relationship `[PENDING]`
+**Definition:** A named type of connection between products (for example, "Accessories" or "Bundle contents"). Creating the relationship type and linking products to it are two separate steps; each link can carry a `quantity`.
+**Notes:** Account-level entity. Read from a product through its `product_relationships` field.
+
+---
+
+### System Attribute
+
+**Capitalisation:** System Attribute `[PENDING]`
+**Definition:** An attribute included in every Plytix account by default, shown with a purple "SYS" marker in the dashboard. System Attributes sit at the top level of the product object rather than inside its `attributes` map, and can't be renamed or deleted.
+**Notes:** `[CONFLICT]` The help center article states there are 12, then lists 13. Confirm the count before publishing content that states one. See [[Product Attribute]] for the custom-field counterpart.
+
+---
+
+### Variant
+
+**Capitalisation:** variant (lowercase in running text)
+**Definition:** A product that has a `parent_id` pointing at another product. Plytix supports up to four levels, tracked in `product_level`: `0` standalone, `1` parent, `2` variant, `3` sub-variant.
+**Notes:** The dashboard labels `parent_id` as "Variant of." When a variant overrides an inherited value, the attribute name appears in its `overwritten_attributes` array. See [[Product Family]] for inheritance configuration.
+
 <!-- Add more terms below -->

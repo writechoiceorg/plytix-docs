@@ -22,7 +22,7 @@ Source: `plytix-outline-canvas.md`, "📘 Guides → 🚀 Get Started" (updated 
 |---|---|---|---|
 | Overview | `fumadocs/content/docs/guides/overview.mdx` | Concept | Written |
 | Quickstart | `fumadocs/content/docs/guides/quickstart.mdx` | Tutorial | Written |
-| The Plytix Data Model | `fumadocs/content/docs/guides/data-model.mdx` | Concept | Placeholder |
+| The Plytix Data Model | `fumadocs/content/docs/guides/data-model.mdx` | Concept | Written |
 | Migrating to v3 | `fumadocs/content/docs/guides/migrating-to-v3/index.mdx` | How-to Guide | Placeholder |
 | ↳ Migration reference | `fumadocs/content/docs/guides/migrating-to-v3/migration-reference.mdx` | Reference | Placeholder |
 
@@ -45,11 +45,11 @@ Source: `plytix-outline-canvas.md`, "📘 Guides → 🔗 Integration Guides".
 
 ### Guides → Plytix MCPs
 
-Source: `plytix-outline-canvas.md`, "📘 Guides → 🤖 Plytix MCPs". The Platform MCP pages are placeholders for a roadmap feature (see `glossary.md`'s MCP Server entry, `[PENDING]`); don't write them until Plytix confirms the feature is live.
+Source: `plytix-outline-canvas.md`, "📘 Guides → 🤖 Plytix MCPs". The Platform MCP pages are placeholders for a roadmap feature (see `glossary.md`'s MCP Server entry, `[PENDING]`); don't write them until Plytix confirms the feature is live. The Documentation MCP is a different server and is already implemented in this repo (`fumadocs/app/api/mcp/route.ts`), so its page was written from that code plus `fumadocs/README.md`; it is not gated on the roadmap feature.
 
 | Page title | File path | Page type | Status |
 |---|---|---|---|
-| Documentation MCP | `fumadocs/content/docs/guides/documentation-mcp.mdx` | How-to Guide | Placeholder |
+| Documentation MCP | `fumadocs/content/docs/guides/documentation-mcp.mdx` | How-to Guide | Written |
 | Plytix Platform MCP | `fumadocs/content/docs/guides/platform-mcp/index.mdx` | Concept | Placeholder |
 | ↳ Authentication and OAuth setup | `fumadocs/content/docs/guides/platform-mcp/authentication-and-oauth-setup.mdx` | How-to Guide | Placeholder |
 | ↳ Supported clients | `fumadocs/content/docs/guides/platform-mcp/supported-clients.mdx` | Reference | Placeholder |

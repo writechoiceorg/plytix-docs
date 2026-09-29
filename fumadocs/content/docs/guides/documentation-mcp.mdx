@@ -1,8 +1,165 @@
 ---
 title: "Documentation MCP"
-description: "Connect Claude, Cursor, VS Code, or any MCP-compatible AI assistant to Plytix's documentation."
+description: "Connect Claude, Cursor, VS Code, or any MCP-compatible AI assistant to the Plytix documentation so it answers from the current docs."
 ---
 
-**Content type:** How-to Guide
+import { Bot, Rocket, BookOpen } from 'lucide-react';
 
-_Placeholder page: content coming soon. This page will cover: Connect Claude, Cursor, VS Code, or any MCP-compatible AI assistant to Plytix's documentation._
+The Plytix documentation runs a Model Context Protocol (MCP) server: a read-only endpoint that lets an AI assistant search and read these docs directly. Connect it once, and your assistant answers from the published pages instead of guessing at endpoint names.
+
+This guide covers connecting a client, verifying the connection, and what to do if your client doesn't support MCP.
+
+<Callout type="warn" title="FLAG">
+  The production domain for the Plytix documentation site isn't confirmed yet, so every URL on this page uses the placeholder `https://<docs-base-url>/api/mcp`. Replace `<docs-base-url>` with the live docs domain before publishing.
+</Callout>
+
+## Prerequisites
+
+You need one of the following, and nothing else:
+
+- An MCP-compatible client that supports remote servers over HTTP. Claude Code, Claude Desktop, Cursor, and VS Code all qualify.
+- The Documentation MCP endpoint: `https://<docs-base-url>/api/mcp`.
+
+You don't need a Plytix account, an API key, or a bearer token. The Documentation MCP serves the public documentation only. It has no access to your product data, and it can't write anything anywhere.
+
+<Callout type="info" title="This is not the Platform MCP">
+  The Documentation MCP reads documentation pages. The [Plytix Platform MCP](/docs/guides/platform-mcp) is a separate server that acts on your Plytix account and requires authorization. Connecting one doesn't connect the other.
+</Callout>
+
+## Add the server to your client
+
+Pick your client below. In every case you're registering a single HTTP endpoint under a server name, and `plytix-docs` is a reasonable name to use.
+
+<Tabs items={['Claude Code', 'Cursor', 'VS Code', 'Other clients']}>
+  <Tab value="Claude Code">
+    1. **Run** the `mcp add` command from your project directory:
+
+       ```bash
+       claude mcp add --transport http plytix-docs https://<docs-base-url>/api/mcp
+       ```
+
+    2. **Restart** Claude Code so it picks up the new server.
+  </Tab>
+  <Tab value="Cursor">
+    1. **Create or open** `.cursor/mcp.json` in your project, or `~/.cursor/mcp.json` to make the server available everywhere.
+
+    2. **Add** the server entry:
+
+       ```json title=".cursor/mcp.json"
+       {
+         "mcpServers": {
+           "plytix-docs": {
+             "url": "https://<docs-base-url>/api/mcp"
+           }
+         }
+       }
+       ```
+
+    3. **Reload** Cursor, then confirm the server shows as connected under **Settings > MCP**.
+  </Tab>
+  <Tab value="VS Code">
+    1. **Create or open** `.vscode/mcp.json` in your workspace.
+
+    2. **Add** the server entry. Note that VS Code uses a `servers` key and needs an explicit `type`:
+
+       ```json title=".vscode/mcp.json"
+       {
+         "servers": {
+           "plytix-docs": {
+             "type": "http",
+             "url": "https://<docs-base-url>/api/mcp"
+           }
+         }
+       }
+       ```
+
+    3. **Start** the server using the **Start** action VS Code shows above the entry in the file.
+  </Tab>
+  <Tab value="Other clients">
+    Most clients accept the same JSON shape. Add the endpoint as a remote HTTP server, with no authentication:
+
+    ```json
+    {
+      "mcpServers": {
+        "plytix-docs": {
+          "url": "https://<docs-base-url>/api/mcp"
+        }
+      }
+    }
+    ```
+
+    In a desktop app such as Claude Desktop, add it through the interface instead: open **Settings > Connectors**, choose **Add custom connector**, and paste the endpoint URL.
+  </Tab>
+</Tabs>
+
+## Verify the connection
+
+1. **List the connected servers** in your client. In Claude Code, run `/mcp`. In Cursor and VS Code, open the MCP section of settings. You should see `plytix-docs` connected, exposing three tools.
+
+2. **Ask a question that needs the docs.** For example: "Using the Plytix docs, what's the endpoint for exchanging an API key for a bearer token?" A correct answer cites a docs page rather than a general description of how APIs usually work.
+
+3. **Check reachability directly** if the client reports an error. This request confirms the endpoint exists and responds over JSON-RPC:
+
+   ```bash
+   curl -i -X POST https://<docs-base-url>/api/mcp \
+     -H "Content-Type: application/json" \
+     -H "Accept: application/json, text/event-stream" \
+     -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
+   ```
+
+   A `404` means the URL is wrong. Any JSON-RPC response, including a protocol error about a missing session, means the server is up and your client configuration is the thing to fix.
+
+## What your assistant can do
+
+The Documentation MCP exposes three tools. Your assistant chooses between them on its own, so you don't call them by name.
+
+| Tool | What it does |
+|---|---|
+| `search` | Searches the docs for a query and returns matching pages |
+| `list_pages` | Lists every docs page with its URL |
+| `get_page` | Returns the full Markdown of one page, by URL |
+
+Together, those cover the questions that are slowest to answer by hand:
+
+- "Which Plytix endpoints support filtering, and what's the filter syntax?"
+- "Write a paginated export loop against the v3 products endpoint, following the pattern in the docs."
+- "Does v3 have write parity with v1/v2 yet? Quote the page that says so."
+
+## Use llms.txt if your client doesn't support MCP
+
+Some assistants can read a URL but can't connect to an MCP server. The documentation publishes plain-text versions of itself for that case:
+
+| URL | Contents |
+|---|---|
+| `https://<docs-base-url>/llms.txt` | An index of every page with its URL |
+| `https://<docs-base-url>/llms-full.txt` | The full text of every page in one file |
+
+Paste either URL into your assistant. To fetch one page instead of all of them, take its docs path and request it under `/llms.mdx`, ending in `/content.md`. This page, at `/docs/guides/documentation-mcp`, is served as Markdown at `https://<docs-base-url>/llms.mdx/docs/guides/documentation-mcp/content.md`.
+
+## Troubleshooting
+
+- **Problem:** The client shows the server as failed or disconnected.
+  - **Solution:** Confirm the URL ends in `/api/mcp` and that you can open `https://<docs-base-url>/docs` in a browser. The docs site and the MCP endpoint are served by the same deployment, so if the site is down, the server is too.
+  - **Prevention:** Register the server once at the user level rather than per project, so a single correct URL is reused.
+
+- **Problem:** VS Code doesn't recognize the entry.
+  - **Solution:** Check that the file uses `servers`, not `mcpServers`, and that each entry includes `"type": "http"`. VS Code's format differs from Cursor's.
+
+- **Problem:** The assistant answers about Plytix without citing the docs.
+  - **Solution:** Name the source in your prompt: "Using the Plytix docs MCP, …". Most clients only reach for a tool when the request makes the need obvious.
+
+- **Problem:** The assistant can read pages but can't create or update products.
+  - **Solution:** That's expected. The Documentation MCP is read-only and covers documentation only. For account actions, see the [Plytix Platform MCP](/docs/guides/platform-mcp).
+
+## Related articles
+
+Now that your assistant can read the Plytix documentation, you can explore these related guides.
+
+<Cards>
+  <Card icon={<Bot />} title="Plytix Platform MCP" href="/docs/guides/platform-mcp">
+    Learn how agents act on a Plytix account, and how that differs from the Documentation MCP.
+  </Card>
+  <Card icon={<BookOpen />} title="API Reference" href="/docs/reference/v3">
+    Browse the resources and endpoints your assistant will be reading about.
+  </Card>
+</Cards>
