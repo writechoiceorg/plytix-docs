@@ -12,7 +12,7 @@ This page explains what each entity is, how the entities reference each other, a
 **In short:**
 
 - The product is the center of the model. Everything else describes it, groups it, or links it to something.
-- A handful of fields live directly on the product (`sku`, `label`, `gtin`, `status`). Everything else you define yourself lives inside its `attributes` map.
+- A handful of fields live directly on the product (`sku`, `label`, `gtin`, `status`), everything else lives inside its `attributes` map.
 - A Product Family controls which attributes apply to a product and how values flow from a parent down to its variants.
 - Categories, Assets, Relationships, and lists are separate entities that products reference by ID. They are not copies stored on the product.
 - Some structural pieces, notably creating a Product Family, are dashboard-only. The API assigns products into structures that already exist.
@@ -35,11 +35,7 @@ This page explains what each entity is, how the entities reference each other, a
 
 A product is the unit everything else attaches to. It carries two kinds of data, and the difference matters when you write queries.
 
-**System fields** sit at the top level of the product object. These are the System Attributes that ship with every Plytix account, and you can't rename or delete them: `id`, `sku`, `label`, `gtin`, `status`, `thumbnail`, `categories`, `assets`, `product_family_id`, `parent_id` (shown as "Variant of" in the dashboard), `num_variations`, `created`, and `modified`.
-
-<Callout type="warn" title="FLAG">
-  The Plytix Help Center article on System Attributes says there are 12, but the list in that same article contains 13 entries. The field names above come from the OpenAPI spec, which is the higher-trust source, so this page lists them without stating a count. Confirm the correct number with Plytix.
-</Callout>
+**System fields** sit at the top level of the product object. These are the System Attributes that ship with every Plytix account and you can't rename or delete them: `id`, `sku`, `label`, `gtin`, `status`, `thumbnail`, `categories`, `assets`, `product_family_id`, `parent_id` (shown as "Variant of" in the dashboard), `num_variations`, `created`, and `modified`.
 
 **Your own attribute values** sit inside the `attributes` map, keyed by attribute name:
 
@@ -65,7 +61,7 @@ A product's `status` is one of `Completed`, `Draft`, or `Archived`.
 
 ## Product Attributes
 
-An attribute is a field definition, created once and reused across products. Creating an attribute doesn't give any product a value for it; it only makes the field available.
+An attribute is a field definition, created once and reused across products. Creating an attribute doesn't give any product a value for it, it only makes the field available.
 
 Each attribute has a type that determines what it can hold and how you can filter on it. Plytix supports short text, paragraph, HTML, integer, decimal, dropdown, multi-select, date, URL, boolean, media, media gallery, completeness, and formula attributes.
 
@@ -78,7 +74,7 @@ Attribute Groups are a separate entity that controls how attributes are grouped 
 
 ## Product Families and variants
 
-A Product Family answers two questions for a group of similar products: which attributes apply, and how values pass down a hierarchy.
+A Product Family answers two questions for a group of similar products: which attributes apply and how values pass down a hierarchy.
 
 Products can nest up to four levels deep, tracked in the product's `product_level` field:
 
@@ -95,8 +91,8 @@ Inheritance is configured per attribute inside the family. Turning inheritance o
 
 The family's own structure is readable through `/api/v3/product-family-models`, which returns `parent_attribute_labels`, `variant_attribute_labels`, and `no_level_attribute_labels`: the attributes that apply at each level.
 
-<Callout type="warn" title="FLAG">
-  Creating a Product Family, choosing its attributes, and configuring inheritance are dashboard-only actions. The API can assign a product into an existing family through `product_family_id`, but it can't build the family itself. Confirmed during this project's endpoint testing.
+<Callout type="warn" title="Product Families are dashboard-only">
+  Creating a Product Family, choosing its attributes, and configuring inheritance are dashboard-only actions. The API can assign a product into an existing family through `product_family_id`, but it can't build the family itself.
 </Callout>
 
 ## Product Categories
@@ -117,9 +113,9 @@ On the product side, `thumbnail_id` points at the single asset used as the produ
 
 ## Relationships
 
-A relationship connects products to other products. Setting one up takes two steps, and conflating them is a common source of confusion.
+A relationship connects products to other products. Setting one up takes two steps and conflating them is a common source of confusion.
 
-1. The **Relationship** itself is the named type, such as "Accessories," "Spare parts," or "Bundle contents." It's an account-level entity at `/api/v3/relationships`, and creating one links no products together.
+1. The **Relationship** itself is the named type, such as "Accessories", "Spare parts", or "Bundle contents". It's an account-level entity at `/api/v3/relationships`, and creating one links no products.
 2. **Linking products** happens through `/api/v3/products/{product_id}/relationships/{relationship_id}`, which attaches specific related products to one product under that relationship type.
 
 Each link can carry a `quantity`, which is what makes relationships usable for bundles and packs rather than only for recommendations.
@@ -139,11 +135,7 @@ A product's `static_lists` field shows the static lists it belongs to.
 
 Products carry read-only links to the places their content gets published: `channels`, `ecatalogs`, and `product_data_sheets`. These return IDs only, and only when you ask for them explicitly.
 
-<Callout type="warn" title="FLAG">
-  Two naming and scope issues to resolve before publishing. First, the API field is `ecatalogs`, but the product name is Plytix Brand Portals and the content guidelines rule out "eCatalog" in customer-facing text. Confirm how to present this field. Second, channels are documented elsewhere in this project as configured entirely in the Plytix dashboard, yet `openapi_pimv3.json` defines `/api/v3/channels` endpoints. See the CONFLICT note in `information-architecture.md`. Until it's resolved, this page claims only that a product exposes read-only channel links.
-</Callout>
-
-Everything else a product points at, its categories, assets, family, parent, and relationships, is stored as an ID. Plytix returns the full object only when you request expansion. That keeps responses small by default, and it's why a product read can look emptier than you expect until you ask for more.
+Everything else a product points at (categories, assets, family, parent, and relationships) is stored as an ID. Plytix returns the full object only when you request expansion. That keeps responses small by default, and it's why a product read can look emptier than you expect until you ask for more.
 
 ## Related articles
 

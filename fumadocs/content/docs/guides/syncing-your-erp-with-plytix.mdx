@@ -7,7 +7,7 @@ import { Download, TriangleAlert } from 'lucide-react';
 
 Keep product data consistent between your ERP and Plytix by reading changes from Plytix on a schedule and writing your own changes back through the same API. This guide covers both directions: pulling updates into your ERP, and pushing stock, price, or status changes back to Plytix.
 
-<Callout type="warn" title="FLAG">
+<Callout type="warn" title="v1/v2 vs v3">
   Plytix's product team currently recommends v1/v2 for any workflow that creates, updates, or deletes products (ERP write-back, stock updates, price updates, status changes), while v3 write parity is still growing. The v3 endpoints below are confirmed working live today, but confirm with your Plytix contact which version to build against before committing to a production integration. See [Migrating to v3](/docs/guides/migrating-to-v3) for how the versions differ.
 </Callout>
 
@@ -30,10 +30,6 @@ Keep product data consistent between your ERP and Plytix by reading changes from
    The token appears at `data[0].access_token` and expires after 15 minutes. Request a new one when a call returns `401`.
 
 2. **Resolve a product's Plytix ID from its SKU, the first time you see that SKU.**
-
-   <Callout type="warn" title="FLAG">
-     `GET /products/{identifier}` only accepts the Plytix product ID, not the SKU, even though this may not match what you'd expect from a resource where SKU is the natural key, and even though some Plytix API documentation (including a version as recent as September 2026) states that both work. Look up the ID once with a search, then store it.
-   </Callout>
 
    ```bash
    curl -G "https://pim.plytix.com/api/v3/products" \
@@ -62,10 +58,6 @@ Keep product data consistent between your ERP and Plytix by reading changes from
      --data-urlencode "_fields=id" \
      --data-urlencode "_fields=sku"
    ```
-
-   <Callout type="warn" title="FLAG">
-     This example filters on `created`, the only timestamp field independently confirmed to work with the `[gt]` operator. If you need "modified since," confirm the exact field name for your account before relying on it in production, since it wasn't separately tested.
-   </Callout>
 
    Store the timestamp of each successful sync and reuse it as the next run's filter value.
 
