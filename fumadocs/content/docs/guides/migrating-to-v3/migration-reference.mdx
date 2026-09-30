@@ -106,16 +106,20 @@ v3 returns page URLs rather than a page number to increment, so a paging loop fo
 |---|---|---|
 | Search | `200` with `data` and `pagination` | `200` with `data` and `pagination` |
 | Get one | `200` with the record | `200` with the record |
-| Create | `200` or `201` with the created entity | `201` with the ID only |
-| Update (PATCH) | Returns the modified entity | `204` with no body |
+| Create | `200` or `201` with the created entity | `201` with the full created entity |
+| Update (PATCH) | Returns the modified entity | `200` with the full updated entity |
 | Delete | Varies | `204` with no body |
 | Accepted for async processing | Not applicable | `202` with a `process_id` |
 | Error | Varies | `errors` array in the same envelope, each entry `{"name": "...", "description": "..."}`. See [Errors and Status Codes](/docs/reference/v3/errors-status-codes) |
 
 Two behavioral differences matter more than the status codes:
 
-- **v3 write endpoints don't return the modified entity.** Read the record back with a GET if you need the resulting values.
+- **v3 returns the full entity on a write**, not just the fields you sent, so a PATCH response is the whole record. This matches v1's behavior, so response-parsing code generally carries over; code that branches on an exact status code does not.
 - **v3 DELETE erases** the entity or field rather than setting it to null or a default, and removing a field can cause inheritance to resolve for it.
+
+<Callout type="warn" title="Plytix's internal reference states the opposite">
+  `API V3.md` describes v3 write endpoints as returning only an ID, with PATCH returning `204`. Live testing contradicts this on every resource tested. The table above is what the API actually does.
+</Callout>
 
 ## Endpoint mapping
 

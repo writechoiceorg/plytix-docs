@@ -1,0 +1,9 @@
+{
+  "title": "Related Products",
+  "pages": [
+    "search_related_products_api_v3_related_products_get",
+    "get_related_products_collection_api_v3_products__product_id__relationships__relationship_id__related_products_get",
+    "get_related_products_identity_api_v3_products__product_id__relationships__relationship_id__related_products__related_product_id__get",
+    "get_related_products_drill_in_api_v3_products__product_id__relationships__relationship_id__related_products__related_product_id___path__get"
+  ]
+}

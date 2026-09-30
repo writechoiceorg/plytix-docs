@@ -4,6 +4,10 @@
     "search_pdf_catalogs_api_v3_pdf_catalogs_get",
     "create_pdf_catalogs_api_v3_pdf_catalogs_post",
     "get_pdf_catalogs_api_v3_pdf_catalogs__identifier__get",
-    "get_pdf_catalogs_subpath_api_v3_pdf_catalogs__identifier___path__get"
+    "update_pdf_catalogs_api_v3_pdf_catalogs__identifier__patch",
+    "delete_pdf_catalogs_api_v3_pdf_catalogs__identifier__delete",
+    "get_pdf_catalogs_subpath_api_v3_pdf_catalogs__identifier___path__get",
+    "update_pdf_catalogs_subpath_api_v3_pdf_catalogs__identifier___path__patch",
+    "delete_pdf_catalogs_subpath_api_v3_pdf_catalogs__identifier___path__delete"
   ]
 }

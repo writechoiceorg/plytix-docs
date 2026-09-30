@@ -1,0 +1,15 @@
+{
+  "title": "Family Attributes",
+  "pages": [
+    "search_family_attributes_api_v3_family_attributes_get",
+    "get_family_attributes_collection_api_v3_product_families__product_family_id__attributes_get",
+    "post_family_attributes_collection_api_v3_product_families__product_family_id__attributes_post",
+    "get_family_attributes_identity_api_v3_product_families__product_family_id__attributes__attribute_id__get",
+    "post_family_attributes_identity_api_v3_product_families__product_family_id__attributes__attribute_id__post",
+    "patch_family_attributes_identity_api_v3_product_families__product_family_id__attributes__attribute_id__patch",
+    "delete_family_attributes_identity_api_v3_product_families__product_family_id__attributes__attribute_id__delete",
+    "get_family_attributes_drill_in_api_v3_product_families__product_family_id__attributes__attribute_id___path__get",
+    "patch_family_attributes_drill_in_api_v3_product_families__product_family_id__attributes__attribute_id___path__patch",
+    "delete_family_attributes_drill_in_api_v3_product_families__product_family_id__attributes__attribute_id___path__delete"
+  ]
+}

@@ -9,7 +9,7 @@ v3 changed how write operations behave. This page documents which method to use 
 
 Key points on this page:
 
-- Write endpoints don't return the modified record. Read it back if you need the resulting values.
+- POST and PATCH return the full record in the response, so you don't need to read it back.
 - PATCH is the standard way to change a record, because it touches only the fields you name.
 - An empty string or empty list is stored as a value, not treated as a deletion.
 - DELETE erases a field or record rather than setting it to null, which can let an inherited value take over.
@@ -38,21 +38,27 @@ Key points on this page:
 
 ## What a write returns
 
-Write endpoints don't return the modified record. This is the change most likely to break code carried over from v1, because the request still succeeds and only the response body is different.
+A successful POST or PATCH returns the complete record, not just an identifier. You don't need a follow-up GET to see the result of a write.
 
 | Operation | Status | Body |
 |---|---|---|
-| Create | `201` | The ID of the created record |
-| Update | `204` | None |
+| Create | `201` | The full created record |
+| Update | `200` | The full updated record |
 | Delete | `204` | None |
 | Accepted for async processing | `202` | A `process_id` for tracking |
 
-If you need the resulting record, read it back with a GET after the write.
+A PATCH response returns every field on the record, not only the fields you sent. It's the same shape a GET on that record returns, which is richer than the create response: it also carries the relationship arrays (`assets`, `categories`, `relationships`) and the `created_user_audit` / `modified_user_audit` blocks.
 
-<Callout type="warn" title="FLAG">
-  **Conflict on declared status codes.** The status codes above come from `API V3.md`'s response conventions. The OpenAPI spec declares only `200` for success and `422` for validation errors on every operation, which [Errors and Status Codes](/docs/reference/v3/errors-status-codes) already documents. A FastAPI export often under-declares response codes, so this may be a gap in the spec rather than a behavioral difference. Confirm the real codes with the `endpoint-tester` skill before publishing.
+<Callout type="warn" title="Plytix's internal reference states the opposite">
+  `API V3.md` specifies that modification endpoints return only an ID rather than the entity, and its URL-standardization table lists PATCH as returning `204`. **Live testing contradicts this on every resource tested:** PATCH returns `200` with the full entity, and POST returns `201` with the full entity. The behavior documented above is what the API actually does.
 
-  `API V3.md` is also internally inconsistent here: its general conventions section says `201` is returned for a successful creation *or modification*, while its endpoint table says PATCH returns `204`. The table is reproduced above because it's more specific.
+  DELETE is the reverse case: the OpenAPI spec declares `200`, but live testing confirms `204 No Content`, which matches `API V3.md`'s prose. A subsequent GET on the deleted record returns `404`.
+
+  Treat the `202` async row as unverified — no endpoint observed in testing has returned it yet. See the Process Manager note at the end of this page.
+</Callout>
+
+<Callout type="info" title="Why the spec shows 200 everywhere">
+  `openapi_pimv3.json` declares only `200` and `422` on every operation, which [Errors and Status Codes](/docs/reference/v3/errors-status-codes) also notes. That's an artifact of the FastAPI export under-declaring its responses, not a description of real behavior, which is why the `201` and `204` above differ from it.
 </Callout>
 
 ## How empty values are treated

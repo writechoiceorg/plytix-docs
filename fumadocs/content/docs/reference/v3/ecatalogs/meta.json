@@ -4,6 +4,10 @@
     "search_ecatalogs_api_v3_ecatalogs_get",
     "create_ecatalogs_api_v3_ecatalogs_post",
     "get_ecatalogs_api_v3_ecatalogs__identifier__get",
-    "get_ecatalogs_subpath_api_v3_ecatalogs__identifier___path__get"
+    "update_ecatalogs_api_v3_ecatalogs__identifier__patch",
+    "delete_ecatalogs_api_v3_ecatalogs__identifier__delete",
+    "get_ecatalogs_subpath_api_v3_ecatalogs__identifier___path__get",
+    "update_ecatalogs_subpath_api_v3_ecatalogs__identifier___path__patch",
+    "delete_ecatalogs_subpath_api_v3_ecatalogs__identifier___path__delete"
   ]
 }

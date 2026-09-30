@@ -136,16 +136,20 @@ Before you start, you need:
 
 5. **Change how your code reads write responses.**
 
-   In v3, write endpoints don't return the modified entity. Code that reads the response body to get updated values will break quietly, because the request still succeeds.
+   v3 returns the full entity on a create or an update, so most code that reads a write response keeps working. The status codes change, though, and code that branches on an exact status will break.
 
    | Operation | v3 response |
    |---|---|
-   | Create | `201` with the ID of the created entity |
-   | Update (PATCH) | `204` with no body |
+   | Create | `201` with the full created entity |
+   | Update (PATCH) | `200` with the full updated entity |
    | Delete | `204` with no body |
    | Accepted for async processing | `202` with a `process_id` to track |
 
-   If you need the resulting record, read it back with a GET after the write.
+   A PATCH response carries the whole record, not just the fields you sent, so there's no need to read it back with a GET.
+
+   <Callout type="warn" title="Plytix's internal reference states the opposite">
+     `API V3.md` describes v3 write endpoints as returning only an ID, with PATCH returning `204`. Live testing contradicts this on every resource tested. The table above is what the API actually does.
+   </Callout>
 
 6. **Re-check your delete logic before you run it.**
 
@@ -162,8 +166,8 @@ Before you start, you need:
   - **Prevention:** Compare counts against the same v1 filter before trusting a converted query.
 
 - **Problem:** Your code breaks after a successful update.
-  - **Solution:** v3 returns `204` with no body on PATCH. Read the record back with a GET if you need the updated values.
-  - **Prevention:** Audit every place your v1 code uses a write response body before you switch versions.
+  - **Solution:** Check what your code asserts about the status code. v3 returns `200` on PATCH and `201` on POST, both with the full entity in the body, so a check for a different exact status fails even though the write succeeded.
+  - **Prevention:** Audit every place your v1 code branches on a write's status code before you switch versions.
 
 - **Problem:** Results are missing fields you used to get.
   - **Solution:** Add them with `_fields`, repeated once per field. Field selection moved from the `attributes` body key to query parameters.

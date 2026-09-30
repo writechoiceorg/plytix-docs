@@ -2,7 +2,13 @@
   "title": "Product Families",
   "pages": [
     "search_product_families_api_v3_product_families_get",
+    "create_product_families_api_v3_product_families_post",
     "get_product_families_api_v3_product_families__identifier__get",
-    "get_product_families_subpath_api_v3_product_families__identifier___path__get"
+    "update_product_families_api_v3_product_families__identifier__patch",
+    "delete_product_families_api_v3_product_families__identifier__delete",
+    "get_product_families_subpath_api_v3_product_families__identifier___path__get",
+    "create_product_families_subpath_api_v3_product_families__identifier___path__post",
+    "update_product_families_subpath_api_v3_product_families__identifier___path__patch",
+    "delete_product_families_subpath_api_v3_product_families__identifier___path__delete"
   ]
 }

@@ -4,6 +4,10 @@
     "search_import_profiles_api_v3_import_profiles_get",
     "create_import_profiles_api_v3_import_profiles_post",
     "get_import_profiles_api_v3_import_profiles__identifier__get",
-    "get_import_profiles_subpath_api_v3_import_profiles__identifier___path__get"
+    "update_import_profiles_api_v3_import_profiles__identifier__patch",
+    "delete_import_profiles_api_v3_import_profiles__identifier__delete",
+    "get_import_profiles_subpath_api_v3_import_profiles__identifier___path__get",
+    "update_import_profiles_subpath_api_v3_import_profiles__identifier___path__patch",
+    "delete_import_profiles_subpath_api_v3_import_profiles__identifier___path__delete"
   ]
 }

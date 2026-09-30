@@ -1,0 +1,15 @@
+{
+  "title": "Product Relationships",
+  "pages": [
+    "search_product_relationships_api_v3_product_relationships_get",
+    "get_product_relationships_collection_api_v3_products__product_id__relationships_get",
+    "post_product_relationships_collection_api_v3_products__product_id__relationships_post",
+    "get_product_relationships_identity_api_v3_products__product_id__relationships__relationship_id__get",
+    "post_product_relationships_identity_api_v3_products__product_id__relationships__relationship_id__post",
+    "patch_product_relationships_identity_api_v3_products__product_id__relationships__relationship_id__patch",
+    "delete_product_relationships_identity_api_v3_products__product_id__relationships__relationship_id__delete",
+    "get_product_relationships_drill_in_api_v3_products__product_id__relationships__relationship_id___path__get",
+    "patch_product_relationships_drill_in_api_v3_products__product_id__relationships__relationship_id___path__patch",
+    "delete_product_relationships_drill_in_api_v3_products__product_id__relationships__relationship_id___path__delete"
+  ]
+}

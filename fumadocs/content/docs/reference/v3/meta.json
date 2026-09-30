@@ -18,7 +18,10 @@
     "assetcategories",
     "assetlists",
     "relationships",
+    "productrelationships",
+    "relatedproducts",
     "productfamilies",
+    "familyattributes",
     "productattributes",
     "productattributegroups",
     "pimproductlists",
@@ -28,7 +31,7 @@
     "importprofiles",
     "pdfcatalogs",
     "productfamilymodels",
-    "unknown",
-    "probes"
+    "probes",
+    "unknown"
   ]
 }
