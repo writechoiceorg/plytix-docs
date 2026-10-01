@@ -36,14 +36,14 @@ Remove a single category or asset from a product without touching anything else 
      -d '{"category_ids": ["<category_id_to_keep>"]}'
    ```
 
-   `PATCH` sets the field to whatever array you send. Sending the current list minus the one category is how you remove only that one. The response returns the full updated product, so you can check the result directly instead of making a separate `GET` call.
+   `PATCH` sets the field to whatever array you send. Sending the current list minus the one category is how you remove only that one. The response is `204` with no body, so confirm the result with the read-back in step 4.
 
    <Callout type="warn" title="FLAG">
      This project confirmed that `PATCH` reliably applies a `category_ids` array you send. The removal direction specifically (sending a shorter array to drop one entry) follows directly from that same behavior but wasn't re-verified as its own dedicated test. Confirm the result with a follow-up `GET` after your first attempt, as shown in step 4.
    </Callout>
 
-   <Callout type="warn" title="FLAG">
-     Some Plytix API documentation describes `PATCH` as returning no content (status `204`, no entity in the response body). This project consistently found the opposite in live testing: `PATCH` returns `200` with the full updated entity. Rely on the response body if you're testing against a live account, but don't be surprised if you see documentation describing it differently.
+   <Callout type="info" title="PATCH returns no body">
+     `PATCH` returns `204` with an empty response body, confirmed live 2026-10-01 on products and product categories. Earlier in this project it returned `200` with the full updated entity, so older integrations that read values out of a `PATCH` response need a follow-up `GET` instead.
    </Callout>
 
 3. **Change or clear a product's thumbnail the same way.**

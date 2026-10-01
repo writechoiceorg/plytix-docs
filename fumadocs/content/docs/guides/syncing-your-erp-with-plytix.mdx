@@ -1,6 +1,6 @@
 ---
 title: Sync your ERP with Plytix
-description: Read product data from Plytix, detect changes, and push updates back so your ERP and Plytix stay in sync.
+description: Read product data from Plytix, detect what changed, and push stock, price, and status updates back so your ERP and Plytix stay in sync.
 ---
 
 import { Download, TriangleAlert } from 'lucide-react';
@@ -13,8 +13,8 @@ Keep product data consistent between your ERP and Plytix by reading changes from
 
 ## Prerequisites
 
-- A Plytix account with API credentials (an `api_key` and `api_password` from **Admin > API**).
-- A way to exchange those credentials for a bearer token. See the Quickstart guide for the full authentication flow.
+- A Plytix account with API credentials (an `api_key` and `api_password` from **Account Administration > API**).
+- A way to exchange those credentials for a bearer token. See the [Quickstart](/docs/guides/quickstart) for the full authentication flow.
 - A field in your ERP to store each product's Plytix product ID, so you can address a product directly instead of searching by SKU on every call.
 
 ## Steps
@@ -47,34 +47,40 @@ Keep product data consistent between your ERP and Plytix by reading changes from
      -H "Authorization: Bearer <access_token>"
    ```
 
-   The response includes `attributes`, `category_ids`, and `thumbnail_id` fully resolved, along with a `product_relationships` field for any configured relationships.
+   The response includes `attributes`, `categories`, and `thumbnail_id`, along with a `product_relationships` field for any configured relationships.
 
 4. **Find what changed since your last sync.**
 
    ```bash
    curl -G "https://pim.plytix.com/api/v3/products" \
      -H "Authorization: Bearer <access_token>" \
-     --data-urlencode "created[gt]=2026-09-01" \
+     --data-urlencode "modified[gt]=2026-09-01" \
      --data-urlencode "_fields=id" \
      --data-urlencode "_fields=sku"
    ```
 
-   Store the timestamp of each successful sync and reuse it as the next run's filter value.
+   `modified` is the last-modification timestamp, so this catches edits as well as new products. Filtering on `created` returns only products added since the cutoff and misses every update, which is rarely what a sync wants. Store the timestamp of each successful sync and reuse it as the next run's filter value.
 
-5. **Push a change back to Plytix.**
+5. **Push an attribute change back to Plytix.**
+
+   Address the attribute directly by name and send its new value on its own. The body is the bare value, not an object:
 
    ```bash
-   curl -X PATCH "https://pim.plytix.com/api/v3/products/<product_id>" \
+   curl -X PATCH "https://pim.plytix.com/api/v3/products/<product_id>/attributes/price" \
      -H "Authorization: Bearer <access_token>" \
      -H "Content-Type: application/json" \
-     -d '{"attributes": {"price": 34.99}}'
+     -d '34.99'
    ```
 
-   Send only the fields that changed. A `PATCH` request merges your fields into the existing product rather than replacing it.
+   This changes only the attribute you name and leaves every other attribute untouched, which makes it the right call for stock and price updates. Repeat it once per attribute you need to change.
 
-   <Callout type="warn" title="FLAG">
-     Some Plytix API documentation describes `PATCH` as returning no content (status `204`). This project consistently found the opposite in live testing: `PATCH` returns `200` with the full updated product in the response body, as used in step 7.
+   <Callout type="error" title="Don't send a partial attributes map to the product itself">
+     `PATCH /products/<product_id>` with `{"attributes": {"price": 34.99}}` looks equivalent, but it isn't: naming `attributes` on the product replaces the entire map, and every attribute missing from your payload is deleted from the product. If you use that form, read the current `attributes` first, merge your change into the full map, and send the result back. Top-level fields such as `label` and `status` are safe to send on their own, and are left alone when omitted.
    </Callout>
+
+   Either way, a successful `PATCH` returns `204` with an empty body, so confirm the result with a read-back (step 7) rather than parsing the response.
+
+   Sending an empty string or an empty list stores that empty value instead of clearing the field. See [Working with Updates and Deletes](/docs/reference/v3/updates-and-deletes) for what each write returns and what DELETE removes.
 
 6. **Create a product your ERP has that Plytix doesn't have yet.**
 
@@ -85,27 +91,38 @@ Keep product data consistent between your ERP and Plytix by reading changes from
      -d '{"sku": "NEW-SKU-001", "label": "New Product"}'
    ```
 
-   `sku` is the only required field. Everything else, including `attributes` and `category_ids`, can follow in the same request or a later `PATCH`. The response includes the full created product, not only its ID, even though some Plytix API documentation describes `POST` as returning only an ID.
+   `sku` is the only required field. Everything else, including `attributes` and `category_ids`, can follow in the same request or a later `PATCH`. A successful create returns `201` with the full created product, not only its ID, even though some Plytix API documentation describes `POST` as returning only an ID.
 
 7. **Confirm the write took effect.**
 
-   Read the product back and compare the fields you sent against the response. A successful `PATCH` returns the full updated product, so you can usually skip this step and check the `PATCH` response directly.
+   ```bash
+   curl "https://pim.plytix.com/api/v3/products/<product_id>" \
+     -H "Authorization: Bearer <access_token>"
+   ```
+
+   Because `PATCH` returns no body, this read-back is the only way to verify an update. Compare the fields you sent against the response, and check that the attributes you meant to keep are still there.
 
 ## Troubleshooting
 
 - **Problem:** `POST /products` returns `409 Conflict` with `"A product with the same name already exists"`-style text.
   - **Solution:** The SKU already exists in this account. Look it up with a search instead of creating it again.
   - **Prevention:** Check for an existing SKU before creating, using the lookup in step 2.
-- **Problem:** `GET /products/<sku>` returns `422` instead of the product.
-  - **Solution:** Use the Plytix product ID, not the SKU, as shown in step 2.
+- **Problem:** `GET /products/<identifier>` returns `404` instead of the product.
+  - **Solution:** Nothing in this account matches that identifier. Both the Plytix product ID and the SKU work in this position, but a SKU containing characters with special meaning in a URL has to be encoded first.
+  - **Prevention:** Store each product's Plytix ID in your ERP (step 2) so lookups don't depend on SKU formatting.
+- **Problem:** Attributes you didn't touch disappear after a sync run.
+  - **Solution:** A `PATCH` that names `attributes` replaces the whole map. Read the product's current attributes, merge your change into them, and send the result, as shown in step 5.
+  - **Prevention:** Never build a `PATCH` body with only the changed attribute in it.
 
 ## Related articles
 
+Now that you know how to keep your ERP and Plytix in sync, you can explore these related guides.
+
 <Cards>
-  <Card icon={<Download />} title="Exporting Your Full Catalog" href="/docs/guides/exporting-your-full-catalog">
+  <Card icon={<Download />} title="Export your full catalog" href="/docs/guides/exporting-your-full-catalog">
     Pull every product, with attributes and assets, in one paginated pass.
   </Card>
-  <Card icon={<TriangleAlert />} title="Safely Removing Categories, Assets, or Relationships from a Product" href="/docs/guides/safely-removing-categories-assets-or-relationships">
+  <Card icon={<TriangleAlert />} title="Safely remove categories, assets, or relationships" href="/docs/guides/safely-removing-categories-assets-or-relationships">
     The right way to unassign data from a product without deleting it.
   </Card>
 </Cards>

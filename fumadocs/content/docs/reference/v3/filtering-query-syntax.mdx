@@ -7,23 +7,22 @@ import { ListOrdered, ArrowRightLeft } from 'lucide-react';
 
 In v3, you filter a search by adding query parameters to the URL. This page documents the operators, how to combine them, and how to filter on custom attributes and related entities.
 
-<Callout type="warn" title="FLAG">
-  **Source limitation:** `openapi_pimv3.json` and `fumadocs/openapi.json` declare no query parameters on any search operation, so the syntax below comes from `API V3.md`. That document is a design specification with approved, rejected, and postponed options, and only the approved forms are reproduced here. Verify each operator against a live account with the `endpoint-tester` skill before publishing, and remove this callout once the syntax is confirmed.
-</Callout>
-
 Key points on this page:
 
 - A filter is `field[operator]=value`, and equality needs no operator at all.
 - `&` combines filters with AND. OR uses an indexed `_or[#]` prefix on each filter it joins.
 - Custom attributes are addressed as `attributes.<name>`.
-- `_fields` controls which fields come back, and it's repeated once per field.
+- `_fields` controls which fields come back, and it's repeated once per field. It works on searches only.
+- Case-insensitive matching is `icontains`.
 
 ## How a filter is written
 
-A filter names a field, an operator in brackets, and a value:
+A filter names a field, an operator in brackets, and a value. Filters live in the query string of a search request:
 
-```text
-status[eq]=Draft
+```bash
+curl -G "https://<v3-base-url>/api/v3/products" \
+  -H "Authorization: Bearer <access_token>" \
+  --data-urlencode "status[eq]=Draft"
 ```
 
 Equality is the default, so the operator can be left out:
@@ -32,13 +31,20 @@ Equality is the default, so the operator can be left out:
 status=Draft
 ```
 
-A search with no filter parameters returns every record. Filters apply to fields only.
+The rest of this page shows filters as bare query-string fragments. Attach them to a search endpoint the same way, one `--data-urlencode` per filter, which is the same as joining them with `&` in the URL.
+
+A search with no filter parameters matches every record, returned one page at a time. See [Pagination](/docs/reference/v3/pagination) for how to walk the full set.
+
+<Callout type="info" title="Encode the brackets">
+  `[` and `]` are not safe in a URL. Most HTTP clients encode them for you, and the API returns them encoded in its `pagination.next_page` links, where `name[icontains]=a` comes back as `name%5Bicontains%5D=a`. If you build query strings by hand, encode them yourself. The curl examples here use `-G` with one `--data-urlencode` per filter so that curl handles it.
+</Callout>
 
 ## Equality and comparison
 
 | Meaning | Syntax |
 |---|---|
-| Equals | `field=value` or `field[eq]=value` |
+| Equals | `field=value` |
+| Equals, explicit operator | `field[eq]=value` |
 | Not equal | `field[!eq]=value` |
 | In a set | `field[in]=value1&field[in]=value2` |
 | Not in a set | `field[!in]=value1&field[!in]=value2` |
@@ -54,18 +60,20 @@ Plytix distinguishes a field that holds no value from a field that was never set
 
 | Meaning | Syntax |
 |---|---|
+| Field is defined | `field[exists]=true` |
+| Field is undefined, meaning it doesn't exist | `field[!exists]=true` |
 | Field is null | `field[null]` |
 | Field is not null | `field[!null]` |
-| Field is undefined, meaning it doesn't exist | `field[!exists]` |
-| Field is defined | `field[exists]` |
-| Field is an empty string or empty list | `field[len]=0` |
-| Field has content | `field[len][gt]=0` |
+| Field is an empty string or empty list | `field[length][eq]=0` |
+| Field has content | `field[length][gt]=0` |
+
+The existence operators take an explicit `=true`.
 
 <Callout type="info" title="Not-equal excludes empty fields">
   `field[!eq]=value` matches only records where the field has a value that differs. Records where the field is null or undefined aren't included, because there's nothing to compare. To catch those too, combine the conditions with OR:
 
   ```text
-  _or[0]field[!eq]=value&_or[0]field[!exists]&_or[0]field[!null]
+  _or[0]field[!eq]=value&_or[0]field[!exists]=true&_or[0]field[null]
   ```
 
   This is the pattern behind most completeness questions, such as finding products that are missing a description.
@@ -75,7 +83,7 @@ Plytix distinguishes a field that holds no value from a field that was never set
 
 | Meaning | Syntax |
 |---|---|
-| Contains, ignoring case | `field[contains:ignorecase]=value` |
+| Contains, ignoring case | `field[icontains]=value` |
 | Contains, case-sensitive | `field[contains]=value` |
 | Arrays share at least one value | `field[intersects]=value` |
 | Arrays share no values | `field[!intersects]=value` |
@@ -95,11 +103,15 @@ A function goes in its own bracket before the filter bracket, in the form `field
 | Logic | Syntax |
 |---|---|
 | A AND B | `A&B` |
+| A AND B, explicit group | `_and[0]A&_and[0]B` |
 | A OR B | `_or[0]A&_or[0]B` |
 | (A OR B) AND (C OR D) | `_or[0]A&_or[0]B&_or[1]C&_or[1]D` |
+| (A AND B) OR (C AND D) | `_or[0]_and[0]A&_or[0]_and[0]B&_or[0]_and[1]C&_or[0]_and[1]D` |
 | NOT (A OR B) | `_!or[0]A&_!or[0]B` |
 
-Filters joined by `&` combine with AND, so grouping only needs a prefix when you want OR. The index in brackets is the group number: filters sharing an index belong to the same OR group, and separate indexes are ANDed together.
+Filters joined by `&` combine with AND, so a query with no prefixes needs no grouping at all. The number in brackets is the group number: filters sharing a prefix and number belong to the same group, and separate numbers make separate groups that are then ANDed together.
+
+The same four conditions grouped two ways give different results, so pick the shape that matches your question. `_or[0]A&_or[0]B&_or[1]C&_or[1]D` ANDs two OR groups. `_or[0]_and[0]A&_or[0]_and[0]B&_or[0]_and[1]C&_or[0]_and[1]D` nests the other way and ORs two AND groups, which is what you need when each alternative is itself a pair of conditions. Nesting three or more levels deep is allowed.
 
 For example, products that are either a draft or under review, and that also sit in one of two categories:
 
@@ -109,11 +121,12 @@ _or[0]status=Draft&_or[0]status=Review&_or[1]categories[in]=<id1>&_or[1]categori
 
 ## Filter on custom attributes
 
-Custom attributes are addressed by name under `attributes`:
+Custom attributes are addressed by name under `attributes`, and take the same operators as any other field:
 
 ```text
-attributes.color[eq]=blue
-attributes.weight[gt]=10
+attributes.brand=Plytix
+attributes.brand[icontains]=plyt
+attributes.main_image_link[!exists]=true
 ```
 
 <Callout type="info" title="Attribute names starting with an underscore">
@@ -136,10 +149,6 @@ For product relationships, the relationship and the related product are separate
 | Products linked to a specific product | `product_relationships.relationship_id=<id>&product_relationships.related_product_id=<product_id>` |
 | Linked with a quantity above a threshold | `product_relationships.related_products.quantity[gt]=2` |
 
-<Callout type="warn" title="One restriction on relationship filters">
-  `API V3.md` restricts the negated-existence form for the public v3 API: `_!exists` is allowed only on `relationships.id` or `relationships.label`, and only when it isn't grouped inside `_and` or `_or`. Deeper negated joins were held back from the 3.0 release.
-</Callout>
-
 ## Choose which fields come back
 
 `_fields` selects the fields in the response, repeated once per field:
@@ -151,14 +160,23 @@ _fields=sku&_fields=label&_fields=status
 | Goal | Syntax |
 |---|---|
 | Selected fields | `_fields=<field1>&_fields=<field2>` |
-| All fields | Default when `_fields` is absent, or `_fields=*` |
+| All fields | Default when `_fields` is absent |
+| All fields, explicit | `_fields=*` |
 | Fields on a related entity | `_fields=<entity>.<field>` |
 | All fields on a related entity | `_fields=<entity>.*` |
 
-Requesting a related entity's fields expands that entity in the response. `_fields=<entity>` and `_fields=<entity>.*` return the same thing.
+Requesting a related entity's fields expands that entity in the response. There is no separate expand parameter: `_fields=categories` already returns fully expanded category objects. `_fields=<entity>` and `_fields=<entity>.*` return the same thing.
+
+<Callout type="warn" title="Three things to know about _fields">
+  **It only works on searches.** `_fields` is silently ignored on `GET /<resource>/<id>`, which always returns the full shape. Use it on the search endpoint and filter down to the one record instead.
+
+  **A valid response field isn't always a valid `_fields` value.** `_fields=category_ids` returns `400 HiddenFieldError` even though the field is declared in the spec, because ID-only fields are hidden to avoid exposing denormalization. The expanded `_fields=categories` works and returns the same data. Search endpoints can also accept a narrower set than the resource itself: `_fields=type` returns a `400` on product lists and asset lists while appearing on every single-record response.
+
+  **An unknown value may fail either way.** Some unknown fields return a `400` naming the error, and others are dropped with no error and no key in the response. Check that every field you asked for came back rather than trusting the status code.
+</Callout>
 
 <Callout type="info" title="Unfiltered related records">
-  When a filter narrows a related entity and you still want the full set of related records back, `_include_unfiltered_entities=<subentity>` returns all of them rather than only the matching ones. Use one parameter per subentity.
+  When a filter narrows a related entity and you still want the full set of related records back, `_include_unfiltered_entities=<subentity>` returns all of them rather than only the matching ones. Use one parameter per subentity. Spec only, not yet tested.
 </Callout>
 
 ## Reserved and forbidden names
@@ -169,7 +187,7 @@ Requesting a related entity's fields expands that entity in the response. `_fiel
 | Names starting with `.` or `__` are reserved | All fields and entities |
 | Names containing `.`, `[`, or `|` are not valid | All fields and entities |
 
-Values in a query string follow normal URL encoding. Spaces become `+` or `%20`, and `=`, `&`, `?`, `#`, and `%` carry meaning in a URL, so encode them when they appear inside a value.
+Values follow normal URL encoding. Spaces become `+` or `%20`, and `=`, `&`, `?`, `#`, and `%` carry meaning in a URL, so encode them when they appear inside a value. The operator brackets need encoding too, as described under [How a filter is written](#how-a-filter-is-written).
 
 ## Related resources
 

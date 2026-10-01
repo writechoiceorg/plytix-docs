@@ -61,7 +61,7 @@ Confirmed live 2026-09-07 finishing Phase 0 (cross-cutting checks) against `/api
 11. **Filtering — three dialects confirmed live**, all matching the "Possible Alternative" (query-string) column of `API V3.md`'s filter table (~lines 145-186), not the "Current" (JSON-object) column: (a) plain field filter `sku=<value>` — 200, exact match; (b) operator filter `created[gt]=<date>` — 200 (URL-encode the brackets); (c) related-entity dot filter `categories.name=<value>` and custom-attribute filter `attributes.<attr_name>=<value>` / `attributes.<attr_name>[icontains]=<value>` — all 200 and correctly filter. v3 implements the newer query-string dialect, not the older JSON-object one described as "Current" in the prose doc.
 12. **`_fields=category_ids`** (declared in `openapi_pimv3.json`'s `ProductOutputDto`) **is rejected**: `400 {"errors":[{"name":"HiddenFieldError","description":"Field 'category_ids' does not exist in model 'Product'."}]}`. The plural `_fields=categories` works and returns fully expanded category objects instead. Two different "invalid field" behaviors observed on this one endpoint: some unknown `_fields` values 400 with a named error (`category_ids`), while others are silently dropped with no error and no key in the response (see next item, `relationships`).
 13. **The spec's `ProductOutputDto.relationships` field does not exist on the live API.** Requesting `_fields=relationships` is silently ignored (200, field just absent from the response — no error). The real field name is **`product_relationships`**, confirmed three ways: the full `GET /products/{id}` response, `_fields=product_relationships` on search, and the internal model's own field-list error message (item 15 below).
-14. **Identifier flexibility — `API V3.md`'s claim is false for this v3 endpoint/account.** `GET /products/<mongo_id>` → 200. `GET /products/<sku>` → `422 {"errors":[{"name":"ValidationError","description":"...Id must be of type PydanticObjectId..."}]}`. Only the raw Mongo ObjectId works as `{identifier}`; SKU is rejected outright. Flag to Plytix — may be a v1-only behavior incorrectly carried over to v3 in the prose doc, or a feature not enabled for this account.
+14. ~~**Identifier flexibility — `API V3.md`'s claim is false for this v3 endpoint/account.**~~ — ✅ **RESOLVED 2026-10-01, see quirk #86: SKU now works as `{identifier}` (200), and a nonexistent SKU returns 404. Original finding preserved below for history.** **Identifier flexibility — `API V3.md`'s claim is false for this v3 endpoint/account.** `GET /products/<mongo_id>` → 200. `GET /products/<sku>` → `422 {"errors":[{"name":"ValidationError","description":"...Id must be of type PydanticObjectId..."}]}`. Only the raw Mongo ObjectId works as `{identifier}`; SKU is rejected outright. Flag to Plytix — may be a v1-only behavior incorrectly carried over to v3 in the prose doc, or a feature not enabled for this account.
 15. **Subpath discovery technique (applies to every v3 resource)**: `GET /{resource}/{id}/{path}` with an unrecognized `{path}` returns `400 {"errors":[{"name":"ValueError","description":"Field '<path>' not found. Available fields: [...]"}]}` — listing the resource's *raw internal model* field names. Confirmed on both `products` (list includes undocumented fields not in `ProductOutputDto`: `product_family_model_id`, `mark_as_deleted`, `last_context`, `modified_user_audit`, `created_user_audit`) and `assets`. **Caveat**: the list is raw-model-only — it does not include computed/joined relations that are still valid subpaths (`categories`, `assets`, `relationships` all resolve 200 on products despite not being in the raw list). Use this trick in every later phase to discover a resource's real fields fast, but still try the Output DTO's own relation names too.
 16. **Confirmed subpaths on `/products/{id}/{path}`**: `attributes` (200, full map), `attributes/<name>` (200, single value), `categories` (200, expanded array), `relationships` (200, flat `[{relationship_id, relationship_label, product_id}]` — a different, flatter shape than the `product_relationships` field on the full GET, which nests `related_products: [{quantity, last_modified}]` per entry), `assets` (200, full expanded asset objects).
 17. **Confirmed subpaths on `/assets/{id}/{path}`** (spot-checked on a pre-existing read-only asset fixture, ahead of Phase 2a): `categories` (200, `[]` for this asset). `attributes`, `relationships`, `products` are **not** valid asset subpaths (400 — not in the asset's raw field list; assets have no attributes/relationships concept, and there's no reverse `assets/{id}/products` lookup).
@@ -487,6 +487,126 @@ parameter completeness against `openapi_pimv3.json`'s `ProductCreateDto`/
     collection if it resurfaces (a repo-wide grep found no other
     occurrences as of this session).
 
+Confirmed live 2026-10-01, resolving two open docs-review findings on
+`fumadocs/content/docs/guides/syncing-your-erp-with-plytix.mdx` against
+"David's Dev Account". **Two behavior changes since 2026-09-23** — both
+invalidate previously-confirmed findings, so re-verify other long-standing
+response-shape claims before trusting them:
+
+84. **BEHAVIOR CHANGE — `PATCH` now returns `204 No Content` with an empty
+    body, on every resource tested.** Confirmed on `PATCH /products/{id}`
+    (both a top-level field and the `attributes` map) and `PATCH
+    /product-categories/{id}`: all return `204`, `size_download=0`, and the
+    change itself applies correctly (verified by follow-up `GET`). This
+    **reverses quirks #20, #28 and #56**, which recorded `200` + full
+    entity consistently across every resource from 2026-09-07 through
+    2026-09-23. It also means Plytix's own `API V3.md` / 2026-09-04 PDF
+    (which always listed PATCH as `204`) is now correct and this project's
+    live findings are what went stale. `POST` is unchanged: still `201`
+    with the full created entity (re-confirmed same session, 626-byte
+    body), so the POST half of quirk #56's conflict still stands.
+    Six published docs pages asserted the old `200` + full-entity behavior
+    and were corrected 2026-10-01.
+85. **Critical for any sync integration — `PATCH` REPLACES the `attributes`
+    map wholesale; it does not merge into it.** Confirmed with a
+    controlled test on a scratch product: set `brand` + `care_instructions`
+    via PATCH (both present on read-back), then PATCH naming only `brand`
+    — `care_instructions` is **gone from the record entirely**, not just
+    from the response. Top-level fields behave the opposite way and merge
+    as expected: a `PATCH {"label": "..."}` on a product with two
+    attributes left both attributes fully intact. So the rule is: omitted
+    top-level fields are preserved, but a named map field is replaced in
+    full. Account-level computed attributes (`*_completeness`,
+    `amazon_ready`, `website_ready`, etc.) survive either way, since they
+    aren't user-set. **Any "send only what changed" integration pattern
+    silently destroys attribute data.** This was never tested in Phases
+    0-5 — the merge-vs-replace question was simply never asked.
+86. **BEHAVIOR CHANGE — SKU now works as `{identifier}`, resolving quirk
+    #14 and open question #5.** `GET /products/BAG-10157` and
+    `GET /products/BAG%2D10157` both return `200` with the full product,
+    identical to `GET /products/6a38f614c3d65a5f868b1a06`. A nonexistent
+    SKU returns `404` (not `422`), confirming real SKU resolution rather
+    than coincidence. Quirk #14 recorded a hard `422 "Id must be of type
+    PydanticObjectId"` on 2026-09-07, and quirk #58 noted Plytix's newer
+    PDF "still repeats the disproven SKU-as-identifier claim" — that claim
+    is no longer disproven; Plytix shipped the behavior their docs
+    described. Same fix window as quirks #31/#54 (both flipped 2026-09-23).
+87. **Safe single-attribute write confirmed: `PATCH /products/{id}/attributes/{name}`
+    with a bare JSON value.** `-d '"BrandViaSubpath"'` on
+    `.../attributes/brand` → `204`, updates only that attribute, and
+    `care_instructions` on the same product is confirmed untouched. This is
+    the correct answer to quirk #85's data-loss hazard and is what the
+    guides now recommend for stock/price sync. Body shape matches quirk
+    #29's asset-subpath convention (raw value, not a partial object) —
+    now confirmed on products too.
+88. **Process note: this project's own live findings now have a shelf
+    life.** Three separate long-standing findings (#14 SKU, #20/#28/#56
+    PATCH response, plus #31/#54 earlier) have each flipped after Plytix
+    shipped changes. Anything load-bearing for a published page should
+    carry its confirmation date inline, and response-shape claims older
+    than a few weeks should be re-run rather than cited. The 2026-10-01
+    session found two reversals in a single 20-minute pass.
+
+Confirmed live 2026-10-01, verifying the pagination parameters flagged as
+unconfirmed on `fumadocs/content/docs/reference/v3/pagination.mdx` against
+"David's Dev Account":
+
+89. **`_total_count` and `_filtered_count` do not exist — there is no count
+    mechanism anywhere in v3.** Both return `400 {"errors":[{"name":
+    "InvalidFieldError","description":"Field '_total_count' does not
+    exist."}]}`, confirmed on `/products` and `/assets`. They appear in
+    `API V3.md`'s prose parameter table and were carried into the docs as
+    `[PENDING]`; they were never implemented. Combined with the `Pagination`
+    schema carrying no count fields, this settles the "Conflict on counts"
+    flag definitively in the spec's favour: **the only way to size a v3
+    result set is to page to the end and tally**, or to request
+    `_page_size=1000` when the set is known to be small. Worth raising with
+    Plytix as a real DX gap — v1 returned `total_count` on every search
+    (see `openapi_pimv1.json`), so this is a capability regression from v1
+    to v3, not merely an undocumented feature.
+90. **`_page`, `_page_size` and `_sort_by` re-confirmed working, and
+    `_page`/`_page_size` have real validation bounds** — the first query
+    params in this project found to carry any. `_page` must be >= 1
+    (`_page=0` and `_page=-1` → `422 "query._page: Input should be greater
+    than or equal to 1"`) and `_page_size` must be <= 1000 (`422
+    "query._page_size: Input should be less than or equal to 1000"`). Note
+    the error prefix `query.<param>` — the first confirmed case of this API
+    naming a *query* parameter in an `InputDTOValidationError`, which
+    elsewhere only ever names body fields. This also means the params are
+    genuinely modelled server-side as a DTO despite being absent from the
+    spec, reinforcing quirk #7's "stale spec, not missing feature" reading.
+91. **Pagination keys are OMITTED when not applicable, never `null` — the
+    spec is wrong about this.** `openapi_pimv3.json`'s `Pagination` schema
+    declares both `next_page` and `previous_page` as `string | null`, but
+    live responses simply leave the key out. Confirmed shapes, all `200`:
+    first page of a multi-page set → `{"next_page": "..."}` only; a middle
+    page → both keys; the last page → `{"previous_page": "..."}` only; a
+    result set that fits on one page → `{}` (empty object); a page past the
+    end → `data: []` with `{"previous_page": "..."}`. Verified identically
+    on `/products`, `/assets`, `/product-categories`, `/pim-product-lists`
+    and `/relationships`, so it is the API-wide convention. **Any client
+    written as `if (pagination.next_page !== null)` is wrong** — test for
+    presence or falsiness. Separately, single-resource `GET /products/{id}`
+    omits the `pagination` key entirely (it is not `null`) and returns
+    `data` as an object rather than an array.
+92. **⚠️ Real hazard — `next_page`/`previous_page` are `http://` URLs, and
+    following one verbatim can cost you your auth header.** Every link the
+    API generates uses the `http` scheme (e.g.
+    `http://pim.dev.plytix.com/api/v3/products?_page=2`). Requesting it as
+    given returns `301 Moved Permanently` → `https://pim.dev.plytix.com:443/...`
+    from `awselb/2.0`, and HTTP clients that do not forward `Authorization`
+    across a scheme/port-changing redirect drop it: plain `curl -L` on the
+    returned URL yields `401 {"detail":"Unauthorized"}`. `curl -L
+    --location-trusted`, or rewriting the scheme to `https` before
+    requesting, both return `200`. This directly undercuts the "follow the
+    URL, don't rebuild it" advice that is otherwise correct — docs must
+    warn about it, and it should be reported to Plytix as a link-generation
+    bug (the API should emit `https` links). Note a pre-existing captured
+    example in `02-Products-v3/List Products.bru` had silently "corrected"
+    the scheme to `https` when it was transcribed on 2026-09-04 — fixed
+    2026-10-01, and a reminder to capture responses verbatim rather than
+    tidying them.
+
 ## Known gaps
 
 - The ~70 pre-existing `.bru` files from Phases 0-5 that predate the
@@ -547,7 +667,7 @@ parameter completeness against `openapi_pimv3.json`'s `ProductCreateDto`/
 2. Is the undocumented `refresh_token` real/usable, or safe to ignore in docs?
 3. Should the 401 error shape and undocumented rate limits be raised with Plytix as doc bugs, or are they already known/tracked (e.g. in `API_Feedback_-_From_Product_board.pdf`)?
 4. **New, from today's v3 test**: is `openapi_pimv3.json` missing `_fields` (and possibly other) query parameters just for `/products`, or across the board? Worth a systematic pass once more v3 endpoints are tested against "David's Dev Account".
-5. **New, from Phase 0 completion (2026-09-07)**: is `GET /products/<sku>` (identifier-by-SKU) meant to work on v3 at all? `API V3.md` documents it as working but it live-422s. Worth confirming before writing customer-facing docs that promise SKU lookup.
+5. ~~**New, from Phase 0 completion (2026-09-07)**: is `GET /products/<sku>` (identifier-by-SKU) meant to work on v3 at all?~~ — ✅ **RESOLVED 2026-10-01 (quirk #86)**: yes, it works now — `200` for both raw and URL-encoded SKU, `404` for a nonexistent one. Plytix shipped the behavior their docs already described; no longer needs raising.
 6. **New, from Phase 0**: is `_expand` meant to work on `/products` at all, or was it only ever a v1/legacy mechanism `API V3.md` describes without it applying to v3's automatic per-`_fields` expansion? Worth checking on a resource with more expansion depth once Phase 1-4 get there.
 7. **New, from Phase 0**: several raw internal Product model fields surfaced via the subpath-discovery 400 trick (`product_family_model_id`, `mark_as_deleted`, `last_context`, `modified_user_audit`, `created_user_audit`) aren't declared anywhere in `openapi_pimv3.json`'s `ProductOutputDto`. Worth asking Plytix whether any of these are meant to be customer-facing/documented, or are intentionally internal.
 8. **New, from Phase 1 (2026-09-07)**: is the undeclared-but-working `PATCH`/`DELETE` on every Phase 1 resource (quirk #20) an intentional, stable part of the public API, or an implementation detail that happens to work today and could change without notice? This determines whether docs can confidently document rename/delete flows for these resources.
@@ -566,3 +686,8 @@ parameter completeness against `openapi_pimv3.json`'s `ProductCreateDto`/
 21. **New, from the 2026-09-15 spec refresh — the most urgent new question this session, since it looks like a genuine data-isolation bug.** Three brand-new endpoints (`GET /family-attributes`, `GET /product-relationships`, `GET /related-products`) all return records from *other Plytix accounts* when called with no filter (quirk #59). Is this a real cross-tenant data leak that needs an urgent fix, or is there some reason these three specific endpoints are exempt from the account-scoping every other v3 endpoint has? Needs a fast answer before any docs reference these endpoints without a loud warning to always filter by `account_id`/`product_id`.
 22. **New, from the 2026-09-15 spec refresh**: is `GET /products/{id}/relationships/{relationship_id}/related-products[/{id}]` (quirk #63) meant to work at all, or is it a known-broken/unfinished endpoint? It returns empty/404 even for a link confirmed to exist by three other means.
 23. **New, from the 2026-09-15 spec refresh**: can "automatic inheritance" for product-family attribute levels (quirk #61, status-gating #4) be enabled on this Dev account, so `PATCH /product-families/{id}/attributes/{attribute_id}`'s actual success response can finally be captured rather than only its `403` rejection?
+24. **New, from 2026-10-01 (quirk #84) — the most urgent question this session.** `PATCH` switched from `200` + full entity to `204` + empty body somewhere between 2026-09-23 and 2026-10-01. Was this an intentional, announced change, and is it final? It's a breaking change for any integration that reads values out of a PATCH response, and the docs now describe `204`. If it's an accidental regression that will be reverted, six published pages need changing back.
+25. **New, from 2026-10-01 (quirk #85).** Is `PATCH` replacing the whole `attributes` map (rather than merging into it) intentional? It's a sharp edge: the natural "send only what changed" pattern silently deletes every attribute the caller omitted, with no error and no warning. If intentional, it's worth Plytix documenting prominently; if not, it's a data-loss bug. (The "is there a safe alternative" half of this question is answered — `PATCH /products/{id}/attributes/{name}` with a bare value works and is scoped, quirk #87. What remains is whether the destructive whole-map behavior is intended.)
+26. **New, from 2026-10-01 (quirk #92) — a concrete bug with a one-line fix.** Every `pagination.next_page`/`previous_page` link is generated with the `http` scheme, 301s to `https`, and silently costs the caller their `Authorization` header on any client that doesn't forward auth across a scheme-changing redirect. Can Plytix emit `https` links? Until then every "follow the next_page URL" instruction in the docs needs a warning attached.
+27. **New, from 2026-10-01 (quirk #89).** v1 returned `total_count` on every search; v3 has no count mechanism at all (`_total_count`/`_filtered_count` both 400, and the `Pagination` schema carries no counts). Is this deliberate, or still-to-come? It's a real capability regression for anyone building a UI that shows "N results" or a progress bar over an export, and it's the kind of thing a migrating v1 customer will hit immediately.
+28. **New, from 2026-10-01 (quirk #91).** The spec's `Pagination` schema says `string | null`, but the API omits the keys instead. Should the spec be corrected, or the API changed to emit explicit nulls? Either is fine for docs, but right now a generated client built from the spec will have a nullable field that is never actually null, only absent.

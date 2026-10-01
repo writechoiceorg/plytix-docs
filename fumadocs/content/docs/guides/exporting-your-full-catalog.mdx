@@ -40,11 +40,17 @@ Pull your entire product catalog, with attributes and assets included, without a
    ```json
    {
      "data": [ /* ... */ ],
-     "pagination": { "next_page": "https://pim.plytix.com/api/v3/products?_fields=sku&_page=2" }
+     "pagination": { "next_page": "http://pim.plytix.com/api/v3/products?_fields=sku&_page=2" }
    }
    ```
 
-   Request `pagination.next_page` directly. It's a complete URL, including every filter and field you sent on the first call. The default page size is 25; setting `_page_size` explicitly (as in step 1) reduces the number of requests for a large catalog. Stop when a response has no `next_page` value.
+   Request `pagination.next_page` directly. It's a complete URL, including every filter and field you sent on the first call. The default page size is 25; the maximum is 1000, so setting `_page_size` explicitly (as in step 1) cuts the number of requests for a large catalog substantially. Stop when a response has no `next_page` key — on the last page the key is absent, not `null`.
+
+   <Callout type="warn" title="Rewrite the link to https before you request it">
+     Plytix generates these links with the `http` scheme. That address `301`-redirects to `https`, and many HTTP clients drop the `Authorization` header across a scheme change, so the redirected request comes back `401 {"detail": "Unauthorized"}`. Swap `http://` for `https://` before requesting the URL, or configure your client to keep the auth header across redirects (`curl --location-trusted`).
+
+     This bites hardest on a long export loop, where the first page succeeds and page two fails for no obvious reason.
+   </Callout>
 
 3. **Read the expanded asset and category data directly from each product.**
 

@@ -53,10 +53,39 @@ docs {
   - `_expand=<relationship>` **400s** (`InvalidFieldError`). Expansion is automatic
     per `_fields` value — no `_expand` needed.
 
-  ## Pagination (confirmed 2026-09-07)
-  - Default page size: 25. `pagination.next_page` is always a full URL (cursor style).
+  ## Pagination (confirmed 2026-09-07, re-verified and extended 2026-10-01)
+  - Default page size: 25. `pagination.next_page` is a full URL (link style).
   - `_page` + `_page_size`: works (see Pagination example below).
   - `_offset` + `_limit`: **400** `InvalidFieldError` — not supported on this resource.
+  - **Bounds (new 2026-10-01)**: `_page` must be >= 1 and `_page_size` <= 1000.
+    Both enforced as `422 InputDTOValidationError` naming `query._page` /
+    `query._page_size` — the only query params in this project confirmed to
+    carry real server-side validation bounds.
+  - **`_total_count` and `_filtered_count` do NOT exist (new 2026-10-01)**:
+    both return `400 {"name":"InvalidFieldError","description":"Field
+    '_total_count' does not exist."}`. They appear in `API V3.md`'s prose but
+    were never implemented. There is **no count of any kind** available from
+    this API — the only way to size a result set is to page to the end and
+    tally, or request `_page_size=1000` and read `data.length` when the set is
+    known to be small. Confirmed on `/products` and `/assets`.
+  - **Pagination keys are OMITTED, never null (new 2026-10-01)**. The spec's
+    `Pagination` schema declares both as `string | null`, but live:
+      - first page of a multi-page set -> `{"next_page": "..."}` only
+      - a middle page -> both keys
+      - the last page -> `{"previous_page": "..."}` only
+      - a single-page result set -> `{}` (empty object)
+      - a page past the end -> `200`, `data: []`, `{"previous_page": "..."}`
+      - single-resource `GET /products/{id}` -> no `pagination` key at all,
+        and `data` is an object, not an array
+    Any client doing `if (res.pagination.next_page !== null)` is wrong; test
+    for presence/falsiness instead.
+  - **⚠️ `next_page`/`previous_page` are `http://` URLs (new 2026-10-01).**
+    They 301-redirect to `https://...:443`, and many HTTP clients drop the
+    `Authorization` header across a scheme-changing redirect — plain
+    `curl -L` on the returned URL yields `401 {"detail":"Unauthorized"}`.
+    `curl -L --location-trusted` (or rewriting the scheme to `https`) works.
+    This is a real hazard for the "just follow the URL" guidance. Report to
+    Plytix as a link-generation bug.
 
   ## Filter dialect
   `API V3.md` lists a JSON-object "Current" syntax and a query-string "Possible
@@ -116,8 +145,205 @@ example {
           ],
           "errors": [],
           "pagination": {
-            "next_page": "https://pim.dev.plytix.com/api/v3/products?_fields=sku&_fields=status&_page=2"
+            "next_page": "http://pim.dev.plytix.com/api/v3/products?_fields=sku&_fields=status&_page=2"
           }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 400 - _total_count / _filtered_count Do Not Exist
+  description: Confirmed live 2026-10-01. Both count parameters described in API V3.md are rejected outright. Identical response for _filtered_count, and identical on /assets — this is not a products-only gap. There is no count mechanism in this API.
+
+  request: {
+    url: {{pim_base_url_v3}}/products?_total_count=true&_page_size=2&_fields=sku
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 400
+      text: Bad Request
+    }
+    headers: {
+      content-type: application/json
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "InvalidFieldError",
+              "description": "Field '_total_count' does not exist."
+            }
+          ]
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 200 - Last Page (previous_page only, next_page key absent)
+  description: Confirmed live 2026-10-01. Account holds 66 products; with _page_size=20 page 4 is the last. The pagination object contains ONLY previous_page — next_page is omitted entirely, not set to null as the spec's Pagination schema implies. Response body trimmed to the first 2 of 6 records.
+
+  request: {
+    url: {{pim_base_url_v3}}/products?_page_size=20&_page=4&_fields=sku
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [
+            {
+              "id": "6a38f615c3d65a5f868b1a39",
+              "sku": "TSH-11470-W-M"
+            },
+            {
+              "id": "6a38f615c3d65a5f868b1a3a",
+              "sku": "TSH-11470-W-S"
+            }
+          ],
+          "errors": [],
+          "pagination": {
+            "previous_page": "http://pim.dev.plytix.com/api/v3/products?_page_size=20&_page=3&_fields=sku"
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 200 - Single-Page Result Set (pagination is an empty object)
+  description: Confirmed live 2026-10-01. When the whole result set fits on one page, pagination is {} — neither key is present. Same result for _page_size=500 over the full 66-product set.
+
+  request: {
+    url: {{pim_base_url_v3}}/products?sku=BAG-10157&_fields=sku
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [
+            {
+              "id": "6a38f614c3d65a5f868b1a06",
+              "sku": "BAG-10157"
+            }
+          ],
+          "errors": [],
+          "pagination": {}
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 422 - Pagination Bounds (_page >= 1, _page_size <= 1000)
+  description: Confirmed live 2026-10-01. _page=0 and _page=-1 both produce the response below; _page_size=1001 and above produce "query._page_size: Input should be less than or equal to 1000". These are the only query params in this project found to carry explicit server-side bounds.
+
+  request: {
+    url: {{pim_base_url_v3}}/products?_page=0&_page_size=2&_fields=sku
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 422
+      text: Unprocessable Entity
+    }
+    headers: {
+      content-type: application/json
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [],
+          "errors": [
+            {
+              "name": "InputDTOValidationError",
+              "description": "query._page: Input should be greater than or equal to 1"
+            }
+          ]
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 401 - Following next_page Verbatim Drops Auth
+  description: Confirmed live 2026-10-01. pagination.next_page is an http:// URL. Requesting it as given returns 301 to https://pim.dev.plytix.com:443/..., and clients that do not forward Authorization across a scheme-changing redirect (plain curl -L, many SDK defaults) then get the 401 below. curl -L --location-trusted, or rewriting the scheme to https, returns 200 with the expected page.
+
+  request: {
+    url: http://pim.dev.plytix.com/api/v3/products?_page_size=2&_page=2&_fields=sku
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 401
+      text: Unauthorized
+    }
+    headers: {
+      content-type: application/json
+    }
+    body: {
+      type: json
+      content: '''
+        {
+          "detail": "Unauthorized"
         }
       '''
     }

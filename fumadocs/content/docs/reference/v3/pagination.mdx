@@ -10,9 +10,10 @@ Search endpoints return results in pages. This page documents the pagination blo
 Key points on this page:
 
 - Every search response carries a `pagination` object alongside `data` and `errors`.
-- The confirmed way to page is to follow `next_page` until it comes back null.
-- `pagination` is null on responses that aren't searches, such as getting one record.
-- Request parameters for page size and sorting aren't in the spec yet, so treat them as unconfirmed.
+- Page by following `next_page` until the key is no longer present.
+- The pagination keys are **omitted** when they don't apply. They are never `null`.
+- There is no record count of any kind. To size a result set, page to the end and tally.
+- The links come back as `http://` URLs, which can cost you your auth header. See [Follow the link, but fix the scheme](#follow-the-link-but-fix-the-scheme).
 
 ## The search response envelope
 
@@ -23,8 +24,7 @@ Every search response uses the same envelope:
   "data": [],
   "errors": [],
   "pagination": {
-    "next_page": null,
-    "previous_page": null
+    "next_page": "http://<v3-base-url>/api/v3/products?_page=2"
   }
 }
 ```
@@ -33,18 +33,33 @@ Every search response uses the same envelope:
 |---|---|---|
 | `data` | array | The records matching your query |
 | `errors` | array of `Error` | Always present, empty when there's nothing to report |
-| `pagination` | object or null | Present on searches, null on operations that return a single record |
+| `pagination` | object | Present on searches, absent on operations that return a single record |
 
-The `pagination` object has two fields, both of which can be null:
+The `pagination` object holds up to two keys:
 
 | Field | Type | Description |
 |---|---|---|
-| `next_page` | string or null | URL of the next page. Null on the last page |
-| `previous_page` | string or null | URL of the previous page. Null on the first page |
+| `next_page` | string | URL of the next page. Absent on the last page |
+| `previous_page` | string | URL of the previous page. Absent on the first page |
+
+<Callout type="warn" title="The keys are absent, not null">
+  When a link doesn't apply, the application leaves the key out rather than setting it to `null`. A client written as `if (pagination.next_page !== null)` will loop forever, because the key is `undefined` on the last page, not `null`. Test for presence or truthiness instead.
+</Callout>
+
+So the object you get back depends on where you are in the result set:
+
+| Where you are | What `pagination` contains |
+|---|---|
+| First page of several | `next_page` only |
+| A middle page | Both keys |
+| The last page | `previous_page` only |
+| The result set fits on one page | `{}` an empty object |
+| A page past the end | `previous_page` only, with `data: []` and status `200` |
+| Getting a single record | No `pagination` key at all, and `data` is an object |
 
 ## Page through a result set
 
-v3 returns page URLs rather than a page number to increment. Request the first page, then follow `next_page` until it's null:
+The application returns page URLs rather than a page number to increment. Request the first page, then follow `next_page` until the key stops appearing:
 
 ```bash
 # First page
@@ -53,44 +68,85 @@ curl --request GET \
   --header 'Authorization: Bearer <token>'
 
 # Then request the URL in pagination.next_page, and repeat
-# until next_page comes back null.
+# until the response has no next_page key.
 ```
 
 A loop in pseudocode:
 
 ```text
 url = "/api/v3/products?status=Draft"
-while url is not null:
+while url:
     response = GET url
     process(response.data)
-    url = response.pagination.next_page
+    url = response.pagination.get("next_page")   # absent on the last page
+    if url: url = url.replace("http://", "https://")
 ```
 
-<Callout type="info" title="Follow the URL, don't rebuild it">
-  `next_page` carries your filters and sort order forward. Rebuilding the URL by incrementing a page number risks dropping a parameter, and it breaks if Plytix changes the paging mechanism later. Use the URL you're given.
-</Callout>
+### Follow the link, but fix the scheme
+
+`next_page` carries your filters and sort order forward, so following it beats rebuilding the URL yourself: incrementing a page number risks dropping a parameter.
+
+The application generates these links with the `http` scheme:
+
+```json
+"next_page": "http://<v3-base-url>/api/v3/products?_page=2"
+```
+
+Requesting that URL as given returns a `301` redirect to the `https` address. Many HTTP clients drop the `Authorization` header when a redirect changes the scheme, so the redirected request arrives unauthenticated and you get:
+
+```json
+{ "detail": "Unauthorized" }
+```
+
+Rewrite the scheme to `https` before you request the URL.
 
 ## Request parameters
 
-<Callout type="warn" title="FLAG">
-  **Insufficient source:** the parameters below come from `API V3.md`, a design document with approved, rejected, and postponed options. Neither `openapi_pimv3.json` nor `fumadocs/openapi.json` declares any query parameter on any search operation, so none of these is confirmed. Verify with the `endpoint-tester` skill before publishing, and drop any that the live API doesn't accept.
-</Callout>
+Three parameters control paging and sort order.
 
 | Parameter | Type | Description |
 |---|---|---|
-| `_page` | integer | The page to return `[PENDING]` |
-| `_page_size` | integer | Records per page `[PENDING]` |
-| `_sort_by` | string | Field to sort by `[PENDING]` |
-| `_filtered_count` | boolean | Include the count of records matching the filter `[PENDING]` |
-| `_total_count` | boolean | Include the total count of records `[PENDING]` |
+| `_page` | integer | The page to return. Must be 1 or greater. Defaults to `1` |
+| `_page_size` | integer | Records per page. Maximum `1000`. Defaults to `25` |
+| `_sort_by` | string | Field to sort by, ascending |
 
-<Callout type="warn" title="FLAG">
-  **Conflict on counts.** `API V3.md` describes a pagination block containing `filtered_count` and `total_count`, but the `Pagination` schema in `fumadocs/openapi.json` defines only `next_page` and `previous_page`. Per the trust order the spec wins, so this page documents the two URL fields as the confirmed shape. If counts are available, add them here and correct the response tables above.
-</Callout>
+Both bounds are enforced, and the error names the parameter and the limit. `_page=0` returns:
+
+```json
+{
+  "data": [],
+  "errors": [
+    {
+      "name": "InputDTOValidationError",
+      "description": "query._page: Input should be greater than or equal to 1"
+    }
+  ]
+}
+```
+
+`_page_size=1001` returns the same shape with `"query._page_size: Input should be less than or equal to 1000"`.
+
+### There are no count parameters
+
+The application doesn't return a count of matching records, and there is no parameter that asks for one. `_total_count` and `_filtered_count` each return `400`:
+
+```json
+{
+  "data": [],
+  "errors": [
+    {
+      "name": "InvalidFieldError",
+      "description": "Field '_total_count' does not exist."
+    }
+  ]
+}
+```
+
+The pagination block carries no counts either. This is a difference from v1, whose search responses included `total_count`. If you're migrating, see [Migrating to v3](/docs/guides/migrating-to-v3).
 
 ## Page without surprises
 
-- **Don't assume a total.** The confirmed pagination block carries no count, so the only reliable way to know how many records matched is to page to the end and tally as you go.
+- **Don't assume a total.** The pagination block carries no count, so the only reliable way to know how many records matched is to page to the end and tally as you go. For a set you know is small, `_page_size=1000` gets you everything in one request.
 - **Watch the request rate.** Paging through a large result set is many requests in quick succession. Rate limits vary by account and are carried in your access token's claims, so pace a long loop and back off on `429`. See [Rate limits](/docs/reference/v3/rate-limits).
 - **Ask for fewer fields.** `_fields` narrows each record to what you need, which makes a long paging run noticeably cheaper. See [Filtering and Query Syntax](/docs/reference/v3/filtering-query-syntax).
 - **Expect the set to shift under you.** A catalog that changes mid-run can move records between pages. For an export that has to be internally consistent, filter on a stable field such as a date range rather than paging an unfiltered set.

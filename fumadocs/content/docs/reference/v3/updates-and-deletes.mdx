@@ -5,12 +5,13 @@ description: "Reference for how v3 handles writes: which method to use, what eac
 
 import { TriangleAlert, BookOpen } from 'lucide-react';
 
-v3 changed how write operations behave. This page documents which method to use for each kind of change, what comes back in the response, how empty values are treated, and what DELETE removes.
+This page documents which method to use for each kind of change, what comes back in the response, how empty values are treated, and what DELETE removes.
 
 Key points on this page:
 
-- POST and PATCH return the full record in the response, so you don't need to read it back.
-- PATCH is the standard way to change a record, because it touches only the fields you name.
+- POST returns the full created record. PATCH returns `204` with no body, so an update has to be read back.
+- PATCH is the standard way to change a record, because it touches only the top-level fields you name.
+- Naming a map field such as `attributes` in a PATCH replaces that whole map, deleting anything you left out.
 - An empty string or empty list is stored as a value, not treated as a deletion.
 - DELETE erases a field or record rather than setting it to null, which can let an inherited value take over.
 
@@ -26,40 +27,46 @@ Key points on this page:
 | Change a link | PATCH | `/api/v3/<entities>/<identifier>/<related-entities>/<linked_id>` |
 | Remove a link | DELETE | `/api/v3/<entities>/<identifier>/<related-entities>/<linked_id>` |
 
-`<identifier>` is usually the record's ID. For products, a URL-encoded SKU works too.
+`<identifier>` is usually the record's ID. For products, a URL-encoded SKU works too, and an identifier that matches nothing returns `404`.
 
 <Callout type="info" title="Why PATCH rather than PUT">
-  PATCH names only the fields you're changing, which reduces the risk of overwriting a field you didn't mean to touch and makes concurrent edits safer. `API V3.md` records this as the recommended standard for modifications in v3.
-</Callout>
-
-<Callout type="warn" title="FLAG">
-  `API V3.md` also specifies PUT for whole-record replacement, but no PUT operation appears in `openapi_pimv3.json` or `fumadocs/openapi.json`. Per the trust order the spec wins, so this page documents PATCH only. Confirm whether PUT is planned, and add it here if it ships.
+  PATCH names only the fields you're changing, which reduces the risk of overwriting a field you didn't mean to touch and makes concurrent edits safer.
 </Callout>
 
 ## What a write returns
 
-A successful POST or PATCH returns the complete record, not just an identifier. You don't need a follow-up GET to see the result of a write.
+A successful POST returns the complete created record. PATCH and DELETE return no body at all, so the only way to see the result of an update is to read the record back.
 
 | Operation | Status | Body |
 |---|---|---|
 | Create | `201` | The full created record |
-| Update | `200` | The full updated record |
+| Update | `204` | None |
 | Delete | `204` | None |
 | Accepted for async processing | `202` | A `process_id` for tracking |
 
-A PATCH response returns every field on the record, not only the fields you sent. It's the same shape a GET on that record returns, which is richer than the create response: it also carries the relationship arrays (`assets`, `categories`, `relationships`) and the `created_user_audit` / `modified_user_audit` blocks.
+## What a PATCH replaces
 
-<Callout type="warn" title="Plytix's internal reference states the opposite">
-  `API V3.md` specifies that modification endpoints return only an ID rather than the entity, and its URL-standardization table lists PATCH as returning `204`. **Live testing contradicts this on every resource tested:** PATCH returns `200` with the full entity, and POST returns `201` with the full entity. The behavior documented above is what the API actually does.
+A PATCH merges at the top level only. Top-level fields you leave out keep their current values, but a map field you name is replaced in full rather than merged into.
 
-  DELETE is the reverse case: the OpenAPI spec declares `200`, but live testing confirms `204 No Content`, which matches `API V3.md`'s prose. A subsequent GET on the deleted record returns `404`.
+| What you send | What happens |
+|---|---|
+| A top-level field (`label`, `status`, `gtin`) | Only that field changes |
+| A top-level field you omit | Left untouched |
+| `attributes` with some keys | The whole map is replaced; omitted attributes are deleted |
 
-  Treat the `202` async row as unverified — no endpoint observed in testing has returned it yet. See the Process Manager note at the end of this page.
-</Callout>
+So `{"attributes": {"price": 34.99}}` on a product that also has `brand` and `care_instructions` leaves it with `price` alone. Read the current map, apply your change to it, and send the result back.
 
-<Callout type="info" title="Why the spec shows 200 everywhere">
-  `openapi_pimv3.json` declares only `200` and `422` on every operation, which [Errors and Status Codes](/docs/reference/v3/errors-status-codes) also notes. That's an artifact of the FastAPI export under-declaring its responses, not a description of real behavior, which is why the `201` and `204` above differ from it.
-</Callout>
+To change one attribute without resending the map, address it through its own path instead. The body is the bare value:
+
+```bash
+curl --request PATCH \
+  --url 'https://<v3-base-url>/api/v3/products/<identifier>/attributes/<name>' \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '34.99'
+```
+
+This returns `204` and leaves every other attribute intact.
 
 ## How empty values are treated
 
@@ -92,7 +99,7 @@ Field-level creation and deletion apply to attributes only. You can POST or DELE
 
 ## Change a single field
 
-v3 exposes fields as paths under a record, so you can read or change one field without sending the whole record:
+V3 exposes fields as paths under a record, so you can read or change one field without sending the whole record:
 
 ```bash
 # Read one field
@@ -105,26 +112,18 @@ The same path pattern extends through related entities, in the form `/api/v3/<en
 
 ## Advanced updates
 
-For changes that a simple field assignment can't express, such as inserting into a specific position in a list, `API V3.md` specifies JSON Patch: send a PATCH with the content type `application/json-patch+json` and a body following RFC 6902.
-
-<Callout type="warn" title="FLAG">
-  `[PENDING]` JSON Patch support isn't declared in the spec. Confirm before documenting it as available.
-</Callout>
+Some changes can't be expressed by assigning a value to a field, such as inserting an item at a specific position in a list. For those, v3 accepts JSON Patch: send a PATCH with the content type `application/json-patch+json` and a body that describes the change as a list of RFC 6902 operations, each naming an `op`, a `path`, and, where the operation needs one, a `value`.
 
 ## Async operations
 
 An operation that can't complete within the request returns `202` with a `process_id` rather than a result. Track it through the Process Manager API, and the record changes once processing finishes.
-
-<Callout type="warn" title="FLAG">
-  `[PENDING]` `API V3.md` describes a Process Manager API exposing full CRUD for processes, with process transitions handled by dedicated endpoints rather than PATCHes to a status field, but its paths are listed as undecided and no process endpoint appears in the spec. Document the tracking flow once the paths are confirmed.
-</Callout>
 
 ## Write safely
 
 - **Read before you write.** Confirm which records match your filter before applying a change to them.
 - **Test deletes on one record.** Erasure and inheritance interact in ways that are hard to predict from a filter alone.
 - **Don't parse a write response for values.** Read the record back instead.
-- **Pace a long run of writes.** v3 has no bulk write endpoints, so a large change is many single requests. See [Bulk operations for large catalogs](/docs/guides/bulk-operations-for-large-catalogs).
+- **Pace a long run of writes.** V3 has no bulk write endpoints, so a large change is many single requests. See [Bulk operations for large catalogs](/docs/guides/bulk-operations-for-large-catalogs).
 
 ## Related resources
 

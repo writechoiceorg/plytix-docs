@@ -56,16 +56,18 @@ v1 expresses a filter as an object with `field`, `operator`, and `value`. v3 put
 | Less than | `lt` | `field[lt]=value` |
 | Less or equal | `lte` | `field[lte]=value` |
 | Between | Two comparisons | `field[gte]=<low>&field[lte]=<high>` |
-| Contains, case-insensitive | `contains` | `field[contains:ignorecase]=value` |
+| Contains, case-insensitive | `contains` | `field[icontains]=value` |
 | Contains, case-sensitive | `contains` | `field[contains]=value` |
-| Field exists | `exists` | `field[exists]` |
-| Field does not exist | `!exists` | `field[!exists]` |
+| Field exists | `exists` | `field[exists]=true` |
+| Field does not exist | `!exists` | `field[!exists]=true` |
 | Field is null | `null` | `field[null]` |
 | Field is not null | `!null` | `field[!null]` |
-| Empty string or empty list | Not available | `field[len]=0` |
+| Empty string or empty list | Not available | `field[length][eq]=0` |
 | Arrays intersect | Not available | `field[intersects]=value`, negated as `field[!intersects]=value` |
 | Length comparison | Not available | `field[length][gt]=value`, and the other comparison operators |
 | Days since a date | Not available | `field[days_passed][gt]=7`, optionally `field[days_passed:Europe/Madrid][lt]=1` |
+
+Equality, `in`, `gt`, `icontains`, and the existence operators are confirmed against a live account. The rest come from `API V3.md` and haven't been tested. [Filtering and Query Syntax](/docs/reference/v3/filtering-query-syntax) marks each one and covers the gotchas. Note that `API V3.md` calls the case-insensitive operator `contains:ignorecase`, but the live API uses `icontains`.
 
 ### Boolean grouping
 
@@ -74,6 +76,7 @@ v1 expresses a filter as an object with `field`, `operator`, and `value`. v3 put
 | A AND B | Both objects in the same inner array `[[A, B]]` `[PENDING]` | `A&B` |
 | A OR B | Separate inner arrays `[[A], [B]]` `[PENDING]` | `_or[0]A&_or[0]B` |
 | (A OR B) AND (C OR D) | Not expressible directly | `_or[0]A&_or[0]B&_or[1]C&_or[1]D` |
+| (A AND B) OR (C AND D) | Not expressible directly | `_or[0]_and[0]A&_or[0]_and[0]B&_or[0]_and[1]C&_or[0]_and[1]D` |
 | NOT (A OR B) | Not available | `_!or[0]A&_!or[0]B` |
 
 The v1 rows are marked `[PENDING]` because the nesting semantics come from the Postman-derived spec's saved example rather than from documented behavior.
@@ -94,11 +97,17 @@ The v1 rows are marked `[PENDING]` because the nesting semantics come from the P
 
 | | v1 and v2 | v3 |
 |---|---|---|
-| Request | `"pagination": {"page": 1, "page_size": 25, "order": "sku"}` in the body | `_page=1&_page_size=25&_sort_by=sku` |
-| Optional counts | Always returned | `_filtered_count=<bool>`, `_total_count=<bool>` |
+| Request | `"pagination": {"page": 1, "page_size": 25, "order": "sku"}` in the body | `_page=1&_page_size=25&_sort_by=sku` in the query string |
+| Record counts | `total_count` always returned | None available |
 | Response keys | `count`, `order`, `page`, `page_size`, `total_count` | `next_page`, `previous_page` |
 
-v3 returns page URLs rather than a page number to increment, so a paging loop follows `next_page` until it's null instead of counting pages. The v3 `Pagination` schema carries no counts, so a migrated loop can't rely on a total. See [Pagination](/docs/reference/v3/pagination).
+v3 returns page URLs rather than a page number to increment, so a paging loop follows `next_page` until that key stops appearing instead of counting pages. Note the keys are omitted when they don't apply rather than set to `null`.
+
+<Callout type="warn" title="No counts in v3">
+  v1 returned `total_count` on every search. v3 has no equivalent: the pagination block carries no counts, and the `_filtered_count` / `_total_count` parameters described in some Plytix design material are not implemented — either one returns `400 InvalidFieldError`.
+
+  Anything in your integration that reads a total — a progress bar, a "showing N of M" label, a pre-sized buffer — has to be reworked to page to the end and tally. See [Pagination](/docs/reference/v3/pagination).
+</Callout>
 
 ## Response conventions
 
@@ -107,18 +116,19 @@ v3 returns page URLs rather than a page number to increment, so a paging loop fo
 | Search | `200` with `data` and `pagination` | `200` with `data` and `pagination` |
 | Get one | `200` with the record | `200` with the record |
 | Create | `200` or `201` with the created entity | `201` with the full created entity |
-| Update (PATCH) | Returns the modified entity | `200` with the full updated entity |
+| Update (PATCH) | Returns the modified entity | `204` with no body |
 | Delete | Varies | `204` with no body |
 | Accepted for async processing | Not applicable | `202` with a `process_id` |
 | Error | Varies | `errors` array in the same envelope, each entry `{"name": "...", "description": "..."}`. See [Errors and Status Codes](/docs/reference/v3/errors-status-codes) |
 
 Two behavioral differences matter more than the status codes:
 
-- **v3 returns the full entity on a write**, not just the fields you sent, so a PATCH response is the whole record. This matches v1's behavior, so response-parsing code generally carries over; code that branches on an exact status code does not.
+- **v3 returns nothing on an update.** v1's PATCH returned the modified entity; v3's returns `204` with an empty body, so any code that read values out of an update response needs a follow-up GET. Create is unchanged in this respect: it still returns the full entity.
+- **v3 PATCH replaces a map field you name.** Sending part of a product's `attributes` deletes the attributes you left out. Read the current map, merge, then send it back. See [Working with Updates and Deletes](/docs/reference/v3/updates-and-deletes).
 - **v3 DELETE erases** the entity or field rather than setting it to null or a default, and removing a field can cause inheritance to resolve for it.
 
-<Callout type="warn" title="Plytix's internal reference states the opposite">
-  `API V3.md` describes v3 write endpoints as returning only an ID, with PATCH returning `204`. Live testing contradicts this on every resource tested. The table above is what the API actually does.
+<Callout type="warn" title="PATCH changed to 204 during this project">
+  Through 2026-09-23, PATCH returned `200` with the full updated entity on every resource tested here. As of 2026-10-01 it returns `204` with an empty body, confirmed on products and product categories. It now matches `API V3.md`, which listed PATCH as `204` all along. POST still returns `201` with the full entity, which `API V3.md` still describes incorrectly as returning only an ID.
 </Callout>
 
 ## Endpoint mapping

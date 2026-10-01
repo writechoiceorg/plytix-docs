@@ -74,7 +74,7 @@ Produce a product set scoped to one channel, for example a UK-only feed or a Sho
    </Callout>
 
    <Callout type="warn" title="FLAG">
-     Some Plytix API documentation describes `PATCH` as returning no content (status `204`). This project consistently found the opposite in live testing: `PATCH` returns `200` with the full updated channel in the response body.
+     `PATCH` changed to `204` with an empty response body, confirmed live 2026-10-01 on products and product categories but not re-tested on channels. Earlier in this project it returned `200` with the full updated channel. Don't rely on the response body here until it's confirmed on this resource; use the read-back in step 4.
    </Callout>
 
 4. **Confirm the channel picked up the right product list.**

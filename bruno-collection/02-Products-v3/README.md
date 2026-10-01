@@ -243,8 +243,77 @@ longer reproducible**:
 - All scratch resources created for this refresh were deleted; no new
   fixtures kept.
 
+## Update — 2026-10-01 (pagination parameter verification)
+
+Targeted verification of the five pagination request parameters that
+`fumadocs/content/docs/reference/v3/pagination.mdx` carried as
+`[PENDING]`/unconfirmed, plus the shape of the `pagination` response
+block. Read-only — no resources created, modified or deleted, so no
+cleanup was needed and no fixtures changed. Five new `example{}` blocks
+added to `List Products.bru`.
+
+| Parameter | Result |
+|---|---|
+| `_page` | ✅ Works. Must be `>= 1`; `_page=0`/`-1` → `422 "query._page: Input should be greater than or equal to 1"` |
+| `_page_size` | ✅ Works. Max `1000`; `1001`+ → `422 "query._page_size: Input should be less than or equal to 1000"`. Default `25` |
+| `_sort_by` | ✅ Works (ascending) |
+| `_filtered_count` | ❌ `400 InvalidFieldError: Field '_filtered_count' does not exist.` |
+| `_total_count` | ❌ `400 InvalidFieldError: Field '_total_count' does not exist.` — same on `/assets` |
+
+Response-block shape (verified identically on `/products`, `/assets`,
+`/product-categories`, `/pim-product-lists`, `/relationships`, so it's
+the API-wide convention):
+
+| Position in the result set | `pagination` contains |
+|---|---|
+| First page of several | `next_page` only |
+| A middle page | both keys |
+| The last page | `previous_page` only |
+| Whole set fits on one page | `{}` (empty object) |
+| A page past the end | `previous_page` only, `data: []`, status `200` |
+| `GET /products/{id}` | no `pagination` key at all; `data` is an object |
+
+**Three findings worth acting on** (full writeups as quirks #89-92 in
+`config/api-testing.config.md`):
+
+1. **No counts exist anywhere in v3.** Both count params 400, and the
+   `Pagination` schema has no count fields. The only way to size a
+   result set is to page to the end and tally. This is a regression from
+   v1, which returned `total_count` on every search.
+2. **Pagination keys are omitted, never `null`** — contradicting the
+   spec's `Pagination` schema, which types both as `string | null`. A
+   client testing `!== null` will loop forever.
+3. **⚠️ `next_page`/`previous_page` are `http://` URLs.** They `301` to
+   `https://...:443`, and clients that drop `Authorization` across a
+   scheme-changing redirect then get `401 {"detail":"Unauthorized"}` —
+   plain `curl -L` does exactly this. `--location-trusted` or rewriting
+   the scheme works. This undercuts the otherwise-correct "follow the
+   URL, don't rebuild it" guidance and is captured as the
+   "401 - Following next_page Verbatim Drops Auth" example.
+
+Also corrected: the `200 - Sparse Field Selection` example (captured
+2026-09-04) showed `next_page` with an `https` scheme. The live API
+returns `http`; the example had been tidied during transcription. Fixed.
+
+Docs pages updated off the back of this: `reference/v3/pagination.mdx`
+(both FLAG callouts resolved), `guides/migrating-to-v3/migration-reference.mdx`
+(count row was wrong), `guides/quickstart.mdx` (showed null pagination
+keys), `guides/exporting-your-full-catalog.mdx` (https scheme + new
+redirect warning).
+
 ## Open items
 
+- [ ] **Ask Plytix**: can `pagination.next_page`/`previous_page` be
+      generated with the `https` scheme? Today they're `http`, and
+      following one verbatim silently costs the caller their auth header
+      on many clients. (Config open question #26.)
+- [ ] **Ask Plytix**: is the total absence of a record count in v3
+      deliberate? v1 returned `total_count` on every search; v3 has no
+      equivalent and both `_total_count`/`_filtered_count` 400. (Config
+      open question #27.)
+- [ ] Ask Plytix: should the `Pagination` schema be corrected to match
+      the API omitting keys, or should the API emit explicit nulls to
+      match the schema? (Config open question #28.)
 - [ ] Ask Plytix: is `GET /products/<sku>` meant to work on v3? (See
       config open question #5.)
 - [ ] Ask Plytix: is `_expand` meant to work on `/products`, or is it
