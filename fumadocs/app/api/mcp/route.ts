@@ -1,8 +1,12 @@
 import { createMcpHandler, McpServer, SUPPORTED_PROTOCOL_VERSIONS } from '@modelcontextprotocol/server';
-import { registerSearchTool, registerSourceTools } from 'fumadocs-core/mcp';
+import { registerSourceTools } from 'fumadocs-core/mcp';
 import { createFromSource } from 'fumadocs-core/search/server';
 import { docsLlms, source } from '@/lib/source';
 import { appName } from '@/lib/shared';
+import { registerDocsSearchTool } from '@/lib/mcp-search';
+
+// Built once per worker instance, not per request.
+const searchServer = createFromSource(source);
 
 const serverInfo = {
   name: 'docs',
@@ -13,7 +17,7 @@ const handler = createMcpHandler(() => {
   const mcp = new McpServer(serverInfo);
 
   registerSourceTools(mcp, source, docsLlms);
-  registerSearchTool(mcp, createFromSource(source));
+  registerDocsSearchTool(mcp, searchServer);
 
   return mcp;
 });
