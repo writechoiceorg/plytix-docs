@@ -1,5 +1,0 @@
-{
-  "title": "API Reference",
-  "root": true,
-  "pages": ["api-overview", "authentication", "status-codes", "endpoints"]
-}

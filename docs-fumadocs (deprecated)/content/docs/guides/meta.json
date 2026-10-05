@@ -1,5 +1,0 @@
-{
-  "title": "Guides",
-  "root": true,
-  "pages": ["overview", "get-started-with-api", "integration-guides"]
-}
