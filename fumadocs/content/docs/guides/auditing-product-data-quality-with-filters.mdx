@@ -46,9 +46,9 @@ Catch incomplete product data before it reaches a channel or marketplace: produc
      --data-urlencode "attributes.short_description[icontains]="
    ```
 
-   <Callout type="warn" title="FLAG">
+   {/* FLAG (open):
      This project confirmed `[icontains]` works for substring matching against a real value, but didn't independently test it with an empty string specifically to distinguish "empty" from "missing." Confirm this distinction behaves as expected for your account before relying on it, or combine both `exists` and a length check if your account supports one.
-   </Callout>
+   */}
 
 4. **Narrow an audit to a set of statuses with `in`.**
 
@@ -77,10 +77,6 @@ Catch incomplete product data before it reaches a channel or marketplace: produc
      -H "Authorization: Bearer <access_token>" \
      --data-urlencode "attributes.website_ready[gt]=90"
    ```
-
-   <Callout type="warn" title="FLAG">
-     Creating your own custom Completeness Attribute through the API is currently broken: sending a real attribute reference in the create request returns a server error. Use the automatically computed scores above instead of trying to create a new one until this is resolved.
-   </Callout>
 
 6. **Combine filters and turn a recurring audit into a Smart List.**
 

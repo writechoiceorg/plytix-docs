@@ -7,7 +7,7 @@ import { ArrowRightLeft, BookOpen } from 'lucide-react';
 
 This page maps v1 and v2 to v3: base URLs, authentication, request and response shapes, filter operators, and every endpoint with its v3 equivalent. For the process of moving an integration across, see [Migrating to v3](/docs/guides/migrating-to-v3).
 
-<Callout type="warn" title="FLAG">
+{/* FLAG (open):
   Sources and their limits, all of which affect this page:
 
   - `openapi_pimv1.json` was converted from the Plytix PIM v1 Postman collection, and its own description says the shapes were inferred from saved examples and haven't been verified against the live API.
@@ -15,16 +15,16 @@ This page maps v1 and v2 to v3: base URLs, authentication, request and response 
   - `API V3.md` is a design document with approved, rejected, and postponed options. Parts of it describe intended rather than shipped behavior.
 
   Verify every row with the `endpoint-tester` skill before publishing. Rows marked `[PENDING]` are ones where no source gives a confident mapping.
-</Callout>
+*/}
 
 ## Base URLs and authentication
 
 | | v1 and v2 | v3 |
 |---|---|---|
-| Base URL | `https://pim.plytix.com` | `https://<v3-base-url>` `[PENDING]` |
+| Base URL | `https://pim.plytix.com` | `https://<v3-base-url>` {/* [PENDING] */} |
 | Path prefix | `/api/v1`, `/api/v2` | `/api/v3` |
-| Auth service | `https://auth.plytix.com` | Same `[PENDING]` |
-| Token request | `POST /auth/api/get-token` with `api_key` and `api_password` | Same `[PENDING]` |
+| Auth service | `https://auth.plytix.com` | Same |
+| Token request | `POST /auth/api/get-token` with `api_key` and `api_password` | Same |
 | Request header | `Authorization: Bearer <token>` | Same |
 
 Credentials, their roles, and token-refresh logic carry over unchanged. See [Quickstart](/docs/guides/quickstart).
@@ -73,13 +73,13 @@ Equality, `in`, `gt`, `icontains`, and the existence operators are confirmed aga
 
 | Logic | v1 | v3 |
 |---|---|---|
-| A AND B | Both objects in the same inner array `[[A, B]]` `[PENDING]` | `A&B` |
-| A OR B | Separate inner arrays `[[A], [B]]` `[PENDING]` | `_or[0]A&_or[0]B` |
+| A AND B | Both objects in the same inner array `[[A, B]]` {/* [PENDING] */} | `A&B` |
+| A OR B | Separate inner arrays `[[A], [B]]` {/* [PENDING] */} | `_or[0]A&_or[0]B` |
 | (A OR B) AND (C OR D) | Not expressible directly | `_or[0]A&_or[0]B&_or[1]C&_or[1]D` |
 | (A AND B) OR (C AND D) | Not expressible directly | `_or[0]_and[0]A&_or[0]_and[0]B&_or[0]_and[1]C&_or[0]_and[1]D` |
 | NOT (A OR B) | Not available | `_!or[0]A&_!or[0]B` |
 
-The v1 rows are marked `[PENDING]` because the nesting semantics come from the Postman-derived spec's saved example rather than from documented behavior.
+{/* The v1 rows are marked [PENDING] because the nesting semantics come from the Postman-derived spec's saved example rather than from documented behavior. */}
 
 ### Custom attributes and related entities
 
@@ -148,7 +148,7 @@ Two behavioral differences matter more than the status codes:
 | `GET /api/v1/products/{product_id}/categories` | `GET /api/v3/products/{identifier}/categories`, or field expansion |
 | `POST /api/v1/products/{product_id}/categories` | `POST /api/v3/products/{identifier}/categories` |
 | `DELETE /api/v1/products/{product_id}/categories/{category_id}` | `DELETE /api/v3/products/{identifier}/categories/{category_id}` |
-| `POST /api/v1/products/{product_id}/family` | `PATCH /api/v3/products/{identifier}` `[PENDING]` |
+| `POST /api/v1/products/{product_id}/family` | `PATCH /api/v3/products/{identifier}` {/* [PENDING] */} |
 
 In v3, `{identifier}` accepts either the product ID or the SKU, URL-encoded. The subresource paths above use v3's generic `/{identifier}/{path}` pattern, which the spec defines but doesn't enumerate per field.
 
@@ -157,7 +157,7 @@ In v3, `{identifier}` accepts either the product ID or the SKU, URL-encoded. The
 | v1 or v2 | v3 |
 |---|---|
 | `POST /api/v1/products/{product_id}/relationships/{relationship_id}` | `POST /api/v3/products/{product_id}/relationships/{relationship_id}` |
-| `PATCH /api/v1/products/{product_id}/relationships/{relationship_id}/product/{related_product_id}` | `PATCH /api/v3/products/{product_id}/relationships/{relationship_id}` `[PENDING]` |
+| `PATCH /api/v1/products/{product_id}/relationships/{relationship_id}/product/{related_product_id}` | `PATCH /api/v3/products/{product_id}/relationships/{relationship_id}` {/* [PENDING] */} |
 | `POST /api/v1/products/{product_id}/relationships/{relationship_id}/unlink` | `DELETE /api/v3/products/{product_id}/relationships/{relationship_id}` |
 | `DELETE /api/v2/products/{product_id}/relationships/{relationship_id}` | `DELETE /api/v3/products/{product_id}/relationships/{relationship_id}` |
 | Not available | `GET /api/v3/products/{product_id}/relationships` |
@@ -205,7 +205,7 @@ In v3, `{identifier}` accepts either the product ID or the SKU, URL-encoded. The
 |---|---|
 | `POST /api/v1/categories/product` | `POST /api/v3/product-categories` |
 | `POST /api/v1/categories/product/search` | `GET /api/v3/product-categories` |
-| `POST /api/v1/categories/product/{category_id}` | `POST /api/v3/product-categories` `[PENDING]` |
+| `POST /api/v1/categories/product/{category_id}` | `POST /api/v3/product-categories` {/* [PENDING] */} |
 | `PATCH /api/v1/categories/product/{category_id}` | `PATCH /api/v3/product-categories/{identifier}` |
 | `DELETE /api/v1/categories/product/{category_id}` | `DELETE /api/v3/product-categories/{identifier}` |
 | `POST /api/v1/categories/file` | `POST /api/v3/asset-categories` |
@@ -225,7 +225,7 @@ File categories are called asset categories in v3.
 | `PATCH /api/v1/product_families/{product_family_id}` | `PATCH /api/v3/product-families/{identifier}` |
 | `DELETE /api/v1/product_families/{product_family_id}` | `DELETE /api/v3/product-families/{identifier}` |
 | `GET /api/v1/product_families/{product_family_id}/attributes` | `GET /api/v3/product-families/{product_family_id}/attributes` |
-| `GET /api/v1/product_families/{product_family_id}/all_attributes` | `GET /api/v3/family-attributes` `[PENDING]` |
+| `GET /api/v1/product_families/{product_family_id}/all_attributes` | `GET /api/v3/family-attributes` {/* [PENDING] */} |
 | `POST /api/v1/product_families/{id}/attributes/link` | `POST /api/v3/product-families/{product_family_id}/attributes` |
 | `POST /api/v1/product_families/{id}/attributes/unlink` | `DELETE /api/v3/product-families/{product_family_id}/attributes/{attribute_id}` |
 | `POST /api/v1/product_families/{id}/attributes/edit` | `PATCH /api/v3/product-families/{product_family_id}/attributes/{attribute_id}` |
@@ -237,17 +237,17 @@ These v1 paths have no counterpart in `openapi_pimv3.json`. Check whether your i
 | v1 endpoint | What to do instead |
 |---|---|
 | `GET /api/v1/filters/product`, `/filters/asset`, `/filters/relationships` | No filter-discovery endpoint in v3. Build filters from the attribute definitions returned by `GET /api/v3/product-attributes` |
-| `PUT /api/v1/assets/{asset_id}/content` | No asset content upload in the v3 spec `[PENDING]` |
-| `POST /api/v1/products/{parent_product_id}/variants` | No variant endpoints in v3. Variants are modeled through product families and product family models `[PENDING]` |
-| `POST /api/v1/products/{parent_product_id}/variants/resync` | No equivalent `[PENDING]` |
-| `DELETE /api/v1/products/{parent_product_id}/variant/{variant_id}` | No equivalent `[PENDING]` |
-| `GET /api/v1/products/{product_id}/variants` | No equivalent `[PENDING]` |
+| `PUT /api/v1/assets/{asset_id}/content` | No asset content upload in the v3 spec {/* [PENDING] */} |
+| `POST /api/v1/products/{parent_product_id}/variants` | No variant endpoints in v3. Variants are modeled through product families and product family models {/* [PENDING] */} |
+| `POST /api/v1/products/{parent_product_id}/variants/resync` | No equivalent {/* [PENDING] */} |
+| `DELETE /api/v1/products/{parent_product_id}/variant/{variant_id}` | No equivalent {/* [PENDING] */} |
+| `GET /api/v1/products/{product_id}/variants` | No equivalent {/* [PENDING] */} |
 | `POST /api/v1/accounts/api-credentials/search` | Manage API keys in the Plytix interface, under the **API** tab |
 | `POST /api/v1/accounts/memberships/search` | Manage users in the Plytix interface, under the **Team** tab |
 
-<Callout type="warn" title="FLAG">
+{/* FLAG (open):
   **Bulk operations.** `API V3.md` specifies a full bulk API at `api/v3/-/bulk/<entities>` with job tracking at `api/v3/-/bulk/-/jobs/`, but no bulk path exists in `openapi_pimv3.json`, and [Bulk operations for large catalogs](/docs/guides/bulk-operations-for-large-catalogs) states there are none today. Neither v1 nor v3 offers bulk writes in their specs. Confirm the timeline with Plytix before documenting the bulk paths here.
-</Callout>
+*/}
 
 ## Resources that are new in v3
 
@@ -263,9 +263,6 @@ These have no v1 equivalent, so they're additions rather than migrations.
 | `/api/v3/connections` | Dropbox and FTP connections |
 | `/api/v3/ecatalogs` | Brand Portal catalogs |
 | `/api/v3/pdf-catalogs` | Product Data Sheet catalogs |
-| `/api/v3/channels` | Channel records `[CONFLICT]` |
-
-The Channels row is marked `[CONFLICT]` because the project's source materials state that Channels are configured only in the Plytix interface, while the spec defines full CRUD for them. See the Notes in `information-architecture.md`.
 
 ## What v2 covers
 

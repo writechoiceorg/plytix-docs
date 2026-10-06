@@ -29,9 +29,9 @@ Pull your entire product catalog, with attributes and assets included, without a
 
    `_fields` accepts repeated values. Requesting `categories` or `assets` returns them fully expanded, with no separate call and no `_expand` parameter needed.
 
-   <Callout type="warn" title="FLAG">
+   {/* FLAG (open):
      `_expand` does not work on this endpoint in this project's testing, despite appearing in some Plytix API documentation. Expansion happens automatically per `_fields` value instead, as shown above.
-   </Callout>
+   */}
 
 2. **Follow the `next_page` link until it stops appearing.**
 

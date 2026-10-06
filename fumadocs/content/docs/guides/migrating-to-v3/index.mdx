@@ -9,12 +9,6 @@ This guide walks through moving an existing v1 or v2 integration to v3: checking
 
 The good news first: your authentication doesn't change. The work is concentrated in how you search and how you read write responses.
 
-<Callout type="warn" title="FLAG">
-  **Conflict on v3 write parity.** `before-writing.md` (§3) states that v1/v2 endpoints remain required for any workflow that creates, updates, or deletes products, because v3 doesn't have write parity yet. But `openapi_pimv3.json` defines POST, PATCH, and DELETE across every resource group, and `information-architecture.md` already carries this as an open conflict (Notes, flagged 2026-09-29).
-
-  Per the project's trust order the spec outranks the prose, but a spec entry doesn't prove an endpoint is live. This guide describes the write path because the spec documents it, and marks it here so nobody plans a cutover on an unverified assumption. Confirm with Plytix or with the `endpoint-tester` skill before publishing, and if v3 writes aren't live, this page becomes "migrate your reads, keep your writes on v1/v2."
-</Callout>
-
 ## Prerequisites
 
 Before you start, you need:
@@ -35,11 +29,11 @@ Before you start, you need:
    | `PUT /api/v1/assets/{asset_id}/content` (asset content upload) | Not present |
    | `POST /api/v1/products/{parent_product_id}/variants` and variant resync | Not present as variant endpoints. v3 models this through product families and product family models |
    | `POST /api/v1/accounts/api-credentials/search` | Not present |
-   | Bulk create, update, and delete | Not present `[CONFLICT]` |
+   | Bulk create, update, and delete | Not present {/* [CONFLICT] */} |
 
-   <Callout type="warn" title="FLAG">
+   {/* FLAG (open):
      `[CONFLICT]` on bulk: `API V3.md` specifies a full bulk API at `api/v3/-/bulk/<entities>` with job tracking, but no bulk path exists in `openapi_pimv3.json`, and [Bulk operations for large catalogs](/docs/guides/bulk-operations-for-large-catalogs) states there are no bulk endpoints today. `API V3.md` is a design document with approved, rejected, and postponed options, so parts of it describe intended rather than shipped behavior. Treat the spec as current and confirm the bulk timeline with Plytix.
-   </Callout>
+   */}
 
 2. **Keep your authentication as it is.**
 
@@ -56,10 +50,6 @@ Before you start, you need:
    ```
 
    Your existing credentials, their roles, and your token-refresh logic all carry over. See [Quickstart](/docs/guides/quickstart) for the full flow.
-
-   <Callout type="warn" title="FLAG">
-     `[PENDING]` Confirm that v3 accepts tokens from the same auth service and that token lifetime is unchanged. `roadmap.md` records the short token lifetime as a known pain point for long-running integrations, and [quickstart.mdx](/docs/guides/quickstart) currently carries a "Redo" note about the auth service move, so this step needs verifying against a live v3 call before publishing.
-   </Callout>
 
 3. **Convert your searches from a POST body to a GET query.**
 
@@ -111,9 +101,9 @@ Before you start, you need:
 
    Custom attributes are addressed directly rather than through a field name string: `attributes.name[eq]=value`. [Migration reference](/docs/guides/migrating-to-v3/migration-reference) carries the full operator mapping.
 
-   <Callout type="warn" title="FLAG">
+   {/* FLAG (open):
      `[PENDING]` The v3 base URL isn't confirmed. v1 and v2 are served from `https://pim.plytix.com`, and this guide uses `<v3-base-url>` as a placeholder. Also confirm the v1 grouping semantics (AND within an inner array, OR between outer arrays) with `endpoint-tester` before publishing, since `openapi_pimv1.json` was converted from a Postman collection and its own description says the shapes haven't been verified against the live API.
-   </Callout>
+   */}
 
 4. **Update your endpoint paths.**
 

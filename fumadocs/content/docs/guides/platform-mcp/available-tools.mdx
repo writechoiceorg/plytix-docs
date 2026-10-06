@@ -7,7 +7,7 @@ import { ListChecks, ShieldCheck } from 'lucide-react';
 
 This page documents the Plytix resources an agent can work with through the Platform MCP, which operations each one supports, and which are read-only.
 
-<Callout type="warn" title="FLAG">
+{/* FLAG (open):
   **Insufficient source:** the Plytix Platform MCP is a roadmap feature and is not live yet (see `glossary.md`, "MCP Server"), and no tool list has been published. This page documents the PIM v3 API surface from `openapi_pimv3.json`, which is ground truth for what the platform can do, but the mapping from API operations to MCP tools is unconfirmed. Before publishing, get answers to:
 
   - What are the tool names, and does one tool cover a resource or a single operation?
@@ -16,7 +16,7 @@ This page documents the Plytix resources an agent can work with through the Plat
   - Are there tools with no API equivalent, such as a combined search across entity types?
 
   Until those are answered, this page names resources rather than tools. Don't invent tool names to fill the gap.
-</Callout>
+*/}
 
 Key points on this page:
 
@@ -27,7 +27,7 @@ Key points on this page:
 
 ## How resources map to tools
 
-The Platform MCP is expected to sit on top of the PIM v3 API, so the resources below are the surface an agent works with. `[PENDING]`
+The Platform MCP is expected to sit on top of the PIM v3 API, so the resources below are the surface an agent works with. {/* [PENDING] */}
 
 Each group follows the same shape in v3. A search operation returns a filtered, paged collection. A get operation returns one record by identifier. Create, update, and delete operate on single records. There are no bulk write operations in v3, which is why a large batch runs as many single calls and needs pacing. See [Bulk operations for large catalogs](/docs/guides/bulk-operations-for-large-catalogs).
 
@@ -65,21 +65,14 @@ Digital assets and the ways they're organized.
 
 ## Outputs, imports, and connections
 
-These groups exist in the v3 spec but are the least settled part of this page. Read the callout below before relying on them.
+These groups exist in the v3 spec but are the least settled part of this page.
 
 | Resource | Read | Write | Covers |
 |---|---|---|---|
-| Channels | Search, get | Create, update, delete | Channel records `[CONFLICT]` |
 | Connections | Search, get | Create, update, delete | Dropbox and FTP connections |
 | Import profiles | Search, get | Create, update, delete | Import profile definitions |
 | Ecatalogs | Search, get | Create, update, delete | Brand Portal catalogs |
 | PDF catalogs | Search, get | Create, update, delete | Product Data Sheet catalogs |
-
-<Callout type="warn" title="FLAG">
-  **Cross-page conflict on Channels.** `openapi_pimv3.json` defines full CRUD at `/api/v3/channels`, but the project's source materials state that Channels are configured only in the Plytix interface, and the standing rule in `information-architecture.md` (Notes, flagged 2026-09-29) is that guides keep following the interface-only claim until Plytix confirms otherwise. A spec entry doesn't prove an endpoint is live or supported.
-
-  This page lists the resource because the spec is the higher-trust source, and marks it so no reader treats it as settled. Resolve this with Plytix or with the `endpoint-tester` skill before publishing, and make sure the answer lands on this page, [Practical examples](/docs/guides/platform-mcp/practical-examples), and [Permissions and security considerations](/docs/guides/platform-mcp/permissions-and-security) at the same time, since all three currently describe Channels as interface-only.
-</Callout>
 
 ## Searching and paging
 

@@ -13,13 +13,9 @@ Plytix enforces rate limits on the API so that no single account can degrade the
 
 ## How rate limits work
 
-Your account plan sets a limit on how many requests you can make in two time windows: per 10 seconds, and per hour. Every request counts as one hit against both limits at the same time, so you can be blocked by whichever window you exhaust first.
+Your account plan sets a limit on how many requests you can make in two time windows: per 10 seconds, and per hour. Standard accounts have either 20 requests per 10 seconds and 2,000 requests per hour, or 50 requests per 10 seconds and 5,000 requests per hour. Accounts that negotiated different limits, mainly enterprise accounts, can have other values. Every request counts as one hit against both limits at the same time, so you can be blocked by whichever window you exhaust first.
 
 Rate limits are enforced across all resources available in the API, and they're based on your account plan. Some large clients have found their plan's limit too low for occasional high-volume operations, such as uploading a large catalog, and have requested a temporary rate-limit extension for those windows. If your integration needs to do something similar, ask your account manager ahead of time rather than building around the assumption that a temporary extension is automatic.
-
-<Callout type="warn" title="FLAG">
-  The source material confirms the two time windows and that limits are plan-based, but doesn't give the actual numeric thresholds for either window, or a breakdown of limits by plan tier. Confirm these details with Plytix before treating them as final.
-</Callout>
 
 ## Exceeding your limit
 

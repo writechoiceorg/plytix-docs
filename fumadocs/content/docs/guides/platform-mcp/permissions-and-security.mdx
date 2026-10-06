@@ -7,13 +7,13 @@ import { KeyRound, ListChecks } from 'lucide-react';
 
 This page documents what an AI agent connected to the Plytix Platform MCP can reach, what limits that reach, and the practices worth adopting before you grant one write access.
 
-<Callout type="warn" title="FLAG">
+{/* FLAG (open):
   The Plytix Platform MCP is a roadmap feature and is not live yet (see `glossary.md`, "MCP Server"). The permission model below is Plytix's existing role model, sourced from the help center, which documents the Plytix interface and API keys. Whether the Platform MCP inherits that model is unconfirmed. Every section marked `[PENDING]` needs an answer from the product team before this page is published.
-</Callout>
+*/}
 
 Key points on this page:
 
-- An agent's reach is bounded by a Plytix role, the same way a user's or an API key's reach is. `[PENDING]`
+- An agent's reach is bounded by a Plytix role, the same way a user's or an API key's reach is. {/* [PENDING] */}
 - Plytix has four system roles and supports up to 15 custom team roles with per-area permissions.
 - Attribute-level permissions don't apply to imports, which is the one gap worth checking before you trust a restricted role.
 - Writes are immediate and there's no undo, so read and write belong in separate steps.
@@ -21,7 +21,7 @@ Key points on this page:
 
 ## OAuth scopes
 
-<Callout type="warn" title="FLAG">
+{/* FLAG (open):
   **Insufficient source:** no scope list exists. The outline (`plytix-outline-canvas.md`) specifies this section as "Required OAuth scopes," but no spec, scope name, or authorization flow has been shared, and nothing in `materials/` or `openapi_pimv3.json` describes one. This section can't be written without answers to:
 
   - What scopes does the Platform MCP define, and what does each one permit?
@@ -30,15 +30,15 @@ Key points on this page:
   - Can a user grant read-only access without an administrator creating a dedicated role first?
 
   Do not publish a scope table assembled from guesswork. An incorrect scope table on a security page is worse than an absent one.
-</Callout>
+*/}
 
 ## Access boundaries
 
 Plytix limits access by role, not by user. You assign permissions to a role, then assign that role to a person or an API key. If the Platform MCP follows the same pattern, the agent's reach is whatever its role allows, and nothing more.
 
-<Callout type="warn" title="FLAG">
+{/* FLAG (open):
   **Unconfirmed applicability:** the tables in this section describe the role model as it works in the Plytix interface and for API keys (sourced from `materials/help-center/system-roles.md`, `team-roles/permissions.md`, and `api.md`). Per the project's trust order, help center content ranks below verified API findings. Confirm that MCP access resolves through the same roles before publishing.
-</Callout>
+*/}
 
 ### System roles
 
@@ -87,7 +87,7 @@ Beyond the area level, an administrator can set View or Edit per individual attr
 <Callout type="warn" title="Attribute permissions don't cover imports">
   Attribute-level permissions limit editing in the Plytix interface, but not in the importer. A role with View rights on an attribute and Edit rights on Import can still change that attribute through an import. To close the gap, set Import to View or None on that role.
 
-  This matters more for an agent than for a person, because an agent may reach for an import to complete a bulk request. Confirm how the Platform MCP writes data before relying on attribute-level permissions to protect a field. `[PENDING]`
+  This matters more for an agent than for a person, because an agent may reach for an import to complete a bulk request. Confirm how the Platform MCP writes data before relying on attribute-level permissions to protect a field. {/* [PENDING] */}
 </Callout>
 
 ### What sits outside the API
@@ -116,7 +116,7 @@ An agent reading your catalog is reading text that came from suppliers, importer
 The authorization token lives in your client, in whatever way that client stores it. That storage is worth a look before you connect an account with write access.
 
 - Check whether your client writes its configuration into a file that gets committed to a repository or synced across machines.
-- Disconnect the server when you stop using it, and revoke the authorization on the Plytix side rather than only removing it from the client. `[PENDING]`
+- Disconnect the server when you stop using it, and revoke the authorization on the Plytix side rather than only removing it from the client. {/* [PENDING] */}
 - Name the connection after the person or tool using it, following the same practice Plytix recommends for API keys, so you can tell later who had access.
 
 ### Watch the pace
@@ -129,9 +129,9 @@ Plytix records processing events in the Process Log, reachable from the icon nex
 
 Twenty-five events is a short history for an agent working through a batch, so export or note what you need before it scrolls away.
 
-<Callout type="warn" title="FLAG">
+{/* FLAG (open):
   **Insufficient source:** it's unconfirmed whether MCP actions appear in the Process Log at all, and if they do, which user they're attributed to. Ask the product team whether agent activity is distinguishable from the authorizing user's own activity. Without that, an audit can't answer "did a person or an agent change this?"
-</Callout>
+*/}
 
 ## Related resources
 

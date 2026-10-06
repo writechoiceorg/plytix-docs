@@ -23,9 +23,9 @@ Read a parent product and its variants as a structured hierarchy, the way an ERP
 
    Each family includes `total_products`, `total_attributes`, and `total_models`, so you can confirm a family actually has data before building against it.
 
-   <Callout type="warn" title="FLAG">
+   {/* FLAG (open):
      Creating a new Product Family, choosing its attributes, or configuring inheritance between levels are all dashboard-only actions today. There's no API endpoint for any of them. The steps below assign products into an existing family, they don't build one from scratch.
-   </Callout>
+   */}
 
 2. **Create the parent product, assigned to that family.**
 
@@ -71,9 +71,9 @@ Read a parent product and its variants as a structured hierarchy, the way an ERP
 
 When a variant is created under a parent, Plytix tracks which of its attribute values were inherited versus explicitly overwritten, in the `overwritten_attributes` field on the product. Read this field to see which attributes a specific variant customized.
 
-<Callout type="warn" title="FLAG">
+{/* FLAG (open):
   This project confirmed the `overwritten_attributes` field is present and returns an array, but didn't independently test what it contains once a variant actually overwrites an inherited value. Verify the exact shape against your own account's data before building logic around its contents.
-</Callout>
+*/}
 
 Plytix's own API documentation notes that deleting a variant's overwritten attribute value (rather than setting it to an empty value) can cause that attribute to fall back to, or "resolve," the parent's inherited value. This wasn't independently tested in this project. If you need to revert a variant's attribute back to its parent's value, this is worth verifying directly against your account before relying on it.
 

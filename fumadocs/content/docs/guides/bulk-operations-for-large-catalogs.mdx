@@ -7,9 +7,9 @@ import { Download, RotateCw } from 'lucide-react';
 
 Process a large catalog of products reliably. This guide covers the confirmed working approach today, pacing single-item requests within the API's rate limits, and what to know before reaching for the older Bulk API.
 
-<Callout type="warn" title="FLAG">
+{/* FLAG (open):
   This API version doesn't currently have bulk create, update, or delete endpoints. If you came here expecting a single call that processes thousands of products at once, the pattern below (single-item requests, paced to the rate limit) is the confirmed working approach today.
-</Callout>
+*/}
 
 ## Prerequisites
 
@@ -53,9 +53,9 @@ Plytix's v2 API includes a Bulk API for batch operations, but it comes with two 
 - **It isn't available to every account.** Confirm with your Plytix contact whether your account has access before planning around it.
 - **Partial failures aren't clearly reported.** A Bulk API response doesn't reliably distinguish between an item that was skipped because nothing changed and one that failed silently, which has been a recurring point of customer feedback. If you do use it, don't assume every item not showing an explicit success actually failed; expect to verify results the same way described in steps 4 and 5 above.
 
-<Callout type="warn" title="FLAG">
+{/* FLAG (open):
   The Bulk API wasn't independently tested in this project. The single-item pattern in steps 1 to 5 is the one confirmed working approach documented here.
-</Callout>
+*/}
 
 ## Related articles
 
