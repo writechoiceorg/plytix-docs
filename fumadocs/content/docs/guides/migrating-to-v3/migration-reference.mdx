@@ -5,29 +5,35 @@ description: "Reference for mapping v1 and v2 endpoints, filter operators, pagin
 
 import { ArrowRightLeft, BookOpen } from 'lucide-react';
 
-This page maps v1 and v2 to v3: base URLs, authentication, request and response shapes, filter operators, and every endpoint with its v3 equivalent. For the process of moving an integration across, see [Migrating to v3](/docs/guides/migrating-to-v3).
+This page maps v1 and v2 to v3: base URLs, authentication, request and response shapes, filter operators, and every endpoint with its v3 equivalent or its absence. For the process of moving an integration across, and for deciding which calls move at all, see [Migrating to v3](/docs/guides/migrating-to-v3).
+
+Where an operation has no v3 equivalent, the table says so rather than guessing at the nearest match.
 
 {/* FLAG (open):
-  Sources and their limits, all of which affect this page:
+  Source limits that still affect this page:
 
-  - `openapi_pimv1.json` was converted from the Plytix PIM v1 Postman collection, and its own description says the shapes were inferred from saved examples and haven't been verified against the live API.
-  - `openapi_pimv3.json` is a FastAPI export with no `servers`, no `securitySchemes`, and no documented query parameters, so the base URL, auth, and search parameters below come from `API V3.md` and the existing guides instead.
-  - `API V3.md` is a design document with approved, rejected, and postponed options. Parts of it describe intended rather than shipped behavior.
+  - `openapi_pimv1.json` was converted from the Plytix PIM v1 Postman collection, and its own description says the shapes were inferred from saved examples and haven't been verified against the live API. Every v1-side row inherits that caveat.
+  - The v3 spec is a FastAPI export with no `servers` and no `securitySchemes`, so base URL and auth come from live testing and the existing guides rather than from the spec.
+  - `API V3.md` is a design document with approved, rejected, and postponed options. Parts of it describe intended rather than shipped behavior, so it is used here only where nothing better exists, and always marked.
 
-  Verify every row with the `endpoint-tester` skill before publishing. Rows marked `[PENDING]` are ones where no source gives a confident mapping.
+  Verify the v1-side rows with the `endpoint-tester` skill before publishing.
 */}
 
 ## Base URLs and authentication
 
 | | v1 and v2 | v3 |
 |---|---|---|
-| Base URL | `https://pim.plytix.com` | `https://<v3-base-url>` {/* [PENDING] */} |
+| Base URL | `https://pim.plytix.com` | `https://pim.plytix.com` |
 | Path prefix | `/api/v1`, `/api/v2` | `/api/v3` |
 | Auth service | `https://auth.plytix.com` | Same |
 | Token request | `POST /auth/api/get-token` with `api_key` and `api_password` | Same |
 | Request header | `Authorization: Bearer <token>` | Same |
 
-Credentials, their roles, and token-refresh logic carry over unchanged. See [Quickstart](/docs/guides/quickstart).
+Credentials, their roles, and token-refresh logic carry over unchanged, and the same token works against both versions. That matters, because an integration that keeps some calls on v1 doesn't need a second auth flow. See [Quickstart](/docs/guides/quickstart).
+
+{/* FLAG (open):
+  v3 was verified live on `https://pim.dev.plytix.com/api/v3` (Plytix DEV environment, "David's Dev Account", authenticated via `https://auth.dev.plytix.com`). `https://pim.plytix.com/api/v3` returned a gateway 503 for the "API Docs" test account as of 2026-09-04 — v3 wasn't routed on the prod host for that account yet. The table above uses the prod host to match every other guide in this set. Confirm prod routing with Plytix before launch; if it lands on a different host, this row and the examples across the guides change together.
+*/}
 
 ## Request shape
 
@@ -67,7 +73,7 @@ v1 expresses a filter as an object with `field`, `operator`, and `value`. v3 put
 | Length comparison | Not available | `field[length][gt]=value`, and the other comparison operators |
 | Days since a date | Not available | `field[days_passed][gt]=7`, optionally `field[days_passed:Europe/Madrid][lt]=1` |
 
-Equality, `in`, `gt`, `icontains`, and the existence operators are confirmed against a live account. The rest come from `API V3.md` and haven't been tested. [Filtering and Query Syntax](/docs/reference/v3/filtering-query-syntax) marks each one and covers the gotchas. Note that `API V3.md` calls the case-insensitive operator `contains:ignorecase`, but the live API uses `icontains`.
+[Filtering and Query Syntax](/docs/reference/v3/filtering-query-syntax) covers each operator in full, along with the gotchas. Note that the case-insensitive contains operator is `icontains`; some older Plytix material calls it `contains:ignorecase`, which the API does not accept.
 
 ### Boolean grouping
 
@@ -79,7 +85,7 @@ Equality, `in`, `gt`, `icontains`, and the existence operators are confirmed aga
 | (A AND B) OR (C AND D) | Not expressible directly | `_or[0]_and[0]A&_or[0]_and[0]B&_or[0]_and[1]C&_or[0]_and[1]D` |
 | NOT (A OR B) | Not available | `_!or[0]A&_!or[0]B` |
 
-{/* The v1 rows are marked [PENDING] because the nesting semantics come from the Postman-derived spec's saved example rather than from documented behavior. */}
+{/* The v1 rows are marked [PENDING] because the nesting semantics come from the Postman-derived spec's saved example rather than from documented behavior. The v3 rows are confirmed. */}
 
 ### Custom attributes and related entities
 
@@ -90,7 +96,7 @@ Equality, `in`, `gt`, `icontains`, and the existence operators are confirmed aga
 | Product relationships | `relationship_filters` with nested `product_ids` objects | `product_relationships.relationship_id=<id>&product_relationships.related_product_id=<id>` |
 
 <Callout type="info" title="One restriction to know about">
-  `API V3.md` restricts the `_!exists` form on relationships for the public v3 API: it's allowed only for `relationships.id` or `relationships.label`, and only when not grouped with `_and` or `_or`.
+  The `_!exists` form on relationships is restricted: it's allowed only for `relationships.id` or `relationships.label`, and only when not grouped with `_and` or `_or`.
 </Callout>
 
 ## Pagination
@@ -98,15 +104,20 @@ Equality, `in`, `gt`, `icontains`, and the existence operators are confirmed aga
 | | v1 and v2 | v3 |
 |---|---|---|
 | Request | `"pagination": {"page": 1, "page_size": 25, "order": "sku"}` in the body | `_page=1&_page_size=25&_sort_by=sku` in the query string |
+| Bounds | Not documented | `_page >= 1` and `_page_size <= 1000` — both return `422` outside those bounds |
 | Record counts | `total_count` always returned | None available |
 | Response keys | `count`, `order`, `page`, `page_size`, `total_count` | `next_page`, `previous_page` |
 
-v3 returns page URLs rather than a page number to increment, so a paging loop follows `next_page` until that key stops appearing instead of counting pages. Note the keys are omitted when they don't apply rather than set to `null`.
+v3 returns page URLs rather than a page number to increment, so a paging loop follows `next_page` until that key stops appearing instead of counting pages. The keys are omitted when they don't apply rather than set to `null`, so a client written as `if (pagination.next_page !== null)` is wrong — test for presence.
 
 <Callout type="warn" title="No counts in v3">
-  v1 returned `total_count` on every search. v3 has no equivalent: the pagination block carries no counts, and the `_filtered_count` / `_total_count` parameters described in some Plytix design material are not implemented — either one returns `400 InvalidFieldError`.
+  v1 returned `total_count` on every search. v3 has no equivalent: the pagination block carries no counts, and there is no parameter that adds one. Requesting `_total_count` or `_filtered_count` returns `400 InvalidFieldError`.
 
-  Anything in your integration that reads a total — a progress bar, a "showing N of M" label, a pre-sized buffer — has to be reworked to page to the end and tally. See [Pagination](/docs/reference/v3/pagination).
+  This is a capability regression from v1, not just an undocumented feature. Anything in your integration that reads a total — a progress bar, a "showing N of M" label, a pre-sized buffer — has to page to the end and tally. See [Pagination](/docs/reference/v3/pagination).
+</Callout>
+
+<Callout type="warn" title="next_page URLs use the http scheme">
+  Every `next_page` and `previous_page` link comes back as `http://`, then `301`s to `https`. Clients that don't forward `Authorization` across a scheme-changing redirect drop it and get a `401`. Rewrite the scheme before following the link, or use `curl -L --location-trusted`.
 </Callout>
 
 ## Response conventions
@@ -114,21 +125,42 @@ v3 returns page URLs rather than a page number to increment, so a paging loop fo
 | Operation | v1 and v2 | v3 |
 |---|---|---|
 | Search | `200` with `data` and `pagination` | `200` with `data` and `pagination` |
-| Get one | `200` with the record | `200` with the record |
+| Get one | `200` with the record | `200` with the record, `data` as an object and no `pagination` key |
 | Create | `200` or `201` with the created entity | `201` with the full created entity |
+| Duplicate on create | Varies | `409` |
 | Update (PATCH) | Returns the modified entity | `204` with no body |
 | Delete | Varies | `204` with no body |
 | Accepted for async processing | Not applicable | `202` with a `process_id` |
 | Error | Varies | `errors` array in the same envelope, each entry `{"name": "...", "description": "..."}`. See [Errors and Status Codes](/docs/reference/v3/errors-status-codes) |
 
-Two behavioral differences matter more than the status codes:
+Three behavioral differences matter more than the status codes:
 
 - **v3 returns nothing on an update.** v1's PATCH returned the modified entity; v3's returns `204` with an empty body, so any code that read values out of an update response needs a follow-up GET. Create is unchanged in this respect: it still returns the full entity.
-- **v3 PATCH replaces a map field you name.** Sending part of a product's `attributes` deletes the attributes you left out. Read the current map, merge, then send it back. See [Working with Updates and Deletes](/docs/reference/v3/updates-and-deletes).
+- **v3 PATCH replaces a map field you name.** Sending part of a product's `attributes` deletes the attributes you left out. Read the current map, merge, then send it back, or patch a single attribute through `PATCH /products/{identifier}/attributes/{name}` with a bare value. See [Working with Updates and Deletes](/docs/reference/v3/updates-and-deletes).
 - **v3 DELETE erases** the entity or field rather than setting it to null or a default, and removing a field can cause inheritance to resolve for it.
 
-<Callout type="warn" title="PATCH changed to 204 during this project">
-  Through 2026-09-23, PATCH returned `200` with the full updated entity on every resource tested here. As of 2026-10-01 it returns `204` with an empty body, confirmed on products and product categories. It now matches `API V3.md`, which listed PATCH as `204` all along. POST still returns `201` with the full entity, which `API V3.md` still describes incorrectly as returning only an ID.
+<Callout type="warn" title="PATCH recently changed to 204">
+  Earlier v3 releases returned `200` with the full updated entity on PATCH. It now returns `204` with an empty body, so an integration written against the older behavior breaks on any code that parses an update response. POST is unaffected: it still returns `201` with the full created entity.
+</Callout>
+
+## Linking and unlinking
+
+v1 links through dedicated subpaths. v3 originally accepted `category_ids` and `static_list_ids` arrays on create and update; those fields are no longer accepted, leaving the dedicated link and unlink endpoints as the only route.
+
+| Link | v1 | v3 |
+|---|---|---|
+| Product to category | `POST /api/v1/products/{product_id}/categories` | `POST /api/v3/products/{identifier}/categories` |
+| Product from category | `DELETE /api/v1/products/{product_id}/categories/{category_id}` | `DELETE /api/v3/products/{identifier}/categories/{id}` |
+| Asset to category | Through `category_ids` on the asset | `POST /api/v3/assets/{identifier}/categories` |
+| Asset from category | Through `category_ids` on the asset | `DELETE /api/v3/assets/{identifier}/categories/{id}` |
+| Attribute to group | `POST /api/v1/attribute-groups/product` | `POST /api/v3/product-attributes/{identifier}/groups` |
+| Attribute from group | Not available | `DELETE /api/v3/product-attributes/{identifier}/groups/{id}` |
+| Product to asset | `POST /api/v1/products/{product_id}/assets` | **No v3 equivalent.** Stays on v1 |
+| Product from asset | `DELETE /api/v1/products/{product_id}/assets/{asset_id}` | **No v3 equivalent.** Stays on v1 |
+| Product to family | `POST /api/v1/products/{product_id}/family` | `PATCH /api/v3/products/{identifier}` with `product_family_id` |
+
+<Callout type="warn" title="The generic subpath DELETE is not an unlink">
+  `DELETE /api/v3/products/{identifier}/{path}` doesn't remove a single linked record. A collection path such as `categories` returns `405`, and an unrecognized path returns `404`. Use the specific unlink endpoints above.
 </Callout>
 
 ## Endpoint mapping
@@ -142,27 +174,55 @@ Two behavioral differences matter more than the status codes:
 | `GET /api/v1/products/{product_id}` | `GET /api/v3/products/{identifier}` |
 | `PATCH /api/v1/products/{product_id}` | `PATCH /api/v3/products/{identifier}` |
 | `DELETE /api/v1/products/{product_id}` | `DELETE /api/v3/products/{identifier}` |
-| `GET /api/v1/products/{product_id}/assets` | `GET /api/v3/products/{identifier}/assets`, or field expansion on the product |
-| `POST /api/v1/products/{product_id}/assets` | `POST /api/v3/products/{identifier}/assets` |
-| `DELETE /api/v1/products/{product_id}/assets/{asset_id}` | `DELETE /api/v3/products/{identifier}/assets/{asset_id}` |
-| `GET /api/v1/products/{product_id}/categories` | `GET /api/v3/products/{identifier}/categories`, or field expansion |
+| `GET /api/v1/products/{product_id}/assets` | `GET /api/v3/products?_fields=assets` |
+| `POST /api/v1/products/{product_id}/assets` | No equivalent. Stays on v1 |
+| `DELETE /api/v1/products/{product_id}/assets/{asset_id}` | No equivalent. Stays on v1 |
+| `GET /api/v1/products/{product_id}/categories` | `GET /api/v3/products?_fields=categories` |
 | `POST /api/v1/products/{product_id}/categories` | `POST /api/v3/products/{identifier}/categories` |
-| `DELETE /api/v1/products/{product_id}/categories/{category_id}` | `DELETE /api/v3/products/{identifier}/categories/{category_id}` |
-| `POST /api/v1/products/{product_id}/family` | `PATCH /api/v3/products/{identifier}` {/* [PENDING] */} |
+| `DELETE /api/v1/products/{product_id}/categories/{category_id}` | `DELETE /api/v3/products/{identifier}/categories/{id}` |
+| `POST /api/v1/products/{product_id}/family` | `PATCH /api/v3/products/{identifier}` with `product_family_id` |
 
-In v3, `{identifier}` accepts either the product ID or the SKU, URL-encoded. The subresource paths above use v3's generic `/{identifier}/{path}` pattern, which the spec defines but doesn't enumerate per field.
+In v3, `{identifier}` accepts either the product ID or the SKU, URL-encoded.
+
+The two read rows above map to the search endpoint rather than to v3's own `/products/{identifier}/categories` and `/products/{identifier}/assets` subpaths. Those subpaths exist, but they currently return an empty array even for a product that genuinely has those relations; `_fields` expansion on a search returns the data correctly. The `relationships` and `attributes` subpaths are unaffected and can be used directly.
+
+### Variants
+
+v3 has no variant endpoints. A variant is an ordinary product that names its parent, so creation and deletion go through the regular product endpoints.
+
+| v1 or v2 | v3 |
+|---|---|
+| `POST /api/v1/products/{parent_product_id}/variants` | `POST /api/v3/products` with `parent_id` and `product_family_id` |
+| `GET /api/v1/products/{product_id}/variants` | `GET /api/v3/products?parent_id=<parent_id>` {/* [PENDING] */} |
+| `DELETE /api/v1/products/{parent_product_id}/variant/{variant_id}` | `DELETE /api/v3/products/{identifier}` |
+| `POST /api/v1/products/{parent_product_id}/variants/resync` | No equivalent. Stays on v1 |
+
+A product's position in the hierarchy is reported by `product_level`: `0` SINGLE, `1` PARENT, `2` VARIANT, `3` SUB_VARIANT. A standalone product starts at `0` and becomes `1` as soon as another product references it through `parent_id`. See [Reconstruct parent/variant hierarchies](/docs/guides/reconstructing-parent-variant-hierarchies).
+
+{/* FLAG (open):
+  Listing a parent's variants with `?parent_id=<id>` is marked [PENDING] — it follows from `parent_id` being a real product field, but filtering on it was never tested, and [Reconstruct parent/variant hierarchies](/docs/guides/reconstructing-parent-variant-hierarchies) reads the hierarchy from the parent's own `num_variations` instead. Verify with `endpoint-tester` before publishing, or drop the row and point at the parent-read method.
+*/}
 
 ### Product relationships
 
 | v1 or v2 | v3 |
 |---|---|
 | `POST /api/v1/products/{product_id}/relationships/{relationship_id}` | `POST /api/v3/products/{product_id}/relationships/{relationship_id}` |
-| `PATCH /api/v1/products/{product_id}/relationships/{relationship_id}/product/{related_product_id}` | `PATCH /api/v3/products/{product_id}/relationships/{relationship_id}` {/* [PENDING] */} |
+| `PATCH /api/v1/products/{product_id}/relationships/{relationship_id}/product/{related_product_id}` | `PATCH /api/v3/products/{product_id}/relationships/{relationship_id}` |
 | `POST /api/v1/products/{product_id}/relationships/{relationship_id}/unlink` | `DELETE /api/v3/products/{product_id}/relationships/{relationship_id}` |
 | `DELETE /api/v2/products/{product_id}/relationships/{relationship_id}` | `DELETE /api/v3/products/{product_id}/relationships/{relationship_id}` |
-| Not available | `GET /api/v3/products/{product_id}/relationships` |
+| Not available | `GET` and `POST /api/v3/products/{product_id}/relationships` |
+| Not available | `GET /api/v3/products/{product_id}/relationships/{relationship_id}/related-products` {/* [PENDING] */} |
 | Not available | `GET /api/v3/product-relationships` |
 | Not available | `GET /api/v3/related-products` |
+
+<Callout type="warn" title="Always filter the account-wide relationship endpoints">
+  `GET /api/v3/product-relationships`, `/related-products`, and `/family-attributes` have returned records from outside the calling account when called with no filter. Always scope them by `product_id` or `account_id`, and check the results against your own account before relying on them.
+</Callout>
+
+{/* FLAG (open):
+  `GET /products/{id}/relationships/{relationship_id}/related-products[/{related_product_id}]` is marked [PENDING] because it returned empty or 404 for a link confirmed to exist by three other means. Ask Plytix whether it is unfinished before documenting it as usable.
+*/}
 
 ### Relationship definitions
 
@@ -178,12 +238,14 @@ In v3, `{identifier}` accepts either the product ID or the SKU, URL-encoded. The
 
 | v1 | v3 |
 |---|---|
-| `POST /api/v1/assets` | `POST /api/v3/assets` |
+| `POST /api/v1/assets` | `POST /api/v3/assets`, with `url` or `content` |
 | `POST /api/v1/assets/search` | `GET /api/v3/assets` |
 | `GET /api/v1/assets/{asset_id}` | `GET /api/v3/assets/{identifier}` |
-| `PATCH /api/v1/assets/{asset_id}` | `PATCH /api/v3/assets/{identifier}` |
+| `PATCH /api/v1/assets/{asset_id}` | `PATCH /api/v3/assets/{identifier}` — `filename` and `alt_text` only |
 | `DELETE /api/v1/assets/{asset_id}` | `DELETE /api/v3/assets/{identifier}` |
-| `PUT /api/v1/assets/{asset_id}/content` | No equivalent in the v3 spec |
+| `PUT /api/v1/assets/{asset_id}/content` | No equivalent. Stays on v1 |
+
+v3 accepts binary content only at creation. Replacing the content of an existing asset has no v3 path, and the v3 asset update schema carries just `filename` and `alt_text`.
 
 ### Attributes and attribute groups
 
@@ -196,7 +258,7 @@ In v3, `{identifier}` accepts either the product ID or the SKU, URL-encoded. The
 | `DELETE /api/v1/attributes/product/{product_attribute_id}` | `DELETE /api/v3/product-attributes/{identifier}` |
 | `POST /api/v1/attribute-groups/product` | `POST /api/v3/product-attribute-groups` |
 | `POST /api/v1/attribute-groups/product/search` | `GET /api/v3/product-attribute-groups` |
-| `PATCH /api/v1/attribute-groups/product/{attribute_group_id}` | No update operation in the v3 spec |
+| `PATCH /api/v1/attribute-groups/product/{attribute_group_id}` | `PATCH /api/v3/product-attribute-groups/{identifier}` |
 | `DELETE /api/v1/attribute-groups/product/{attribute_group_id}` | `DELETE /api/v3/product-attribute-groups/{identifier}` |
 
 ### Categories
@@ -225,29 +287,29 @@ File categories are called asset categories in v3.
 | `PATCH /api/v1/product_families/{product_family_id}` | `PATCH /api/v3/product-families/{identifier}` |
 | `DELETE /api/v1/product_families/{product_family_id}` | `DELETE /api/v3/product-families/{identifier}` |
 | `GET /api/v1/product_families/{product_family_id}/attributes` | `GET /api/v3/product-families/{product_family_id}/attributes` |
-| `GET /api/v1/product_families/{product_family_id}/all_attributes` | `GET /api/v3/family-attributes` {/* [PENDING] */} |
+| `GET /api/v1/product_families/{product_family_id}/all_attributes` | `GET /api/v3/family-attributes` |
 | `POST /api/v1/product_families/{id}/attributes/link` | `POST /api/v3/product-families/{product_family_id}/attributes` |
 | `POST /api/v1/product_families/{id}/attributes/unlink` | `DELETE /api/v3/product-families/{product_family_id}/attributes/{attribute_id}` |
 | `POST /api/v1/product_families/{id}/attributes/edit` | `PATCH /api/v3/product-families/{product_family_id}/attributes/{attribute_id}` |
 
+Creating a Product Family, choosing its attributes, and configuring inheritance between levels are dashboard-only in both versions.
+
 ## Endpoints with no v3 equivalent
 
-These v1 paths have no counterpart in `openapi_pimv3.json`. Check whether your integration depends on any of them before planning a cutover.
+These v1 paths have no counterpart in the v3 spec. The first four keep working on v1 and are the usual reason an integration stays split across versions.
 
-| v1 endpoint | What to do instead |
+| v1 endpoint | What to do |
 |---|---|
-| `GET /api/v1/filters/product`, `/filters/asset`, `/filters/relationships` | No filter-discovery endpoint in v3. Build filters from the attribute definitions returned by `GET /api/v3/product-attributes` |
-| `PUT /api/v1/assets/{asset_id}/content` | No asset content upload in the v3 spec {/* [PENDING] */} |
-| `POST /api/v1/products/{parent_product_id}/variants` | No variant endpoints in v3. Variants are modeled through product families and product family models {/* [PENDING] */} |
-| `POST /api/v1/products/{parent_product_id}/variants/resync` | No equivalent {/* [PENDING] */} |
-| `DELETE /api/v1/products/{parent_product_id}/variant/{variant_id}` | No equivalent {/* [PENDING] */} |
-| `GET /api/v1/products/{product_id}/variants` | No equivalent {/* [PENDING] */} |
+| `PUT /api/v1/assets/{asset_id}/content` | Keep on v1. v3 takes content only at asset creation |
+| `POST` and `DELETE /api/v1/products/{product_id}/assets[/{asset_id}]` | Keep on v1. v3 has no product-to-asset link path. `thumbnail_id` on the product sets a single image, which is not the same thing |
+| `GET /api/v1/filters/product`, `/filters/asset`, `/filters/relationships` | Keep on v1, or build filters from the attribute definitions returned by `GET /api/v3/product-attributes` |
+| `POST /api/v1/products/{parent_product_id}/variants/resync` | Keep on v1 |
 | `POST /api/v1/accounts/api-credentials/search` | Manage API keys in the Plytix interface, under the **API** tab |
 | `POST /api/v1/accounts/memberships/search` | Manage users in the Plytix interface, under the **Team** tab |
 
-{/* FLAG (open):
-  **Bulk operations.** `API V3.md` specifies a full bulk API at `api/v3/-/bulk/<entities>` with job tracking at `api/v3/-/bulk/-/jobs/`, but no bulk path exists in `openapi_pimv3.json`, and [Bulk operations for large catalogs](/docs/guides/bulk-operations-for-large-catalogs) states there are none today. Neither v1 nor v3 offers bulk writes in their specs. Confirm the timeline with Plytix before documenting the bulk paths here.
-*/}
+### Bulk operations
+
+Neither v1 nor v3 offers bulk writes as a generally available feature. The v3 bulk API is restricted to large and enterprise accounts; contact your account manager to find out whether your account has access. See [Bulk operations for large catalogs](/docs/guides/bulk-operations-for-large-catalogs).
 
 ## Resources that are new in v3
 
@@ -255,14 +317,14 @@ These have no v1 equivalent, so they're additions rather than migrations.
 
 | v3 resource | Covers |
 |---|---|
-| `/api/v3/pim-product-lists` | Saved product lists |
 | `/api/v3/asset-lists` | Saved asset lists |
-| `/api/v3/product-family-models` | Family model definitions, read-only |
+| `/api/v3/family-attributes` | Attribute definitions across families, read-only |
+| `/api/v3/product-relationships` | Relationship records, read-only |
 | `/api/v3/related-products` | The products on the far side of a relationship, read-only |
-| `/api/v3/import-profiles` | Import profile definitions |
-| `/api/v3/connections` | Dropbox and FTP connections |
-| `/api/v3/ecatalogs` | Brand Portal catalogs |
-| `/api/v3/pdf-catalogs` | Product Data Sheet catalogs |
+
+{/* FLAG (open):
+  The previous version of this table also listed `/pim-product-lists`, `/import-profiles`, `/connections`, `/ecatalogs`, `/pdf-catalogs` and `/product-family-models`. The first five are classified internal in `roadmap.md` and are not to be documented; `/product-family-models` was removed from the v3 spec in the 2026-10-02 revision. All six are omitted here deliberately — don't re-add them from an older spec. Note that `/products/{identifier}/channels`, `/ecatalogs`, `/product_data_sheets` and `/static_lists` link endpoints are also omitted for the same reason.
+*/}
 
 ## What v2 covers
 
