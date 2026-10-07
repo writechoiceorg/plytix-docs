@@ -11,6 +11,7 @@
           "relatedproducts"
         ],
         "summary": "Get-Related-Products Identity",
+        "description": "Fetch a single product-to-product link: the record connecting `product_id` to `related_product_id` under `relationship_id`.\n\n> **Warning:** This endpoint returns `404 NotFoundError` for links that do exist, the same underlying problem that makes its [collection form](/docs/reference/v3/relatedproducts/get_related_products_collection_api_v3_products__product_id__relationships__relationship_id__related_products_get) come back empty. Don't use it to check whether two products are linked. Use [Search-Related-Products](/docs/reference/v3/relatedproducts/search_related_products_api_v3_related_products_get) with `?product_id=<id>` instead.\n\nAll three path segments take Plytix IDs, not SKUs.",
         "operationId": "get_related_products_identity_api_v3_products__product_id__relationships__relationship_id__related_products__related_product_id__get",
         "responses": {
           "200": {
@@ -30,6 +31,7 @@
           "relatedproducts"
         ],
         "summary": "Get-Related-Products Drill In",
+        "description": "Fetch a single field from one product-to-product link, such as `quantity`, instead of the whole record.\n\n> **Warning:** This resolves the link through the same lookup as [Get-Related-Products Identity](/docs/reference/v3/relatedproducts/get_related_products_identity_api_v3_products__product_id__relationships__relationship_id__related_products__related_product_id__get), which can't find links that do exist, so expect the same `404` here. Read a link's fields through [Search-Related-Products](/docs/reference/v3/relatedproducts/search_related_products_api_v3_related_products_get) with `?product_id=<id>` and `_fields` instead.\n\nAll path segments take Plytix IDs, not SKUs.",
         "operationId": "get_related_products_drill_in_api_v3_products__product_id__relationships__relationship_id__related_products__related_product_id___path__get",
         "responses": {
           "200": {
@@ -49,6 +51,7 @@
           "relatedproducts"
         ],
         "summary": "Get-Related-Products Collection",
+        "description": "List the products linked to one product under a single relationship type.\n\n> **Warning:** This endpoint returns an empty `data` array even when the relationship has live links. Use [Search-Related-Products](/docs/reference/v3/relatedproducts/search_related_products_api_v3_related_products_get) with `?product_id=<id>` instead.\n\nBoth path segments take Plytix IDs: `product_id` is the product's `id`, not its SKU, and `relationship_id` is the ID of the relationship type, from [Search-Relationships](/docs/reference/v3/relationships/search_relationships_api_v3_relationships_get). To see which relationship types a product takes part in, use [Get-Product-Relationships Collection](/docs/reference/v3/productrelationships/get_product_relationships_collection_api_v3_products__product_id__relationships_get).",
         "operationId": "get_related_products_collection_api_v3_products__product_id__relationships__relationship_id__related_products_get",
         "responses": {
           "200": {
@@ -68,6 +71,7 @@
           "familyattributes"
         ],
         "summary": "Get-Family-Attributes Identity",
+        "description": "Fetch a single family-attribute link by its two IDs. Returns the one record: `{product_family_id, attribute_id, level, account_id}`.\n\nUse this to check whether a specific attribute applies to a family. If it isn’t linked, the response is `404` with a `NotFoundError` describing the missing association.\n\nTo list every attribute on the family instead, use [Get-Family-Attributes Collection](/docs/reference/v3/familyattributes/get_family_attributes_collection_api_v3_product_families__product_family_id__attributes_get).",
         "operationId": "get_family_attributes_identity_api_v3_product_families__product_family_id__attributes__attribute_id__get",
         "responses": {
           "200": {
@@ -85,6 +89,7 @@
           "familyattributes"
         ],
         "summary": "Post-Family-Attributes Identity",
+        "description": "Link an attribute to a product family, taking `attribute_id` from the URL instead of the request body. It needs no body, and is otherwise the same action as [Post-Family-Attributes Collection](/docs/reference/v3/familyattributes/post_family_attributes_collection_api_v3_product_families__product_family_id__attributes_post).\n\nIf the attribute is already linked to that family, this returns `409 AlreadyExists` rather than linking it twice.\n\nUse the collection form when you want to set the attribute’s `level` in the same call; this form always links at the family’s default.",
         "operationId": "post_family_attributes_identity_api_v3_product_families__product_family_id__attributes__attribute_id__post",
         "responses": {
           "200": {
@@ -102,6 +107,7 @@
           "familyattributes"
         ],
         "summary": "Delete-Family-Attributes Identity",
+        "description": "Unlink an attribute from a product family. Returns `204` with no body, after which a `GET` on the same pair returns `404`.\n\nThis removes only the link, the attribute itself stays in your account and stays available to other families. To delete the attribute everywhere, use [Delete-Product-Attributes](/docs/reference/v3/productattributes/delete_product_attributes_api_v3_product_attributes__identifier__delete).\n\n> **Warning:** The link is what makes an attribute apply to products in the family, so unlinking changes every product in it, not one. Attribute membership is excluded from [Update-Product-Families](/docs/reference/v3/productfamilies/update_product_families_api_v3_product_families__identifier__patch) for the same reason. Check the family’s `total_products` before unlinking.",
         "operationId": "delete_family_attributes_identity_api_v3_product_families__product_family_id__attributes__attribute_id__delete",
         "responses": {
           "200": {
@@ -119,6 +125,7 @@
           "familyattributes"
         ],
         "summary": "Patch-Family-Attributes Identity",
+        "description": "Change an existing family-attribute link’s `level`, moving the attribute between the family’s inheritance tiers: `no_level`, `parent_level`, or `variant_level`. Raising an attribute to `parent_level` is what makes a parent’s values flow down to its variants.\n\n> **Warning:** This requires the automatic-inheritance feature on your account. Without it, every level change returns `403 PermissionError` with \"Automatic inheritance is not available for this account\", whatever the target level. That’s an account-plan gate rather than a problem with the request; contact your account manager to have the feature enabled.\n\n`level` is the only part of a link that can be updated. To change which attributes a family has, link and unlink them with [Post-Family-Attributes Collection](/docs/reference/v3/familyattributes/post_family_attributes_collection_api_v3_product_families__product_family_id__attributes_post) and [Delete-Family-Attributes Identity](/docs/reference/v3/familyattributes/delete_family_attributes_identity_api_v3_product_families__product_family_id__attributes__attribute_id__delete).",
         "operationId": "patch_family_attributes_identity_api_v3_product_families__product_family_id__attributes__attribute_id__patch",
         "responses": {
           "200": {
@@ -138,6 +145,7 @@
           "familyattributes"
         ],
         "summary": "Get-Family-Attributes Drill In",
+        "description": "Fetch a single field from one family-attribute link, such as `level`, instead of the whole record.\n\nA link holds only `product_family_id`, `attribute_id`, `level`, and `account_id`, so there’s rarely a reason to use this over [Get-Family-Attributes Identity](/docs/reference/v3/familyattributes/get_family_attributes_identity_api_v3_product_families__product_family_id__attributes__attribute_id__get), which returns all four in one call.",
         "operationId": "get_family_attributes_drill_in_api_v3_product_families__product_family_id__attributes__attribute_id___path__get",
         "responses": {
           "200": {
@@ -155,6 +163,7 @@
           "familyattributes"
         ],
         "summary": "Delete-Family-Attributes Drill In",
+        "description": "Delete a single field from a family-attribute link.\n\n> **Warning:** Don’t use this to clear a `level`. Subpath deletes elsewhere in the v3 API don’t perform scoped field removal, and act on the parent record instead of the single field named in the path. To take an attribute off a family, use [Delete-Family-Attributes Identity](/docs/reference/v3/familyattributes/delete_family_attributes_identity_api_v3_product_families__product_family_id__attributes__attribute_id__delete); to move it between tiers, use [Patch-Family-Attributes Identity](/docs/reference/v3/familyattributes/patch_family_attributes_identity_api_v3_product_families__product_family_id__attributes__attribute_id__patch).",
         "operationId": "delete_family_attributes_drill_in_api_v3_product_families__product_family_id__attributes__attribute_id___path__delete",
         "responses": {
           "200": {
@@ -172,6 +181,7 @@
           "familyattributes"
         ],
         "summary": "Patch-Family-Attributes Drill In",
+        "description": "Update a single field on a family-attribute link. `level` is the only field a link exposes for update, so this does the same job as [Patch-Family-Attributes Identity](/docs/reference/v3/familyattributes/patch_family_attributes_identity_api_v3_product_families__product_family_id__attributes__attribute_id__patch), with the field name in the path rather than the body.\n\n> **Warning:** The same account-plan gate applies. Without the automatic-inheritance feature, a level change returns `403 PermissionError` with \"Automatic inheritance is not available for this account\".\n\nPrefer the identity endpoint, which takes the change as an ordinary partial update.",
         "operationId": "patch_family_attributes_drill_in_api_v3_product_families__product_family_id__attributes__attribute_id___path__patch",
         "responses": {
           "200": {
@@ -191,6 +201,7 @@
           "familyattributes"
         ],
         "summary": "Get-Family-Attributes Collection",
+        "description": "List every attribute currently linked to one product family. This is the per-family view of the same link records returned by [Search-Family-Attributes](/docs/reference/v3/familyattributes/search_family_attributes_api_v3_family_attributes_get), scoped by the `product_family_id` in the path, so it needs no account filter.\n\nEach record is `{product_family_id, attribute_id, level, account_id}`. `level` is the attribute’s inheritance tier within the family: `no_level`, `parent_level`, or `variant_level`.\n\nThe response carries attribute IDs, not full attribute definitions. Resolve names and types with [Search-Product-Attributes](/docs/reference/v3/productattributes/search_product_attributes_api_v3_product_attributes_get).\n\nResponses come back in a single page with no `next_page` link, so don’t build paging logic around this endpoint.\n\n`product_family_id` is the family’s Plytix `id`, from [Search-Product-Families](/docs/reference/v3/productfamilies/search_product_families_api_v3_product_families_get), not its name.",
         "operationId": "get_family_attributes_collection_api_v3_product_families__product_family_id__attributes_get",
         "responses": {
           "200": {
@@ -208,6 +219,7 @@
           "familyattributes"
         ],
         "summary": "Post-Family-Attributes Collection",
+        "description": "Link an existing attribute to a product family, so that products in the family can carry that attribute.\n\nSend `{\"attribute_id\": \"<id>\"}`. The attribute has to exist already. Create it first with [Create-Product-Attributes](/docs/reference/v3/productattributes/create_product_attributes_api_v3_product_attributes_post). A successful call returns `201`.\n\n`level` is optional and sets the attribute’s inheritance tier in this family (`no_level`, `parent_level`, or `variant_level`). Omit it and the attribute is linked at `no_level`.\n\n> **Warning:** `parent_level` and `variant_level` require the automatic-inheritance feature on your account. Without it, setting either returns `403 PermissionError` with \"Automatic inheritance is not available for this account\", and only `no_level` links can be created. See [Patch-Family-Attributes Identity](/docs/reference/v3/familyattributes/patch_family_attributes_identity_api_v3_product_families__product_family_id__attributes__attribute_id__patch) for the same gate on changing a level later.\n\nTo link by URL instead of in the body, use [Post-Family-Attributes Identity](/docs/reference/v3/familyattributes/post_family_attributes_identity_api_v3_product_families__product_family_id__attributes__attribute_id__post). Use this collection form when you want to set `level` in the same call.",
         "operationId": "post_family_attributes_collection_api_v3_product_families__product_family_id__attributes_post",
         "responses": {
           "200": {
@@ -386,6 +398,7 @@
           "products"
         ],
         "summary": "Search Products",
+        "description": "Search and list the products in your catalog. With no filters, this returns every product in the account.\n\nNarrow the results with query-string filters, for example `sku=BAG-10157` or `categories.name=Backpacks`. See [Filtering and query syntax reference](/docs/reference/v3/filtering-query-syntax) for the full set of operators.\n\nUse `_fields` (repeatable) to select only the fields you need. Requesting a relationship field such as `categories` or `assets` returns it fully expanded, with no extra call and no `_expand` parameter needed.\n\nResults are paginated at 25 products per page by default. Set `_page_size` to change that, and follow the `next_page` link in the response's `pagination` object to get the next page instead of building your own offset logic.",
         "operationId": "search_products",
         "responses": {
           "200": {
@@ -398,14 +411,14 @@
               }
             }
           }
-        },
-        "description": "Search and list the products in your catalog. With no filters, this returns every product in the account.\n\nNarrow the results with query-string filters, for example `sku=BAG-10157` or `categories.name=Backpacks`. See [Filtering and query syntax reference](/docs/reference/v3/filtering-query-syntax) for the full set of operators.\n\nUse `_fields` (repeatable) to select only the fields you need. Requesting a relationship field such as `categories` or `assets` returns it fully expanded, with no extra call and no `_expand` parameter needed.\n\nResults are paginated at 25 products per page by default. Set `_page_size` to change that, and follow the `next_page` link in the response's `pagination` object to get the next page instead of building your own offset logic."
+        }        
       },
       "post": {
         "tags": [
           "products"
         ],
         "summary": "Create-Products",
+        "description": "Create a single product.\n\nThe response returns the full created product, including its generated `id`, not the ID on its own.\n\nTo create a variant, include `parent_id` and `product_family_id` so the new product joins an existing product family hierarchy. See [Reconstruct parent/variant hierarchies](/docs/guides/reconstructing-parent-variant-hierarchies).\n\nIf the `sku` you send already exists in the account, this returns `409 Conflict` instead of creating a duplicate.",
         "operationId": "create_products_api_v3_products_post",
         "requestBody": {
           "content": {
@@ -438,8 +451,7 @@
               }
             }
           }
-        },
-        "description": "Create a single product.\n\nThe response returns the full created product, including its generated `id`, not the ID on its own.\n\nTo create a variant, include `parent_id` and `product_family_id` so the new product joins an existing product family hierarchy. See [Reconstruct parent/variant hierarchies](/docs/guides/reconstructing-parent-variant-hierarchies).\n\nIf the `sku` you send already exists in the account, this returns `409 Conflict` instead of creating a duplicate."
+        }
       }
     },
     "/api/v3/products/{identifier}/{path}": {
@@ -448,6 +460,7 @@
           "products"
         ],
         "summary": "Create-Products Subpath",
+        "description": "Add a field to a product. Use the product's Plytix `id` as `identifier`, not its SKU.\n\nTo set an attribute value, use [Update-Products](/docs/reference/v3/products/update_products_api_v3_products__identifier__patch) with `{\"attributes\": {\"<name>\": \"<value>\"}}`.",
         "operationId": "create_products_subpath_api_v3_products__identifier___path__post",
         "parameters": [
           {
@@ -488,14 +501,14 @@
               }
             }
           }
-        },
-        "description": "Add a field to a product. Use the product's Plytix `id` as `identifier`, not its SKU.\n\nTo set an attribute value, use [Update-Products](/docs/reference/v3/products/update_products_api_v3_products__identifier__patch) with `{\"attributes\": {\"<name>\": \"<value>\"}}`."
+        }
       },
       "get": {
         "tags": [
           "products"
         ],
         "summary": "Get-Products Subpath",
+        "description": "Fetch a single field from a product without pulling back the entire product record.\n\nUse the product's Plytix `id` as `identifier`, not its SKU.\n\n> **Warning:** The `categories`, `assets`, and `static_lists` subpaths return an empty array even when the product genuinely has those links. Don't use them to check membership, and don't treat an empty result as proof that a write didn't apply. Read those fields through the search endpoint instead, with `_fields`, for example `GET /products?sku=BAG-10157&_fields=categories&_fields=assets`. The `relationships` subpath is unaffected and returns real data.",
         "operationId": "get_products_subpath_api_v3_products__identifier___path__get",
         "parameters": [
           {
@@ -536,14 +549,14 @@
               }
             }
           }
-        },
-        "description": "Fetch a single field from a product without pulling back the entire product record.\n\nUse the product's Plytix `id` as `identifier`, not its SKU.\n\n> **Warning:** The `categories`, `assets`, and `static_lists` subpaths return an empty array even when the product genuinely has those links. Don't use them to check membership, and don't treat an empty result as proof that a write didn't apply. Read those fields through the search endpoint instead, with `_fields`, for example `GET /products?sku=BAG-10157&_fields=categories&_fields=assets`. The `relationships` subpath is unaffected and returns real data."
+        }
       },
       "patch": {
         "tags": [
           "products"
         ],
         "summary": "Update-Products Subpath",
+        "description": "Update a single field on a product without sending the whole record.\n\nThe `path` is the field name, and the request body is that field's new value on its own, not an object wrapping it. That's a different shape from [Update-Products](/docs/reference/v3/products/update_products_api_v3_products__identifier__patch), which takes a partial product object. Use the root PATCH to change several fields at once, and this one to change exactly one.\n\nUse the product's Plytix `id` as `identifier`, not its SKU.\n\nPlytix checks `path` against the fields a product accepts on an update, so a name it doesn't recognize returns `422` instead of creating anything. A successful call returns `200` with the full updated product.",
         "operationId": "update_products_subpath_api_v3_products__identifier___path__patch",
         "parameters": [
           {
@@ -584,14 +597,14 @@
               }
             }
           }
-        },
-        "description": "Update a single field on a product without sending the whole record.\n\nThe `path` is the field name, and the request body is that field's new value on its own, not an object wrapping it. That's a different shape from [Update-Products](/docs/reference/v3/products/update_products_api_v3_products__identifier__patch), which takes a partial product object. Use the root PATCH to change several fields at once, and this one to change exactly one.\n\nUse the product's Plytix `id` as `identifier`, not its SKU.\n\nPlytix checks `path` against the fields a product accepts on an update, so a name it doesn't recognize returns `422` instead of creating anything. A successful call returns `200` with the full updated product."
+        }
       },
       "delete": {
         "tags": [
           "products"
         ],
         "summary": "Delete-Products Subpath",
+        "description": "Delete a single field from a product. In practice this does not provide scoped removal of a link.\n\nA recognized collection name, such as `DELETE /products/{id}/categories`, returns `405 Method Not Allowed` because there's no single well-defined write target. Any other path, including the three-segment `/categories/{category_id}` unlink form, returns `404 Not Found`. The product is left intact in both cases.\n\nTo remove one category, asset, or relationship, PATCH the product with the reduced array instead. See [Safely remove categories, assets, or relationships](/docs/guides/safely-removing-categories-assets-or-relationships).",
         "operationId": "delete_products_subpath_api_v3_products__identifier___path__delete",
         "parameters": [
           {
@@ -632,8 +645,7 @@
               }
             }
           }
-        },
-        "description": "Delete a single field from a product. In practice this does not provide scoped removal of a link.\n\nA recognized collection name, such as `DELETE /products/{id}/categories`, returns `405 Method Not Allowed` because there's no single well-defined write target. Any other path, including the three-segment `/categories/{category_id}` unlink form, returns `404 Not Found`. The product is left intact in both cases.\n\nTo remove one category, asset, or relationship, PATCH the product with the reduced array instead. See [Safely remove categories, assets, or relationships](/docs/guides/safely-removing-categories-assets-or-relationships)."
+        }
       }
     },
     "/api/v3/products/{identifier}": {
@@ -642,6 +654,7 @@
           "products"
         ],
         "summary": "Get-Products",
+        "description": "Fetch a single product by its Plytix product `id`. This always returns the full product record. It doesn't support `_fields` filtering the way [Search-Products](/docs/reference/v3/products/search_products) does.\n\nThe `identifier` must be the product's Plytix ID, not its SKU, even though SKU is the natural key for most catalogs. If you only have a SKU, look it up first with [Search-Products](/docs/reference/v3/products/search_products) (filter on `sku=<value>` with `_fields=id`), then use the returned `id` here.",
         "operationId": "get_products_api_v3_products__identifier__get",
         "parameters": [
           {
@@ -675,14 +688,14 @@
               }
             }
           }
-        },
-        "description": "Fetch a single product by its Plytix product `id`. This always returns the full product record. It doesn't support `_fields` filtering the way [Search-Products](/docs/reference/v3/products/search_products) does.\n\nThe `identifier` must be the product's Plytix ID, not its SKU, even though SKU is the natural key for most catalogs. If you only have a SKU, look it up first with [Search-Products](/docs/reference/v3/products/search_products) (filter on `sku=<value>` with `_fields=id`), then use the returned `id` here."
+        }
       },
       "patch": {
         "tags": [
           "products"
         ],
         "summary": "Update-Products",
+        "description": "Update selected fields on a product. Send only the fields you want to change; any field you omit is left untouched.\n\nThe response returns the full updated product, not only the fields you sent. It's the same shape a GET on the product returns, including the `assets`, `categories`, and `relationships` arrays.\n\nUse the product's Plytix `id` as `identifier`, not its SKU.\n\nPATCH with a reduced array is the only confirmed way to remove a single category, asset, or relationship link, because the delete-by-subpath endpoint doesn't perform scoped removal. See [Safely remove categories, assets, or relationships](/docs/guides/safely-removing-categories-assets-or-relationships).\n\nTwo constraints to know:\n\n- Sending `parent_id` and `product_family_id` together returns `422`. A variant inherits family membership from its parent, so omit `product_family_id` when you set `parent_id`.\n- `channel_ids`, `ecatalog_ids`, and `product_data_sheet_ids` require the UEF feature on your account. Without it, including any one of them fails the whole request with `403`, and none of the other fields in that request are applied.",
         "operationId": "update_products_api_v3_products__identifier__patch",
         "parameters": [
           {
@@ -724,14 +737,14 @@
               }
             }
           }
-        },
-        "description": "Update selected fields on a product. Send only the fields you want to change; any field you omit is left untouched.\n\nThe response returns the full updated product, not only the fields you sent. It's the same shape a GET on the product returns, including the `assets`, `categories`, and `relationships` arrays.\n\nUse the product's Plytix `id` as `identifier`, not its SKU.\n\nPATCH with a reduced array is the only confirmed way to remove a single category, asset, or relationship link, because the delete-by-subpath endpoint doesn't perform scoped removal. See [Safely remove categories, assets, or relationships](/docs/guides/safely-removing-categories-assets-or-relationships).\n\nTwo constraints to know:\n\n- Sending `parent_id` and `product_family_id` together returns `422`. A variant inherits family membership from its parent, so omit `product_family_id` when you set `parent_id`.\n- `channel_ids`, `ecatalog_ids`, and `product_data_sheet_ids` require the UEF feature on your account. Without it, including any one of them fails the whole request with `403`, and none of the other fields in that request are applied."
+        }
       },
       "delete": {
         "tags": [
           "products"
         ],
         "summary": "Delete-Products",
+        "description": "Permanently delete a single product by its Plytix product `id`. This can't be undone: once deleted, the product's data and its links to categories, assets, and relationships are gone.\n\nUse the product's Plytix ID here, not its SKU. If you only have a SKU, look it up first with [Search-Products](/docs/reference/v3/products/search_products).",
         "operationId": "delete_products_api_v3_products__identifier__delete",
         "parameters": [
           {
@@ -763,8 +776,7 @@
               }
             }
           }
-        },
-        "description": "Permanently delete a single product by its Plytix product `id`. This can't be undone: once deleted, the product's data and its links to categories, assets, and relationships are gone.\n\nUse the product's Plytix ID here, not its SKU. If you only have a SKU, look it up first with [Search-Products](/docs/reference/v3/products/search_products)."
+        }
       }
     },
     "/api/v3/product-relationships": {
@@ -794,6 +806,7 @@
           "relatedproducts"
         ],
         "summary": "Search-Related-Products",
+        "description": "Search the individual product-to-product links in your catalog. Each record is one pair (`product_id`, `related_product_id`, `quantity`, and `last_modified`) which makes this the dependable way to find out which products sit on the other end of a product's relationships.\n\n> **Warning:** Always send a filter. This endpoint is not automatically scoped to your own account the way the rest of the v3 API is, so a call with no filter returns a result set that isn't limited to your catalog. Filter by `product_id` to list one product's related products, or by `account_id` to scope the search to your account.\n\nA product's own `product_relationships` field lists each link's `quantity` and `last_modified` but not its `related_product_id`, so that field alone can't tell you which product a link points to. This endpoint can.\n\nFiltering by `relationship_id` isn't supported: it isn't a field on this resource, and sending it returns `500` with a `HiddenFieldError` rather than the usual `400`. When the relationship type matters, use [Search-Product-Relationships](/docs/reference/v3/productrelationships/search_product_relationships_api_v3_product_relationships_get) instead, which groups links by `relationship_id`.\n\n`_fields`, `_page`/`_page_size`, and `_sort_by` work as they do on the other search endpoints. See [Filtering and query syntax reference](/docs/reference/v3/filtering-query-syntax).",
         "operationId": "search_related_products_api_v3_related_products_get",
         "responses": {
           "200": {
@@ -2846,6 +2859,7 @@
           "familyattributes"
         ],
         "summary": "Search-Family-Attributes",
+        "description": "Search the links between product families and product attributes across your account. Each record is one family-attribute pair: `product_family_id`, `attribute_id`, `level`, and `account_id`.\n\n> **Warning:** Always send a filter. This endpoint is not automatically scoped to your own account the way the rest of the v3 API is, so a call with no filter returns a result set that isn’t limited to your catalog. Filter by `account_id` to scope the search to your account, and add `product_family_id` to narrow it to a single family.\n\n`level` is where the attribute sits in the family’s inheritance: `no_level`, `parent_level`, or `variant_level`. It can also come back `null` on links where it was never set. See [Data model](/docs/guides/data-model) for how family inheritance works.\n\nTo list one family’s attributes without the filtering caveat, use [Get-Family-Attributes Collection](/docs/reference/v3/familyattributes/get_family_attributes_collection_api_v3_product_families__product_family_id__attributes_get), which is scoped by its path.\n\nRecords carry attribute IDs, not full attribute definitions. Resolve names, types, and groups with [Search-Product-Attributes](/docs/reference/v3/productattributes/search_product_attributes_api_v3_product_attributes_get).\n\n`_fields`, `_page`, and `_page_size` work as on the other search endpoints. See [Filtering and query syntax reference](/docs/reference/v3/filtering-query-syntax).",
         "operationId": "search_family_attributes_api_v3_family_attributes_get",
         "responses": {
           "200": {
