@@ -239,6 +239,7 @@
           "productrelationships"
         ],
         "summary": "Get-Product-Relationships Identity",
+        "description": "Fetch one of a product's relationship links by the ID of its relationship type. Returns the flat record `{relationship_id, relationship_label, product_id}`.\n\nBoth path segments take Plytix IDs: `product_id` is the product's `id`, not its SKU, and `relationship_id` is the ID of the relationship type, from [Search-Relationships](/docs/reference/v3/relationships/search_relationships_api_v3_relationships_get).\n\nThis tells you which relationship type the product takes part in, not which products sit on the other end of it. To see the products a link points to, use [Search-Related-Products](/docs/reference/v3/relatedproducts/search_related_products_api_v3_related_products_get) with `?product_id=<id>`.",
         "operationId": "get_product_relationships_identity_api_v3_products__product_id__relationships__relationship_id__get",
         "responses": {
           "200": {
@@ -256,6 +257,7 @@
           "productrelationships"
         ],
         "summary": "Post-Product-Relationships Identity",
+        "description": "Link related products to a product under the relationship type named in the URL, rather than passing `relationship_id` in the body.\n\nThe body carries the related products as `related_products`, an array of `{\"product_id\": \"<id>\", \"quantity\": N}` entries. The nested field is `product_id`; `id` is rejected.\n\n[Post-Product-Relationships Collection](/docs/reference/v3/productrelationships/post_product_relationships_collection_api_v3_products__product_id__relationships_post) is the confirmed form of this operation, taking the same `related_products` array plus `relationship_id` in the body, and returning each `related_product_id` it created. Prefer it unless you specifically want the relationship type pinned in the URL.",
         "operationId": "post_product_relationships_identity_api_v3_products__product_id__relationships__relationship_id__post",
         "responses": {
           "200": {
@@ -273,6 +275,7 @@
           "productrelationships"
         ],
         "summary": "Delete-Product-Relationships Identity",
+        "description": "Unlink a product from a relationship type. Returns `204` with no body, and the product itself is left fully intact; a follow-up `GET` on it shows `sku`, `label`, and `status` unchanged, with only its `product_relationships` entry for that type gone.\n\nThis is a properly scoped unlink, unlike the generic [Delete-Products Subpath](/docs/reference/v3/products/delete_products_subpath_api_v3_products__identifier___path__delete) route, which never removes a single link. Use it whenever you need to break a product's relationship.\n\n> **Warning:** This removes the whole link for that relationship type, meaning every related product under it, not one of them. To drop a single related product from a multi-product link, send a reduced array to [Patch-Product-Relationships Identity](/docs/reference/v3/productrelationships/patch_product_relationships_identity_api_v3_products__product_id__relationships__relationship_id__patch) instead.",
         "operationId": "delete_product_relationships_identity_api_v3_products__product_id__relationships__relationship_id__delete",
         "responses": {
           "200": {
@@ -290,6 +293,7 @@
           "productrelationships"
         ],
         "summary": "Patch-Product-Relationships Identity",
+        "description": "Update the related products on an existing link, most often to change a `quantity`. The body is `{\"related_products\": [{\"product_id\": \"<id>\", \"quantity\": 5}]}`, the same entry shape as [Post-Product-Relationships Collection](/docs/reference/v3/productrelationships/post_product_relationships_collection_api_v3_products__product_id__relationships_post).\n\nSend the full array you want the link to end up with. That makes this the way to drop one related product from a multi-product link: PATCH the array without it. To remove the link and every product under it at once, use [Delete-Product-Relationships Identity](/docs/reference/v3/productrelationships/delete_product_relationships_identity_api_v3_products__product_id__relationships__relationship_id__delete).\n\nThe response carries the related product's ID twice per entry, as both `product_id` and `related_product_id` with the same value. Either one identifies the product on the other end of the link.",
         "operationId": "patch_product_relationships_identity_api_v3_products__product_id__relationships__relationship_id__patch",
         "responses": {
           "200": {
@@ -309,6 +313,7 @@
           "productrelationships"
         ],
         "summary": "Get-Product-Relationships Drill In",
+        "description": "Fetch a single field from one of a product's relationship links, such as `relationship_label`, instead of the whole record.\n\n`path` accepts the link record's own fields: `_id`, `product_id`, `account_id`, `relationship_id`, and `relationship_label`. Any other name returns `400` with a `ValueError` listing those five. `account_id` is readable here even though no other response on this resource returns it.\n\nA link holds only three visible fields, so [Get-Product-Relationships Identity](/docs/reference/v3/productrelationships/get_product_relationships_identity_api_v3_products__product_id__relationships__relationship_id__get) usually gets you the same thing in one call.",
         "operationId": "get_product_relationships_drill_in_api_v3_products__product_id__relationships__relationship_id___path__get",
         "responses": {
           "200": {
@@ -326,6 +331,7 @@
           "productrelationships"
         ],
         "summary": "Delete-Product-Relationships Drill In",
+        "description": "Delete a single field from a product's relationship link.\n\n> **Warning:** Don't use this to unlink a product. Subpath deletes elsewhere in the v3 API don't perform scoped field removal, they reject the call or act on the parent record instead of the single field named in the path. [Delete-Product-Relationships Identity](/docs/reference/v3/productrelationships/delete_product_relationships_identity_api_v3_products__product_id__relationships__relationship_id__delete) is the confirmed, safe unlink: it removes the link and leaves the product intact.",
         "operationId": "delete_product_relationships_drill_in_api_v3_products__product_id__relationships__relationship_id___path__delete",
         "responses": {
           "200": {
@@ -343,6 +349,7 @@
           "productrelationships"
         ],
         "summary": "Patch-Product-Relationships Drill In",
+        "description": "Update a single field on one of a product's relationship links. `path` is the field name, and the request body is that field's new value on its own, not an object wrapping it.\n\nThe only part of a link meant to change is its `related_products` array, and [Patch-Product-Relationships Identity](/docs/reference/v3/productrelationships/patch_product_relationships_identity_api_v3_products__product_id__relationships__relationship_id__patch) is the confirmed way to change it, taking `{\"related_products\": [...]}` as a partial object. Use that endpoint instead. `relationship_id` and `relationship_label` identify the link and its type, so rewriting them here isn't a supported way to move a product to another relationship type; link it under the new type with [Post-Product-Relationships Collection](/docs/reference/v3/productrelationships/post_product_relationships_collection_api_v3_products__product_id__relationships_post), then unlink the old one with [Delete-Product-Relationships Identity](/docs/reference/v3/productrelationships/delete_product_relationships_identity_api_v3_products__product_id__relationships__relationship_id__delete).",
         "operationId": "patch_product_relationships_drill_in_api_v3_products__product_id__relationships__relationship_id___path__patch",
         "responses": {
           "200": {
@@ -362,6 +369,7 @@
           "productrelationships"
         ],
         "summary": "Get-Product-Relationships Collection",
+        "description": "List every relationship link a product currently has. Each entry is flat (`{relationship_id, relationship_label, product_id}`) and a product with no links returns an empty `data` array.\n\nResults are scoped by the `product_id` in the URL, so this needs none of the filtering that [Search-Product-Relationships](/docs/reference/v3/productrelationships/search_product_relationships_api_v3_product_relationships_get) requires. `product_id` is the product's Plytix `id`, not its SKU.\n\nThe entries name the relationship types the product takes part in, not the products on the other end of them, there's no `related_product_id` in this shape. For that, use [Search-Related-Products](/docs/reference/v3/relatedproducts/search_related_products_api_v3_related_products_get) with `?product_id=<id>`.",
         "operationId": "get_product_relationships_collection_api_v3_products__product_id__relationships_get",
         "responses": {
           "200": {
@@ -379,6 +387,7 @@
           "productrelationships"
         ],
         "summary": "Post-Product-Relationships Collection",
+        "description": "Link one or more products to this product under a relationship type. Returns `201` with the created link.\n\nBoth body fields are required: `{\"relationship_id\": \"<id>\", \"related_products\": [{\"product_id\": \"<id>\", \"quantity\": 3}, {\"product_id\": \"<id>\", \"quantity\": 7}]}`. `relationship_id` is the ID of the relationship type, from [Search-Relationships](/docs/reference/v3/relationships/search_relationships_api_v3_relationships_get). Inside `related_products`, the field is `product_id`, passing `id` returns `422` naming both the missing field and the extra one. `quantity` is optional and defaults to `1`.\n\nThe response is richer than this resource's `GET` views: its `related_products` entries carry `related_product_id` and `last_modified` per link, so it tells you which products ended up on the other end. Keep that response, or read the links back with [Search-Related-Products](/docs/reference/v3/relatedproducts/search_related_products_api_v3_related_products_get) using `?product_id=<id>`.",
         "operationId": "post_product_relationships_collection_api_v3_products__product_id__relationships_post",
         "responses": {
           "200": {
@@ -411,7 +420,7 @@
               }
             }
           }
-        }        
+        }
       },
       "post": {
         "tags": [
@@ -785,6 +794,7 @@
           "productrelationships"
         ],
         "summary": "Search-Product-Relationships",
+        "description": "Search every product-to-relationship-type link in your account, across all products, as flat `{relationship_id, relationship_label, product_id}` records.\n\n> **Warning:** Always send a filter. Called with no query parameters, this endpoint isn't scoped to your account and returns other accounts' link records. Both `?account_id=<your account id>` and `?product_id=<id>` scope the results correctly.\n\n> **Warning:** Don't filter by `relationship_id`. The request hangs and then fails with a gateway timeout rather than returning. To find every product using one relationship type, filter by `account_id` and match `relationship_id` in the results yourself.\n\nSupports `_fields` (repeatable) for sparse responses, `_sort_by`, and `_page`/`_page_size` pagination, follow the `next_page` link in the response's `pagination` object. See [Pagination](/docs/reference/v3/pagination) and [Filtering and query syntax](/docs/reference/v3/filtering-query-syntax).\n\nFor a single product's links, [Get-Product-Relationships Collection](/docs/reference/v3/productrelationships/get_product_relationships_collection_api_v3_products__product_id__relationships_get) is scoped by the URL and needs no filter.",
         "operationId": "search_product_relationships_api_v3_product_relationships_get",
         "responses": {
           "200": {
