@@ -1,0 +1,75 @@
+---
+title: "Filter operators"
+description: "Reference for mapping v1 filter objects to v3 bracket syntax, including boolean grouping, custom attributes, and related-entity filters."
+---
+
+import { Search, Filter } from 'lucide-react';
+
+v1 expresses a filter as an object with `field`, `operator`, and `value`. v3 puts the operator in brackets after the field name, and equality needs no operator at all. This page maps the operators one to one, then covers the two areas where the translation isn't mechanical: boolean grouping and custom attributes. It's part of the reference set for [Migrating to v3](/docs/guides/migrating-to-v3).
+
+## Operators
+
+| Meaning | v1 operator | v3 syntax |
+|---|---|---|
+| Equals | `eq` | `field=value` or `field[eq]=value` |
+| Not equal | `!eq` | `field[!eq]=value` |
+| In a set | `in` | `field[in]=value1&field[in]=value2` |
+| Not in a set | `!in` | `field[!in]=value1&field[!in]=value2` |
+| Greater than | `gt` | `field[gt]=value` |
+| Greater or equal | `gte` | `field[gte]=value` |
+| Less than | `lt` | `field[lt]=value` |
+| Less or equal | `lte` | `field[lte]=value` |
+| Between | Two comparisons | `field[gte]=<low>&field[lte]=<high>` |
+| Contains, case-insensitive | `contains` | `field[icontains]=value` |
+| Contains, case-sensitive | `contains` | `field[contains]=value` |
+| Field exists | `exists` | `field[exists]=true` |
+| Field does not exist | `!exists` | `field[!exists]=true` |
+| Field is null | `null` | `field[null]` |
+| Field is not null | `!null` | `field[!null]` |
+| Empty string or empty list | Not available | `field[length][eq]=0` |
+| Arrays intersect | Not available | `field[intersects]=value`, negated as `field[!intersects]=value` |
+| Length comparison | Not available | `field[length][gt]=value`, and the other comparison operators |
+| Days since a date | Not available | `field[days_passed][gt]=7`, optionally `field[days_passed:Europe/Madrid][lt]=1` |
+
+[Filtering and Query Syntax](/docs/reference/v3/filtering-query-syntax) covers each operator in full, along with the gotchas. Note that the case-insensitive contains operator is `icontains`; some older Plytix material calls it `contains:ignorecase`, which the API does not accept.
+
+## Boolean grouping
+
+v1 nests filters as arrays. v3 uses `&` for AND and an indexed `_or` prefix for OR, which makes combinations that v1 couldn't express directly.
+
+| Logic | v1 | v3 |
+|---|---|---|
+| A AND B | Both objects in the same inner array `[[A, B]]` {/* [PENDING] */} | `A&B` |
+| A OR B | Separate inner arrays `[[A], [B]]` {/* [PENDING] */} | `_or[0]A&_or[0]B` |
+| (A OR B) AND (C OR D) | Not expressible directly | `_or[0]A&_or[0]B&_or[1]C&_or[1]D` |
+| (A AND B) OR (C AND D) | Not expressible directly | `_or[0]_and[0]A&_or[0]_and[0]B&_or[0]_and[1]C&_or[0]_and[1]D` |
+| NOT (A OR B) | Not available | `_!or[0]A&_!or[0]B` |
+
+{/* The v1 rows are marked [PENDING] because the nesting semantics come from the Postman-derived spec's saved example rather than from documented behavior. The v3 rows are confirmed. */}
+
+## Custom attributes and related entities
+
+Custom attributes are addressed directly in v3 rather than through a field-name string, and filtering across a relation is possible at all, which it wasn't in v1.
+
+| Target | v1 | v3 |
+|---|---|---|
+| Custom attribute | `{"field": "attributes.name", "operator": "<op>", "value": "<value>"}` | `attributes.name[<op>]=value` |
+| Related entity field | Not possible | `related-entity.attribute[<op>]=value` |
+| Product relationships | `relationship_filters` with nested `product_ids` objects | `product_relationships.relationship_id=<id>&product_relationships.related_product_id=<id>` |
+
+<Callout type="info" title="One restriction to know about">
+  The `_!exists` form on relationships is restricted: it's allowed only for `relationships.id` or `relationships.label`, and only when not grouped with `_and` or `_or`.
+</Callout>
+
+## Related resources
+
+Now that you can translate a filter, you can explore these related pages.
+
+<Cards>
+  <Card icon={<Search />} title="Searching and pagination" href="/docs/guides/migrating-to-v3/searching-and-pagination">
+    Put the translated filters into a v3 search and page through the results.
+  </Card>
+  <Card icon={<Filter />} title="Filtering and query syntax" href="/docs/reference/v3/filtering-query-syntax">
+    Read the full v3 filter reference, including encoding rules and gotchas.
+  </Card>
+</Cards>

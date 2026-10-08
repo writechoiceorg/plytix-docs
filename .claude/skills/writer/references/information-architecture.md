@@ -24,7 +24,12 @@ Source: `plytix-outline-canvas.md`, "📘 Guides → 🚀 Get Started" (updated 
 | Quickstart | `fumadocs/content/docs/guides/quickstart.mdx` | Tutorial | Written |
 | The Plytix Data Model | `fumadocs/content/docs/guides/data-model.mdx` | Concept | Written |
 | Migrating to v3 | `fumadocs/content/docs/guides/migrating-to-v3/index.mdx` | How-to Guide | Draft, blocked on flags |
-| ↳ Migration reference | `fumadocs/content/docs/guides/migrating-to-v3/migration-reference.mdx` | Reference | Draft, blocked on flags |
+| ↳ Authentication and base URLs | `fumadocs/content/docs/guides/migrating-to-v3/authentication-and-base-urls.mdx` | Reference | Draft, blocked on flags |
+| ↳ Searching and pagination | `fumadocs/content/docs/guides/migrating-to-v3/searching-and-pagination.mdx` | Reference | Draft, blocked on flags |
+| ↳ Filter operators | `fumadocs/content/docs/guides/migrating-to-v3/filter-operators.mdx` | Reference | Draft, blocked on flags |
+| ↳ Responses and updates | `fumadocs/content/docs/guides/migrating-to-v3/responses-and-updates.mdx` | Reference | Draft, blocked on flags |
+| ↳ Endpoint mapping | `fumadocs/content/docs/guides/migrating-to-v3/endpoint-mapping.mdx` | Reference | Draft, blocked on flags |
+| ↳ Not migrated and new in v3 | `fumadocs/content/docs/guides/migrating-to-v3/not-migrated-and-new-in-v3.mdx` | Reference | Draft, blocked on flags |
 
 ### Guides → Integration Guides
 
@@ -77,7 +82,7 @@ Source: `plytix-outline-canvas.md`, "📘 Guides → 🤖 Plytix MCPs". The Plat
 | Pagination Reference | `fumadocs/content/docs/reference/v3/pagination.mdx` | Reference | Draft, blocked on flags |
 | Working with Updates and Deletes | `fumadocs/content/docs/reference/v3/updates-and-deletes.mdx` | Reference | Draft, blocked on flags |
 
-> These three were drafted 2026-09-29 and are the authoritative v3 pages for their topics; `migrating-to-v3/migration-reference.mdx` covers the same ground for the v1 comparison and now links across rather than restating it. Their common blocker: neither `openapi_pimv3.json` nor `fumadocs/openapi.json` declares any query parameter on any search operation, so filter syntax, `_fields`, and all paging parameters rest on `API V3.md` (a design doc with approved/rejected/postponed options). Confirmed from the spec and safe: the response envelope (`data`, `errors`, `pagination`) and the `Pagination` schema's two fields (`next_page`, `previous_page`, no counts).
+> These three were drafted 2026-09-29 and are the authoritative v3 pages for their topics; the `migrating-to-v3/` reference pages cover the same ground for the v1 comparison and now link across rather than restating it. Their common blocker: neither `openapi_pimv3.json` nor `fumadocs/openapi.json` declares any query parameter on any search operation, so filter syntax, `_fields`, and all paging parameters rest on `API V3.md` (a design doc with approved/rejected/postponed options). Confirmed from the spec and safe: the response envelope (`data`, `errors`, `pagination`) and the `Pagination` schema's two fields (`next_page`, `previous_page`, no counts).
 >
 > **Updated 2026-10-01 (review of `filtering-query-syntax.mdx`):** don't write these pages from `API V3.md` alone. `endpoint-tester` already ran (2026-09-07 to 2026-10-01) and `config/api-testing.config.md`'s quirks outrank the prose doc. That testing confirmed plain equality, `[gt]`, `[in]`, `[exists]`/`[!exists]` (with an explicit `=true`), `[icontains]`, dot-notation related-entity filters, `attributes.<name>`, `_fields`, and `_page`/`_page_size`/`_sort_by`. It also **contradicts** `API V3.md` in places: the case-insensitive operator is `icontains`, not `contains:ignorecase`; `_expand` and `_offset`/`_limit` return 400; products have no `relationships` field, only `product_relationships`. Still untested and marked "Spec only" on the filtering page: `_or`/`_and`/`_!or` grouping, `[null]`/`[!null]`, `[length]`, `days_passed`, `[intersects]`, `_fields=*`, and `_include_unfiltered_entities`.
 

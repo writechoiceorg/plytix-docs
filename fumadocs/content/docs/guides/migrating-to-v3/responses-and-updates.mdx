@@ -1,0 +1,46 @@
+---
+title: "Responses and updates"
+description: "Reference for v3 response conventions and the update and delete behaviors that break migrated code, including the empty 204 returned by PATCH."
+---
+
+import { Table2, FilePen } from 'lucide-react';
+
+v3 changed what a write gives back and what a write does. The status codes are the visible part; the behavioral differences underneath them are what actually break migrated code. This page covers both, and it's part of the reference set for [Migrating to v3](/docs/guides/migrating-to-v3).
+
+## Response conventions
+
+| Operation | v1 and v2 | v3 |
+|---|---|---|
+| Search | `200` with `data` and `pagination` | `200` with `data` and `pagination` |
+| Get one | `200` with the record | `200` with the record, `data` as an object and no `pagination` key |
+| Create | `200` or `201` with the created entity | `201` with the full created entity |
+| Duplicate on create | Varies | `409` |
+| Update (PATCH) | Returns the modified entity | `204` with no body |
+| Delete | Varies | `204` with no body |
+| Accepted for async processing | Not applicable | `202` with a `process_id` |
+| Error | Varies | `errors` array in the same envelope, each entry `{"name": "...", "description": "..."}`. See [Errors and Status Codes](/docs/reference/v3/errors-status-codes) |
+
+## Behavioral differences
+
+Three differences matter more than the status codes, because each one lets code keep running while doing the wrong thing:
+
+- **v3 returns nothing on an update.** v1's PATCH returned the modified entity; v3's returns `204` with an empty body, so any code that read values out of an update response needs a follow-up GET. Create is unchanged in this respect: it still returns the full entity.
+- **v3 PATCH replaces a map field you name.** Sending part of a product's `attributes` deletes the attributes you left out, with no error and no warning. Read the current map, merge, then send it back, or patch a single attribute through `PATCH /products/{identifier}/attributes/{name}` with a bare value. See [Working with Updates and Deletes](/docs/reference/v3/updates-and-deletes).
+- **v3 DELETE erases** the entity or field rather than setting it to null or a default, and removing a field can cause inheritance to resolve for it.
+
+<Callout type="warn" title="PATCH recently changed to 204">
+  Earlier v3 releases returned `200` with the full updated entity on PATCH. It now returns `204` with an empty body, so an integration written against the older behavior breaks on any code that parses an update response. POST is unaffected: it still returns `201` with the full created entity.
+</Callout>
+
+## Related resources
+
+Now that you know what a v3 write returns and what it does, you can explore these related pages.
+
+<Cards>
+  <Card icon={<Table2 />} title="Endpoint mapping" href="/docs/guides/migrating-to-v3/endpoint-mapping">
+    Find the v3 equivalent of each v1 and v2 endpoint, resource by resource.
+  </Card>
+  <Card icon={<FilePen />} title="Working with updates and deletes" href="/docs/reference/v3/updates-and-deletes">
+    Read the full v3 rules for partial updates, map fields, and deletions.
+  </Card>
+</Cards>
