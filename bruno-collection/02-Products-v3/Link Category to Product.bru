@@ -1,0 +1,175 @@
+meta {
+  name: Link Category to Product
+  type: http
+  seq: 17
+}
+
+post {
+  url: {{pim_base_url_v3}}/products/REPLACE_WITH_PRODUCT_ID/categories
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {
+    "id": "REPLACE_WITH_CATEGORY_ID"
+  }
+}
+
+docs {
+  `POST /api/v3/products/{product_id}/categories` — link one existing product
+  category to a product. Confirmed live 2026-10-08 against "David's Dev Account"
+  on a disposable product (`WC-REV-1008-A`), since deleted.
+
+  ## Why this file exists: `category_ids` no longer works
+  Until 2026-10-01 the documented way to attach a category was the
+  `category_ids` array on `POST /products` or `PATCH /products/{id}`. **As of
+  2026-10-08 that field is rejected on both verbs** with
+  `422 {"errors":[{"name":"InputDTOValidationError","description":"category_ids:
+  Extra inputs are not permitted"}]}`, even though `ProductCreateDto` and
+  `ProductUpdateInputDto` in `openapi_pimv3.json` still declare it. The same
+  applies to `static_list_ids`, `channel_ids`, `ecatalog_ids` and
+  `product_data_sheet_ids` (quirk #93).
+
+  This endpoint is the replacement. It implements the "1:M link a new entity
+  instance" row that `materials/api-references/API V3 - status map (08_10_2026).md`
+  marks **Direct** (pp. 11-13).
+
+  ## Request shape
+  The body is an object with a single `id` key naming the category to link —
+  **not** a bare array and **not** `{"category_ids": [...]}`. Both of those are
+  rejected:
+  - `["<id>"]` → `422 "Input should be a valid dictionary or object to extract
+    fields from"`
+  - `{"category_ids": ["<id>"]}` → `422 "id: Field required"` plus
+    `"category_ids: Extra inputs are not permitted"`
+
+  ## Responses
+  - **201** — `{"data": {"id": "<category_id>"}, "errors": []}`. Echoes the linked
+    category's id, not the product.
+  - **409 AlreadyExists** — the category is already linked. The message is
+    unusually specific for this API and names both sides:
+    `"'<category_id>' is already linked to products <product_id> through 'categories'"`.
+
+  Link one category per request; there is no batch form.
+
+  ## Related
+  - Unlink: `Unlink Category from Product.bru` (`DELETE .../categories/{category_id}`)
+  - Verify: `GET /products/{id}/categories` works again as of 2026-10-08
+    (quirk #80's always-empty regression is resolved).
+  - Assets do **not** support this pattern — `POST /products/{id}/assets` returns
+    `405` (quirk #96).
+}
+
+example {
+  name: Link Category - 201 Created
+  description: Real response captured 2026-10-08 against "David's Dev Account", linking "WC Test Category" to disposable product WC-REV-1008-A.
+
+  request: {
+    url: {{pim_base_url_v3}}/products/6ac7ef509c6194f8c08e24aa/categories
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "id": "6a9f1b482b6fd055ffb7c7dc"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 201
+      text: Created
+    }
+    headers: {
+      content-type: application/json
+    }
+    body:json: {
+      {"data": {"id": "6a9f1b482b6fd055ffb7c7dc"}, "errors": []}
+      '''
+      }
+      }
+      }
+      example {
+      name: Link Category - 409 Already Linked
+      description: Real response captured 2026-10-08, re-sending the identical link request from the 201 example above.
+      request: {
+      url: {{pim_base_url_v3}}/products/6ac7ef509c6194f8c08e24aa/categories
+      method: post
+      mode: json
+      headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+      }
+      body: {
+      type: json
+      content: '''
+      {
+      "id": "6a9f1b482b6fd055ffb7c7dc"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 409
+      text: Conflict
+    }
+    headers: {
+      content-type: application/json
+    }
+    body:json: {
+      {"data": [], "errors": [{"name": "AlreadyExists", "description": "'6a9f1b482b6fd055ffb7c7dc' is already linked to products 6ac7ef509c6194f8c08e24aa through 'categories'"}]}
+      '''
+      }
+      }
+      }
+      example {
+      name: Link Category - 422 Wrong Body Shape
+      description: Real response captured 2026-10-08, sending the old {"category_ids": [...]} shape instead of {"id": "..."}.
+      request: {
+      url: {{pim_base_url_v3}}/products/6ac7ef509c6194f8c08e24aa/categories
+      method: post
+      mode: json
+      headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+      }
+      body: {
+      type: json
+      content: '''
+      {
+      "category_ids": ["6a9f1b482b6fd055ffb7c7dc"]
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 422
+      text: Unprocessable Entity
+    }
+    headers: {
+      content-type: application/json
+    }
+    body: {
+      type: json
+      content: '''
+        {"data": [], "errors": [{"name": "InputDTOValidationError", "description": "id: Field required"}, {"name": "InputDTOValidationError", "description": "category_ids: Extra inputs are not permitted"}]}
+      '''
+    }
+  }
+}

@@ -23,9 +23,9 @@ These are unrelated features that happen to both live under the umbrella of "get
 
 Set up entirely in the dashboard, under a channel's settings. A basic webhook fires a fixed `POST` request with a fixed JSON payload (channel name, processing status, channel URL, feed URL, and the number of products processed) whenever that channel finishes processing. An advanced version of the same feature lets you customize the request URL, headers, and body.
 
-{/* FLAG (open):
-  The channel resource's create schema includes a `webhook` field (`webhook_url`, `webhook_headers`, `webhook_body`) that appears to correspond to the dashboard's advanced webhook settings. This project confirmed the field exists on the live API but didn't independently confirm that setting it through the API actually registers a working webhook. Verify this with a real test before building an integration around it.
-*/}
+<Callout type="warn" title="The channel API accepts a webhook payload and ignores it">
+  The channel resource has a `webhook` field (`webhook_url`, `webhook_headers`, `webhook_body`), so it looks like you can configure a webhook through the API, but you can't. A `PATCH` carrying that field returns `204` as though it worked, but the value is discarded: a follow-up read shows the field absent, and requesting it with `_fields=webhook` returns nothing. Configure channel webhooks in the dashboard and treat the API field as unavailable.
+</Callout>
 
 ### Automations
 

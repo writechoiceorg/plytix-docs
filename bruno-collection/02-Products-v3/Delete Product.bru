@@ -55,11 +55,29 @@ docs {
 
   **Implication for docs**: the old warning against ever using
   `DELETE /products/{id}/{subpath}` no longer needs to gate any docs — the
-  endpoint now fails safely (405/404) instead of silently destroying data. Still
-  true that neither pattern provides a working scoped-unlink mechanism; `PATCH`
-  with a reduced `category_ids`/relationship array remains the only confirmed way
-  to remove a single relationship. See the updated examples below, and
-  `config/api-testing.config.md`'s quirks #31/#54 (both now marked resolved).
+  endpoint now fails safely (405/404) instead of silently destroying data. See
+  the updated examples below, and `config/api-testing.config.md`'s quirks
+  #31/#54 (both now marked resolved).
+
+  ## ⚠️ SUPERSEDED 2026-10-08 — scoped unlink now EXISTS, and `category_ids` is GONE
+  The paragraph above used to end by saying that no pattern provides a working
+  scoped unlink and that `PATCH` with a reduced `category_ids` array was the only
+  way to remove a single category. **Both halves of that are now wrong** —
+  re-tested live 2026-10-08:
+
+  1. `DELETE /products/{id}/categories/{category_id}` is now a **working, safe,
+     scoped unlink**: `204`, product fully intact, only the named category
+     removed. See `Unlink Category from Product.bru` for the captured examples.
+  2. `category_ids` on `PATCH /products/{id}` (and on `POST /products`) is now
+     **rejected** with `422 "category_ids: Extra inputs are not permitted"`, along
+     with `static_list_ids`, `channel_ids`, `ecatalog_ids` and
+     `product_data_sheet_ids` — quirk #93. Linking is done with `POST
+     /products/{id}/categories` and body `{"id": "<category_id>"}`; see
+     `Link Category to Product.bru`.
+
+  The 405/404 examples below remain accurate for the *bare collection* and
+  *unrecognized field* forms. Only the 3-segment `categories/{id}` form changed
+  behavior, from `404` to a working `204` unlink.
 }
 
 example {

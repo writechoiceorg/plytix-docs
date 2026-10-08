@@ -277,7 +277,7 @@
 
 **Capitalisation:** Product Family `[PENDING]`
 **Definition:** The set of attributes that applies to one type of product, plus the inheritance rules that pass values from a parent product down to its variants and sub-variants.
-**Notes:** **API constraint:** creating a family, choosing its attributes, and configuring inheritance are dashboard-only. The API can assign a product into an existing family via `product_family_id` but can't build one. Confirmed by this project's endpoint testing.
+**Notes:** **API constraint (corrected 2026-10-08):** families are writable. `POST /api/v3/product-families` creates one, `POST /api/v3/product-families/{id}/attributes` links an attribute to it, and `PATCH` renames it (`name` only, because attribute-membership changes propagate across every product in the family). Assigning a product into a family still uses `product_family_id`. The one dashboard-only piece is **inheritance between levels**: changing an attribute link's `level` returns `403 "Automatic inheritance is not available for this account"` on accounts without the feature. The previous note here said families were entirely dashboard-only; that was true until the 2026-09-15 spec refresh and is the source of errors found in `guides/data-model.mdx` and `guides/reconstructing-parent-variant-hierarchies.mdx` during the 2026-10-08 review.
 
 ---
 
@@ -285,7 +285,7 @@
 
 **Capitalisation:** Relationship `[PENDING]`
 **Definition:** A named type of connection between products (for example, "Accessories" or "Bundle contents"). Creating the relationship type and linking products to it are two separate steps; each link can carry a `quantity`.
-**Notes:** Account-level entity. Read from a product through its `product_relationships` field.
+**Notes:** Account-level entity. Read from a product through its `product_relationships` field. **Writable (confirmed 2026-10-08):** `POST /api/v3/relationships` creates the type; `POST`, `PATCH`, and `DELETE` on `/api/v3/products/{product_id}/relationships/{relationship_id}` link products, change a link's `quantity`, and unlink. The link body uses `product_id` (not `related_product_id`) and repeats `relationship_id` inside the body as well as in the path. The `DELETE` is scoped: it removes the link and leaves both products intact.
 
 ---
 

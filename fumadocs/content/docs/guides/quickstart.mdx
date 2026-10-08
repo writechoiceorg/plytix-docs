@@ -1,128 +1,155 @@
 ---
 title: Quickstart
-description: Generate an API key, exchange it for a bearer token, and make your first authenticated request.
+description: Create an API key, exchange it for a bearer token, and read your first products from the Plytix API in under ten minutes.
 ---
 
-import { BookOpen, TriangleAlert } from 'lucide-react';
+import { BookOpen, RotateCw } from 'lucide-react';
 
-<callout type="warning" title="Redo">
-  Must REDO this page.. New authentication is now done via the auth service, not the API service. The example request must be updated to use the new auth service.
-</callout>
+This tutorial takes you from an empty terminal to a real response from your own catalog. You'll create an API key in the Plytix dashboard, trade it for a bearer token, and use that token to read products out of your account. It's written for anyone starting an integration, whether you're syncing an ERP, building an export, or sizing up what the API returns before you plan anything.
 
-This guide is a step-by-step checklist to connect your systems with the Plytix API, which involves three steps:
+**Learning objectives:** By the end of this tutorial, you will be able to:
 
-1. Generate your API credentials.
-2. Exchange them for a bearer token.
-3. Verify the connection with a test call.
+- Create and manage API credentials in the Plytix dashboard
+- Exchange those credentials for a bearer token, and know when it expires
+- Make an authenticated request and read the response envelope Plytix returns
 
-## Integration Steps
+## Before you begin
 
-<Steps>
-  <Step>
-    ### Get your API credentials
+Make sure you have the following:
 
-    Only Owners and Admins can create and manage API keys. If you don't have Admin rights, ask an account Owner or Admin to complete this step, or to grant you those rights first.
+- **A Plytix account with Owner or Admin rights.** Only Owners and Admins can create API keys. If you don't have those rights, ask an account Owner or Admin to complete step 1 and send you the credentials.
+- **A terminal with `curl`,** or any HTTP client you prefer. Every example here is a `curl` command you can paste and run.
 
-    1. Access and login into [your Dashboard](http://accounts.plytix.com/).
-    2. Open the **API** tab.
-    3. Create a key with a name and a role (the role determines its access rights).
-    4. Copy the **API key** and **API password** using the clipboard icon next to it.
+You don't need to request API access or wait for approval. Key creation is self-service.
 
-    You can edit, re-role, or delete a key later from the same API tab.
+## Step 1: Create your API credentials
 
-    <Callout title="Self-service key creation">
-      Unlike processes that require manual approval, creating a Plytix API key is self-service. Once you have Admin or Owner rights, you can generate one immediately.
-    </Callout>
-  </Step>
-  <Step>
-    ### Retrieve a bearer token
+An API key is a key and password pair that identifies your integration to Plytix. You create it once in the dashboard.
 
-    The Plytix API uses bearer token authentication. You don't send your API key and password on every request. Instead, you exchange them once for a token, then send that token instead.
+1. Sign in at [accounts.plytix.com](https://accounts.plytix.com).
+2. Open the **API** tab.
+3. Create a key, giving it a name and a role. The role decides what the key can reach, so pick the narrowest one that covers what you're building.
+4. Copy the **API key** and the **API password** using the clipboard icon beside each.
 
-    Send a **POST** request to the `/auth/api/get-token` endpoint to retrieve your bearer token.
+Store both somewhere safe before you leave the page. You can rename, re-role, or delete a key later from the same tab, but changing an existing key's role can break whatever is already using it, so prefer creating a new key per integration.
 
-    <Tabs items={['Request', 'Response']}>
-      <Tab value="Request">
-        ```bash
-        curl --request POST \
-          --url https://auth.plytix.com/auth/api/get-token \
-          --header 'Content-Type: application/json' \
-          --data '{
-            "api_key": "your.api.key",
-            "api_password": "your.secret.api.password"
-          }'
-        ```
-      </Tab>
-      <Tab value="Response">
-        ```json
+## Step 2: Exchange your credentials for a token
+
+Plytix uses bearer tokens. Rather than sending your key and password on every request, you trade them once for a token and send that instead.
+
+Note the host: tokens come from `auth.plytix.com`, which is a different service from the PIM API you'll call in step 3.
+
+<Tabs items={['Request', 'Response']}>
+  <Tab value="Request">
+    ```bash
+    curl --request POST \
+      --url https://auth.plytix.com/auth/api/get-token \
+      --header 'Content-Type: application/json' \
+      --data '{
+        "api_key": "your.api.key",
+        "api_password": "your.secret.api.password"
+      }'
+    ```
+  </Tab>
+  <Tab value="Response">
+    ```json
+    {
+      "data": [
         {
-          "data": [
-            {
-              "access_token": "your_access_token"
-            }
-          ]
+          "access_token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
+          "refresh_token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
         }
-        ```
-      </Tab>
-    </Tabs>
+      ]
+    }
+    ```
+  </Tab>
+</Tabs>
 
-    You will receive a bearer token in the response. Every request you make after that needs the `Authorization: Bearer <token>` header.
-  </Step>
-  <Step>
-    ### Validate connection
+Take `access_token` from `data[0]`. Every request after this needs it in an `Authorization: Bearer <token>` header.
 
-    With a valid token, perform a GET request to the `/products` endpoint to confirm your connection is working:
+<Callout type="warn" title="Tokens expire after 15 minutes">
+  Request a new token when you get a `401`, and build that refresh into any job that runs longer than a few minutes. A response also carries a `refresh_token`, treat it as unsupported and request a fresh token the same way you got the first one.
+</Callout>
 
-    <Tabs items={['Request', 'Response']}>
-      <Tab value="Request">
-        ```bash
-        curl --request GET \
-          --url https://pim.plytix.com/api/v3/products \
-          --header 'Authorization: Bearer <token>' \
-          --header 'Content-Type: application/json' \
-          --header 'Accept: application/json'
-        ```
-      </Tab>
-      <Tab value="Response">
-        ```json
+If the credentials are wrong, you'll get a `401` with the message nested under an `error` key:
+
+```json
+{
+  "error": {
+    "msg": "Bad api_key or api_password: Query did not throw any results",
+    "errors": [{ "field": "http_status_code", "msg": 401 }]
+  }
+}
+```
+
+## Step 3: Make your first authenticated request
+
+Read some products back to prove the whole chain works.
+
+<Tabs items={['Request', 'Response']}>
+  <Tab value="Request">
+    ```bash
+    curl --request GET \
+      --url 'https://pim.plytix.com/api/v3/products?_page_size=1' \
+      --header 'Authorization: Bearer <access_token>' \
+      --header 'Accept: application/json'
+    ```
+  </Tab>
+  <Tab value="Response">
+    ```json
+    {
+      "data": [
         {
-          "data": [
-            {
-              "id": "5f7c8a1b2c3d4e5f6a7b8c9d",
-              "sku": "SHIRT-001",
-              "label": "Classic Cotton T-Shirt",
-              "status": "Completed",
-              "created": "2026-01-15T10:30:00Z",
-              "modified": "2026-02-01T09:12:00Z"
-            }
-          ],
-          "errors": [],
-          "pagination": {
-            "next_page": "http://pim.plytix.com/api/v3/products?_page=2"
-          }
+          "id": "6a38f614c3d65a5f868b1a06",
+          "sku": "BAG-10157",
+          "label": "Plytix Backpack",
+          "gtin": "9780201379624",
+          "status": "Completed",
+          "attributes": {
+            "brand": "Plytix",
+            "color": ["Black"],
+            "price": 29.99,
+            "short_description": "A sleek, functional backpack designed for everyday use."
+          },
+          "thumbnail_id": "6a38f5e1c3d65a5f868b18a5",
+          "num_variations": 0,
+          "product_level": 0,
+          "product_family_id": "6a38f5d8c3d65a5f868b186e",
+          "overwritten_attributes": [],
+          "created": "2026-06-22T08:45:08.648000",
+          "modified": "2026-09-14T11:02:47.113000"
         }
-        ```
-      </Tab>
-    </Tabs>
+      ],
+      "errors": [],
+      "pagination": {
+        "next_page": "http://pim.plytix.com/api/v3/products?_page_size=1&_page=2"
+      }
+    }
+    ```
+  </Tab>
+</Tabs>
 
-    A successful response confirms your entire setup:
-    - Your API key and password are valid.
-    - Your bearer token exchange worked.
-    - Your request headers are correctly formatted.
+A `200` here confirms the whole setup: your credentials were valid, the token exchange worked, and your headers are right. A `401` with `{"detail": "Unauthorized"}` means the token is missing, malformed, or expired, so go back to step 2.
 
-    If you get an error instead, check [Status codes and error codes](/docs/reference/v3/errors-status-codes) for troubleshooting guidance.
-  </Step>
-</Steps>
+Three things in that response are worth noticing now, because they shape every integration you build on top of it:
 
-## What's next
+- **Every response is an envelope.** `data`, `errors`, and `pagination` are always there. Your own values live in `attributes`, keyed by attribute name, while fields like `sku` and `status` sit at the top level.
+- **`next_page` is a complete URL, and it uses `http`.** That address redirects to `https`, and many HTTP clients drop the `Authorization` header across a scheme change, which turns page two into a surprise `401`. Rewrite the scheme to `https` before you request it.
+- **There's no total count.** Page until `next_page` stops appearing; on the last page the key is absent rather than `null`.
 
-With your connection verified, you're ready to integrate. We recommend reviewing the following to build a robust integration.
+<Callout type="idea" title="Drop the page size once you're done testing">
+  `_page_size=1` keeps this example readable. The default is 25 and the maximum is 1000, so raise it for real work.
+</Callout>
+
+## Related articles
+
+With your connection verified, pick the guide that matches what you're building.
 
 <Cards>
-  <Card icon={<BookOpen />} title="API Reference" href="/docs/reference/v3">
-    Understand what the Plytix API is for and the resources it exposes.
+  <Card icon={<RotateCw />} title="Sync your ERP" href="/docs/guides/syncing-your-erp-with-plytix">
+    Read changes out of Plytix on a schedule and write your own updates back.
   </Card>
-  <Card icon={<TriangleAlert />} title="Status Codes & Errors" href="/docs/reference/v3/errors-status-codes">
-    See the HTTP status codes and error formats the API returns.
+  <Card icon={<BookOpen />} title="The Plytix data model" href="/docs/guides/data-model">
+    Learn how products, attributes, categories, and relationships fit together.
   </Card>
 </Cards>

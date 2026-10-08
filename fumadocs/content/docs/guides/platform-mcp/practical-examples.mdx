@@ -132,21 +132,22 @@ See [Safely remove categories, assets, or relationships](/docs/guides/safely-rem
 
 ## Troubleshooting
 
-- **Problem:** The assistant answers about your catalog without calling Plytix, and the numbers look invented.
-  - **Solution:** Name the source in your prompt: "Using Plytix, …". Then ask it to cite the SKUs it retrieved, so you can check them.
-  - **Prevention:** Open every catalog prompt with the source named. Most clients only reach for a tool when the request makes the need obvious.
+Check the problems below if a workflow doesn't go the way you expected.
 
-- **Problem:** A batch of writes stops partway through.
-  - **Solution:** Ask which items succeeded before retrying, then retry only the rest. Re-running the whole batch can create duplicates.
-  - **Prevention:** For batches past a few dozen items, run the job as code with paced requests rather than through an agent.
-
-- **Problem:** Results are short, and the totals don't match what Plytix shows.
-  - **Solution:** Ask the assistant to page through all results. Agents often stop at the first page.
-  - **Prevention:** Include the expected count in your prompt when you know it.
-
-- **Problem:** The assistant changed something you didn't intend.
-  - **Solution:** There's no undo, so fix it forward. Ask the assistant for the exact list of what it changed, then correct those records.
-  - **Prevention:** Split every workflow into a read prompt and a write prompt, and grant write access only where you need it.
+<Accordions type="multiple">
+  <Accordion title="The assistant answers about your catalog without calling Plytix" value="answers-without-calling">
+    Numbers that look plausible but don't match anything in your account usually mean the assistant answered from its own knowledge instead of reaching for a tool. Most clients only call a tool when the request makes the need obvious, so name the source in your prompt, as in "Using Plytix, …", and ask it to cite the SKUs it retrieved. Opening every catalog prompt with the source named is the habit that prevents this.
+  </Accordion>
+  <Accordion title="A batch of writes stops partway through" value="batch-stops-partway">
+    Ask which items the assistant completed before you retry anything, then retry only the remainder. Re-running the whole batch is what creates duplicates, and the agent has the list you need to avoid that. For anything past a few dozen items, run the job as code with paced requests rather than through an agent, as in [Bulk operations for large catalogs](/docs/guides/bulk-operations-for-large-catalogs).
+  </Accordion>
+  <Accordion title="Results are short and the totals don't match what Plytix shows" value="results-short-paging">
+    Agents frequently stop at the first page of results and report that as the whole answer. Ask it to page through everything and compare the total again. Including the expected count in your prompt when you already know it gives the assistant something to check itself against.
+  </Accordion>
+  <Accordion title="The assistant changed something you didn't intend" value="unintended-change">
+    There's no undo in Plytix, so the only route is forward: ask the assistant for the exact list of records it changed, then correct those. The discipline that prevents a repeat is the one every workflow on this page follows, which is splitting the work into a read prompt you review and a separate write prompt you approve, and granting write access only where the job actually needs it.
+  </Accordion>
+</Accordions>
 
 ## Related articles
 

@@ -5,22 +5,29 @@ description: Process large product catalogs reliably today, and what to know bef
 
 import { Download, RotateCw } from 'lucide-react';
 
-Process a large catalog of products reliably. This guide covers the confirmed working approach today, pacing single-item requests within the API's rate limits, and what to know before reaching for the older Bulk API.
-
-{/* FLAG (open):
-  This API version doesn't currently have bulk create, update, or delete endpoints. If you came here expecting a single call that processes thousands of products at once, the pattern below (single-item requests, paced to the rate limit) is the confirmed working approach today.
-*/}
+Process a large catalog of products reliably. **The v3 API has no bulk create, update, or delete endpoints**, so the working approach today is a loop of single-item requests paced against your account's rate limit. This guide covers how to find that limit, how to page through reads efficiently, how to track per-item results so a partial failure doesn't cost you the whole run, and what to know before reaching for the older Bulk API. Everything here uses v3 with a bearer token.
 
 ## Prerequisites
 
 - A bearer token. See the Quickstart guide for the authentication flow.
 - The single-item read, create, and update patterns from "Syncing Your ERP with Plytix." This guide builds on those, applied at scale.
 
-## Steps
+## Build the processing loop
 
-1. **Know your account's rate limit before writing a processing loop.**
+Follow the steps below to find your rate limit, page through reads, pace your writes against it, and keep a record good enough to retry from.
 
-   Rate limits vary by account and are embedded in your access token's claims. Check the limit for your account with your Plytix contact if it's not otherwise documented for your plan, and build your loop to stay under it rather than hard-coding a number.
+1. **Read your account's rate limit out of your own access token.**
+
+   Your limits travel in the token itself, so you don't need to ask anyone for them. Decode the JWT and look at `user_claims.account.rate_limit`, an array of `{limit, window_size}` pairs where `window_size` is in seconds:
+
+   ```json
+   "rate_limit": [
+     { "limit": 20, "window_size": 10 },
+     { "limit": 5000, "window_size": 3600 }
+   ]
+   ```
+
+   The values differ by account and plan, so read them rather than copying the numbers above. Build your loop against whatever your own token reports, and re-read it if your plan changes.
 
 2. **Page through reads instead of requesting everything at once.**
 
@@ -34,9 +41,9 @@ Process a large catalog of products reliably. This guide covers the confirmed wo
 
    See "Exporting Your Full Catalog" for the full pagination pattern. A larger `_page_size` reduces the number of requests needed to read the whole catalog.
 
-3. **Pace writes to stay under the rate limit, and back off on `429`.**
+3. **Pace writes to stay under the rate limit, and handle `429` defensively.**
 
-   Space out `POST` and `PATCH` calls so you don't exceed your account's request limit. If a call returns `429`, wait before retrying rather than immediately resending, and consider slowing your loop's overall pace rather than only handling the single failed request.
+   Space out `POST` and `PATCH` calls so you don't exceed the limits from step 1. If a call returns `429`, wait before retrying rather than immediately resending, and slow your loop's overall pace rather than only retrying the single failed request.
 
 4. **Track per-item results yourself.**
 
@@ -52,10 +59,6 @@ Plytix's v2 API includes a Bulk API for batch operations, but it comes with two 
 
 - **It isn't available to every account.** Confirm with your Plytix contact whether your account has access before planning around it.
 - **Partial failures aren't clearly reported.** A Bulk API response doesn't reliably distinguish between an item that was skipped because nothing changed and one that failed silently, which has been a recurring point of customer feedback. If you do use it, don't assume every item not showing an explicit success actually failed; expect to verify results the same way described in steps 4 and 5 above.
-
-{/* FLAG (open):
-  The Bulk API wasn't independently tested in this project. The single-item pattern in steps 1 to 5 is the one confirmed working approach documented here.
-*/}
 
 ## Related articles
 

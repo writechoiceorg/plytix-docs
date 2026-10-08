@@ -335,3 +335,103 @@ redirect warning).
       return `[]`) as of 2026-09-23 — is this a known regression, and can
       it be fixed? It previously worked (2026-09-07 captures). See quirk
       #80 in `config/api-testing.config.md`.
+
+---
+
+## Update — 2026-10-08 (docs-review re-verification: the biggest behavior shift yet)
+
+Run to re-verify the blocker claims in `output-reviewer-2026-10-08.md` and
+close its testable flags, against "David's Dev Account". **This session
+invalidated more prior findings in this folder than any before it.** Every
+scratch resource created was deleted; `BAG-10157` and `WC-TEST-FULL-001`
+were confirmed intact afterwards (2 categories each).
+
+### Three things changed, and two of them break published guides
+
+**1. All five `*_ids` relationship-array fields are now rejected on both
+`POST /products` and `PATCH /products/{id}`** (quirk #93). `category_ids`,
+`static_list_ids`, `channel_ids`, `ecatalog_ids`, `product_data_sheet_ids`
+each return `422 "<field>: Extra inputs are not permitted"` — despite
+`ProductCreateDto` and `ProductUpdateInputDto` still declaring all of them in
+`openapi_pimv3.json`. Still accepted on both verbs: `label`, `gtin`, `status`,
+`attributes`, `thumbnail_id`, `product_family_id`, `parent_id`.
+This retracts quirks #26 and #27.
+
+**2. The 1:M link/unlink pattern is implemented for categories, and it is
+safe and scoped** (quirks #94, #95). Two new files in this folder:
+- `Link Category to Product.bru` — `POST /products/{id}/categories` with body
+  `{"id": "<category_id>"}` → `201`; duplicate → `409 AlreadyExists` with a
+  message naming both sides.
+- `Unlink Category from Product.bru` — `DELETE
+  /products/{id}/categories/{category_id}` → `204`, product fully intact,
+  only the named category removed. **This is the mechanism that replaces the
+  now-rejected `category_ids` array.**
+
+The sibling error paths are all non-destructive and now carry genuinely
+helpful messages: bare-collection `DELETE` → `405` naming the correct path
+form; unrecognized subpath → `404 "Product has no field '<x>'"`; `PATCH
+/products/{id}/categories` → `405 "link or unlink here, and update a linked
+entity at its own path."`
+
+**3. The broken read subpaths are fixed** — quirk #80 is resolved. `GET
+/products/{id}/categories` and `.../assets` now return real, fully expanded
+data (verified on `BAG-10157`: 2 categories, real assets). The
+always-empty-array regression is gone, which closes the urgent open item at
+the bottom of this README.
+
+### Other confirmations this run
+
+| Behavior | Result |
+|---|---|
+| `PATCH /products/{id}` status | `204`, empty body (quirk #84 holds) |
+| `{"thumbnail_id": null}` | `204`, clears the thumbnail (quirk #97) |
+| `POST /products` status | `201`, `data` as an **object**, not an array |
+| `parent_id` + `product_family_id` on create | **`201` — works** (retracts quirk #72) |
+| `parent_id` + a *different* family | `422 "product data validation failed"` — this is the real rule |
+| Variant with `parent_id` alone | Inherits the parent's `product_family_id` automatically |
+| `product_level` / `num_variations` | Parent `0`→`1`, variant `2`, counter increments — unchanged |
+| Asset link/unlink | **Not supported** — `POST .../assets` → `405`, `DELETE .../assets/{id}` → `404` (quirk #96) |
+
+### Filter operators (relevant to every search example in this folder)
+
+`icontains` is **rejected** — the operator is `contains:ignorecase` again,
+reversing the 2026-10-01 finding (quirk #99). An invalid operator now returns
+the authoritative list, which makes this cheap to re-check:
+
+```
+!contains, !contains:ignorecase, !eq, !exists, !gt, !gte, !in, !includes,
+!intersects, !lt, !lte, !null, contains, contains:ignorecase, eq, exists,
+gt, gte, in, includes, intersects, lt, lte, null
+```
+
+Both `[length]` and `[len]` work (quirk #100), as do `[null]`/`[!null]`,
+`[intersects]` on a traversed field, `_or[#]`/`_and[#]`, `_fields=*`, and
+`_sort_by=-<field>`. `_total_count` still `400`s. The `_![bool][#]`
+NOT-grouping form from `API V3.md` does **not** work (`400`).
+
+### Rate limits
+
+No `429` could be produced: 80 requests issued 40-way parallel in ~2 seconds
+(4x the JWT's stated 20-per-10-seconds burst limit) all returned `200`, and
+**no PIM response carries any rate-limit header** (quirk #102). The JWT's
+account claims still advertise `[{limit: 20, window_size: 10}, {limit: 5000,
+window_size: 3600}]` and a 900-second token lifetime.
+
+### Open items from this run
+
+- [x] ~~`GET /products/{id}/categories`, `.../assets`, `.../static_lists`
+      always return `[]`~~ — **resolved 2026-10-08**, all return real data.
+- [x] ~~Is there a working scoped unlink for categories?~~ — **yes, shipped**;
+      see `Unlink Category from Product.bru`.
+- [ ] **Ask Plytix urgently**: was removing `*_ids` from `ProductCreateDto` /
+      `ProductUpdateInputDto` intentional, and will the spec be corrected?
+      Three published guides currently teach a call that `422`s. (Config open
+      question #29.)
+- [ ] **Ask Plytix**: with `*_ids` gone and no `/assets` link/unlink, there is
+      no way to attach or detach a non-thumbnail asset via the API. Is an
+      asset link/unlink endpoint coming? (Config open question #30.)
+- [ ] **Ask Plytix**: `icontains` vs `contains:ignorecase` — which is
+      supported going forward? And what are the undocumented
+      `includes`/`!includes` operators? (Config open question #31.)
+- [ ] **Ask Plytix**: are the JWT rate limits enforced anywhere? No `429` is
+      reachable on the dev host. (Config open question #34.)

@@ -138,18 +138,22 @@ Paste either URL into your assistant. To fetch one page instead of all of them, 
 
 ## Troubleshooting
 
-- **Problem:** The client shows the server as failed or disconnected.
-  - **Solution:** Confirm the URL ends in `/api/mcp` and that you can open `https://<docs-base-url>/docs` in a browser. The docs site and the MCP endpoint are served by the same deployment, so if the site is down, the server is too.
-  - **Prevention:** Register the server once at the user level rather than per project, so a single correct URL is reused.
+Check the problems below if you run into issues while connecting.
 
-- **Problem:** VS Code doesn't recognize the entry.
-  - **Solution:** Check that the file uses `servers`, not `mcpServers`, and that each entry includes `"type": "http"`. VS Code's format differs from Cursor's.
-
-- **Problem:** The assistant answers about Plytix without citing the docs.
-  - **Solution:** Name the source in your prompt: "Using the Plytix docs MCP, …". Most clients only reach for a tool when the request makes the need obvious.
-
-- **Problem:** The assistant can read pages but can't create or update products.
-  - **Solution:** That's expected. The Documentation MCP is read-only and covers documentation only. For account actions, see the [Plytix Platform MCP](/docs/guides/platform-mcp).
+<Accordions type="multiple">
+  <Accordion title="Your client shows the server as failed or disconnected" value="server-failed">
+    Confirm the URL ends in `/api/mcp`, then open the docs site itself in a browser. The site and the MCP endpoint ship from the same deployment, so if one is down the other is too, and that tells you whether the problem is yours or ours. Registering the server once at the user level rather than per project means you only ever have one URL to get right.
+  </Accordion>
+  <Accordion title="VS Code doesn't recognize the entry" value="vscode-format">
+    VS Code's configuration format differs from Cursor's in two specific ways, and copying a Cursor snippet into `.vscode/mcp.json` trips both. The top-level key is `servers`, not `mcpServers`, and each entry needs an explicit `"type": "http"`. Fix those two and the **Start** action appears above the entry.
+  </Accordion>
+  <Accordion title="The assistant answers about Plytix without citing the docs" value="no-citation">
+    Most clients only reach for a tool when the request makes the need obvious, so a bare question gets answered from the model's own knowledge instead. Name the source in your prompt, as in "Using the Plytix docs MCP, …", and ask it to cite the page it used so you can tell the difference.
+  </Accordion>
+  <Accordion title="The assistant can read pages but can't create or update products" value="read-only">
+    That's working as intended. The Documentation MCP serves these published pages and nothing else: it has no access to your Plytix account and no ability to write anywhere. For an assistant that acts on your catalog, see the [Plytix Platform MCP](/docs/guides/platform-mcp), which is a separate server with its own authorization.
+  </Accordion>
+</Accordions>
 
 ## Related articles
 
