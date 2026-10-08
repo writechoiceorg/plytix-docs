@@ -27,6 +27,12 @@ Structure
 [ ] Frontmatter `title` is present and accurate (it renders as the H1; no `# H1` in the body)
 [ ] No headings deeper than H3
 [ ] Numbered steps used for sequential instructions; bullets for non-sequential items
+[ ] Every bullet list, numbered list, and accordion group is preceded by a lead-in sentence (never starts directly under a heading)
+[ ] How-to intro is detailed: scope, API conventions, useful links, and warnings where relevant
+[ ] Procedure section is not titled "Steps"; it uses a task-based heading, and the title has no "with Plytix" style suffix
+[ ] Guides other than Authentication and the Quickstart do not show the `get-token` request; the token step links to Authentication or the Quickstart
+[ ] Troubleshooting uses Accordions (one per problem), not a bullet list; endpoint names in titles are in code format with a unique `value`
+[ ] Accordion bodies are one or two paragraphs of continuous prose, with no "Solution:"/"Prevention:" labels
 
 Formatting
 [ ] Frontmatter is complete and matches projectConvention.md (no fields Fumadocs strips, such as `slug`)

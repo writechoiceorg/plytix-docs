@@ -1,5 +1,5 @@
 ---
-title: Sync your ERP with Plytix
+title: Sync your ERP
 description: Read product data from Plytix, detect what changed, and push stock, price, and status updates back so your ERP and Plytix stay in sync.
 ---
 
@@ -7,27 +7,21 @@ import { Download, TriangleAlert } from 'lucide-react';
 
 Keep product data consistent between your ERP and Plytix by reading changes from Plytix on a schedule and writing your own changes back through the same API. This guide covers both directions: pulling updates into your ERP, and pushing stock, price, or status changes back to Plytix.
 
-<Callout type="warn" title="v1/v2 vs v3">
-  Plytix's product team currently recommends v1/v2 for any workflow that creates, updates, or deletes products (ERP write-back, stock updates, price updates, status changes), while v3 write parity is still growing. The v3 endpoints below are confirmed working live today, but confirm with your Plytix contact which version to build against before committing to a production integration. See [Migrating to v3](/docs/guides/migrating-to-v3) for how the versions differ.
-</Callout>
-
 ## Prerequisites
 
+Before you start, make sure you have the following:
+
 - A Plytix account with API credentials (an `api_key` and `api_password` from **Account Administration > API**).
-- A way to exchange those credentials for a bearer token. See the [Quickstart](/docs/guides/quickstart) for the full authentication flow.
+- A way to exchange those credentials for a bearer token. See [Authentication](/docs/reference/v3/authentication), or the [Quickstart](/docs/guides/quickstart) for a first walkthrough.
 - A field in your ERP to store each product's Plytix product ID, so you can address a product directly instead of searching by SKU on every call.
 
-## Steps
+## Sync your ERP
+
+Follow the steps below to authenticate, read changes from Plytix, push your own updates back, and confirm they were applied.
 
 1. **Get an access token.**
 
-   ```bash
-   curl -X POST "https://auth.plytix.com/auth/api/get-token" \
-     -H "Content-Type: application/json" \
-     -d '{"api_key": "your_api_key", "api_password": "your_api_password"}'
-   ```
-
-   The token appears at `data[0].access_token` and expires after 15 minutes. Request a new one when a call returns `401`.
+   Exchange your `api_key` and `api_password` for a bearer token, as described in [Authentication](/docs/reference/v3/authentication). The token expires after 15 minutes, so request a new one when a call returns `401`.
 
 2. **Resolve a product's Plytix ID from its SKU, the first time you see that SKU.**
 
@@ -104,15 +98,23 @@ Keep product data consistent between your ERP and Plytix by reading changes from
 
 ## Troubleshooting
 
-- **Problem:** `POST /products` returns `409 Conflict` with `"A product with the same name already exists"`-style text.
-  - **Solution:** The SKU already exists in this account. Look it up with a search instead of creating it again.
-  - **Prevention:** Check for an existing SKU before creating, using the lookup in step 2.
-- **Problem:** `GET /products/<identifier>` returns `404` instead of the product.
-  - **Solution:** Nothing in this account matches that identifier. Both the Plytix product ID and the SKU work in this position, but a SKU containing characters with special meaning in a URL has to be encoded first.
-  - **Prevention:** Store each product's Plytix ID in your ERP (step 2) so lookups don't depend on SKU formatting.
-- **Problem:** Attributes you didn't touch disappear after a sync run.
-  - **Solution:** A `PATCH` that names `attributes` replaces the whole map. Read the product's current attributes, merge your change into them, and send the result, as shown in step 5.
-  - **Prevention:** Never build a `PATCH` body with only the changed attribute in it.
+Check the problems below if you run into issues while following this guide.
+
+<Accordions type="multiple">
+  <Accordion title={<><code>POST /products</code> returns 409 Conflict</>} value="post-products-409">
+    If the response includes `"A product with the same name already exists"`-style text, the SKU already exists in this account. Look it up with a search instead of creating it again, and check for an existing SKU before every create, using the lookup in step 2.
+  </Accordion>
+  <Accordion title={<><code>GET /products/&lt;identifier&gt;</code> returns 404</>} value="get-products-404">
+    If the request returns `404` instead of the product, nothing in this account matches that identifier. Both the Plytix product ID and the SKU work in this position, but a SKU containing characters with special meaning in a URL has to be encoded first.
+
+    To avoid SKU formatting issues altogether, store each product's Plytix ID in your ERP (step 2) so lookups don't depend on it.
+  </Accordion>
+  <Accordion title="Attributes you didn't touch disappear after a sync run" value="attributes-disappear">
+    A `PATCH` that names `attributes` replaces the whole map, so every attribute missing from your payload is removed. Read the product's current attributes, merge your change into them, and send the result, as shown in step 5.
+
+    To avoid this, never build a `PATCH` body with only the changed attribute in it.
+  </Accordion>
+</Accordions>
 
 ## Related articles
 

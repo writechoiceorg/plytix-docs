@@ -96,13 +96,18 @@ description: "{Specific problem this guide solves}"
 ```
 # [Imperative verb + task, e.g. "Create a webhook"]
 
-Short introduction: state what the user will accomplish and when or why
-they would do it. Keep it brief — do not teach theory here.
+Detailed introduction: state what the guide covers (both directions or
+scope), when or why the user would do it, and the conventions of the APIs
+used (version, base URLs, auth, response conventions). Include useful links
+to reference pages and warnings the reader must know before starting. Keep
+theory out, but do not make it thin: this is the most useful paragraph on the
+page. See "Introductions" in style-guide.md.
 Do not bold any words in this introduction.
 
 ## Prerequisites
 
-Short intro before bullet list:
+Lead-in sentence that points to the list, e.g. "Before you start, make sure
+you have the following:" Never start a list without one.
 
 - Tools or software required (with links if necessary).
 - Prior knowledge or previous setup steps (with links to the relevant guides).
@@ -110,7 +115,13 @@ Short intro before bullet list:
 
 > [Insert callout for known limitations or caveats if needed.]
 
-## [Step section — follow the convention chosen in style-guide.md]
+## [Task-based heading, e.g. "Sync your ERP"]
+
+Never title this section "Steps". Use a heading that names what the guide
+does (the guide title without product-name suffixes such as "with Plytix").
+
+Lead-in sentence before the list, e.g. "Follow the steps below to [do X, Y,
+and Z]." Never start a numbered list without one.
 
 [Option A — Narrative steps]
 ### Step 1: [Descriptive title]
@@ -122,11 +133,21 @@ Paragraph explaining the step in detail.
    - Expected result or verification.
 2. **[Next action]** …
 
+[If the first step is getting an access token, do not show the request. Link
+to Authentication or the Quickstart instead. See style-guide.md.]
+
 ## Troubleshooting (optional)
 
-- **Problem:** [Symptom or error message]
-  - **Solution:** [Steps to resolve.]
-  - **Prevention:** [Optional tip to avoid the problem in future.]
+Lead-in sentence, e.g. "Check the problems below if you run into issues while
+following this guide." Then one accordion per problem (not a bullet list). Endpoint names in the title use `<code>`; titles that are JSX need a unique `value`:
+
+<Accordions type="multiple">
+  <Accordion title={<><code>[ENDPOINT]</code> [symptom]</>} value="[unique-kebab-id]">
+    If [what the reader sees], [the cause]. [The fix]. [Optional prevention
+    tip, in the same paragraph or one short second paragraph. No "Solution:"
+    or "Prevention:" labels.]
+  </Accordion>
+</Accordions>
 
 ## Related articles (optional)
 

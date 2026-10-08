@@ -86,6 +86,19 @@ Plytix sounds like an experienced, friendly colleague: competent, relatable, and
 - Start every page with a short, un-bolded introduction that summarises the page's purpose.
 - Do not bold any words in introduction sections.
 - Do not teach theory in introductions — save that for concept pages.
+- **How-to guide introductions are detailed** (decided 2026-10-06). Include as much of the following as applies: what the guide covers (scope and directions), the conventions of the APIs used (version, auth, response conventions), links to the relevant reference pages, and warnings the reader needs before starting. A one-line intro is too thin for a guide.
+
+### Lead-in text before lists and accordions
+
+Decided 2026-10-06. Never start a section with a bullet list, numbered list, or accordion group. Always put a sentence of text before it that points to what follows.
+
+- Prerequisites: "Before you start, make sure you have the following:"
+- Procedures: "Follow the steps below to [do X, Y, and Z]."
+- Troubleshooting: "Check the problems below if you run into issues while following this guide."
+
+### Procedure section headings
+
+Decided 2026-10-06. Never title a procedure section "Steps". Use a task-based heading that relates to what the guide does, usually the guide title without product-name suffixes. Example: for the guide "Sync your ERP", the section is `## Sync your ERP`. Guide titles themselves also drop "with Plytix" style suffixes when the product is already obvious (e.g. "Sync your ERP", not "Sync your ERP with Plytix").
 
 ### User interface elements
 
@@ -150,7 +163,19 @@ For long articles with a main H2 heading followed by many H3 subheadings, add a 
 - Use numbered lists for all procedures.
 - Begin each step with a bold imperative verb: `1. **Create** your template`
 - Add optional sub-steps, code snippets, or expected results indented below the step.
-- Include at least one sentence of context before presenting a list of steps whenever possible.
+- Always include a lead-in sentence before the numbered list (see "Lead-in text before lists and accordions" above). This is required, not optional.
+
+### Access token step in integration guides
+
+Decided 2026-10-06. In any integration guide or how-to that is not itself about authentication or the quickstart, do not show the token request. When the first step is "Get an access token," make it a short sentence that links to where the reader learns it: [Authentication](/docs/reference/v3/authentication) in the API reference, or the [Quickstart](/docs/guides/quickstart). Keep only guide-specific facts, such as the 15-minute expiry and what to do on `401`. Only the Authentication reference and the Quickstart carry the `get-token` request.
+
+### Troubleshooting format
+
+Decided 2026-10-06. Troubleshooting sections use an accordion per problem (`Accordions` / `Accordion`, see `projectConvention.md`), not a bullet list. Open the section with a lead-in sentence.
+
+- **Title:** the symptom or error message. Endpoint names, paths, and status codes in the title use code format (see `projectConvention.md` for the JSX syntax, since plain backticks don't render in a title).
+- **Body:** one paragraph, two at most, written as continuous prose. Do not use "Solution:" and "Prevention:" labels. Start from the symptom, then state the cause and the fix, then fold any prevention tip into the last sentence or a short second paragraph.
+- **Example:** "If the response includes `"A product with the same name already exists"`-style text, the SKU already exists in this account. Look it up with a search instead of creating it again."
 
 ---
 
