@@ -1,6 +1,6 @@
 ---
-title: Rate Limits
-description: How rate limits work and where to find the limits for your plan.
+title: Rate limits
+description: "Learn how Plytix API rate limits work, what happens when you exceed them, and where to find the limits that apply to your plan."
 ---
 
 import { BookOpen, Rocket, TriangleAlert } from 'lucide-react';
@@ -8,12 +8,17 @@ import { BookOpen, Rocket, TriangleAlert } from 'lucide-react';
 Plytix enforces rate limits on the API so that no single account can degrade the platform for everyone else. This page covers how those limits work, what happens when you exceed them, and where to check the limits for your plan.
 
 <Callout type="warn" title="Checking your plan's limits">
-  Rate limits vary by account plan. To find the limits that apply to your account, check the [Plytix pricing page](https://www.plytix.com/pricing) or ask your account manager.
+  Rate limits vary by account plan, and your access token's claims carry the limits for your account. To confirm the limits that apply to you, ask your account manager.
 </Callout>
 
 ## How rate limits work
 
-Your account plan sets a limit on how many requests you can make in two time windows: per 10 seconds, and per hour. Standard accounts have either 20 requests per 10 seconds and 2,000 requests per hour, or 50 requests per 10 seconds and 5,000 requests per hour. Accounts that negotiated different limits, mainly enterprise accounts, can have other values. Every request counts as one hit against both limits at the same time, so you can be blocked by whichever window you exhaust first.
+Your account plan sets a limit on how many requests you can make in two time windows: per 10 seconds, and per hour. Standard accounts have one of these two pairs of limits:
+
+- 20 requests per 10 seconds and 2,000 requests per hour.
+- 50 requests per 10 seconds and 5,000 requests per hour.
+
+Accounts that negotiated different limits, mainly enterprise accounts, can have other values. Every request counts as one hit against both limits at the same time, so you can be blocked by whichever window you exhaust first.
 
 Rate limits are enforced across all resources available in the API, and they're based on your account plan. Some large clients have found their plan's limit too low for occasional high-volume operations, such as uploading a large catalog, and have requested a temporary rate-limit extension for those windows. If your integration needs to do something similar, ask your account manager ahead of time rather than building around the assumption that a temporary extension is automatic.
 
@@ -22,7 +27,6 @@ Rate limits are enforced across all resources available in the API, and they're 
 If you reach either limit, the API returns a `429 TOO MANY REQUESTS` status code. Every request you make keeps returning 429 until the time interval for the limit you hit expires.
 
 See [Status codes and error codes](/docs/reference/v3/errors-status-codes) for the full list of HTTP status codes the API returns.
-
 
 ## Related resources
 

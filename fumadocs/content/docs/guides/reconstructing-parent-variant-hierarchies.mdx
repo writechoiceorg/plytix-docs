@@ -1,15 +1,17 @@
 ---
 title: Reconstruct parent/variant hierarchies
-description: Retrieve a parent product together with its variants in one structured call.
+description: Learn how to build a parent and variant hierarchy with product families, then read its levels and structure back through the V3 API.
 ---
 
 import { RotateCw, TriangleAlert } from 'lucide-react';
 
-Read a parent product and its variants as a structured hierarchy, the way an ERP or marketplace needs it, using `parent_id` and `product_family_id`. This guide covers both building a hierarchy and reading one back. Creating a Product Family, adding attributes to it, and assigning products into it all work through the v3 API with a bearer token. The one piece that doesn't is inheritance between levels, which is a paid feature configured in the dashboard, so this guide shows you how to check whether your account has it before you build against it.
+Build a parent and variant hierarchy, the way an ERP or marketplace needs it, using `parent_id` and `product_family_id`, and read its levels and structure back. Creating a product family, adding attributes to it, and assigning products into it all work through the V3 API with a bearer token. Inheritance between levels is an account-level feature that isn't enabled on every account, so ask your Plytix contact whether your account has it before you build against it.
 
 ## Prerequisites
 
-- A bearer token. See the Quickstart guide for the authentication flow.
+Before you start, make sure you have the following:
+
+- A bearer token. See [Authentication](/docs/reference/v3/authentication), or the [Quickstart](/docs/guides/quickstart) for a first walkthrough.
 - An existing product family in your account. If you're not sure whether one exists, step 1 shows you how to check.
 
 ## Build and read the hierarchy
@@ -34,7 +36,7 @@ Follow the steps below to find or create a family, add a parent and its variants
      -d '{"name": "Backpacks"}'
    ```
 
-   Add attributes to it with `POST /api/v3/product-families/<family_id>/attributes`, sending `{"attribute_id": "<attribute_id>"}` for each one. A family's own `PATCH` accepts `name` only, because changing its attribute membership propagates across every product in the family.
+   A family create also accepts `attributes`, `parent_attributes`, and `variant_attributes`, and the last two depend on inheritance being enabled on your account. Add attributes to it with `POST /api/v3/product-families/<family_id>/attributes`, sending `{"attribute_id": "<attribute_id>"}` for each one. A family's own `PATCH` accepts `name` only, because changing its attribute membership propagates across every product in the family.
 
 2. **Create the parent product, assigned to that family.**
 
@@ -76,19 +78,25 @@ Follow the steps below to find or create a family, add a parent and its variants
 
    A family model includes `parent_attribute_labels`, `variant_attribute_labels`, and `no_level_attribute_labels`, the arrays that define which attributes apply at each level of the hierarchy. These models are read-only.
 
-   Which level an attribute sits at is what drives inheritance, and you change it with `PATCH /api/v3/product-families/<family_id>/attributes/<attribute_id>`, sending a new `level`. On accounts without the inheritance feature this returns `403` with `"Automatic inheritance is not available for this account"`, which is a plan-level setting rather than anything wrong with your request. Send that `PATCH` once against a test attribute to find out which case you're in before you design around inheritance.
+   Which level an attribute sits at is what drives inheritance, and you change it with `PATCH /api/v3/product-families/<family_id>/attributes/<attribute_id>`, sending a new `level`. On accounts without the inheritance feature this returns `403` with `"Automatic inheritance is not available for this account"`, which is an account-level setting rather than anything wrong with your request.
 
-## Reading inheritance
+## Read which values a variant overrides
+
+{/* FLAG (open):
+  This behavior is unverified. Inheritance is gated on the development account used for testing, so `overwritten_attributes` couldn't be tested, and the spec describes it only as "Overwritten attribute names". Confirm with Plytix before relying on it.
+*/}
 
 When inheritance is enabled and a variant overrides a value it would otherwise inherit, Plytix records that attribute's name in the variant's `overwritten_attributes` array. Read that field to see which values a specific variant customized and which it's still taking from its parent.
 
 ## Related articles
 
+Now that you know how to build and read a hierarchy, you can explore these related guides.
+
 <Cards>
-  <Card icon={<RotateCw />} title="Syncing Your ERP with Plytix" href="/docs/guides/syncing-your-erp-with-plytix">
+  <Card icon={<RotateCw />} title="Sync your ERP" href="/docs/guides/syncing-your-erp-with-plytix">
     Apply the same read/write pattern to keep hierarchy data in sync.
   </Card>
-  <Card icon={<TriangleAlert />} title="Safely Removing Categories, Assets, or Relationships from a Product" href="/docs/guides/safely-removing-categories-assets-or-relationships">
-    What's read-only versus writable across related product data.
+  <Card icon={<TriangleAlert />} title="Safely remove categories, assets, or relationships" href="/docs/guides/safely-removing-categories-assets-or-relationships">
+    Unlink a category or relationship from a product without affecting its other data.
   </Card>
 </Cards>

@@ -1,11 +1,11 @@
 ---
-title: Errors and Status Codes
-description: Reference for the HTTP status codes and error response format the v1 and v2 APIs return, and how they differ from v3.
+title: Errors and status codes
+description: "Reference for the HTTP status codes and error response format the V1/V2 APIs return, and how they differ from V3 responses."
 ---
 
 import { Gauge, Key } from 'lucide-react';
 
-This page documents the HTTP status codes and the response formats you encounter when you call the v1 and v2 APIs. Successful responses and error responses use different shapes, so it helps to know both before you write error handling.
+This page documents the HTTP status codes and the response formats you encounter when you call the V1/V2 APIs. Successful responses and error responses use different shapes, so it helps to know both before you write error handling.
 
 <Callout type="warn" title="Deprecation notice">
   The API sends a custom `X-Plytix-Deprecation` header in the response when the endpoint you're calling is scheduled for deprecation soon. Log this header in your integration so you hear about a retirement before it happens.
@@ -116,22 +116,22 @@ A detailed error lists each field that failed validation:
 }
 ```
 
-<Callout type="warn" title="FLAG">
-  The error shapes above come from the v1 Postman collection. Only the `401` body from the token request has been checked against the live API, and it matched the nested `error` object, though its `errors` entry names the field `http_status_code` rather than the credential at fault. Check other statuses against the live API before relying on their exact bodies.
-</Callout>
+{/* FLAG (open):
+  The error shapes above come from the V1 Postman collection. Only the `401` body from the token request has been checked against the live API, and it matched the nested `error` object, though its `errors` entry names the field `http_status_code` rather than the credential at fault. Check other statuses against the live API before relying on their exact bodies.
+*/}
 
-## How this differs from v3
+## How this differs from V3
 
-v3 returns errors in a different envelope. If you handle both versions in one client, branch on the API version before you parse an error.
+V3 returns errors in a different envelope. If you handle both versions in one client, branch on the API version before you parse an error.
 
-| | v1 and v2 | v3 |
+| | V1/V2 | V3 |
 |---|---|---|
 | Error location | `error` object | `errors` array |
 | Error entry | `msg`, optional `errors` with `field` and `msg` | `name` and `description` |
 | Successful body | `data` list | `data` list, plus an always-present `errors` array |
 | Validation failures | `422` with the `error` object | `422` with a `detail` array |
 
-See the [v3 errors reference](/docs/reference/v3/errors-status-codes) for the full v3 format.
+See the [V3 errors reference](/docs/reference/v3/errors-status-codes) for the full V3 format.
 
 ## Related resources
 

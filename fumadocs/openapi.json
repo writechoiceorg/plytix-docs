@@ -163,7 +163,7 @@
           "familyattributes"
         ],
         "summary": "Delete-Family-Attributes Drill In",
-        "description": "Delete a single field from a family-attribute link.\n\n> **Warning:** Don’t use this to clear a `level`. Subpath deletes elsewhere in the v3 API don’t perform scoped field removal, and act on the parent record instead of the single field named in the path. To take an attribute off a family, use [Delete-Family-Attributes Identity](/docs/reference/v3/familyattributes/delete_family_attributes_identity_api_v3_product_families__product_family_id__attributes__attribute_id__delete); to move it between tiers, use [Patch-Family-Attributes Identity](/docs/reference/v3/familyattributes/patch_family_attributes_identity_api_v3_product_families__product_family_id__attributes__attribute_id__patch).",
+        "description": "Delete a single field from a family-attribute link.\n\n> **Warning:** Don’t use this to clear a `level`. Subpath deletes elsewhere in the V3 API don’t perform scoped field removal, and act on the parent record instead of the single field named in the path. To take an attribute off a family, use [Delete-Family-Attributes Identity](/docs/reference/v3/familyattributes/delete_family_attributes_identity_api_v3_product_families__product_family_id__attributes__attribute_id__delete); to move it between tiers, use [Patch-Family-Attributes Identity](/docs/reference/v3/familyattributes/patch_family_attributes_identity_api_v3_product_families__product_family_id__attributes__attribute_id__patch).",
         "operationId": "delete_family_attributes_drill_in_api_v3_product_families__product_family_id__attributes__attribute_id___path__delete",
         "responses": {
           "200": {
@@ -331,7 +331,7 @@
           "productrelationships"
         ],
         "summary": "Delete-Product-Relationships Drill In",
-        "description": "Delete a single field from a product's relationship link.\n\n> **Warning:** Don't use this to unlink a product. Subpath deletes elsewhere in the v3 API don't perform scoped field removal, they reject the call or act on the parent record instead of the single field named in the path. [Delete-Product-Relationships Identity](/docs/reference/v3/productrelationships/delete_product_relationships_identity_api_v3_products__product_id__relationships__relationship_id__delete) is the confirmed, safe unlink: it removes the link and leaves the product intact.",
+        "description": "Delete a single field from a product's relationship link.\n\n> **Warning:** Don't use this to unlink a product. Subpath deletes elsewhere in the V3 API don't perform scoped field removal, they reject the call or act on the parent record instead of the single field named in the path. [Delete-Product-Relationships Identity](/docs/reference/v3/productrelationships/delete_product_relationships_identity_api_v3_products__product_id__relationships__relationship_id__delete) is the confirmed, safe unlink: it removes the link and leaves the product intact.",
         "operationId": "delete_product_relationships_drill_in_api_v3_products__product_id__relationships__relationship_id___path__delete",
         "responses": {
           "200": {
@@ -816,7 +816,7 @@
           "relatedproducts"
         ],
         "summary": "Search-Related-Products",
-        "description": "Search the individual product-to-product links in your catalog. Each record is one pair (`product_id`, `related_product_id`, `quantity`, and `last_modified`) which makes this the dependable way to find out which products sit on the other end of a product's relationships.\n\n> **Warning:** Always send a filter. This endpoint is not automatically scoped to your own account the way the rest of the v3 API is, so a call with no filter returns a result set that isn't limited to your catalog. Filter by `product_id` to list one product's related products, or by `account_id` to scope the search to your account.\n\nA product's own `product_relationships` field lists each link's `quantity` and `last_modified` but not its `related_product_id`, so that field alone can't tell you which product a link points to. This endpoint can.\n\nFiltering by `relationship_id` isn't supported: it isn't a field on this resource, and sending it returns `500` with a `HiddenFieldError` rather than the usual `400`. When the relationship type matters, use [Search-Product-Relationships](/docs/reference/v3/productrelationships/search_product_relationships_api_v3_product_relationships_get) instead, which groups links by `relationship_id`.\n\n`_fields`, `_page`/`_page_size`, and `_sort_by` work as they do on the other search endpoints. See [Filtering and query syntax reference](/docs/reference/v3/filtering-query-syntax).",
+        "description": "Search the individual product-to-product links in your catalog. Each record is one pair (`product_id`, `related_product_id`, `quantity`, and `last_modified`) which makes this the dependable way to find out which products sit on the other end of a product's relationships.\n\n> **Warning:** Always send a filter. This endpoint is not automatically scoped to your own account the way the rest of the V3 API is, so a call with no filter returns a result set that isn't limited to your catalog. Filter by `product_id` to list one product's related products, or by `account_id` to scope the search to your account.\n\nA product's own `product_relationships` field lists each link's `quantity` and `last_modified` but not its `related_product_id`, so that field alone can't tell you which product a link points to. This endpoint can.\n\nFiltering by `relationship_id` isn't supported: it isn't a field on this resource, and sending it returns `500` with a `HiddenFieldError` rather than the usual `400`. When the relationship type matters, use [Search-Product-Relationships](/docs/reference/v3/productrelationships/search_product_relationships_api_v3_product_relationships_get) instead, which groups links by `relationship_id`.\n\n`_fields`, `_page`/`_page_size`, and `_sort_by` work as they do on the other search endpoints. See [Filtering and query syntax reference](/docs/reference/v3/filtering-query-syntax).",
         "operationId": "search_related_products_api_v3_related_products_get",
         "responses": {
           "200": {
@@ -2869,7 +2869,7 @@
           "familyattributes"
         ],
         "summary": "Search-Family-Attributes",
-        "description": "Search the links between product families and product attributes across your account. Each record is one family-attribute pair: `product_family_id`, `attribute_id`, `level`, and `account_id`.\n\n> **Warning:** Always send a filter. This endpoint is not automatically scoped to your own account the way the rest of the v3 API is, so a call with no filter returns a result set that isn’t limited to your catalog. Filter by `account_id` to scope the search to your account, and add `product_family_id` to narrow it to a single family.\n\n`level` is where the attribute sits in the family’s inheritance: `no_level`, `parent_level`, or `variant_level`. It can also come back `null` on links where it was never set. See [Data model](/docs/guides/data-model) for how family inheritance works.\n\nTo list one family’s attributes without the filtering caveat, use [Get-Family-Attributes Collection](/docs/reference/v3/familyattributes/get_family_attributes_collection_api_v3_product_families__product_family_id__attributes_get), which is scoped by its path.\n\nRecords carry attribute IDs, not full attribute definitions. Resolve names, types, and groups with [Search-Product-Attributes](/docs/reference/v3/productattributes/search_product_attributes_api_v3_product_attributes_get).\n\n`_fields`, `_page`, and `_page_size` work as on the other search endpoints. See [Filtering and query syntax reference](/docs/reference/v3/filtering-query-syntax).",
+        "description": "Search the links between product families and product attributes across your account. Each record is one family-attribute pair: `product_family_id`, `attribute_id`, `level`, and `account_id`.\n\n> **Warning:** Always send a filter. This endpoint is not automatically scoped to your own account the way the rest of the V3 API is, so a call with no filter returns a result set that isn’t limited to your catalog. Filter by `account_id` to scope the search to your account, and add `product_family_id` to narrow it to a single family.\n\n`level` is where the attribute sits in the family’s inheritance: `no_level`, `parent_level`, or `variant_level`. It can also come back `null` on links where it was never set. See [Data model](/docs/guides/data-model) for how family inheritance works.\n\nTo list one family’s attributes without the filtering caveat, use [Get-Family-Attributes Collection](/docs/reference/v3/familyattributes/get_family_attributes_collection_api_v3_product_families__product_family_id__attributes_get), which is scoped by its path.\n\nRecords carry attribute IDs, not full attribute definitions. Resolve names, types, and groups with [Search-Product-Attributes](/docs/reference/v3/productattributes/search_product_attributes_api_v3_product_attributes_get).\n\n`_fields`, `_page`, and `_page_size` work as on the other search endpoints. See [Filtering and query syntax reference](/docs/reference/v3/filtering-query-syntax).",
         "operationId": "search_family_attributes_api_v3_family_attributes_get",
         "responses": {
           "200": {
@@ -6950,7 +6950,7 @@
           "DESC"
         ],
         "title": "AttributeSorting",
-        "description": "Attribute sorting option (v1: ATTRIBUTE_SORTING_OPTIONS)."
+        "description": "Attribute sorting option (V1: ATTRIBUTE_SORTING_OPTIONS)."
       },
       "AttributeStatus": {
         "type": "string",
@@ -10047,7 +10047,7 @@
         "additionalProperties": false,
         "type": "object",
         "title": "ChannelShopifyUpdateDto",
-        "description": "PATCH input for Shopify config, reachable sub-field-by-sub-field via a sub-path PATCH.\n\n``shop`` is non-nullable on ``ShopifyConfig``; sending an explicit ``null`` is rejected.\nOmitting it leaves the stored value untouched, since the v1 resource merges this patch onto\nthe channel's current ``shopify`` before loading it."
+        "description": "PATCH input for Shopify config, reachable sub-field-by-sub-field via a sub-path PATCH.\n\n``shop`` is non-nullable on ``ShopifyConfig``; sending an explicit ``null`` is rejected.\nOmitting it leaves the stored value untouched, since the V1 resource merges this patch onto\nthe channel's current ``shopify`` before loading it."
       },
       "ChannelUpdateInputDto": {
         "properties": {
@@ -10389,7 +10389,7 @@
         "additionalProperties": false,
         "type": "object",
         "title": "ChannelWebhookUpdateDto",
-        "description": "PATCH input for webhook config, reachable sub-field-by-sub-field via a sub-path PATCH.\n\n``webhook_url`` is non-nullable because v1's ``WebhookSchema`` marks it ``required=True``.\nThe v1 resource merges this patch onto the channel's stored webhook before loading it, so\nomitted siblings keep their current values."
+        "description": "PATCH input for webhook config, reachable sub-field-by-sub-field via a sub-path PATCH.\n\n``webhook_url`` is non-nullable because V1's ``WebhookSchema`` marks it ``required=True``.\nThe V1 resource merges this patch onto the channel's stored webhook before loading it, so\nomitted siblings keep their current values."
       },
       "ChannelXmlNodeAttributeInputDto": {
         "properties": {
@@ -10836,7 +10836,7 @@
           "\t"
         ],
         "title": "ColumnSeparator",
-        "description": "Column separator for CSV channels (v1: COLUMN_SEPARATOR_OPTIONS)."
+        "description": "Column separator for CSV channels (V1: COLUMN_SEPARATOR_OPTIONS)."
       },
       "CompletenessAttributeCreateInputDto": {
         "properties": {
@@ -11673,7 +11673,7 @@
           "bearer"
         ],
         "title": "ConnectionTokenType",
-        "description": "Connection token type values (mirrors v1's TOKEN_TYPE choices)."
+        "description": "Connection token type values (mirrors V1's TOKEN_TYPE choices)."
       },
       "ConnectionType": {
         "type": "string",
@@ -11683,7 +11683,7 @@
           "sftp"
         ],
         "title": "ConnectionType",
-        "description": "Connection type values (mirrors v1's CONNECTION_TYPE choices)."
+        "description": "Connection type values (mirrors V1's CONNECTION_TYPE choices)."
       },
       "ConnectionUpdateInputDto": {
         "properties": {
@@ -11773,7 +11773,7 @@
         "additionalProperties": false,
         "type": "object",
         "title": "ConnectionUpdateInputDto",
-        "description": "Input DTO for patching a connection.\n\n``type`` is intentionally not patchable: the v1 manager selects the read/write schema\nby the connection's *current* type, so changing it mid-patch would desync the\nmongoengine discriminator from the schema used to validate the rest of the payload.\n\n``token``/``refresh_token`` are intentionally not patchable: v1's marshmallow schema\ndoesn't declare them, so they'd be dropped from the loaded model while the raw payload\nkeys still reach ``ConnectionManager.patch``'s columns list, wiping the stored token\nto ``None`` instead of leaving it untouched.\n\nNullability follows the concrete ``Connection`` subclasses: ``email`` lives only on\n``DropboxConnection``, ``use_tls`` only on ``FtpConnection``. ``token_type``/``password``\nexist only on the wire, with no entity field of that name."
+        "description": "Input DTO for patching a connection.\n\n``type`` is intentionally not patchable: the V1 manager selects the read/write schema\nby the connection's *current* type, so changing it mid-patch would desync the\nmongoengine discriminator from the schema used to validate the rest of the payload.\n\n``token``/``refresh_token`` are intentionally not patchable: V1's marshmallow schema\ndoesn't declare them, so they'd be dropped from the loaded model while the raw payload\nkeys still reach ``ConnectionManager.patch``'s columns list, wiping the stored token\nto ``None`` instead of leaving it untouched.\n\nNullability follows the concrete ``Connection`` subclasses: ``email`` lives only on\n``DropboxConnection``, ``use_tls`` only on ``FtpConnection``. ``token_type``/``password``\nexist only on the wire, with no entity field of that name."
       },
       "CreateAsset-categoriesResponse": {
         "properties": {
@@ -12563,7 +12563,7 @@
           "SUNDAY"
         ],
         "title": "DayOfWeek",
-        "description": "Day of week for scheduled rebuilds (v1: DAYS_OF_WEEK)."
+        "description": "Day of week for scheduled rebuilds (V1: DAYS_OF_WEEK)."
       },
       "DecimalAttributeCreateInputDto": {
         "properties": {
@@ -15873,7 +15873,7 @@
           "HEX"
         ],
         "title": "ECatalogPickerMode",
-        "description": "Mirrors v1's `ECatalogPickerMode` choices."
+        "description": "Mirrors V1's `ECatalogPickerMode` choices."
       },
       "ECatalogProductOverviewSettingsDto": {
         "properties": {
@@ -16254,7 +16254,7 @@
         },
         "type": "object",
         "title": "ECatalogProductPageBodyComponentDto",
-        "description": "Product page body component, as returned by the API.\n\nNo native polymorphism support (mirrors v1); all component-type fields live together."
+        "description": "Product page body component, as returned by the API.\n\nNo native polymorphism support (mirrors V1); all component-type fields live together."
       },
       "ECatalogProductPageBodyComponentInputDto": {
         "properties": {
@@ -16388,7 +16388,7 @@
         "additionalProperties": false,
         "type": "object",
         "title": "ECatalogProductPageBodyComponentInputDto",
-        "description": "Strict input for a product page body component. No native polymorphism support\n(mirrors v1); all component-type fields live together."
+        "description": "Strict input for a product page body component. No native polymorphism support\n(mirrors V1); all component-type fields live together."
       },
       "ECatalogProductPageSettingsDto": {
         "properties": {
@@ -17731,7 +17731,7 @@
         "additionalProperties": false,
         "type": "object",
         "title": "ECatalogUpdateInputDto",
-        "description": "Input DTO for patching an eCatalog.\n\nList fields (``output_attributes``, ``notification_list``,\n``quote_request_output_attributes``, ``exportable_attributes``) SET-replace with no\nper-item merge on plytix-pim, so each item is sent complete and the CREATE item DTOs are\nreused rather than kept as twins that could drift. ``settings`` is the one nested object\nthe PIM internal endpoint deep-merges onto the stored value, so it takes a dedicated\n``Missing``-based UPDATE DTO whose sub-objects are patchable in turn.\n\nNullability follows v1's ``ECatalogSchema`` ``allow_none`` field by field, which is what\ndecides whether an explicit ``null`` survives to Mongo: fields v1 declares with\n``allow_none=True`` accept ``null``, the rest do not. ``exportable_attributes`` is the one\nplace the two disagree — v1 permits ``null`` but ``ECatalog.exportable_attributes`` is a\nnon-nullable list, and a ``None`` reaching ``Document.set()`` is not re-validated, so the\nstricter entity shape wins."
+        "description": "Input DTO for patching an eCatalog.\n\nList fields (``output_attributes``, ``notification_list``,\n``quote_request_output_attributes``, ``exportable_attributes``) SET-replace with no\nper-item merge on plytix-pim, so each item is sent complete and the CREATE item DTOs are\nreused rather than kept as twins that could drift. ``settings`` is the one nested object\nthe PIM internal endpoint deep-merges onto the stored value, so it takes a dedicated\n``Missing``-based UPDATE DTO whose sub-objects are patchable in turn.\n\nNullability follows V1's ``ECatalogSchema`` ``allow_none`` field by field, which is what\ndecides whether an explicit ``null`` survives to Mongo: fields V1 declares with\n``allow_none=True`` accept ``null``, the rest do not. ``exportable_attributes`` is the one\nplace the two disagree — V1 permits ``null`` but ``ECatalog.exportable_attributes`` is a\nnon-nullable list, and a ``None`` reaching ``Document.set()`` is not re-validated, so the\nstricter entity shape wins."
       },
       "Error": {
         "properties": {
@@ -20574,7 +20574,7 @@
           45
         ],
         "title": "MinuteOfHour",
-        "description": "Minute of hour for scheduled rebuilds (v1: MINUTES_OF_HOUR = range(0, 60, 15))."
+        "description": "Minute of hour for scheduled rebuilds (V1: MINUTES_OF_HOUR = range(0, 60, 15))."
       },
       "MultiSelectAttributeCreateInputDto": {
         "properties": {
@@ -21430,7 +21430,7 @@
           "LANDSCAPE"
         ],
         "title": "PageOrientation",
-        "description": "Allowed PDF page orientations (mirrors v1's ORIENTATIONS choices)."
+        "description": "Allowed PDF page orientations (mirrors V1's ORIENTATIONS choices)."
       },
       "PageSize": {
         "type": "string",
@@ -21439,7 +21439,7 @@
           "A4"
         ],
         "title": "PageSize",
-        "description": "Allowed PDF page sizes (mirrors v1's PAGE_SIZES choices)."
+        "description": "Allowed PDF page sizes (mirrors V1's PAGE_SIZES choices)."
       },
       "PageType": {
         "type": "string",
@@ -21449,7 +21449,7 @@
           "PRODUCTS"
         ],
         "title": "PageType",
-        "description": "Allowed PDF template page types (mirrors v1's PAGE_TYPES choices)."
+        "description": "Allowed PDF template page types (mirrors V1's PAGE_TYPES choices)."
       },
       "Pagination": {
         "properties": {
@@ -21487,7 +21487,7 @@
           "ALL_PARENT_IN_VARIANTS"
         ],
         "title": "ParentIncludeCriteria",
-        "description": "Parent product inclusion criteria (v1: PARENT_INCLUDE_CRITERIA)."
+        "description": "Parent product inclusion criteria (V1: PARENT_INCLUDE_CRITERIA)."
       },
       "PdfCatalogCreateInputDto": {
         "properties": {
@@ -22082,7 +22082,7 @@
           "ALL"
         ],
         "title": "ProcessingCriteria",
-        "description": "Product processing criteria (v1: PROCESSING_CRITERIA)."
+        "description": "Product processing criteria (V1: PROCESSING_CRITERIA)."
       },
       "ProductAttributeCreateOutputDto": {
         "oneOf": [
@@ -22912,7 +22912,7 @@
         "additionalProperties": false,
         "type": "object",
         "title": "ProductAttributeUpdateInputDto",
-        "description": "Bound request superset for patching a product attribute.\n\nFlat, not a discriminated union like create: ``type`` is not patchable, so there is no\ndiscriminator in the PATCH body (nor in a reconstructed sub-path fragment) to resolve a\nunion at bind time. This DTO therefore accepts the union of every type's patchable field.\n\nPer-type narrowing happens server-side: ``AttributeService.patch`` fetches the attribute's\nconcrete type and re-validates the set fields against the matching per-type subtype DTO\n(see ``ATTRIBUTE_TYPE_TO_UPDATE_DTO``), rejecting fields that don't apply to that type.\n\n``label``, ``group_ids`` and ``product_family_ids`` are intentionally not patchable:\nv1's patch path doesn't handle ``label``/``groups``, and product-family attribute\nmembership is an async, destructive operation that must stay a separate job."
+        "description": "Bound request superset for patching a product attribute.\n\nFlat, not a discriminated union like create: ``type`` is not patchable, so there is no\ndiscriminator in the PATCH body (nor in a reconstructed sub-path fragment) to resolve a\nunion at bind time. This DTO therefore accepts the union of every type's patchable field.\n\nPer-type narrowing happens server-side: ``AttributeService.patch`` fetches the attribute's\nconcrete type and re-validates the set fields against the matching per-type subtype DTO\n(see ``ATTRIBUTE_TYPE_TO_UPDATE_DTO``), rejecting fields that don't apply to that type.\n\n``label``, ``group_ids`` and ``product_family_ids`` are intentionally not patchable:\nV1's patch path doesn't handle ``label``/``groups``, and product-family attribute\nmembership is an async, destructive operation that must stay a separate job."
       },
       "ProductCategoryCreateInputDto": {
         "properties": {
@@ -24066,7 +24066,7 @@
         "additionalProperties": false,
         "type": "object",
         "title": "ProductFamilyUpdateInputDto",
-        "description": "Input DTO for patching a product family.\n\n``name`` is the only patchable field. Attribute membership (``attributes``,\n``parent_attributes``, ``variant_attributes``) is intentionally absent: in PIM those are\nlink/unlink/edit-level operations that return a Job, because the family write is followed\nby an unbounded propagation across the family's products that also *deletes* attribute\nvalues off variants whose parent now owns them. v1's own family PATCH reflects this by\nhard-coding ``columns = [\"name\"]``, so an attribute field in the body would be silently\ndropped; ``extra=\"forbid\"`` rejects it instead.\n\nv1 loads the family PATCH body without ``partial=True`` and its ``name`` is\n``required=True``, so a patch that sets no field at all is rejected: the hook's own\nempty-payload guard catches that before the PIM round-trip."
+        "description": "Input DTO for patching a product family.\n\n``name`` is the only patchable field. Attribute membership (``attributes``,\n``parent_attributes``, ``variant_attributes``) is intentionally absent: in PIM those are\nlink/unlink/edit-level operations that return a Job, because the family write is followed\nby an unbounded propagation across the family's products that also *deletes* attribute\nvalues off variants whose parent now owns them. V1's own family PATCH reflects this by\nhard-coding ``columns = [\"name\"]``, so an attribute field in the body would be silently\ndropped; ``extra=\"forbid\"`` rejects it instead.\n\nV1 loads the family PATCH body without ``partial=True`` and its ``name`` is\n``required=True``, so a patch that sets no field at all is rejected: the hook's own\nempty-payload guard catches that before the PIM round-trip."
       },
       "ProductLevel": {
         "type": "integer",
@@ -25367,7 +25367,7 @@
           "MONTHLY"
         ],
         "title": "RebuildFeedFrequency",
-        "description": "Rebuild schedule frequency (v1: PROCESS_FREQUENCIES)."
+        "description": "Rebuild schedule frequency (V1: PROCESS_FREQUENCIES)."
       },
       "RelatedAttributeDto": {
         "properties": {
@@ -25852,7 +25852,7 @@
         "additionalProperties": false,
         "type": "object",
         "title": "RelationshipUpdateInputDto",
-        "description": "Input DTO for patching a relationship.\n\n``name`` is the only patchable field: ``label`` is derived and dump_only in v1's\n``RelationshipSchema`` (and non-writable in ``RelationshipManager.writable_columns``),\nand ``status`` is managed by the delete flow, not by callers."
+        "description": "Input DTO for patching a relationship.\n\n``name`` is the only patchable field: ``label`` is derived and dump_only in V1's\n``RelationshipSchema`` (and non-writable in ``RelationshipManager.writable_columns``),\nand ``status`` is managed by the delete flow, not by callers."
       },
       "SearchAsset-categoriesResponse": {
         "properties": {
@@ -26743,7 +26743,7 @@
           "'"
         ],
         "title": "TextDelimiter",
-        "description": "Text delimiter for CSV channels (v1: TEXT_DELIMITER_OPTIONS)."
+        "description": "Text delimiter for CSV channels (V1: TEXT_DELIMITER_OPTIONS)."
       },
       "UrlAttributeCreateInputDto": {
         "properties": {

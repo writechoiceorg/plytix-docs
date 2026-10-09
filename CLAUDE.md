@@ -15,7 +15,7 @@ Do not go looking for `package.json`, lint configs, or test runners — there ar
   - `project-references/` — PDFs: project requirements, product-board API feedback, bulk-operations docs, brand/content guidelines, image optimization guide.
   - `transcripts/` — kickoff call transcripts with Plytix stakeholders (product, PM) and internal WriteChoice team syncs. Contain project context, terminology, and decisions (e.g. tooling choices) not written down elsewhere.
   - `help-center/` — full scrape of Plytix's existing end-user help center (help.plytix.com/en), converted to Markdown, one file per article/category page, mirroring the site's URL slugs (e.g. `operations/if.md` for the formula-operations reference). This is existing/scraped-docs material — per `docs-ia`'s trust order it ranks below `materials/`'s other raw sources and below verified API findings, but above nothing; treat its content and terminology as a starting point, not ground truth.
-- `openapi_pimv3.json` — the authoritative OpenAPI 3 spec for Plytix's PIM v3 API (FastAPI-generated), 63 paths covering products, assets, product/asset categories, asset lists, product families/attributes, product relationships, and related entities. Treat this as ground truth for endpoint shapes over the prose in `API V3.md` where they conflict.
+- `openapi_pimv3_20261002 (Latest spec).json` — the authoritative OpenAPI 3 spec for Plytix's PIM v3 API (FastAPI-generated, 76 paths; the older `openapi_pimv3.json`, 63 paths, is superseded) covering products, assets, product/asset categories, asset lists, product families/attributes, product relationships, and related entities. Treat this as ground truth for endpoint shapes over the prose in `API V3.md` where they conflict.
 - `.claude/skills/` — project-specific Claude Code skills that drive the actual work (see below).
 
 ## Skills that drive this project's workflow
@@ -32,5 +32,5 @@ When multiple source categories are present for an IA/outline task (existing doc
 
 - Files in `materials/` are inputs, not outputs — don't refactor or "clean up" them; extract facts from them into outline/planning files instead.
 - Non-English transcript content (e.g. `wc-pos-kickoff-call.md` is in Portuguese) should be read for decisions/context, not translated in place.
-- When the OpenAPI spec (`openapi_pimv3.json`) and the prose API reference (`API V3.md`) disagree, prefer the OpenAPI spec, but flag the discrepancy — it may indicate the prose doc (or the spec) is stale.
+- When the OpenAPI spec (`openapi_pimv3_20261002 (Latest spec).json`) and the prose API reference (`API V3.md`) disagree, prefer the OpenAPI spec, but flag the discrepancy — it may indicate the prose doc (or the spec) is stale.
 - No `docs/` output directory exists yet; `structure-planner` will create `docs/outline.md` as the first deliverable of that kind.

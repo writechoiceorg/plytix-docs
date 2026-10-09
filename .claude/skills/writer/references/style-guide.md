@@ -58,7 +58,7 @@ Plytix sounds like an experienced, friendly colleague: competent, relatable, and
 - **Specifics beat superlatives.** Concrete actions and outcomes build credibility. "Sync product titles and prices to Shopify automatically," not "Unlock unlimited potential with effortless automation."
 - **Answer first, then expand.** Lead with the concise answer, then add detail for readers who want it. "Yes. Go to Settings → Attributes → Add Attribute," not "It depends…" without ever answering.
 - **Don't say "no." Lead with what we can do.** Keep momentum. Be honest about limits, but make progress the headline. "You can do Y today using Z, and here's how. (X isn't supported yet.)" — not "No, we don't support X."
-  - Worked example specific to this project: channels (Shopify, BigCommerce, feed exports) have no API endpoints at all — they're configured entirely in the Plytix UI. Don't write "The API doesn't support channels." Bridge to what the reader can actually do: "Channels are set up in the Plytix UI. To manage channel-eligible products from the API, use Destinations instead — see [Destinations]." (Source: `materials/project-references/before-writing.md`, §3; see also `information-architecture.md`'s Notes.)
+  - Worked example specific to this project: v3 has no bulk endpoints. Don't write "The v3 API doesn't support bulk operations." Bridge to what the reader can do: "For large catalogs, send single requests in a paced loop. See [Bulk operations for large catalogs]." (Source: `config/api-testing.config.md`; see also `information-architecture.md`'s Notes.)
 
 ---
 
@@ -137,6 +137,7 @@ For long articles with a main H2 heading followed by many H3 subheadings, add a 
 - If any list item is a complete sentence, use proper punctuation and capitalization on **all** items in that list.
 - If list items are not complete sentences, don't add end punctuation, but do capitalize the first word of each item.
 - Don't mix the two styles within a single list.
+- **Don't pack parallel facts into one paragraph** (decided 2026-10-09). When a sentence enumerates several fields, each with its own allowed values or meaning (e.g. `field_a` is one of X, Y, Z; `field_b` is 0 to 23; ...), break it into a bulleted list, one item per field, with a lead-in sentence. Group related items under separate lead-ins if they differ in kind (e.g. core fields vs. fields only some schedules need). When the list is supporting detail rather than the main path (e.g. allowed values for a request field), put it inside a single `Accordion` titled for its content (e.g. "Allowed schedule values") so the step stays scannable. The lead-in goes inside the accordion.
 - **Rule of three for examples**: keep example lists to about three items (e.g. "…industries like furniture, fashion, and sporting goods"). A long list of 10+ examples is overwhelming and harder to remember — trim to the most representative few, or move a full list to a reference table.
 
 ### Numbers (PDF §6)

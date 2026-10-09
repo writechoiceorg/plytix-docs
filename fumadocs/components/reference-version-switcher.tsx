@@ -9,12 +9,12 @@ import { cn } from '@/lib/cn';
 
 const VERSIONS = [
   {
-    title: 'v3 (Current)',
+    title: 'V3 (Current)',
     url: '/docs/reference/v3',
     prefix: '/docs/reference/v3',
   },
   {
-    title: 'Legacy (v1/v2)',
+    title: 'Legacy (V1/V2)',
     url: '/docs/reference/legacy/api-v1-v2-reference',
     prefix: '/docs/reference/legacy',
   },

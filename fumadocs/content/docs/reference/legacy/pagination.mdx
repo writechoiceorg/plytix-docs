@@ -1,6 +1,6 @@
 ---
 title: Pagination
-description: Reference for how v1 and v2 page search results, which pagination fields you send and get back, and the limits that apply.
+description: "Reference for how V1/V2 page search results, which pagination fields you send and get back, and the limits that apply to a search."
 ---
 
 import { Filter, ArrowRightLeft } from 'lucide-react';
@@ -78,38 +78,38 @@ Search responses return a `pagination` object next to `data`. It describes the p
 
 Use `total_count` and `page_size` to work out how many pages there are, and loop from page 1 until you reach the last one. Only search operations return a `pagination` object. A request for a single record doesn't.
 
-<Callout type="warn" title="FLAG">
+{/* FLAG (open):
   The collection's own examples are inconsistent about which of these fields appear: some responses omit `total_count`, and one omits `count`. Confirm which fields every search response carries before publishing, and whether `total_count` is always returned.
-</Callout>
+*/}
 
 ## Limits
 
-The following limits apply to product search. v2 product search documents the same ones.
+The following limits apply to product search. V2 product search documents the same ones.
 
 | Limit | Behavior |
 |---|---|
 | Maximum `page_size` | `100`. A larger value returns `422`. |
 | Default page | The first page, with `25` records, when you send no `pagination`. |
-| Sorting large result sets | If `order` is set and the search matches more than 10000 products, the API returns `428`. |
+| Sorting large result sets | If `order` is set and the search matches more than 10000 products (or assets, on asset search), the API returns `428`. |
 
 To avoid the `428`, narrow the search with filters until it matches 10000 products or fewer, or leave `order` empty. See [Filtering and search](/docs/reference/legacy/filtering-and-search) for how to narrow a search.
 
-<Callout type="warn" title="FLAG">
+{/* FLAG (open):
   These limits come from the product search endpoint description only. The collection doesn't say whether asset, category, family, or relationship searches share the same page size ceiling. Confirm before telling readers the limits apply to every search.
-</Callout>
+*/}
 
-## How this differs from v3
+## How this differs from V3
 
-v3 pages through results with a link, not a page number, and it has no record counts. If you're migrating, anything that reads `total_count` has to change.
+V3 pages through results with a link, not a page number, and it has no record counts. If you're migrating, anything that reads `total_count` has to change.
 
-| | v1 and v2 | v3 |
+| | V1/V2 | V3 |
 |---|---|---|
 | Where you set it | `pagination` object in the body | `_page`, `_page_size`, and `_sort_by` in the query string |
 | Maximum page size | `100` on product search | `1000` |
 | Counts | `count` and `total_count` | None |
 | Moving to the next page | Increment `page` | Follow `next_page` |
 
-See [Pagination](/docs/reference/v3/pagination) in the v3 reference for the full v3 behavior.
+See [Pagination](/docs/reference/v3/pagination) in the V3 reference for the full V3 behavior.
 
 ## Related resources
 
@@ -118,6 +118,6 @@ See [Pagination](/docs/reference/v3/pagination) in the v3 reference for the full
     Narrow a search with filters and choose the attributes that come back.
   </Card>
   <Card icon={<ArrowRightLeft />} title="Migration reference" href="/docs/guides/migrating-to-v3/migration-reference">
-    Compare v1 pagination with v3, side by side.
+    Compare V1 pagination with V3, side by side.
   </Card>
 </Cards>

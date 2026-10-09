@@ -1,6 +1,6 @@
 ---
 title: Quickstart
-description: Create an API key, exchange it for a bearer token, and read your first products from the Plytix API in under ten minutes.
+description: Create an API key, exchange it for a bearer token, and read your first products from your own catalog with the Plytix API V3 and curl.
 ---
 
 import { BookOpen, RotateCw } from 'lucide-react';
@@ -18,7 +18,7 @@ This tutorial takes you from an empty terminal to a real response from your own 
 Make sure you have the following:
 
 - **A Plytix account with Owner or Admin rights.** Only Owners and Admins can create API keys. If you don't have those rights, ask an account Owner or Admin to complete step 1 and send you the credentials.
-- **A terminal with `curl`,** or any HTTP client you prefer. Every example here is a `curl` command you can paste and run.
+- **A terminal with `curl`** or any HTTP client you prefer. Every example here is a `curl` command you can paste and run.
 
 You don't need to request API access or wait for approval. Key creation is self-service.
 
@@ -26,10 +26,10 @@ You don't need to request API access or wait for approval. Key creation is self-
 
 An API key is a key and password pair that identifies your integration to Plytix. You create it once in the dashboard.
 
-1. Sign in at [accounts.plytix.com](https://accounts.plytix.com).
-2. Open the **API** tab.
-3. Create a key, giving it a name and a role. The role decides what the key can reach, so pick the narrowest one that covers what you're building.
-4. Copy the **API key** and the **API password** using the clipboard icon beside each.
+1. **Sign in** at [accounts.plytix.com](https://accounts.plytix.com).
+2. **Open** the **API** tab.
+3. **Click Create API Key**, then enter a name and choose a role. The role decides what the key can reach, so pick the narrowest one that covers what you're building.
+4. **Copy** the **API key** and the **API password** using the clipboard icon beside each.
 
 Store both somewhere safe before you leave the page. You can rename, re-role, or delete a key later from the same tab, but changing an existing key's role can break whatever is already using it, so prefer creating a new key per integration.
 
@@ -68,7 +68,7 @@ Note the host: tokens come from `auth.plytix.com`, which is a different service 
 Take `access_token` from `data[0]`. Every request after this needs it in an `Authorization: Bearer <token>` header.
 
 <Callout type="warn" title="Tokens expire after 15 minutes">
-  Request a new token when you get a `401`, and build that refresh into any job that runs longer than a few minutes. A response also carries a `refresh_token`, treat it as unsupported and request a fresh token the same way you got the first one.
+  Request a new token when you get a `401`, and build that refresh into any job that runs longer than a few minutes. The response also includes a `refresh_token`, which this API doesn't document. Request a new token the same way you got the first one.
 </Callout>
 
 If the credentials are wrong, you'll get a `401` with the message nested under an `error` key:
@@ -129,9 +129,9 @@ Read some products back to prove the whole chain works.
   </Tab>
 </Tabs>
 
-A `200` here confirms the whole setup: your credentials were valid, the token exchange worked, and your headers are right. A `401` with `{"detail": "Unauthorized"}` means the token is missing, malformed, or expired, so go back to step 2.
+The sample response is trimmed for readability. A `200` here confirms the whole setup: your credentials were valid, the token exchange worked, and your headers are right. A `401` with `{"detail": "Unauthorized"}` means the token is missing, malformed, or expired, so go back to step 2.
 
-Three things in that response are worth noticing now, because they shape every integration you build on top of it:
+Three details in that response are worth noticing now, because they shape every integration you build on top of it:
 
 - **Every response is an envelope.** `data`, `errors`, and `pagination` are always there. Your own values live in `attributes`, keyed by attribute name, while fields like `sku` and `status` sit at the top level.
 - **`next_page` is a complete URL, and it uses `http`.** That address redirects to `https`, and many HTTP clients drop the `Authorization` header across a scheme change, which turns page two into a surprise `401`. Rewrite the scheme to `https` before you request it.
@@ -143,7 +143,7 @@ Three things in that response are worth noticing now, because they shape every i
 
 ## Related articles
 
-With your connection verified, pick the guide that matches what you're building.
+Now that you've made your first authenticated request, you can explore these related guides.
 
 <Cards>
   <Card icon={<RotateCw />} title="Sync your ERP" href="/docs/guides/syncing-your-erp-with-plytix">

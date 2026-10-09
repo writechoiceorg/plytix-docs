@@ -5,11 +5,11 @@ description: "Walk through common agent workflows on the Plytix Platform MCP: au
 
 import { Wrench, ShieldCheck } from 'lucide-react';
 
-This page shows four workflows you can hand to an AI assistant once it's connected to the Plytix Platform MCP, and what to check after each one. Every workflow here is a task the documentation already covers as code, so you can compare the two routes and pick whichever fits the job.
-
-{/* FLAG (open):
-  The Plytix Platform MCP is a roadmap feature and is not live yet (see `glossary.md`, "MCP Server"). The workflows below are built from confirmed Plytix API behavior and from stakeholder-stated use cases in `materials/transcripts/kick_off_2.md`, but no prompt on this page has been run against a working server. Re-test every example and replace the sample responses with real output before publishing.
+{/* FLAG: Feature not yet available (open):
+  The Plytix Platform MCP is a roadmap feature and is not yet available. The workflows below are built from confirmed Plytix API behavior and from stakeholder-stated use cases, but no prompt on this page has been run against a working server. All prompts and expected assistant behavior are illustrative and unconfirmed. Re-test every example before publishing.
 */}
+
+This page shows four illustrative workflows you could hand to an AI assistant once the Plytix Platform MCP is available, and what to check after each one. It assumes an assistant connected through the Platform MCP, a Plytix account with API access, and a role that allows the work. The Platform MCP authenticates and limits access in ways that are not yet confirmed, so see [Authentication and OAuth setup](/docs/guides/platform-mcp/authentication-and-oauth-setup) and [Permissions and security considerations](/docs/guides/platform-mcp/permissions-and-security). Every workflow here is a task the documentation already covers as code, so you can compare the two routes and pick whichever fits the job. Use a test account first, because some of these workflows change real data.
 
 ## Prerequisites
 
@@ -19,21 +19,21 @@ Before you start, you need:
 - An AI assistant connected to the Platform MCP. See [Supported clients](/docs/guides/platform-mcp/supported-clients) and [Authentication and OAuth setup](/docs/guides/platform-mcp/authentication-and-oauth-setup).
 - Permission to write, for the examples that create or change data. Read-only access covers the first and third workflows only. See [Permissions and security considerations](/docs/guides/platform-mcp/permissions-and-security).
 
-<Callout type="warn" title="Writes happen immediately">
-  An agent calling a write tool changes your catalog the moment it runs, and there's no undo. Ask for a plan before you ask for the change, and keep write access off the accounts you can't afford to have edited.
+<Callout type="warn" title="Changes can't always be undone">
+  An agent calling a write tool changes your catalog when it runs, and Plytix can't undo some changes, such as deletions. Ask for a plan before you ask for the change, and keep write access off the accounts you can't afford to have edited.
 </Callout>
 
 ## How to read these examples
 
-Each workflow gives you a prompt to adapt, the work the assistant does behind it, and a verification step. The prompts are starting points, not magic words. Assistants vary, and a prompt that names the data you care about beats a vague one every time.
+Each workflow gives you a prompt to adapt, the work the assistant does behind it, and a verification step. The prompts are starting points. Assistants vary, and a prompt that names the data you care about usually works better than a vague one.
 
-{/* FLAG (open):
-  **Insufficient source:** the tool names an agent calls are not confirmed, because [Available tools](/docs/guides/platform-mcp/available-tools) hasn't been written against a live server. This page deliberately describes what the assistant does in plain language instead of naming tools. Once the tool list is confirmed, add the specific tool each step calls.
+{/* FLAG: Tool names unconfirmed (open):
+  The tool names an agent calls are not confirmed, because [Available tools](/docs/guides/platform-mcp/available-tools) has not been written against a live server. This page describes what the assistant does in plain language instead of naming tools. Once the tool list is confirmed, add the specific tool each step calls.
 */}
 
 ## Audit product data quality
 
-Find the products that are missing the attributes you care about, without writing a filter payload by hand. This is the workflow stakeholders described as the most common first use of the MCP: ask a question about the catalog, get an answer back.
+Find the products that are missing the attributes you care about, without writing a filter payload by hand. Follow the steps below to ask a question about the catalog and get an answer back.
 
 1. **Ask for the gap, not the query.** Name the attributes and the scope:
 
@@ -53,7 +53,7 @@ For the same audit as code, see [Audit product data quality with filters](/docs/
 
 ## Curate a batch of products before importing them
 
-This is the workflow Plytix stakeholders called out as the reason the MCP matters: you bring product data from somewhere else, have the assistant clean it against your own catalog's rules, and create the products without building an integration first.
+Plytix stakeholders described curating data before importing it as a motivation for the MCP. Follow the steps below to bring product data from somewhere else, have the assistant clean it against your own catalog's rules, and create the products without building an integration first.
 
 1. **Give the assistant the source data and the rules.** Paste or attach the raw data, then state what "correct" means in your catalog:
 
@@ -75,13 +75,13 @@ This is the workflow Plytix stakeholders called out as the reason the MCP matter
 
 4. **Confirm the count.** Ask how many products it created and compare that number against your source. Then spot-check a few in Plytix.
 
-<Callout type="info" title="Pace matters more than you'd think">
-  Rate limits vary by account and are carried in your access token's claims. An assistant creating products one at a time can reach that limit on a large batch, which shows up as failures partway through. For anything past a few dozen items, see [Bulk operations for large catalogs](/docs/guides/bulk-operations-for-large-catalogs) and run it as code instead.
+<Callout type="info" title="Pace matters">
+  In the V3 API, rate limits vary by account and are carried in your access token's claims. An assistant creating products one at a time can reach that limit on a large batch, which shows up as failures partway through. For large batches, see [Bulk operations for large catalogs](/docs/guides/bulk-operations-for-large-catalogs) and run it as code instead.
 </Callout>
 
 ## Export a slice of the catalog
 
-Pull a filtered set of products into a format you can hand to someone else, such as a marketplace listing sheet or a review document.
+Pull a filtered set of products into a format you can hand to someone else, such as a marketplace listing sheet or a review document. Follow the steps below to export a slice.
 
 1. **Describe the slice and the shape you want:**
 
@@ -101,14 +101,14 @@ Pull a filtered set of products into a format you can hand to someone else, such
    ```
 
 <Callout type="info" title="Channels are set up in Plytix">
-  Channels (Shopify, BigCommerce, and feed exports) are configured in the Plytix interface, not through the API, so an agent can't create one or publish to a storefront for you. What it can do is assemble the product set and check it before you send it. To work with channel-eligible products programmatically, use Destinations instead.
+  Channels (Shopify, BigCommerce, and feed exports) are configured in the Plytix interface. Whether channels can also be managed through the API is not yet confirmed. An agent can assemble the product set and check it before you send it.
 </Callout>
 
 For a fuller treatment, see [Export your full catalog](/docs/guides/exporting-your-full-catalog) and [Build a marketplace-specific product feed](/docs/guides/building-marketplace-specific-product-feeds).
 
-## Clean up categories, assets, or relationships
+## Clean up categories
 
-Removing a link in Plytix can affect more than the one product in front of you, which makes it a good fit for an assistant that can check the blast radius first and a bad fit for an unsupervised one.
+Removing a category in Plytix can affect more than the one product in front of you, which makes it a good fit for an assistant that can check the impact first and a bad fit for an unsupervised one. Follow the steps below to check and scope a category removal.
 
 1. **Ask what would be affected, before anything changes:**
 
@@ -117,18 +117,18 @@ Removing a link in Plytix can affect more than the one product in front of you, 
    and do any of them have no other category left? Don't change anything yet.
    ```
 
-2. **Read the impact list.** Products left with no category are the ones to handle deliberately, because they can drop out of filtered views and feeds.
+2. **Read the impact list.** Products left with no category are the ones to handle deliberately.
 
 3. **Scope the change narrowly.** Name the exact set rather than describing it loosely:
 
    ```text
    Remove the "Clearance" category from the 18 products you listed, except
-   the 3 that would be left with no category at all.
+   the three that would be left with no category at all.
    ```
 
 4. **Verify in Plytix.** Confirm the count changed by exactly what you expected, and that the excluded products kept their category.
 
-See [Safely remove categories, assets, or relationships](/docs/guides/safely-removing-categories-assets-or-relationships) for the rules behind this workflow.
+See [Safely remove categories, assets, or relationships](/docs/guides/safely-removing-categories-assets-or-relationships) for the rules behind this workflow, including which links can and can't be removed through the API.
 
 ## Troubleshooting
 
@@ -136,16 +136,16 @@ Check the problems below if a workflow doesn't go the way you expected.
 
 <Accordions type="multiple">
   <Accordion title="The assistant answers about your catalog without calling Plytix" value="answers-without-calling">
-    Numbers that look plausible but don't match anything in your account usually mean the assistant answered from its own knowledge instead of reaching for a tool. Most clients only call a tool when the request makes the need obvious, so name the source in your prompt, as in "Using Plytix, …", and ask it to cite the SKUs it retrieved. Opening every catalog prompt with the source named is the habit that prevents this.
+    Numbers that look plausible but don't match anything in your account usually mean the assistant answered from its own knowledge instead of reaching for a tool. A client can skip calling a tool when the request doesn't make the need obvious, so name the source in your prompt, as in "Using Plytix, …", and ask it to cite the SKUs it retrieved. Naming the source in every catalog prompt helps prevent this.
   </Accordion>
   <Accordion title="A batch of writes stops partway through" value="batch-stops-partway">
-    Ask which items the assistant completed before you retry anything, then retry only the remainder. Re-running the whole batch is what creates duplicates, and the agent has the list you need to avoid that. For anything past a few dozen items, run the job as code with paced requests rather than through an agent, as in [Bulk operations for large catalogs](/docs/guides/bulk-operations-for-large-catalogs).
+    Ask which items the assistant completed before you retry anything, then retry only the remainder. Re-running the whole batch is what creates duplicates, and the agent has the list you need to avoid that. For large batches, run the job as code with paced requests rather than through an agent, as in [Bulk operations for large catalogs](/docs/guides/bulk-operations-for-large-catalogs).
   </Accordion>
   <Accordion title="Results are short and the totals don't match what Plytix shows" value="results-short-paging">
-    Agents frequently stop at the first page of results and report that as the whole answer. Ask it to page through everything and compare the total again. Including the expected count in your prompt when you already know it gives the assistant something to check itself against.
+    An agent can stop at the first page of results and report that as the whole answer. Ask it to page through everything and compare the total again. Including the expected count in your prompt when you already know it gives the assistant something to check itself against.
   </Accordion>
   <Accordion title="The assistant changed something you didn't intend" value="unintended-change">
-    There's no undo in Plytix, so the only route is forward: ask the assistant for the exact list of records it changed, then correct those. The discipline that prevents a repeat is the one every workflow on this page follows, which is splitting the work into a read prompt you review and a separate write prompt you approve, and granting write access only where the job actually needs it.
+    Plytix can't undo some changes, such as deletions, so the route is forward: ask the assistant for the exact list of records it changed, then correct those. The discipline that prevents a repeat is the one every workflow on this page follows, which is splitting the work into a read prompt you review and a separate write prompt you approve, and granting write access only where the job actually needs it.
   </Accordion>
 </Accordions>
 
@@ -155,9 +155,9 @@ Now that you know how to run these workflows, you can explore these related page
 
 <Cards>
   <Card icon={<Wrench />} title="Available tools" href="/docs/guides/platform-mcp/available-tools">
-    See the full set of Plytix actions an agent can call.
+    See which Plytix resources an agent can reach.
   </Card>
   <Card icon={<ShieldCheck />} title="Permissions and security considerations" href="/docs/guides/platform-mcp/permissions-and-security">
-    Learn which scopes each workflow needs, and where the access boundaries sit.
+    Learn what limits an agent's access.
   </Card>
 </Cards>

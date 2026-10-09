@@ -1,6 +1,6 @@
 ---
-title: "API v1/v2 Reference"
-description: "Endpoint reference for teams still integrating against v1/v2, alongside guidance on moving to v3 over time."
+title: "API V1/V2 Reference"
+description: "Reference for the V1 and V2 (beta) APIs for teams not yet on V3: core concepts, every resource, and guidance on moving to V3."
 ---
 
 import {
@@ -21,13 +21,13 @@ import {
   ListOrdered,
 } from 'lucide-react';
 
-This is the reference for Plytix's **v1** API, plus the small set of **v2 (beta)** endpoints that mirror some v1 product operations with a slightly different shape. New integrations should use [API Reference (v3)](/docs/reference/v3); see [Migrating to v3](/docs/guides/migrating-to-v3) for what's different and how to migrate.
+This is the reference for Plytix's V1 API, plus the small set of V2 (beta) endpoints that mirror some V1 product operations with a slightly different shape. New integrations should use [API Reference (V3)](/docs/reference/v3); see [Migrating to V3](/docs/guides/migrating-to-v3) for what's different and how to migrate.
 
-Every request here uses the same bearer-token authentication as v3: get a token from [`POST /auth/api/get-token`](/docs/reference/legacy/authentication/retrievesAnAuthenticationToken_auth_api_get_token_post) and send it as `Authorization: Bearer <token>`.
+Every request here uses the same bearer-token authentication as V3: get a token from [`POST /auth/api/get-token`](/docs/reference/legacy/authentication/retrievesAnAuthenticationToken_auth_api_get_token_post) and send it as `Authorization: Bearer <token>`.
 
 ## Core concepts
 
-Before integrating with a specific resource, review these fundamental patterns. They apply to every v1 and v2 endpoint, and several differ from v3.
+Before integrating with a specific resource, review these fundamental patterns. They apply to every V1/V2 endpoint, and several differ from V3.
 
 <Cards>
   <Card icon={<Key />} title="Authentication" href="/docs/reference/legacy/token-authentication">
@@ -49,9 +49,11 @@ Before integrating with a specific resource, review these fundamental patterns. 
 
 ## Available services
 
+Each resource below links to its endpoints, with request and response schemas and examples.
+
 <Cards>
   <Card icon={<Key />} title="Authentication" href="/docs/reference/legacy/authentication/retrievesAnAuthenticationToken_auth_api_get_token_post">
-    Get a bearer token from the v1 auth endpoint.
+    Get a bearer token from the V1 auth endpoint.
   </Card>
   <Card icon={<Building2 />} title="Accounts" href="/docs/reference/legacy/accounts/apiCredentialSearch_api_v1_accounts_api_credentials_search_post">
     Search account memberships and API credentials.
@@ -62,11 +64,11 @@ Before integrating with a specific resource, review these fundamental patterns. 
   <Card icon={<FolderTree />} title="Categories" href="/docs/reference/legacy/categories/addNewFileCategory_api_v1_categories_file_post">
     Manage both asset and product category trees.
   </Card>
-  <Card icon={<Box />} title="Products (v1)" href="/docs/reference/legacy/products/addNewProducts_api_v1_products_post">
+  <Card icon={<Box />} title="Products (V1)" href="/docs/reference/legacy/products/addNewProducts_api_v1_products_post">
     Create, update, delete, and search products, plus their variants, assets, categories, and relationships.
   </Card>
-  <Card icon={<Beaker />} title="Products (v2 beta)" href="/docs/reference/legacy/products-v2-beta/addNewProducts_api_v2_products_post">
-    The same product operations under `/api/v2`, with minor request/response differences from v1.
+  <Card icon={<Beaker />} title="Products (V2 beta)" href="/docs/reference/legacy/products-v2-beta/addNewProducts_api_v2_products_post">
+    The same product operations under `/api/v2`, with minor request/response differences from V1.
   </Card>
   <Card icon={<LinkIcon />} title="Relationships" href="/docs/reference/legacy/relationships/addNewRelationship_api_v1_relationships_post">
     Create and manage relationships between products.
@@ -87,4 +89,4 @@ Before integrating with a specific resource, review these fundamental patterns. 
 
 ## About this reference
 
-This reference was generated from Plytix's internal v1 Postman collection, not from a machine-readable spec, so request/response schemas and examples are inferred from that collection's saved examples rather than a live source of truth. Cross-check against the live API with a real request before relying on an exact field name or type.
+This reference was generated from Plytix's internal V1 Postman collection, not from a machine-readable spec, so request/response schemas and examples are inferred from that collection's saved examples rather than a live source of truth. Cross-check against the live API with a real request before relying on an exact field name or type.

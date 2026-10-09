@@ -70,7 +70,7 @@ If a reference is missing, pause and ask in a single message, the same way the W
 When checking factual claims, use this order (highest first), per the project's `CLAUDE.md` and `docs-ia` skill:
 
 1. Verified live API findings (Bruno collection results, `endpoint-tester` logs)
-2. OpenAPI specs: `openapi_pimv3.json` for v3, `openapi_pimv1.json` for v1/v2
+2. OpenAPI specs: `openapi_pimv3_20261002 (Latest spec).json` for v3 (the older `openapi_pimv3.json` is superseded), `openapi_pimv1.json` for v1/v2
 3. Raw source materials in `materials/` (API V3.md, project references, transcripts)
 4. Scraped help center (`materials/help-center/`) and existing docs
 

@@ -1,28 +1,19 @@
 ---
-title: "Migrating to v3"
-description: "Decide which parts of a v1/v2 integration move to v3, which have to stay where they are, and how to convert the parts that move."
+title: "Migrating to V3"
+description: "Decide which parts of a V1/V2 integration move to V3, which have to stay where they are, and how to convert the parts that move."
 ---
 
-import { Table2, BookOpen } from 'lucide-react';
+import { Table2, KeyRound, Search, Filter, FilePen, PackageX } from 'lucide-react';
 
-v3 reorganized the Plytix API rather than replicating it. Most of what a v1 or v2 integration does moves across and gets better in the process, but a few operations have no v3 equivalent at all, so a working integration usually ends up calling both versions rather than cutting over wholesale.
+V3 reorganized the Plytix API rather than replicating it. Most of what a V1/V2 integration does moves across and gets better in the process, but a few operations have no V3 equivalent at all, so a working integration usually ends up calling both versions rather than cutting over wholesale.
 
 This guide covers that split: what moves, what stays, and how to convert the parts that move. Your authentication doesn't change either way.
-
-Six reference pages sit under this guide and carry the detail the steps below point to:
-
-- [Authentication and base URLs](/docs/guides/migrating-to-v3/authentication-and-base-urls) — the base URL, path prefix, and token flow both versions share.
-- [Searching and pagination](/docs/guides/migrating-to-v3/searching-and-pagination) — the v1 search body translated into a v3 query string, and how v3 pages.
-- [Filter operators](/docs/guides/migrating-to-v3/filter-operators) — every operator, boolean grouping, and custom attributes.
-- [Responses and updates](/docs/guides/migrating-to-v3/responses-and-updates) — what each write returns, and the behaviors that break migrated code.
-- [Endpoint mapping](/docs/guides/migrating-to-v3/endpoint-mapping) — every v1 and v2 endpoint with its v3 equivalent, resource by resource.
-- [Not migrated and new in v3](/docs/guides/migrating-to-v3/not-migrated-and-new-in-v3) — what has no v3 counterpart, what v3 added, and what v2 covers.
 
 ## Prerequisites
 
 Before you start, you need:
 
-- **A working v1 or v2 integration**, and access to its source. This guide assumes you're changing existing code, not starting fresh.
+- **A working V1/V2 integration**, and access to its source. This guide assumes you're changing existing code, not starting fresh.
 - **A test account or a safe dataset.** Write behavior differs between versions in ways that are hard to spot until something is already deleted.
 - **Your current API credentials.** They keep working, so you don't need new ones.
 
@@ -32,57 +23,45 @@ Before you start, you need:
 
    Start here rather than with the endpoint mapping. Three groups matter, and the middle one is the reason a cutover is rarely clean.
 
-   **Move these to v3.** Everything in this group has a v3 equivalent, and v3 is the better place for it:
+   **Move these to V3.** Everything in this group has a V3 equivalent, and V3 is the better place for it:
 
-   | Operation | Why v3 |
+   | Operation | Why V3 |
    |---|---|
    | Searching and reading any resource | Richer operators, real `OR` grouping, field expansion in one call |
    | Create, update, and delete on products, assets, categories, asset categories, product attributes, attribute groups, families, and relationships | Consistent conventions across every resource |
    | Linking products to categories, assets to categories, and attributes to groups | Dedicated link and unlink endpoints, rather than rewriting an array |
-   | Adding and removing product relationships | v3's `DELETE /products/{product_id}/relationships/{relationship_id}` is a scoped unlink; v1 needs a separate `/unlink` call |
+   | Adding and removing product relationships | V3's `DELETE /products/{product_id}/relationships/{relationship_id}` is a scoped unlink; V1 needs a separate `/unlink` call |
    | Creating variants | `parent_id` and `product_family_id` on the product itself |
 
-   **Keep these on v1 or v2.** No v3 equivalent exists today, so these calls stay where they are:
+   **Keep these on V1/V2.** No V3 equivalent exists today, so these calls stay where they are:
 
-   | Operation | v1 endpoint | Status in v3 |
+   | Operation | V1 endpoint | Status in V3 |
    |---|---|---|
-   | Replacing the binary content of an existing asset | `PUT /api/v1/assets/{asset_id}/content` | No equivalent. v3 accepts `url` or `content` only when the asset is created; its update schema carries just `filename` and `alt_text` |
-   | Linking and unlinking assets on a product | `POST` and `DELETE /api/v1/products/{product_id}/assets` | No equivalent, and not supported. v3 has no product-to-asset link path and no `asset_ids` field on the product. `thumbnail_id` is the one exception, and it sets a single image |
+   | Replacing the binary content of an existing asset | `PUT /api/v1/assets/{asset_id}/content` | No equivalent. V3 accepts `url` or `content` only when the asset is created; its update schema carries only `filename` and `alt_text` |
+   | Linking and unlinking assets on a product | `POST` and `DELETE /api/v1/products/{product_id}/assets` | No equivalent, and not supported. V3 has no product-to-asset link path and no `asset_ids` field on the product. `thumbnail_id` is the one exception, and it sets a single image |
    | Discovering the available filters for a resource | `GET /api/v1/filters/product`, `/filters/asset`, `/filters/relationships` | No equivalent. Build filters from `GET /api/v3/product-attributes` instead |
    | Resyncing variants against their parent | `POST /api/v1/products/{parent_product_id}/variants/resync` | No equivalent |
-   | Reading a total result count | `total_count` on every v1 search response | No equivalent anywhere in v3. See step 6 |
+   | Reading a total result count | `total_count` on every V1 search response | No equivalent anywhere in V3. See step 6 |
 
    **These are gone from both.** Plan around them rather than migrating them:
 
-   - **Bulk writes.** Neither version offers them in its public spec. The v3 bulk API is restricted to large and enterprise accounts; contact your account manager. See [Bulk operations for large catalogs](/docs/guides/bulk-operations-for-large-catalogs).
-   - **API credential and membership management** (`POST /api/v1/accounts/api-credentials/search`, `/accounts/memberships/search`). Manage these in the Plytix interface, under the **API** and **Team** tabs.
+   - **Bulk writes.** V3 has no bulk create, update, or delete endpoints. A Bulk API exists in V2, but it isn't available to every account; confirm access with your Plytix contact. See [Bulk operations for large catalogs](/docs/guides/bulk-operations-for-large-catalogs).
+   - **API credential and membership management** (`POST /api/v1/accounts/api-credentials/search`, `/accounts/memberships/search`). Manage these in the Plytix dashboard. API Keys are under the **API** tab.
 
    <Callout type="info" title="Running both versions is the normal end state">
-     Both versions take the same bearer token against the same auth service, so calling v1 for asset content and v3 for everything else needs no extra credentials and no second auth flow. Treat the mixed setup as the destination, not as an unfinished migration.
+     Both versions take the same bearer token against the same auth service, so calling V1 for asset content and V3 for everything else needs no extra credentials and no second auth flow. Treat the mixed setup as the destination, not as an unfinished migration.
    </Callout>
 
 2. **Keep your authentication as it is.**
 
-   Both versions use the same auth service. You exchange your API key and password once, then send the token as a bearer header:
-
-   ```bash
-   curl --request POST \
-     --url https://auth.plytix.com/auth/api/get-token \
-     --header 'Content-Type: application/json' \
-     --data '{
-       "api_key": "your.api.key",
-       "api_password": "your.secret.api.password"
-     }'
-   ```
-
-   Your existing credentials, their roles, and your token-refresh logic all carry over. See [Authentication and base URLs](/docs/guides/migrating-to-v3/authentication-and-base-urls) for the shared base URLs, and [Quickstart](/docs/guides/quickstart) for the full flow.
+   Both versions use the same auth service. You exchange your API Key and password once, then send the token as a bearer header. Your existing credentials, their roles, and your token-refresh logic all carry over. See [Authentication and base URLs](/docs/guides/migrating-to-v3/authentication-and-base-urls) for the shared base URLs, [Authentication](/docs/reference/v3/authentication) for the token request, and [Quickstart](/docs/guides/quickstart) for the full flow.
 
 3. **Convert your searches from a POST body to a GET query.**
 
-   This is the largest change in the parts that do move. In v1, a search is a POST with a JSON body. In v3, it's a GET with query parameters, and the filters move into the URL.
+   This is the largest change in the parts that do move. In V1, a search is a POST with a JSON body. In V3, it's a GET with query parameters, and the filters move into the URL.
 
-   <Tabs items={['v1', 'v3']}>
-     <Tab value="v1">
+   <Tabs items={['V1', 'V3']}>
+     <Tab value="V1">
        ```bash
        curl --request POST \
          --url https://pim.plytix.com/api/v1/products/search \
@@ -100,9 +79,9 @@ Before you start, you need:
          }'
        ```
      </Tab>
-     <Tab value="v3">
+     <Tab value="V3">
        ```bash
-       curl --request GET \
+       curl --globoff --request GET \
          --url 'https://pim.plytix.com/api/v3/products?status=Draft&categories[in]=5c4ed7f62f0985001c233274&_fields=label&_fields=status&_fields=categories&_sort_by=sku&_page=1&_page_size=25' \
          --header 'Authorization: Bearer <token>'
        ```
@@ -111,15 +90,15 @@ Before you start, you need:
 
    Three parts of the body become three kinds of parameter:
 
-   | v1 body key | v3 equivalent |
+   | V1 body key | V3 equivalent |
    |---|---|
    | `filters` | Query parameters in bracket syntax, such as `status=Draft` or `categories[in]=<id>` |
    | `attributes` | `_fields=<name>`, repeated once per field |
    | `pagination` | `_page`, `_page_size`, and `_sort_by` |
 
-   The operators change shape but not meaning. `{"operator": "eq"}` becomes `field=value` or `field[eq]=value`, `!exists` becomes `field[!exists]`, `in` becomes `field[in]=value` repeated per value, and the comparison operators become `field[gt]`, `field[gte]`, `field[lt]`, and `field[lte]`.
+   The operators change shape but not meaning. `{"operator": "eq"}` becomes `field=value` or `field[eq]=value`, `!exists` becomes `field[!exists]=true`, `in` becomes `field[in]=value` repeated per value, and the comparison operators become `field[gt]`, `field[gte]`, `field[lt]`, and `field[lte]`.
 
-   Boolean grouping changes too. In v1, filters nest as arrays: items inside one array combine with AND, and the outer arrays combine with OR. In v3, `&` is AND, and OR uses an indexed prefix:
+   Boolean grouping changes too. In V1, filters nest as arrays: items inside one array combine with AND, and the outer arrays combine with OR. In V3, `&` is AND, and OR uses an indexed prefix:
 
    ```text
    _or[0]status=Draft&_or[0]status=Review
@@ -128,14 +107,14 @@ Before you start, you need:
    Custom attributes are addressed directly rather than through a field name string: `attributes.name[eq]=value`. [Filter operators](/docs/guides/migrating-to-v3/filter-operators) carries the full operator mapping.
 
    {/* FLAG (open):
-     Confirm the v1 grouping semantics (AND within an inner array, OR between outer arrays) with `endpoint-tester` before publishing. `openapi_pimv1.json` was converted from a Postman collection and its own description says the shapes were inferred from saved examples rather than verified against the live API. The v3 side is confirmed.
+     The V1 grouping semantics (AND within an inner array, OR between outer arrays) are unconfirmed. `openapi_pimv1.json` was converted from a Postman collection, and its own description says the shapes were inferred from saved examples rather than verified against the live API. Confirm with `endpoint-tester` before publishing. The V3 side is confirmed.
    */}
 
 4. **Update your endpoint paths.**
 
-   v3 names resources consistently: plural, kebab-case, and resource-first, rather than a type appended to a generic path. A few common moves:
+   V3 names resources consistently: plural, kebab-case, and resource-first, rather than a type appended to a generic path. A few common moves:
 
-   | v1 | v3 |
+   | V1 | V3 |
    |---|---|
    | `/api/v1/attributes/product` | `/api/v3/product-attributes` |
    | `/api/v1/attribute-groups/product` | `/api/v3/product-attribute-groups` |
@@ -145,18 +124,14 @@ Before you start, you need:
 
    Two changes are worth calling out beyond the renaming:
 
-   - **Products accept more than one identifier.** In v3, both the product ID and the SKU work in the path, as long as the SKU is URL-encoded. That removes a lookup step for integrations keyed on SKU.
-   - **Related data comes back with the record.** Where v1 has a separate call for each relation, v3 returns them through field selection on a search: `GET /api/v3/products?sku=<sku>&_fields=categories&_fields=assets`.
-
-   <Callout type="warn" title="Read related data through a search, not a subpath">
-     v3 exposes per-relation subpaths such as `GET /products/{identifier}/categories` and `GET /products/{identifier}/assets`, but they currently return an empty array even for a product that genuinely has those relations. Request the same relations as `_fields` on the search endpoint instead, which returns them correctly. The `relationships` and `attributes` subpaths are unaffected.
-   </Callout>
+   - **Products accept more than one identifier.** In V3, both the product ID and the SKU work in the path, as long as the SKU is URL-encoded. That removes a lookup step for integrations keyed on SKU.
+   - **Related data comes back with the record.** Where V1 has a separate call for each relation, V3 returns them through field selection on a search: `GET /api/v3/products?sku=<sku>&_fields=categories&_fields=assets`. The per-relation subpaths, such as `GET /api/v3/products/{identifier}/categories`, return the same data one relation at a time.
 
    See [Endpoint mapping](/docs/guides/migrating-to-v3/endpoint-mapping) for the complete mapping.
 
 5. **Replace array-field linking with the link and unlink endpoints.**
 
-   If you translated a v1 link operation into a v3 `PATCH` that sends a `category_ids` or `static_list_ids` array, that approach no longer works. Those fields are not accepted on product or asset writes, and linking has its own endpoints:
+   If you translated a V1 link operation into a V3 `PATCH` that sends a `category_ids` or `static_list_ids` array, that approach no longer works. Those fields are not accepted on product or asset writes, and linking has its own endpoints:
 
    | To do this | Call |
    |---|---|
@@ -169,15 +144,11 @@ Before you start, you need:
 
    Don't use the generic `DELETE /products/{identifier}/{path}` form to unlink. It isn't a scoped removal: an unrecognized path returns `404`, and a collection path such as `categories` returns `405`.
 
-   {/* FLAG (open):
-     The 2026-10-02 spec removed `category_ids` and `static_list_ids` from `ProductCreateDto`, `ProductUpdateInputDto`, and `AssetUpdateInputDto`. [Safely removing categories, assets, or relationships](/docs/guides/safely-removing-categories-assets-or-relationships) still documents the PATCH-a-shorter-array method as the only working way to unlink a category, which the schema change contradicts. That guide is already queued for rework; confirm with Plytix which method is current and align both pages together.
-   */}
-
 6. **Rework anything that reads a result count.**
 
-   v1 returned `total_count` on every search. v3 has no equivalent: the pagination block carries no counts, and there is no parameter that adds one. Requesting `_total_count` or `_filtered_count` returns `400 InvalidFieldError`.
+   V1 returned `total_count` on every search. V3 has no equivalent: the pagination block carries no counts, and there is no parameter that adds one. Requesting `_total_count` or `_filtered_count` returns `400 InvalidFieldError`.
 
-   Anything in your integration that reads a total has to be reworked to page to the end and tally: a progress bar, a "showing N of M" label, a pre-sized buffer, a sanity check that compares an expected count against a returned one. v3 also paginates by returning the next page's URL rather than a page number to increment, so the loop follows `next_page` until that key stops appearing.
+   Anything in your integration that reads a total has to be reworked to page to the end and tally: a progress bar, a "showing N of M" label, a pre-sized buffer, a sanity check that compares an expected count against a returned one. V3 also paginates by returning the next page's URL rather than a page number to increment, so the loop follows `next_page` until that key stops appearing.
 
    <Callout type="warn" title="Rewrite next_page to https before following it">
      Every `next_page` and `previous_page` URL is generated with the `http` scheme and `301`s to `https`. HTTP clients that don't forward `Authorization` across a scheme-changing redirect will drop it and get a `401`. Rewrite the scheme before requesting the URL, or use `curl -L --location-trusted`.
@@ -187,84 +158,89 @@ Before you start, you need:
 
 7. **Change how your code reads write responses.**
 
-   v3 returns the full entity on a create, so code that reads a create response keeps working. An update returns nothing at all, so code that reads a PATCH response has to change.
+   V3 returns the full entity on a create, so code that reads a create response keeps working. An update returns nothing at all, so code that reads a PATCH response has to change.
 
-   | Operation | v3 response |
+   | Operation | V3 response |
    |---|---|
    | Create | `201` with the full created entity |
    | Update (PATCH) | `204` with no body |
    | Delete | `204` with no body |
    | Duplicate on create | `409` |
-   | Accepted for async processing | `202` with a `process_id` to track |
 
-   Anywhere your v1 code reads values out of a PATCH response, add a follow-up GET instead.
+   Anywhere your V1 code reads values out of a PATCH response, add a follow-up GET instead.
 
    <Callout type="warn" title="PATCH recently changed to 204">
-     Earlier v3 releases returned `200` with the full updated entity on PATCH. It now returns `204` with an empty body, so an integration written against the older behavior breaks on any code that parses an update response. POST is unaffected: it still returns `201` with the full created entity.
+     Earlier V3 releases returned `200` with the full updated entity on PATCH. It now returns `204` with an empty body, so an integration written against the older behavior breaks on any code that parses an update response. POST is unaffected: it still returns `201` with the full created entity.
    </Callout>
 
 8. **Re-check your delete and update logic before you run it.**
 
-   Two v3 behaviors catch migrated code out:
+   Two V3 behaviors catch migrated code out:
 
-   - **PATCH replaces the `attributes` map rather than merging into it.** Sending only the attributes that changed deletes every attribute you left out, with no error and no warning. Read the current map, merge, then send it back — or use `PATCH /products/{identifier}/attributes/{name}` with a bare value to scope the change to one attribute.
-   - **DELETE erases** the entity or the field it's applied to. It doesn't set the value to null or reset it to a default, and removing a field can cause inheritance to resolve for it instead. Confirm on a test record that a delete does what your v1 code assumed.
+   - **PATCH replaces the `attributes` map rather than merging into it.** Sending only the attributes that changed deletes every attribute you left out, with no error and no warning. Read the current map, merge, then send it back, or use `PATCH /products/{identifier}/attributes/{name}` with a bare value to scope the change to one attribute.
+   - **DELETE erases** the entity or the field it's applied to. It doesn't set the value to null or reset it to a default, and removing a field can cause inheritance to resolve for it instead. Confirm on a test record that a delete does what your V1 code assumed.
 
-   See [Working with Updates and Deletes](/docs/reference/v3/updates-and-deletes).
+   See [Update and delete records](/docs/reference/v3/updates-and-deletes).
 
 9. **Run both versions side by side before cutting over.**
 
-   Point a copy of your integration at v3 while the v1 one keeps running, and compare the results: record counts from the same filter, the fields that come back, and the relations each product reports. A count that differs usually means a filter didn't translate the way you expected, and it's far cheaper to find that in a comparison than in production. Since v3 won't give you a total, get the count by paging to the end on both sides.
+   Point a copy of your integration at V3 while the V1 one keeps running, and compare the results: record counts from the same filter, the fields that come back, and the relations each product reports. A count that differs usually means a filter didn't translate the way you expected, and it's far cheaper to find that in a comparison than in production. Since V3 won't give you a total, get the count by paging to the end on both sides.
 
 ## Troubleshooting
 
+Check the problems below if you run into issues while following this guide.
+
 <Accordions type="multiple">
-  <Accordion title="A v3 search returns everything, ignoring your filter">
-    **Solution:** Check the bracket syntax and the URL encoding. An unrecognized parameter is easy to produce by hand, and a search with no recognized filter means "get all."
-
-    **Prevention:** Compare counts against the same v1 filter before trusting a converted query.
+  <Accordion title="A v3 search returns everything, ignoring your filter" value="search-returns-everything">
+    A search with no recognized filter means "get all," and an unrecognized parameter is common when you type the bracket syntax by hand. Check the bracket syntax and the URL encoding, then compare counts against the same V1 filter before you trust a converted query.
   </Accordion>
 
-  <Accordion title="Your code breaks after a successful update">
-    **Solution:** v3's PATCH returns `204` with an empty body. Code that checks for `200`, or that parses the response, fails even though the write succeeded. Read the updated values with a follow-up GET.
-
-    **Prevention:** Audit every place your v1 code branches on a write's status code or reads its body before you switch versions.
+  <Accordion title="Your code breaks after a successful update" value="code-breaks-after-update">
+    V3's PATCH returns `204` with an empty body. Code that checks for `200`, or that parses the response, fails even though the write succeeded. Read the updated values with a follow-up GET, and audit every place your V1 code branches on a write's status code or reads its body before you switch versions.
   </Accordion>
 
-  <Accordion title="Attributes you didn't touch disappeared after an update">
-    **Solution:** PATCH replaced the whole `attributes` map with what you sent. Restore the missing values, then switch to read-merge-write, or patch one attribute at a time through `PATCH /products/{identifier}/attributes/{name}`.
+  <Accordion title="Attributes you didn't touch disappeared after an update" value="attributes-disappeared">
+    PATCH replaced the whole `attributes` map with what you sent. Restore the missing values, then switch to read-merge-write, or patch one attribute at a time through `PATCH /products/{identifier}/attributes/{name}`.
   </Accordion>
 
-  <Accordion title="A link request returns 404 or 405">
-    **Solution:** Use the dedicated link and unlink endpoints from step 5. `category_ids` and `static_list_ids` are no longer accepted on create or update, and the generic `DELETE /products/{identifier}/{path}` form isn't a scoped unlink.
+  <Accordion title={<>A link request returns <code>404</code> or <code>405</code></>} value="link-request-404-405">
+    Use the dedicated link and unlink endpoints from step 5. `category_ids` and `static_list_ids` are no longer accepted on create or update, and the generic `DELETE /products/{identifier}/{path}` form isn't a scoped unlink.
   </Accordion>
 
-  <Accordion title="A product's categories or assets come back empty when you know it has them">
-    **Solution:** Request the relations through the search endpoint instead: `GET /api/v3/products?sku=<sku>&_fields=categories&_fields=assets`. The per-relation subpaths `GET /products/{identifier}/categories` and `/assets` are currently broken for these two relations.
+  <Accordion title="Results are missing fields you used to get" value="results-missing-fields">
+    Field selection moved from the `attributes` body key to query parameters. Add the fields with `_fields`, repeated once per field.
   </Accordion>
 
-  <Accordion title="Results are missing fields you used to get">
-    **Solution:** Add them with `_fields`, repeated once per field. Field selection moved from the `attributes` body key to query parameters.
+  <Accordion title={<>Following a <code>next_page</code> URL returns <code>401</code></>} value="next-page-401">
+    The URL came back as `http` and redirected to `https`, and your client dropped the `Authorization` header. Rewrite the scheme to `https` before requesting it.
   </Accordion>
 
-  <Accordion title="Following a next_page URL returns 401">
-    **Solution:** The URL came back as `http` and redirected to `https`, and your client dropped the `Authorization` header. Rewrite the scheme to `https` before requesting it.
-  </Accordion>
-
-  <Accordion title="You can't find the v3 endpoint for uploading asset content or attaching an asset to a product">
-    **Solution:** There isn't one. Both stay on v1 — see step 1.
+  <Accordion title="You can't find the v3 endpoint for uploading asset content or attaching an asset to a product" value="no-v3-asset-endpoint">
+    There isn't one. Both operations stay on V1, as step 1 explains.
   </Accordion>
 </Accordions>
 
-## Related articles
+## Migration reference pages
 
-Now that you know which parts of your integration move and how to convert them, you can explore these related pages.
+Six reference pages sit under this guide and carry the detail the steps above point to:
 
 <Cards>
-  <Card icon={<Table2 />} title="Endpoint mapping" href="/docs/guides/migrating-to-v3/endpoint-mapping">
-    Look up every v1 and v2 endpoint next to its v3 equivalent.
+  <Card icon={<KeyRound />} title="Authentication and base URLs" href="/docs/guides/migrating-to-v3/authentication-and-base-urls">
+    The base URL, path prefix, and token flow both versions share.
   </Card>
-  <Card icon={<BookOpen />} title="v3 API reference" href="/docs/reference/v3">
-    Browse the v3 resources and their parameters in detail.
+  <Card icon={<Search />} title="Searching and pagination" href="/docs/guides/migrating-to-v3/searching-and-pagination">
+    The V1 search body translated into a V3 query string, and how V3 pages.
+  </Card>
+  <Card icon={<Filter />} title="Filter operators" href="/docs/guides/migrating-to-v3/filter-operators">
+    Every operator, boolean grouping, and custom attributes.
+  </Card>
+  <Card icon={<FilePen />} title="Responses and updates" href="/docs/guides/migrating-to-v3/responses-and-updates">
+    What each write returns, and the behaviors that break migrated code.
+  </Card>
+  <Card icon={<Table2 />} title="Endpoint mapping" href="/docs/guides/migrating-to-v3/endpoint-mapping">
+    The V1/V2 endpoints with their V3 equivalents, resource by resource.
+  </Card>
+  <Card icon={<PackageX />} title="Not migrated and new in V3" href="/docs/guides/migrating-to-v3/not-migrated-and-new-in-v3">
+    What has no V3 counterpart, what V3 added, and what V2 covers.
   </Card>
 </Cards>

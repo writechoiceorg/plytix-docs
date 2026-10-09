@@ -54,7 +54,7 @@ These are the only components registered in `fumadocs/components/mdx.tsx`, on to
 | `Card` | A single related article card with title, icon, link, and short description | `<Card icon={<Search />} title="..." href="/docs/guides/...">Description.</Card>` |
 | `Steps` / `Step` | Visual step layout. Available, but how-to procedures use numbered lists per `style-guide.md`. Use only for tutorial milestones if the project lead approves. | `<Steps><Step>...</Step></Steps>` |
 | `Tabs` / `Tab` | Alternatives the reader picks one of (for example, v1/v2 vs. v3 samples, or curl vs. Python) | `<Tabs items={['v3', 'v1/v2']}><Tab value="v3">...</Tab><Tab value="v1/v2">...</Tab></Tabs>` |
-| `Accordions` / `Accordion` | Collapsible detail. **Required for how-to guide Troubleshooting sections** (one `Accordion` per problem, titled with the symptom; see `style-guide.md`). Also used for FAQs. Always precede with a lead-in sentence. | `<Accordions type="multiple"><Accordion title="...">...</Accordion></Accordions>` |
+| `Accordions` / `Accordion` | Collapsible detail, including supporting lists such as allowed field values inside a procedure step (indent to the step's level). **Required for how-to guide Troubleshooting sections** (one `Accordion` per problem, titled with the symptom; see `style-guide.md`). Also used for FAQs. Always precede with a lead-in sentence. | `<Accordions type="multiple"><Accordion title="...">...</Accordion></Accordions>` |
 | `OpenAPIPage` | Generated endpoint reference pages only | Written by the OpenAPI generator. Never hand-write. |
 
 ### Accordion titles with code

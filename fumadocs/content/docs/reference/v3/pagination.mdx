@@ -1,6 +1,6 @@
 ---
 title: "Pagination"
-description: "Reference for how v3 pages search results, what the pagination block contains, and how to loop through a full result set safely."
+description: "Reference for how V3 pages search results, what the pagination block contains, and how to loop through a full result set safely."
 ---
 
 import { Filter, Layers } from 'lucide-react';
@@ -13,7 +13,7 @@ Key points on this page:
 - Page by following `next_page` until the key is no longer present.
 - The pagination keys are **omitted** when they don't apply. They are never `null`.
 - There is no record count of any kind. To size a result set, page to the end and tally.
-- The links come back as `http://` URLs, which can cost you your auth header. See [Follow the link, but fix the scheme](#follow-the-link-but-fix-the-scheme).
+- The links come back as `http://` URLs, which can cost you your auth header. See [Fix the scheme before following the link](#fix-the-scheme-before-following-the-link).
 
 ## The search response envelope
 
@@ -82,7 +82,7 @@ while url:
     if url: url = url.replace("http://", "https://")
 ```
 
-### Follow the link, but fix the scheme
+### Fix the scheme before following the link
 
 `next_page` carries your filters and sort order forward, so following it beats rebuilding the URL yourself: incrementing a page number risks dropping a parameter.
 
@@ -102,13 +102,13 @@ Rewrite the scheme to `https` before you request the URL.
 
 ## Request parameters
 
-Three parameters control paging and sort order.
+Use these three parameters to control paging and sort order:
 
 | Parameter | Type | Description |
 |---|---|---|
 | `_page` | integer | The page to return. Must be 1 or greater. Defaults to `1` |
 | `_page_size` | integer | Records per page. Maximum `1000`. Defaults to `25` |
-| `_sort_by` | string | Field to sort by, ascending |
+| `_sort_by` | string | Field to sort by. Prefix with `-` for descending |
 
 Both bounds are enforced, and the error names the parameter and the limit. `_page=0` returns:
 
@@ -142,12 +142,14 @@ The application doesn't return a count of matching records, and there is no para
 }
 ```
 
-The pagination block carries no counts either. This is a difference from v1, whose search responses included `total_count`. If you're migrating, see [Migrating to v3](/docs/guides/migrating-to-v3).
+The pagination block carries no counts either. This is a difference from V1, whose search responses included `total_count`. If you're migrating, see [Migrating to V3](/docs/guides/migrating-to-v3).
 
-## Page without surprises
+## Page through results safely
+
+Keep these points in mind when you page through a large result set:
 
 - **Don't assume a total.** The pagination block carries no count, so the only reliable way to know how many records matched is to page to the end and tally as you go. For a set you know is small, `_page_size=1000` gets you everything in one request.
-- **Watch the request rate.** Paging through a large result set is many requests in quick succession. Rate limits vary by account and are carried in your access token's claims, so pace a long loop and back off on `429`. See [Rate limits](/docs/reference/v3/rate-limits).
+- **Watch the request rate.** Paging through a large result set is many requests in rapid succession. Rate limits vary by account and are carried in your access token's claims, so pace a long loop and back off on `429`. See [Rate limits](/docs/reference/v3/rate-limits).
 - **Ask for fewer fields.** `_fields` narrows each record to what you need, which makes a long paging run noticeably cheaper. See [Filtering and Query Syntax](/docs/reference/v3/filtering-query-syntax).
 - **Expect the set to shift under you.** A catalog that changes mid-run can move records between pages. For an export that has to be internally consistent, filter on a stable field such as a date range rather than paging an unfiltered set.
 

@@ -1,53 +1,53 @@
 ---
 title: "Endpoint mapping"
-description: "Reference for every v1 and v2 endpoint and its v3 equivalent, resource by resource, including the dedicated link and unlink endpoints."
+description: "Reference for every V1/V2 endpoint and its V3 equivalent, resource by resource, including the dedicated link and unlink endpoints."
 ---
 
 import { Ban, BookOpen } from 'lucide-react';
 
-This page maps each v1 and v2 endpoint to its v3 equivalent, one resource at a time, and ends with the link and unlink endpoints that replaced v1's array fields. Where an operation has no v3 equivalent, the table says so rather than guessing at the nearest match; [Not migrated and new in v3](/docs/guides/migrating-to-v3/not-migrated-and-new-in-v3) collects those in one place. It's part of the reference set for [Migrating to v3](/docs/guides/migrating-to-v3).
+This page maps the V1/V2 endpoints most integrations use to their V3 equivalents, one resource at a time, and ends with the link and unlink endpoints that replaced V1's array fields. Where an operation has no V3 equivalent, the table says so rather than guessing at the nearest match; [Not migrated and new in V3](/docs/guides/migrating-to-v3/not-migrated-and-new-in-v3) collects those in one place. It's part of the reference set for [Migrating to V3](/docs/guides/migrating-to-v3).
 
 ## Products
 
-| v1 or v2 | v3 |
+| V1/V2 | V3 |
 |---|---|
 | `POST /api/v1/products` | `POST /api/v3/products` |
 | `POST /api/v1/products/search` | `GET /api/v3/products` |
 | `GET /api/v1/products/{product_id}` | `GET /api/v3/products/{identifier}` |
 | `PATCH /api/v1/products/{product_id}` | `PATCH /api/v3/products/{identifier}` |
 | `DELETE /api/v1/products/{product_id}` | `DELETE /api/v3/products/{identifier}` |
-| `GET /api/v1/products/{product_id}/assets` | `GET /api/v3/products?_fields=assets` |
-| `POST /api/v1/products/{product_id}/assets` | No equivalent. Stays on v1 |
-| `DELETE /api/v1/products/{product_id}/assets/{asset_id}` | No equivalent. Stays on v1 |
-| `GET /api/v1/products/{product_id}/categories` | `GET /api/v3/products?_fields=categories` |
+| `GET /api/v1/products/{product_id}/assets` | `GET /api/v3/products/{identifier}/assets`, or `GET /api/v3/products?_fields=assets` |
+| `POST /api/v1/products/{product_id}/assets` | No equivalent. Stays on V1 |
+| `DELETE /api/v1/products/{product_id}/assets/{asset_id}` | No equivalent. Stays on V1 |
+| `GET /api/v1/products/{product_id}/categories` | `GET /api/v3/products/{identifier}/categories`, or `GET /api/v3/products?_fields=categories` |
 | `POST /api/v1/products/{product_id}/categories` | `POST /api/v3/products/{identifier}/categories` |
 | `DELETE /api/v1/products/{product_id}/categories/{category_id}` | `DELETE /api/v3/products/{identifier}/categories/{id}` |
 | `POST /api/v1/products/{product_id}/family` | `PATCH /api/v3/products/{identifier}` with `product_family_id` |
 
-In v3, `{identifier}` accepts either the product ID or the SKU, URL-encoded.
+In V3, `{identifier}` accepts either the product ID or the SKU, URL-encoded.
 
-The two read rows above map to the search endpoint rather than to v3's own `/products/{identifier}/categories` and `/products/{identifier}/assets` subpaths. Those subpaths exist, but they currently return an empty array even for a product that genuinely has those relations; `_fields` expansion on a search returns the data correctly. The `relationships` and `attributes` subpaths are unaffected and can be used directly.
+For the two read rows above, you can use V3's per-relation subpath or request the relation as `_fields` on a search. Both return the related records.
 
 ## Variants
 
-v3 has no variant endpoints. A variant is an ordinary product that names its parent, so creation and deletion go through the regular product endpoints.
+V3 has no variant endpoints. A variant is an ordinary product that names its parent, so creation and deletion go through the regular product endpoints.
 
-| v1 or v2 | v3 |
+| V1/V2 | V3 |
 |---|---|
 | `POST /api/v1/products/{parent_product_id}/variants` | `POST /api/v3/products` with `parent_id` and `product_family_id` |
 | `GET /api/v1/products/{product_id}/variants` | `GET /api/v3/products?parent_id=<parent_id>` {/* [PENDING] */} |
 | `DELETE /api/v1/products/{parent_product_id}/variant/{variant_id}` | `DELETE /api/v3/products/{identifier}` |
-| `POST /api/v1/products/{parent_product_id}/variants/resync` | No equivalent. Stays on v1 |
+| `POST /api/v1/products/{parent_product_id}/variants/resync` | No equivalent. Stays on V1 |
 
 A product's position in the hierarchy is reported by `product_level`: `0` SINGLE, `1` PARENT, `2` VARIANT, `3` SUB_VARIANT. A standalone product starts at `0` and becomes `1` as soon as another product references it through `parent_id`. See [Reconstruct parent/variant hierarchies](/docs/guides/reconstructing-parent-variant-hierarchies).
 
 {/* FLAG (open):
-  Listing a parent's variants with `?parent_id=<id>` is marked [PENDING] — it follows from `parent_id` being a real product field, but filtering on it was never tested, and [Reconstruct parent/variant hierarchies](/docs/guides/reconstructing-parent-variant-hierarchies) reads the hierarchy from the parent's own `num_variations` instead. Verify with `endpoint-tester` before publishing, or drop the row and point at the parent-read method.
+  Listing a parent's variants with `?parent_id=<id>` is unconfirmed. It follows from `parent_id` being a real product field, but filtering on it was never tested, and [Reconstruct parent/variant hierarchies](/docs/guides/reconstructing-parent-variant-hierarchies) reads the hierarchy from the parent's own `num_variations` instead. Verify with `endpoint-tester` before publishing, or drop the row and point at the parent-read method.
 */}
 
 ## Product relationships
 
-| v1 or v2 | v3 |
+| V1/V2 | V3 |
 |---|---|
 | `POST /api/v1/products/{product_id}/relationships/{relationship_id}` | `POST /api/v3/products/{product_id}/relationships/{relationship_id}` |
 | `PATCH /api/v1/products/{product_id}/relationships/{relationship_id}/product/{related_product_id}` | `PATCH /api/v3/products/{product_id}/relationships/{relationship_id}` |
@@ -59,16 +59,16 @@ A product's position in the hierarchy is reported by `product_level`: `0` SINGLE
 | Not available | `GET /api/v3/related-products` |
 
 <Callout type="warn" title="Always filter the account-wide relationship endpoints">
-  `GET /api/v3/product-relationships`, `/related-products`, and `/family-attributes` have returned records from outside the calling account when called with no filter. Always scope them by `product_id` or `account_id`, and check the results against your own account before relying on them.
+  `GET /api/v3/product-relationships`, `/related-products`, and `/family-attributes` return account-wide data when called with no filter. Always scope them by `product_id` or `account_id`.
 </Callout>
 
 {/* FLAG (open):
-  `GET /products/{id}/relationships/{relationship_id}/related-products[/{related_product_id}]` is marked [PENDING] because it returned empty or 404 for a link confirmed to exist by three other means. Ask Plytix whether it is unfinished before documenting it as usable.
+  `GET /products/{id}/relationships/{relationship_id}/related-products[/{related_product_id}]` is unconfirmed. It returned empty or `404` for a link confirmed to exist by three other means. Ask Plytix whether it is unfinished before documenting it as usable.
 */}
 
 ## Relationship definitions
 
-| v1 | v3 |
+| V1 | V3 |
 |---|---|
 | `POST /api/v1/relationships` | `POST /api/v3/relationships` |
 | `POST /api/v1/relationships/search` | `GET /api/v3/relationships` |
@@ -78,20 +78,20 @@ A product's position in the hierarchy is reported by `product_level`: `0` SINGLE
 
 ## Assets
 
-| v1 | v3 |
+| V1 | V3 |
 |---|---|
 | `POST /api/v1/assets` | `POST /api/v3/assets`, with `url` or `content` |
 | `POST /api/v1/assets/search` | `GET /api/v3/assets` |
 | `GET /api/v1/assets/{asset_id}` | `GET /api/v3/assets/{identifier}` |
-| `PATCH /api/v1/assets/{asset_id}` | `PATCH /api/v3/assets/{identifier}` / `filename` and `alt_text` only |
+| `PATCH /api/v1/assets/{asset_id}` | `PATCH /api/v3/assets/{identifier}`, with `filename` and `alt_text` only |
 | `DELETE /api/v1/assets/{asset_id}` | `DELETE /api/v3/assets/{identifier}` |
-| `PUT /api/v1/assets/{asset_id}/content` | No equivalent. Stays on v1 |
+| `PUT /api/v1/assets/{asset_id}/content` | No equivalent. Stays on V1 |
 
-v3 accepts binary content only at creation. Replacing the content of an existing asset has no v3 path, and the v3 asset update schema carries just `filename` and `alt_text`.
+V3 accepts binary content only at creation. Replacing the content of an existing asset has no V3 path, and the V3 asset update schema carries only `filename` and `alt_text`.
 
 ## Attributes and attribute groups
 
-| v1 | v3 |
+| V1 | V3 |
 |---|---|
 | `POST /api/v1/attributes/product` | `POST /api/v3/product-attributes` |
 | `POST /api/v1/attributes/product/search` | `GET /api/v3/product-attributes` |
@@ -105,7 +105,7 @@ v3 accepts binary content only at creation. Replacing the content of an existing
 
 ## Categories
 
-| v1 | v3 |
+| V1 | V3 |
 |---|---|
 | `POST /api/v1/categories/product` | `POST /api/v3/product-categories` |
 | `POST /api/v1/categories/product/search` | `GET /api/v3/product-categories` |
@@ -117,11 +117,15 @@ v3 accepts binary content only at creation. Replacing the content of an existing
 | `PATCH /api/v1/categories/file/{category_id}` | `PATCH /api/v3/asset-categories/{identifier}` |
 | `DELETE /api/v1/categories/file/{category_id}` | `DELETE /api/v3/asset-categories/{identifier}` |
 
-File categories are called asset categories in v3.
+File categories are called asset categories in V3.
+
+{/* FLAG (open):
+  The mapping of `POST /api/v1/categories/product/{category_id}` (add a product subcategory) to `POST /api/v3/product-categories` is unconfirmed, and the V3 body for a subcategory is not stated here. Test it with `endpoint-tester` before publishing, or drop the row.
+*/}
 
 ## Product families
 
-| v1 | v3 |
+| V1 | V3 |
 |---|---|
 | `POST /api/v1/product_families` | `POST /api/v3/product-families` |
 | `POST /api/v1/product_families/search` | `GET /api/v3/product-families` |
@@ -134,22 +138,22 @@ File categories are called asset categories in v3.
 | `POST /api/v1/product_families/{id}/attributes/unlink` | `DELETE /api/v3/product-families/{product_family_id}/attributes/{attribute_id}` |
 | `POST /api/v1/product_families/{id}/attributes/edit` | `PATCH /api/v3/product-families/{product_family_id}/attributes/{attribute_id}` |
 
-Creating a Product Family, choosing its attributes, and configuring inheritance between levels are dashboard-only in both versions.
+You can create a Product Family, link attributes to it, and rename it through the API in both versions. Changing an attribute link's `level` (inheritance between levels) returns `403` on accounts without automatic inheritance.
 
 ## Linking and unlinking
 
-v1 links through dedicated subpaths. v3 originally accepted `category_ids` and `static_list_ids` arrays on create and update; those fields are no longer accepted, leaving the dedicated link and unlink endpoints as the only route.
+V1 links through dedicated subpaths. V3 originally accepted `category_ids` and `static_list_ids` arrays on create and update; those fields are no longer accepted, leaving the dedicated link and unlink endpoints as the only route.
 
-| Link | v1 | v3 |
+| Link | V1 | V3 |
 |---|---|---|
 | Product to category | `POST /api/v1/products/{product_id}/categories` | `POST /api/v3/products/{identifier}/categories` |
 | Product from category | `DELETE /api/v1/products/{product_id}/categories/{category_id}` | `DELETE /api/v3/products/{identifier}/categories/{id}` |
-| Asset to category | Through `category_ids` on the asset | `POST /api/v3/assets/{identifier}/categories` |
-| Asset from category | Through `category_ids` on the asset | `DELETE /api/v3/assets/{identifier}/categories/{id}` |
-| Attribute to group | `POST /api/v1/attribute-groups/product` | `POST /api/v3/product-attributes/{identifier}/groups` |
+| Asset to category | Through `categories` on the asset | `POST /api/v3/assets/{identifier}/categories` |
+| Asset from category | Through `categories` on the asset | `DELETE /api/v3/assets/{identifier}/categories/{id}` |
+| Attribute to group | Include the attribute in `attribute_labels` when you create the group with `POST /api/v1/attribute-groups/product` | `POST /api/v3/product-attributes/{identifier}/groups` |
 | Attribute from group | Not available | `DELETE /api/v3/product-attributes/{identifier}/groups/{id}` |
-| Product to asset | `POST /api/v1/products/{product_id}/assets` | **No v3 equivalent.** Stays on v1 |
-| Product from asset | `DELETE /api/v1/products/{product_id}/assets/{asset_id}` | **No v3 equivalent.** Stays on v1 |
+| Product to asset | `POST /api/v1/products/{product_id}/assets` | **No V3 equivalent.** Stays on V1 |
+| Product from asset | `DELETE /api/v1/products/{product_id}/assets/{asset_id}` | **No V3 equivalent.** Stays on V1 |
 | Product to family | `POST /api/v1/products/{product_id}/family` | `PATCH /api/v3/products/{identifier}` with `product_family_id` |
 
 <Callout type="warn" title="The generic subpath DELETE is not an unlink">
@@ -161,10 +165,10 @@ v1 links through dedicated subpaths. v3 originally accepted `category_ids` and `
 Now that you have the mapping, you can explore these related pages.
 
 <Cards>
-  <Card icon={<Ban />} title="Not migrated and new in v3" href="/docs/guides/migrating-to-v3/not-migrated-and-new-in-v3">
-    See which v1 calls have no v3 counterpart and which resources are new.
+  <Card icon={<Ban />} title="Not migrated and new in V3" href="/docs/guides/migrating-to-v3/not-migrated-and-new-in-v3">
+    See which V1 calls have no V3 counterpart and which resources are new.
   </Card>
-  <Card icon={<BookOpen />} title="v3 API reference" href="/docs/reference/v3">
-    Browse the v3 resources and their parameters in detail.
+  <Card icon={<BookOpen />} title="V3 API reference" href="/docs/reference/v3">
+    Browse the V3 resources and their parameters in detail.
   </Card>
 </Cards>

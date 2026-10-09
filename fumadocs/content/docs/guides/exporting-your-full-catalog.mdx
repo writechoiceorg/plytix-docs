@@ -1,15 +1,17 @@
 ---
 title: Export your full catalog
-description: Pull every product, with attributes and assets fully expanded, in one paginated operation.
+description: Learn how to pull every product, with attributes and assets fully expanded, by paging through the V3 search endpoint with a bearer token.
 ---
 
 import { Search, SatelliteDish } from 'lucide-react';
 
-Pull your entire product catalog, with attributes and assets included, without a separate call per product or per image. This guide covers paging through a large result set and expanding related data inline, the pattern behind tools like catalog-production plugins, platform migrations, and backups.
+Pull your entire product catalog, with attributes and assets included, without a separate call per product or per image. This guide covers paging through a large result set and expanding related data inline, the pattern behind tools like catalog-production plugins, platform migrations, and backups. All requests use the V3 API with a bearer token. Access tokens expire after 15 minutes, so a long export can start returning `401` partway through. If that happens, request a new token and resume from the page you were on.
 
 ## Prerequisites
 
-- A bearer token. See the Quickstart guide for the authentication flow.
+Before you start, make sure you have the following:
+
+- A bearer token. See [Authentication](/docs/reference/v3/authentication), or the [Quickstart](/docs/guides/quickstart) for a first walkthrough.
 - An idea of which fields you actually need. Requesting only those fields keeps each page smaller and the export faster.
 
 ## Export the catalog page by page
@@ -31,7 +33,7 @@ Follow the steps below to request the fields you need, walk the pages until you 
 
    `_fields` accepts repeated values. Requesting `categories` or `assets` returns them fully expanded, with no separate call needed.
 
-   Don't add `_expand`, the v3 search endpoint rejects it with `400` and `"Field '_expand' does not exist in model 'Product'."` Expansion happens automatically for each `_fields` value you name.
+   Don't add `_expand`. The V3 search endpoint rejects it with `400` and `"Field '_expand' does not exist in model 'Product'."` Expansion happens automatically for each `_fields` value you name.
 
 2. **Follow the `next_page` link until it stops appearing.**
 
@@ -44,7 +46,7 @@ Follow the steps below to request the fields you need, walk the pages until you 
    }
    ```
 
-   Request `pagination.next_page` directly. It's a complete URL, including every filter and field you sent on the first call. The default page size is 25; the maximum is 1000, so setting `_page_size` explicitly (as in step 1) cuts the number of requests for a large catalog substantially. Stop when a response has no `next_page` key: on the last page the key is absent, not `null`.
+   Request `pagination.next_page` directly. It's a complete URL, including every filter and field you sent on the first call. The default page size is 25; the maximum is 1000, so setting `_page_size` explicitly (as in step 1) cuts the number of requests for a large catalog substantially. Stop when a response has no `next_page` key: on the last page the key is absent, not `null`. The V3 search endpoint has no total count, so plan progress reporting around pages rather than a percentage. See [Pagination](/docs/reference/v3/pagination) for the full rules.
 
    <Callout type="warn" title="Rewrite the link to https before you request it">
      Plytix generates these links with the `http` scheme. That address `301`-redirects to `https`, and many HTTP clients drop the `Authorization` header across a scheme change, so the redirected request comes back `401 {"detail": "Unauthorized"}`. Swap `http://` for `https://` before requesting the URL, or configure your client to keep the auth header across redirects (`curl --location-trusted`).
@@ -62,7 +64,7 @@ Follow the steps below to request the fields you need, walk the pages until you 
    }
    ```
 
-   Because `assets` returns the full asset object, including its file path, your export doesn't need a separate request per image. This replaces the per-asset lookup that earlier API versions required.
+   Because `assets` returns the full asset object, including its file path, your export doesn't need a separate request per image.
 
 4. **Scope the export if you don't need the whole catalog.**
 
@@ -75,7 +77,7 @@ Follow the steps below to request the fields you need, walk the pages until you 
      --data-urlencode "_fields=sku"
    ```
 
-   See "Build a Marketplace-Specific Product Feed" for more filtering patterns aimed at a specific audience or destination.
+   See [Build a marketplace-specific product feed](/docs/guides/building-marketplace-specific-product-feeds) for more filtering patterns aimed at a specific audience or destination.
 
 ## Troubleshooting
 
@@ -95,11 +97,13 @@ Check the problems below if you run into issues while following this guide.
 
 ## Related articles
 
+Now that you know how to export the catalog, you can explore these related guides.
+
 <Cards>
-  <Card icon={<Search />} title="Auditing Product Data Quality with Filters" href="/docs/guides/auditing-product-data-quality-with-filters">
+  <Card icon={<Search />} title="Audit product data quality with filters" href="/docs/guides/auditing-product-data-quality-with-filters">
     Find products with missing images, empty fields, or incomplete data before an export.
   </Card>
-  <Card icon={<SatelliteDish />} title="Build a Marketplace-Specific Product Feed" href="/docs/guides/building-marketplace-specific-product-feeds">
+  <Card icon={<SatelliteDish />} title="Build a marketplace-specific product feed" href="/docs/guides/building-marketplace-specific-product-feeds">
     Shape a scoped export for a specific channel instead of the whole catalog.
   </Card>
 </Cards>

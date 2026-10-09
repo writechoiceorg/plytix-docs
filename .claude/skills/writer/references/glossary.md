@@ -42,7 +42,7 @@
 
 **Capitalisation:** channel (lowercase in running text, unless starting a sentence)
 **Definition:** A destination you send product data to (e.g. Shopify, Amazon).
-**Notes:** Not "export" or "feed." If a reader uses their own term for this (e.g. "export feed" or "output"), bridge to the correct term instead of correcting bluntly: "You may know this as an export feed. In Plytix, it's a channel." **API note:** channels are configured and managed entirely in the Plytix UI — there are no API endpoints to create or manage a channel. For API-driven product-to-destination assignment, the correct term is Destinations (see below), not Channel.
+**Notes:** Not "export" or "feed." If a reader uses their own term for this (e.g. "export feed" or "output"), bridge to the correct term instead of correcting bluntly: "You may know this as an export feed. In Plytix, it's a channel." **API note:** channels can be created and managed through the v3 API (`/channels`, and `/products/{id}/channels` to link products). Destinations is the upcoming, broader assignment feature (see below) and isn't fully live yet.
 
 ---
 

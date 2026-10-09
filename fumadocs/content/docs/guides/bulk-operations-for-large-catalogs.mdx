@@ -1,16 +1,18 @@
 ---
-title: Bulk Operations for Large Catalogs
-description: Process large product catalogs reliably today, and what to know before reaching for the older Bulk API.
+title: Bulk operations for large catalogs
+description: Learn how to process large product catalogs reliably with single-item requests, and what to know before reaching for the older Bulk API.
 ---
 
 import { Download, RotateCw } from 'lucide-react';
 
-Process a large catalog of products reliably. **The v3 API has no bulk create, update, or delete endpoints**, so the working approach today is a loop of single-item requests paced against your account's rate limit. This guide covers how to find that limit, how to page through reads efficiently, how to track per-item results so a partial failure doesn't cost you the whole run, and what to know before reaching for the older Bulk API. Everything here uses v3 with a bearer token.
+Process a large catalog of products reliably. The V3 API has no bulk create, update, or delete endpoints, so the working approach today is a loop of single-item requests paced against your account's rate limit. This guide covers how to find that limit, how to page through reads efficiently, how to track per-item results so a partial failure doesn't cost you the whole run, and what to know before reaching for the older Bulk API. Everything here uses V3 with a bearer token. See [Rate Limits](/docs/reference/v3/rate-limits) and [Pagination](/docs/reference/v3/pagination) for the full rules. Limits can vary by account and plan.
 
 ## Prerequisites
 
-- A bearer token. See the Quickstart guide for the authentication flow.
-- The single-item read, create, and update patterns from "Syncing Your ERP with Plytix." This guide builds on those, applied at scale.
+Before you start, make sure you have the following:
+
+- A bearer token. See [Authentication](/docs/reference/v3/authentication), or the [Quickstart](/docs/guides/quickstart) for a first walkthrough.
+- The single-item read, create, and update patterns from [Sync your ERP](/docs/guides/syncing-your-erp-with-plytix). This guide builds on those, applied at scale.
 
 ## Build the processing loop
 
@@ -39,34 +41,51 @@ Follow the steps below to find your rate limit, page through reads, pace your wr
      --data-urlencode "_page_size=100"
    ```
 
-   See "Exporting Your Full Catalog" for the full pagination pattern. A larger `_page_size` reduces the number of requests needed to read the whole catalog.
+   See [Export your full catalog](/docs/guides/exporting-your-full-catalog) for the full pagination pattern. A larger `_page_size` reduces the number of requests needed to read the whole catalog.
 
-3. **Pace writes to stay under the rate limit, and handle `429` defensively.**
+3. **Pace writes to stay under the rate limit.**
 
-   Space out `POST` and `PATCH` calls so you don't exceed the limits from step 1. If a call returns `429`, wait before retrying rather than immediately resending, and slow your loop's overall pace rather than only retrying the single failed request.
+   Space out `POST` and `PATCH` calls so you don't exceed the limits from step 1. If you receive a `429`, wait before retrying rather than immediately resending, and slow your loop's overall pace rather than only retrying the single failed request.
+
+   {/* FLAG (open):
+     The limits in the token are confirmed, but they haven't been observed being enforced. In testing, 80 parallel requests in about 2 seconds all returned `200`, no rate-limit headers appeared, and no `429` was produced on the V3 host, so the `429` response shape is uncaptured. Confirm with Plytix whether limits are enforced in production.
+   */}
 
 4. **Track per-item results yourself.**
 
-   Since there's no bulk endpoint returning a combined success and failure report, log each item's outcome (its ID, the status code, and any error message) as you process it. This gives you your own record of what succeeded, what failed, and why, which you'll need for step 5.
+   Since there's no bulk endpoint returning a combined success and failure report, log each item's outcome (its ID, the status code, and any error message) as you process it. This gives you your own record of what succeeded, what failed, and why, which you'll need for step 5. A minimal loop looks like this:
+
+   ```bash
+   while read -r id; do
+     status=$(curl -s -o /dev/null -w "%{http_code}" -X PATCH        "https://pim.plytix.com/api/v3/products/$id"        -H "Authorization: Bearer <access_token>"        -H "Content-Type: application/json"        -d '{"label": "Updated label"}')
+     echo "$id $status" >> results.log
+   done < product_ids.txt
+   ```
 
 5. **Retry only the items that actually failed.**
 
-   Use the log from step 4 to retry failed items specifically, instead of reprocessing the whole catalog. This is the main efficiency you lose without a bulk endpoint, and the main thing to build deliberately into your own processing loop.
+   Use the log from step 4 to retry failed items specifically, instead of reprocessing the whole catalog. A retried `POST` for a SKU that already exists returns `409`, so treat that response as success. This is the main efficiency you lose without a bulk endpoint, and the main thing to build deliberately into your own processing loop.
 
 ## Before reaching for the older Bulk API
 
-Plytix's v2 API includes a Bulk API for batch operations, but it comes with two things worth knowing before you build against it:
+{/* FLAG (open):
+  The availability and error-response shape of the Bulk API are unconfirmed, and this section comes from project notes only. Confirm both with Plytix before relying on it, and link its documentation here if Plytix supplies it.
+*/}
+
+Plytix's V2 API includes a Bulk API for batch operations, but it comes with two caveats before you build against it:
 
 - **It isn't available to every account.** Confirm with your Plytix contact whether your account has access before planning around it.
 - **Partial failures aren't clearly reported.** A Bulk API response doesn't reliably distinguish between an item that was skipped because nothing changed and one that failed silently, which has been a recurring point of customer feedback. If you do use it, don't assume every item not showing an explicit success actually failed; expect to verify results the same way described in steps 4 and 5 above.
 
 ## Related articles
 
+Now that you know how to process large catalogs, you can explore these related guides.
+
 <Cards>
-  <Card icon={<Download />} title="Exporting Your Full Catalog" href="/docs/guides/exporting-your-full-catalog">
+  <Card icon={<Download />} title="Export your full catalog" href="/docs/guides/exporting-your-full-catalog">
     The pagination pattern this guide's read loop is built on.
   </Card>
-  <Card icon={<RotateCw />} title="Syncing Your ERP with Plytix" href="/docs/guides/syncing-your-erp-with-plytix">
+  <Card icon={<RotateCw />} title="Sync your ERP" href="/docs/guides/syncing-your-erp-with-plytix">
     The single-item read and write calls to pace at scale.
   </Card>
 </Cards>

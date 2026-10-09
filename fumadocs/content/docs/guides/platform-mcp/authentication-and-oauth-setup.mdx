@@ -5,73 +5,64 @@ description: "Learn how to authorize an AI assistant to act on your Plytix accou
 
 import { Plug, ShieldCheck } from 'lucide-react';
 
-This guide walks through authorizing an AI assistant to act on your Plytix account: choosing the credential and the role behind it, connecting your client, confirming the connection works, and revoking it when you're done.
-
-{/* FLAG (open):
-  **Insufficient source:** the Plytix Platform MCP is a roadmap feature and is not live yet (see `glossary.md`, "MCP Server"). No authorization flow, endpoint URL, or client registration process has been shared, so the steps below describe the shape of the task using Plytix's existing credential model, not a tested flow. Every value marked `[PENDING]` needs an answer before this page is published, and the whole procedure needs running end to end against a live server.
+{/* FLAG: Feature not yet available (open):
+  The Plytix Platform MCP is a roadmap feature and is not yet available. No authorization flow, endpoint URL, or client registration process has been shared, so the steps below describe the shape of the task using Plytix's existing credential model. They are not a tested flow, and the details are unconfirmed.
 */}
 
-{/* FLAG (open):
-  **Conflict: Plytix API auth is not OAuth today.** This page is titled "Authentication and OAuth setup" in the outline (`plytix-outline-canvas.md`), but the confirmed v3 flow is a two-step exchange that isn't OAuth 2.0: you post an API key and password to `https://auth.plytix.com/auth/api/get-token` and get back a bearer token (see [Quickstart](/docs/guides/quickstart), and `roadmap.md`, which records this as the single highest-friction onboarding issue with 81 support tickets in two years).
-
-  So one of two things is true, and the answer changes most of this page:
-
-  - The Platform MCP introduces OAuth as new work, in which case this page documents a browser-based authorization flow and the scopes on [Permissions and security considerations](/docs/guides/platform-mcp/permissions-and-security).
-  - The Platform MCP reuses the existing key and password exchange, in which case this page is about supplying those credentials to a client, the page should be retitled, and there are no OAuth scopes to document.
-
-  Confirm which before writing the authorization step in detail.
+{/* FLAG: OAuth or API Key is unresolved (open):
+  Plytix API authentication is not OAuth today. The confirmed V3 flow is a two-step exchange: you post an API Key and password to `https://auth.plytix.com/auth/api/get-token` and get back a bearer token (see [Quickstart](/docs/guides/quickstart)). It is not yet confirmed whether the Platform MCP introduces OAuth, with a browser-based authorization flow and scopes, or reuses the existing exchange. The answer changes most of this page, including its title.
 */}
+
+This guide describes how authorizing an AI assistant to act on your Plytix account is expected to work: choosing the credential and the role behind it, connecting your client, confirming the connection works, and revoking it when you're done. It assumes the Platform MCP reuses Plytix's existing API Key credential, which is unconfirmed. Access is controlled by roles, so read [Permissions and security considerations](/docs/guides/platform-mcp/permissions-and-security) first. Use a test account while you follow it, because an agent with write access changes your catalog when it acts.
 
 ## Prerequisites
 
-Before you start, you need:
+Make sure you have the following:
 
 - **A Plytix account with API access.** Only Owners and Admins can create and manage API credentials. If you don't have Admin rights, ask an account Owner or Admin to complete the credential step, or to grant you those rights.
 - **An MCP-compatible client.** See [Supported clients](/docs/guides/platform-mcp/supported-clients) for which assistants and frameworks work, and what each one needs.
 - **A decision about access.** Read-only covers auditing, exporting, and answering questions about your catalog. Grant write access only if the agent needs to change data. See [Permissions and security considerations](/docs/guides/platform-mcp/permissions-and-security).
 
 <Callout type="warn" title="Start on a test account">
-  An agent with write access changes your catalog the moment it acts, and Plytix has no undo for those changes. Run this setup against a test account first, and connect production only once you've seen the agent behave the way you expect.
+  An agent with write access changes your catalog when it acts, and Plytix can't undo some changes, such as deletions. Run this setup against a test account first, and connect production only once you've seen the agent behave the way you expect.
 </Callout>
 
 ## Authorize your client
 
 1. **Decide which role the agent acts under.**
 
-   Plytix grants access by role, not by user, and the same model covers API keys: a key's role determines what it can reach. Create a dedicated team role for the agent rather than reusing an Owner or Admin role. Start with View across every area, then turn on Edit only where the agent's work needs it.
+   Plytix grants access by role, not by user, and the same model covers API Keys: an API Key's role determines what it can reach. Create a dedicated team role for the agent rather than reusing an Owner or Admin role. Team roles are a paid feature. If your plan doesn't include them, the four system roles are the only option, and all of them except Blocked can edit every PIM section. Start with View across every area, then turn on Edit only where the agent's work needs it.
 
-   {/* FLAG (open):
-     `[PENDING]` It's unconfirmed whether the Platform MCP acts as the authorizing user, inheriting that person's role, or as a separate credential with its own role the way API keys work today. If it acts as the user, a dedicated role means creating a dedicated user, which is a different instruction than the one above.
+   {/* FLAG: Role model unconfirmed (open):
+     It's not yet confirmed whether the Platform MCP acts as the authorizing user, inheriting that person's role, or as a separate credential with its own role the way API Keys work today. If it acts as the user, a dedicated role means creating a dedicated user, which is a different instruction than the one above.
    */}
 
 2. **Create the credential in Plytix.**
 
-   Today, that means an API key:
+   If the Platform MCP reuses the existing credential, that means an API Key. This is unconfirmed.
 
-   1. Sign in at [accounts.plytix.com](https://accounts.plytix.com).
-   2. Open the **API** tab.
-   3. Click **Create API Key**.
-   4. Give the key a name and set its role. Name it after the assistant or the person using it, so you can tell later who had access.
-   5. Copy the **API key** with the clipboard icon, and reveal the **API password** with the eye icon.
+   1. **Sign in** at [accounts.plytix.com](https://accounts.plytix.com).
+   2. **Open** the **API** tab.
+   3. **Click** **Create API Key**.
+   4. **Give** the API Key a name and set its role. Name it after the assistant or the person using it, so you can tell later who had access.
+   5. **Copy** the **API Key** with the clipboard icon, and reveal the **API password** with the eye icon.
 
-   You can edit, re-role, or delete a key later from the same tab.
+   You can edit, re-role, or delete an API Key later from the same tab.
 
-   <Callout type="warn" title="Changing a key's role can break what's using it">
-     Plytix warns that changing an existing API key's role can stop an integration working. Create a new key for the agent rather than re-roling one that something else already depends on.
+   <Callout type="warn" title="Changing an API Key's role can break what's using it">
+     Plytix warns that changing an existing API Key's role can stop an integration working. Create a new API Key for the agent rather than re-roling one that something else already depends on.
    </Callout>
 
 3. **Add the server to your client.**
 
-   Register the Platform MCP endpoint under a server name. The exact syntax depends on your client, and [Supported clients](/docs/guides/platform-mcp/supported-clients) covers the per-client format.
-
-   {/* FLAG (open):
-     `[PENDING]` No endpoint URL exists yet. When it does, add per-client configuration examples here, following the pattern used on [Documentation MCP](/docs/guides/documentation-mcp), which uses a `<docs-base-url>` placeholder until its domain is confirmed.
+   {/* FLAG: No endpoint URL yet (open):
+     No Platform MCP endpoint URL exists yet, so this step can't be written. Per-client configuration examples will be added here once it does, following the pattern used on [Documentation MCP](/docs/guides/documentation-mcp).
    */}
 
 4. **Complete the authorization.**
 
-   {/* FLAG (open):
-     **Insufficient source:** this step can't be written until the conflict at the top of this page is resolved. If the MCP uses OAuth, the step is a browser redirect where you sign in, review the access being requested, and approve it. If it reuses the existing exchange, the step is supplying the API key and password to your client, and the client handles the token exchange. Write whichever one is true, not both.
+   {/* FLAG: Step not yet written (open):
+     This step can't be written until the OAuth or API Key question at the top of this page is resolved. It depends on which authorization method the Platform MCP uses.
    */}
 
 5. **Verify with a read-only question.**
@@ -91,13 +82,13 @@ Before you start, you need:
 
 ## Revoke access
 
-Remove access when the agent no longer needs it, or when you're done testing. Two steps, and the second is the one people skip:
+Remove access when the agent no longer needs it, or when you're done testing. Follow these steps to revoke it:
 
 1. **Remove the server from your client**, so it stops trying to connect.
-2. **Delete or re-role the credential in Plytix**, from the same **API** tab where you created it. Removing the server from a client doesn't invalidate the credential, so a copy of it elsewhere still works until you revoke it on the Plytix side.
+2. **Delete or re-role the credential in Plytix**, from the same **API** tab where you created it. Removing the server from a client doesn't delete the API Key in Plytix, so revoke it on the Plytix side too.
 
-{/* FLAG (open):
-  `[PENDING]` If the Platform MCP uses OAuth, there's presumably a way to revoke a granted authorization independently of API keys, and possibly a list of connected applications. Document that here once it exists.
+{/* FLAG: OAuth revocation unconfirmed (open):
+  If the Platform MCP uses OAuth, there may be a way to revoke a granted authorization independently of API Keys. Document that here once it exists.
 */}
 
 ## Troubleshooting
@@ -106,10 +97,10 @@ Check the problems below if you run into issues while authorizing a client.
 
 <Accordions type="multiple">
   <Accordion title="The assistant reports being connected but every request fails" value="connected-all-fail">
-    Check the credential first and the role second, because the two fail at different points and the status code tells you which you're looking at. A `401` means the credential itself wasn't accepted, so the key, the password, or the way your client stores them is wrong. A `403` means the credential was fine but its role isn't allowed to do what the agent asked. Verifying with a read-only question before you grant write access keeps these two cases from arriving at the same time.
+    Check the credential first and the role second. The two fail at different points, and the status code tells you which. A `401` means the credential wasn't accepted, so the API Key, the password, or the way your client stores them is wrong. A `403` means the credential was fine but its role isn't allowed to do what the agent asked. Verify with a read-only question before you grant write access, so the two cases don't arrive together.
   </Accordion>
   <Accordion title="A long-running job stops partway through with an authorization error" value="long-job-auth-expiry">
-    Bearer tokens from the current Plytix auth flow last 15 minutes, which is short enough that an agent working through a large batch can outlive its own token. Reconnect, ask the agent what it finished before you retry, and rerun only the remainder so you don't duplicate work. The durable fix is to keep agent-driven jobs short and run large batches as code with its own token handling, as in [Bulk operations for large catalogs](/docs/guides/bulk-operations-for-large-catalogs).
+    Bearer tokens from the V3 auth flow last 15 minutes. How the Platform MCP handles tokens is not yet confirmed. If a job stops partway through, ask the agent what it finished before you retry, and rerun only the remainder so you don't duplicate work. For large batches, run them as code with its own token handling, as in [Bulk operations for large catalogs](/docs/guides/bulk-operations-for-large-catalogs).
   </Accordion>
   <Accordion title="The agent can read your catalog but can't change anything" value="read-but-not-write">
     That's a role boundary doing its job, not a bug. Check the role's permissions for the specific area the agent was working in, whether that's products, attributes, categories, or assets, since they're set independently of each other. Deciding read-only or read-write before you create the credential saves discovering the limit partway through a task.
@@ -121,7 +112,7 @@ Check the problems below if you run into issues while authorizing a client.
 
 ## Related articles
 
-Now that your assistant is authorized, you can explore these related pages.
+Now that you know how to authorize an assistant, you can explore these related guides.
 
 <Cards>
   <Card icon={<Plug />} title="Supported clients" href="/docs/guides/platform-mcp/supported-clients">

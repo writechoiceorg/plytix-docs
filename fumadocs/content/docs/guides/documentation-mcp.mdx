@@ -1,13 +1,13 @@
 ---
-title: "Documentation MCP"
+title: "Connect an AI assistant to the Plytix docs"
 description: "Connect Claude, Cursor, VS Code, or any MCP-compatible AI assistant to the Plytix documentation so it answers from the current docs."
 ---
 
-import { Bot, BookOpen } from 'lucide-react';
+import { KeyRound, BookOpen } from 'lucide-react';
 
 The Plytix documentation runs a Model Context Protocol (MCP) server: a read-only endpoint that lets an AI assistant search and read these docs directly. Connect it once, and your assistant answers from the published pages instead of guessing at endpoint names.
 
-This guide covers connecting a client, verifying the connection, and what to do if your client doesn't support MCP.
+This guide covers connecting a client, verifying the connection, and what to do if your client doesn't support MCP. The server is read-only and needs no authentication. If your client can't connect to an MCP server, use the [llms.txt files](#use-llmstxt-if-your-client-doesnt-support-mcp) instead.
 
 {/* FLAG (open):
   The production domain for the Plytix documentation site isn't confirmed yet, so every URL on this page uses the placeholder `https://<docs-base-url>/api/mcp`. Replace `<docs-base-url>` with the live docs domain before publishing.
@@ -15,16 +15,12 @@ This guide covers connecting a client, verifying the connection, and what to do 
 
 ## Prerequisites
 
-You need one of the following, and nothing else:
+Before you start, make sure you have the following:
 
 - An MCP-compatible client that supports remote servers over HTTP. Claude Code, Claude Desktop, Cursor, and VS Code all qualify.
 - The Documentation MCP endpoint: `https://<docs-base-url>/api/mcp`.
 
 You don't need a Plytix account, an API key, or a bearer token. The Documentation MCP serves the public documentation only. It has no access to your product data, and it can't write anything anywhere.
-
-<Callout type="info" title="This is not the Platform MCP">
-  The Documentation MCP reads documentation pages. The [Plytix Platform MCP](/docs/guides/platform-mcp) is a separate server that acts on your Plytix account and requires authorization. Connecting one doesn't connect the other.
-</Callout>
 
 ## Add the server to your client
 
@@ -37,8 +33,6 @@ Pick your client below. In every case you're registering a single HTTP endpoint 
        ```bash
        claude mcp add --transport http plytix-docs https://<docs-base-url>/api/mcp
        ```
-
-    2. **Restart** Claude Code so it picks up the new server.
   </Tab>
   <Tab value="Cursor">
     1. **Create or open** `.cursor/mcp.json` in your project, or `~/.cursor/mcp.json` to make the server available everywhere.
@@ -88,7 +82,7 @@ Pick your client below. In every case you're registering a single HTTP endpoint 
     }
     ```
 
-    In a desktop app such as Claude Desktop, add it through the interface instead: open **Settings > Connectors**, choose **Add custom connector**, and paste the endpoint URL.
+    In a desktop app, add it as a remote HTTP server through the app's settings instead.
   </Tab>
 </Tabs>
 
@@ -107,7 +101,7 @@ Pick your client below. In every case you're registering a single HTTP endpoint 
      -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
    ```
 
-   A `404` means the URL is wrong. Any JSON-RPC response, including a protocol error about a missing session, means the server is up and your client configuration is the thing to fix.
+   A `404` means the URL is wrong. A JSON response that lists `search`, `list_pages`, and `get_page` means the server is up and the problem is in your client configuration. Opening the endpoint in a browser returns a short description of the server.
 
 ## What your assistant can do
 
@@ -122,8 +116,8 @@ The Documentation MCP exposes three tools. Your assistant chooses between them o
 Together, those cover the questions that are slowest to answer by hand:
 
 - "Which Plytix endpoints support filtering, and what's the filter syntax?"
-- "Write a paginated export loop against the v3 products endpoint, following the pattern in the docs."
-- "Does v3 have write parity with v1/v2 yet? Quote the page that says so."
+- "Write a paginated export loop against the V3 products endpoint, following the pattern in the docs."
+- "Does V3 have write parity with V1/V2 yet? Quote the page that says so."
 
 ## Use llms.txt if your client doesn't support MCP
 
@@ -151,7 +145,7 @@ Check the problems below if you run into issues while connecting.
     Most clients only reach for a tool when the request makes the need obvious, so a bare question gets answered from the model's own knowledge instead. Name the source in your prompt, as in "Using the Plytix docs MCP, …", and ask it to cite the page it used so you can tell the difference.
   </Accordion>
   <Accordion title="The assistant can read pages but can't create or update products" value="read-only">
-    That's working as intended. The Documentation MCP serves these published pages and nothing else: it has no access to your Plytix account and no ability to write anywhere. For an assistant that acts on your catalog, see the [Plytix Platform MCP](/docs/guides/platform-mcp), which is a separate server with its own authorization.
+    That's working as intended. The Documentation MCP serves these published pages and nothing else: it has no access to your Plytix account and no ability to write anywhere.
   </Accordion>
 </Accordions>
 
@@ -160,8 +154,8 @@ Check the problems below if you run into issues while connecting.
 Now that your assistant can read the Plytix documentation, you can explore these related guides.
 
 <Cards>
-  <Card icon={<Bot />} title="Plytix Platform MCP" href="/docs/guides/platform-mcp">
-    Learn how agents act on a Plytix account, and how that differs from the Documentation MCP.
+  <Card icon={<KeyRound />} title="Authentication" href="/docs/reference/v3/authentication">
+    Learn how to exchange API credentials for a bearer token when you call the API.
   </Card>
   <Card icon={<BookOpen />} title="API Reference" href="/docs/reference/v3">
     Browse the resources and endpoints your assistant will be reading about.

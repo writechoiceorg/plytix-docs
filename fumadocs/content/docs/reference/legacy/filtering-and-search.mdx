@@ -1,11 +1,11 @@
 ---
-title: Filtering and Search
-description: Reference for the search request body in v1 and v2, including filters, operators, returned attributes, and relationship filters.
+title: Filtering and search
+description: Reference for the search request body in V1/V2, including filters, operators, returned attributes, and relationship filters.
 ---
 
 import { ArrowRightLeft, ListOrdered } from 'lucide-react';
 
-Search endpoints in v1 and v2 take their filters in a JSON request body, not in the query string. This page documents that body: how to write filter conditions, which operators exist, how to choose the attributes that come back, and how to filter products by their relationships.
+Search endpoints in V1/V2 take their filters in a JSON request body, not in the query string. This page documents that body: how to write filter conditions, which operators exist, how to choose the attributes that come back, and how to filter products by their relationships.
 
 Key points on this page:
 
@@ -15,9 +15,9 @@ Key points on this page:
 - Filter and attribute names use the label of the field, and custom attributes need the `attributes.` prefix.
 - Invalid fields, operators, or values return `422`.
 
-<Callout type="warn" title="FLAG">
-  This page is built from the v1 Postman collection. Only `POST /api/v1/products/search` has been tested against the live API, and only with basic requests. The operator list and relationship filters haven't been checked live. v2 product search documents the same restrictions as v1, so this page applies to both unless noted.
-</Callout>
+{/* FLAG (open):
+  This page is built from the V1 Postman collection. Only `POST /api/v1/products/search` has been tested against the live API, and only with basic requests. The operator list and relationship filters haven't been checked live. V2 product search documents the same restrictions as V1, so this page applies to both unless noted.
+*/}
 
 ## Search request body
 
@@ -88,9 +88,9 @@ The operators below are common to all search endpoints. Not every operator is al
 
 A unary operator takes no `value`. A binary operator needs one, and `in` and `!in` need a list.
 
-<Callout type="warn" title="FLAG">
-  The v1 Postman collection names the contains operator `like`. The [Migration reference](/docs/guides/migrating-to-v3/migration-reference) lists it as `contains`, and also lists `null` and `!null`, which the collection doesn't document. Confirm the operator names against the live API before publishing, and align the Migration reference with the result.
-</Callout>
+{/* FLAG (open):
+  The V1 Postman collection names the contains operator `like`. The [Migration reference](/docs/guides/migrating-to-v3/migration-reference) lists it as `contains`, and also lists `null` and `!null`, which the collection doesn't document. Confirm the operator names against the live API before publishing, and align the Migration reference with the result.
+*/}
 
 ## Find available filters
 
@@ -102,7 +102,7 @@ Each searchable resource has a matching endpoint that lists its fields, the oper
 | Assets | `GET /api/v1/filters/asset` |
 | Relationships | `GET /api/v1/filters/relationships` |
 
-Use the `key` value from these responses as the `field` in a filter or as an entry in `attributes`. The same endpoint gives you each custom attribute's name and label. v3 has no equivalent of these endpoints.
+Use the `key` value from these responses as the `field` in a filter or as an entry in `attributes`. The same endpoint gives you each custom attribute's name and label. V3 has no equivalent of these endpoints.
 
 ## Choose which attributes come back
 
@@ -124,9 +124,9 @@ Follow these rules when you name attributes:
 
 A search also returns a `422` if more than 50 attributes are requested. System attributes and custom attributes both count toward the limit, and ID and SKU don't.
 
-<Callout type="warn" title="FLAG">
+{/* FLAG (open):
   The attribute limit conflicts across sources. The product search description says 50 (plus ID and SKU). The collection's general search section says 20, and recommends fetching IDs and then reading each product when you need more. Confirm the limit for each search endpoint with Plytix before publishing.
-</Callout>
+*/}
 
 ## Filter on relationships
 
@@ -183,9 +183,9 @@ When a request includes a `relationships.` column in `attributes`, each product 
 | `label` | string | The label of the relationship. |
 | `related_products` | array | The related products, each with a `product_id` and a `quantity`. |
 
-<Callout type="warn" title="FLAG">
+{/* FLAG (open):
   The collection lists `eq`, `in`, `gt`, `gte`, `lt`, `lte`, `bte`, and `last_days` as the operators under relationship filters, without saying which apply to `qty_operator`. Only `gt` and `bte` appear in its examples. Confirm the valid `qty_operator` values before publishing.
-</Callout>
+*/}
 
 ## Related resources
 
@@ -194,6 +194,6 @@ When a request includes a `relationships.` column in `attributes`, each product 
     Set the page, page size, and sort order of a search, and read the counts it returns.
   </Card>
   <Card icon={<ArrowRightLeft />} title="Migration reference" href="/docs/guides/migrating-to-v3/migration-reference">
-    Compare v1 filter operators with their v3 query-string equivalents.
+    Compare V1 filter operators with their V3 query-string equivalents.
   </Card>
 </Cards>

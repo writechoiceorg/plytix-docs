@@ -32,6 +32,7 @@ Structure
 [ ] Procedure section is not titled "Steps"; it uses a task-based heading, and the title has no "with Plytix" style suffix
 [ ] Guides other than Authentication and the Quickstart do not show the `get-token` request; the token step links to Authentication or the Quickstart
 [ ] Troubleshooting uses Accordions (one per problem), not a bullet list; endpoint names in titles are in code format with a unique `value`
+[ ] Fields with their own allowed values are listed as bullets (inside an Accordion when it is supporting detail), not packed into one paragraph
 [ ] Accordion bodies are one or two paragraphs of continuous prose, with no "Solution:"/"Prevention:" labels
 
 Formatting

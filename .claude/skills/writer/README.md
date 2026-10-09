@@ -32,6 +32,7 @@ This skill depends on the following files in the `references/` folder. Before us
 | [`references/projectConvention.md`](references/projectConvention.md) | Platform-specific formatting: frontmatter, MDX components, callout types |
 | [`references/information-architecture.md`](references/information-architecture.md) | IA map and file paths — where each page lives in the documentation structure |
 | [`references/checklist.md`](references/checklist.md) | Post-writing verification checklist — used before closing any writing task |
+| [`references/guideline.md`](references/guideline.md) | Standing rules for every page, such as writing API versions as V1/V2 and V3 |
 
 ---
 

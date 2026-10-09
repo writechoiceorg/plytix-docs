@@ -71,6 +71,11 @@ Provides MDX/frontmatter syntax, structural rules, and callout types for the pro
 
 Provides the IA map — where this page fits, what pages precede and follow it, and the correct file path for saving output. Do not guess or create a path if it is not listed here.
 
+### Guideline
+→ See [`references/guideline.md`](references/guideline.md)
+
+Standing project rules that apply to every page, starting with how API versions are named: always V1/V2 and V3, never lowercase. Apply them while writing, not only at review.
+
 ### Verification checklist
 → See [`references/checklist.md`](references/checklist.md)
 
@@ -83,6 +88,7 @@ Use after writing each page to confirm output quality before closing the task.
 3. Platform components (MCP or `projectConvention.md`) — establishes what you can build with
 4. Page types (`page-types.md`) — load only the relevant type
 5. IA structure (`information-architecture.md`) — establishes where the output lives
+6. Guideline (`guideline.md`) — standing rules, such as V1/V2 and V3 version naming
 
 ### When references are missing
 
