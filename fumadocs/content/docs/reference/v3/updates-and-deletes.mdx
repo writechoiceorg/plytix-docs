@@ -1,6 +1,6 @@
 ---
-title: "Working with Updates and Deletes"
-description: "Reference for how v3 handles writes: which method to use, what each returns, how empty values are stored, and what DELETE actually removes."
+title: "Update and delete records"
+description: "Reference for how V3 handles writes: which method to use, what each returns, how empty values are stored, and what DELETE actually removes."
 ---
 
 import { TriangleAlert, BookOpen } from 'lucide-react';
@@ -70,7 +70,7 @@ This returns `204` and leaves every other attribute intact.
 
 ## How empty values are treated
 
-An empty string or an empty list is a value in v3, not an instruction to remove something.
+An empty string or an empty list is a value in V3, not an instruction to remove something.
 
 | Operation | Empty value behavior |
 |---|---|
@@ -112,13 +112,15 @@ The same path pattern extends through related entities, in the form `/api/v3/<en
 
 ## Advanced updates
 
-Some changes can't be expressed by assigning a value to a field, such as inserting an item at a specific position in a list. For those, v3 accepts JSON Patch: send a PATCH with the content type `application/json-patch+json` and a body that describes the change as a list of RFC 6902 operations, each naming an `op`, a `path`, and, where the operation needs one, a `value`.
+Some changes can't be expressed by assigning a value to a field, such as inserting an item at a specific position in a list. For those, V3 accepts JSON Patch: send a PATCH with the content type `application/json-patch+json` and a body that describes the change as a list of RFC 6902 operations, each naming an `op`, a `path`, and, where the operation needs one, a `value`.
 
 ## Async operations
 
 An operation that can't complete within the request returns `202` with a `process_id` rather than a result. Track it through the Process Manager API, and the record changes once processing finishes.
 
 ## Write safely
+
+Follow these practices when you write to the API:
 
 - **Read before you write.** Confirm which records match your filter before applying a change to them.
 - **Test deletes on one record.** Erasure and inheritance interact in ways that are hard to predict from a filter alone.
@@ -127,7 +129,7 @@ An operation that can't complete within the request returns `202` with a `proces
 
 ## Related resources
 
-Now that you know how v3 handles writes, you can explore these related pages.
+Now that you know how V3 handles writes, you can explore these related pages.
 
 <Cards>
   <Card icon={<TriangleAlert />} title="Errors and Status Codes" href="/docs/reference/v3/errors-status-codes">

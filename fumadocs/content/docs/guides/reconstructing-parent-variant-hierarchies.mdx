@@ -1,18 +1,22 @@
 ---
 title: Reconstruct parent/variant hierarchies
-description: Retrieve a parent product together with its variants in one structured call.
+description: Learn how to build a parent and variant hierarchy with product families, then read its levels and structure back through the V3 API.
 ---
 
 import { RotateCw, TriangleAlert } from 'lucide-react';
 
-Read a parent product and its variants as a structured hierarchy, the way an ERP or marketplace needs it, using `parent_id` and `product_family_id`. This guide covers reading an existing hierarchy. Creating or configuring a Product Family itself is a dashboard-only action; the API can only assign products into a family that already exists.
+Build a parent and variant hierarchy, the way an ERP or marketplace needs it, using `parent_id` and `product_family_id`, and read its levels and structure back. Creating a product family, adding attributes to it, and assigning products into it all work through the V3 API with a bearer token. Inheritance between levels is an account-level feature that isn't enabled on every account, so ask your Plytix contact whether your account has it before you build against it.
 
 ## Prerequisites
 
-- A bearer token. See the Quickstart guide for the authentication flow.
+Before you start, make sure you have the following:
+
+- A bearer token. See [Authentication](/docs/reference/v3/authentication), or the [Quickstart](/docs/guides/quickstart) for a first walkthrough.
 - An existing product family in your account. If you're not sure whether one exists, step 1 shows you how to check.
 
-## Steps
+## Build and read the hierarchy
+
+Follow the steps below to find or create a family, add a parent and its variants, and read the structure back.
 
 1. **List the product families already in your account.**
 
@@ -23,9 +27,16 @@ Read a parent product and its variants as a structured hierarchy, the way an ERP
 
    Each family includes `total_products`, `total_attributes`, and `total_models`, so you can confirm a family actually has data before building against it.
 
-   <Callout type="warn" title="FLAG">
-     Creating a new Product Family, choosing its attributes, or configuring inheritance between levels are all dashboard-only actions today. There's no API endpoint for any of them. The steps below assign products into an existing family, they don't build one from scratch.
-   </Callout>
+   To create one instead, `POST` a name:
+
+   ```bash
+   curl -X POST "https://pim.plytix.com/api/v3/product-families" \
+     -H "Authorization: Bearer <access_token>" \
+     -H "Content-Type: application/json" \
+     -d '{"name": "Backpacks"}'
+   ```
+
+   A family create also accepts `attributes`, `parent_attributes`, and `variant_attributes`, and the last two depend on inheritance being enabled on your account. Add attributes to it with `POST /api/v3/product-families/<family_id>/attributes`, sending `{"attribute_id": "<attribute_id>"}` for each one. A family's own `PATCH` accepts `name` only, because changing its attribute membership propagates across every product in the family.
 
 2. **Create the parent product, assigned to that family.**
 
@@ -36,7 +47,7 @@ Read a parent product and its variants as a structured hierarchy, the way an ERP
      -d '{"sku": "PARENT-001", "product_family_id": "<family_id>"}'
    ```
 
-   A standalone product starts at `product_level: 0`. The response includes the full created product, not only its ID, even though some Plytix API documentation describes `POST` as returning only an ID.
+   A successful create returns `201` with the product itself, not only its ID, leaving out any field you didn't set. Note the `product_level: 0` in that response: putting a product in a family doesn't make it a parent. It becomes one in step 3, when a variant points at it.
 
 3. **Create a variant, referencing the parent.**
 
@@ -44,10 +55,10 @@ Read a parent product and its variants as a structured hierarchy, the way an ERP
    curl -X POST "https://pim.plytix.com/api/v3/products" \
      -H "Authorization: Bearer <access_token>" \
      -H "Content-Type: application/json" \
-     -d '{"sku": "VARIANT-001", "product_family_id": "<family_id>", "parent_id": "<parent_id>"}'
+     -d '{"sku": "VARIANT-001", "parent_id": "<parent_id>"}'
    ```
 
-   Use the same `product_family_id` as the parent. The API doesn't enforce this, but a mismatched family will break how the hierarchy reads back.
+   A variant takes its family from its parent, so you can leave `product_family_id` out. If you do send it, it has to match the parent's: a different family is rejected with `422` and the generic message `"product data validation failed"`, which names no field, so it's worth recognizing.
 
 4. **Read the parent back and confirm the hierarchy updated.**
 
@@ -65,25 +76,27 @@ Read a parent product and its variants as a structured hierarchy, the way an ERP
      -H "Authorization: Bearer <access_token>"
    ```
 
-   A family model includes `parent_attribute_labels`, `variant_attribute_labels`, and `no_level_attribute_labels`, the arrays that define which attributes apply at each level of the hierarchy. This is read-only. Changing which attributes belong at which level is done in Settings, not through the API.
+   A family model includes `parent_attribute_labels`, `variant_attribute_labels`, and `no_level_attribute_labels`, the arrays that define which attributes apply at each level of the hierarchy. These models are read-only.
 
-## Reading inheritance
+   Which level an attribute sits at is what drives inheritance, and you change it with `PATCH /api/v3/product-families/<family_id>/attributes/<attribute_id>`, sending a new `level`. On accounts without the inheritance feature this returns `403` with `"Automatic inheritance is not available for this account"`, which is an account-level setting rather than anything wrong with your request.
 
-When a variant is created under a parent, Plytix tracks which of its attribute values were inherited versus explicitly overwritten, in the `overwritten_attributes` field on the product. Read this field to see which attributes a specific variant customized.
+## Read which values a variant overrides
 
-<Callout type="warn" title="FLAG">
-  This project confirmed the `overwritten_attributes` field is present and returns an array, but didn't independently test what it contains once a variant actually overwrites an inherited value. Verify the exact shape against your own account's data before building logic around its contents.
-</Callout>
+{/* FLAG (open):
+  This behavior is unverified. Inheritance is gated on the development account used for testing, so `overwritten_attributes` couldn't be tested, and the spec describes it only as "Overwritten attribute names". Confirm with Plytix before relying on it.
+*/}
 
-Plytix's own API documentation notes that deleting a variant's overwritten attribute value (rather than setting it to an empty value) can cause that attribute to fall back to, or "resolve," the parent's inherited value. This wasn't independently tested in this project. If you need to revert a variant's attribute back to its parent's value, this is worth verifying directly against your account before relying on it.
+When inheritance is enabled and a variant overrides a value it would otherwise inherit, Plytix records that attribute's name in the variant's `overwritten_attributes` array. Read that field to see which values a specific variant customized and which it's still taking from its parent.
 
 ## Related articles
 
+Now that you know how to build and read a hierarchy, you can explore these related guides.
+
 <Cards>
-  <Card icon={<RotateCw />} title="Syncing Your ERP with Plytix" href="/docs/guides/syncing-your-erp-with-plytix">
+  <Card icon={<RotateCw />} title="Sync your ERP" href="/docs/guides/syncing-your-erp-with-plytix">
     Apply the same read/write pattern to keep hierarchy data in sync.
   </Card>
-  <Card icon={<TriangleAlert />} title="Safely Removing Categories, Assets, or Relationships from a Product" href="/docs/guides/safely-removing-categories-assets-or-relationships">
-    What's read-only versus writable across related product data.
+  <Card icon={<TriangleAlert />} title="Safely remove categories, assets, or relationships" href="/docs/guides/safely-removing-categories-assets-or-relationships">
+    Unlink a category or relationship from a product without affecting its other data.
   </Card>
 </Cards>

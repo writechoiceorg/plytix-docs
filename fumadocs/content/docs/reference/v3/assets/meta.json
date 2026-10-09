@@ -1,5 +1,6 @@
 {
   "title": "Assets",
+  "icon": "Image",
   "pages": [
     "search_assets_api_v3_assets_get",
     "create_assets_api_v3_assets_post",

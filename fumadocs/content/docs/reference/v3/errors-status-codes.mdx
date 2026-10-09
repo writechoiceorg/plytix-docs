@@ -1,13 +1,13 @@
 ---
-title: Errors and Status Codes
-description: The status codes and error response shapes you'll see across the API.
+title: Errors and status codes
+description: "Reference for the HTTP status codes and error response shapes you see across the Plytix API, including validation errors."
 ---
 
 import { BookOpen, Gauge } from 'lucide-react';
 
 This page documents the HTTP status codes and error response formats you'll encounter when calling the Plytix API.
 
-<Callout type="warning" title="Deprecation notice">
+<Callout type="warn" title="Deprecation notice">
 The API sends a custom `X-Plytix-Deprecation` header in the response when the endpoint you're calling is scheduled for deprecation soon.
 </Callout>
 
@@ -51,6 +51,7 @@ Operations declare only two response codes in the OpenAPI specification: 200 for
 Every response, successful or not, uses an envelope with a `data` field and an `errors` array. The `errors` array is always present, even on a successful response, and is empty when there's nothing to report. Search responses also include a `pagination` object with `next_page` and `previous_page`.
 
 Example response for a request that fails with a 404:
+
 ```json
 {
   "data": [],
@@ -63,20 +64,21 @@ Example response for a request that fails with a 404:
 }
 ```
 
-Each entry in `errors` is an `Error` object:
+Open the entries below for the shape of each error object.
+
 <Accordions type="multiple">
-  <Accordion title="errors: Error object">
+  <Accordion title="errors: Error object" value="error-object">
     Each entry in `errors` is an `Error` object:
 
- | Field | Type | Required | Description |
- |---|---|---|---|
- | `name` | string | Yes | Error name. |
- | `description` | string | Yes | Error description. |
-  
-</Accordion>
-  <Accordion title="422 responses: HTTPValidationError / ValidationError">
+    | Field | Type | Required | Description |
+    |---|---|---|---|
+    | `name` | string | Yes | Error name. |
+    | `description` | string | Yes | Error description. |
+  </Accordion>
+  <Accordion title="422 responses: HTTPValidationError / ValidationError" value="validation-error">
     For 422 responses, the body uses a different shape, `HTTPValidationError`, with a `detail` array instead of `errors`:
-  ```json
+
+    ```json
     {
       "detail": [
         {
@@ -86,8 +88,10 @@ Each entry in `errors` is an `Error` object:
         }
       ]
     }
-  ```
+    ```
+
     Each entry in `detail` is a `ValidationError`:
+
     | Field | Type | Required | Description |
     |---|---|---|---|
     | `loc` | array of string or integer | Yes | Location of the invalid field. |

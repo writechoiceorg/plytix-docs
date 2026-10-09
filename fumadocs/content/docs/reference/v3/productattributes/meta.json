@@ -1,5 +1,6 @@
 {
   "title": "Product Attributes",
+  "icon": "Tags",
   "pages": [
     "search_product_attributes_api_v3_product_attributes_get",
     "create_product_attributes_api_v3_product_attributes_post",

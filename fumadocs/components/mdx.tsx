@@ -1,6 +1,7 @@
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import type { MDXComponents } from 'mdx/types';
 import { OpenAPIPage } from './openapi-page';
+import { ComingSoon } from './coming-soon';
 import { Card, Cards } from 'fumadocs-ui/components/card';
 import { Callout } from 'fumadocs-ui/components/callout';
 import { Step, Steps } from 'fumadocs-ui/components/steps';
@@ -14,6 +15,7 @@ export function getMDXComponents(components?: MDXComponents) {
     Card,
     Cards,
     Callout,
+    ComingSoon,
     Step,
     Steps,
     Tab,

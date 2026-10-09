@@ -1,0 +1,60 @@
+---
+title: "Searching and pagination"
+description: "Reference for converting a V1 search POST body into a V3 GET query, and for paging through a V3 result set that returns no record counts."
+---
+
+import { Filter, ListOrdered } from 'lucide-react';
+
+A V1 search is a POST with a JSON body. A V3 search is a GET with query parameters. This page maps the two request shapes onto each other and covers what changes once the results come back, including the two pagination behaviors that break migrated paging loops. It's part of the reference set for [Migrating to V3](/docs/guides/migrating-to-v3).
+
+## Request shape
+
+The structural change is the verb: what used to be a POST body is now a query string on a GET.
+
+| | V1/V2 | V3 |
+|---|---|---|
+| Search verb and path | `POST /api/v1/<entities>/search` | `GET /api/v3/<entities>` |
+| Filters | `filters` array in the body | Query parameters in bracket syntax |
+| Field selection | `attributes` array in the body | `_fields=<name>`, repeated per field |
+| Paging | `pagination` object in the body | `_page`, `_page_size`, `_sort_by` |
+| No filter given | The V1 collection always shows a body | Returns all records |
+
+That last row is worth pausing on. A V3 search with no recognized parameter means "get all," so a filter that fails to translate doesn't error, it quietly returns the whole collection. [Filter operators](/docs/guides/migrating-to-v3/filter-operators) covers the syntax each V1 operator becomes.
+
+## Pagination
+
+Both versions page, but V3 reports its position differently and drops counts entirely.
+
+| | V1/V2 | V3 |
+|---|---|---|
+| Request | `"pagination": {"page": 1, "page_size": 25, "order": "sku"}` in the body | `_page=1&_page_size=25&_sort_by=sku` in the query string |
+| Bounds | Not documented in the V1 collection | `_page >= 1` and `_page_size <= 1000`; both return `422` outside those bounds |
+| Default page size | Not documented in the V1 collection | `25` |
+| Descending sort | Not documented in the V1 collection | `_sort_by=-<field>` |
+| Record counts | `total_count` always returned | None available |
+| Response keys | `count`, `order`, `page`, `page_size`, `total_count` | `next_page`, `previous_page` |
+
+V3 returns page URLs rather than a page number to increment, so a paging loop follows `next_page` until that key stops appearing instead of counting pages. The keys are omitted when they don't apply rather than set to `null`, so a client written as `if (pagination.next_page !== null)` is wrong. Test for presence.
+
+<Callout type="warn" title="No counts in v3">
+  V1 returned `total_count` on every search. V3 has no equivalent: the pagination block carries no counts, and there is no parameter that adds one. Requesting `_total_count` or `_filtered_count` returns `400 InvalidFieldError`.
+
+  Anything in your integration that reads a total (a progress bar, a "showing N of M" label, a pre-sized buffer) has to page to the end and tally. See [Pagination](/docs/reference/v3/pagination).
+</Callout>
+
+<Callout type="warn" title="next_page URLs use the http scheme">
+  Every `next_page` and `previous_page` link comes back as `http://`, then `301`s to `https`. Clients that don't forward `Authorization` across a scheme-changing redirect drop it and get a `401`. Rewrite the scheme before following the link, or use `curl -L --location-trusted`.
+</Callout>
+
+## Related resources
+
+Now that you can convert a search and page through its results, you can explore these related pages.
+
+<Cards>
+  <Card icon={<Filter />} title="Filter operators" href="/docs/guides/migrating-to-v3/filter-operators">
+    Map each V1 filter object to its V3 bracket syntax.
+  </Card>
+  <Card icon={<ListOrdered />} title="Pagination" href="/docs/reference/v3/pagination">
+    Read the V3 pagination block and its parameters in full.
+  </Card>
+</Cards>

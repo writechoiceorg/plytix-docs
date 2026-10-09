@@ -1,9 +1,9 @@
 {
-  "title": "v3 (Current)",
+  "title": "V3 (Current)",
   "root": true,
   "icon": "Code",
   "pages": [
-    "---Overview---",
+    "---[BookOpen]Overview---",
     "index",
     "authentication",
     "errors-status-codes",
@@ -11,7 +11,7 @@
     "filtering-query-syntax",
     "pagination",
     "updates-and-deletes",
-    "---Endpoints---",
+    "---[Webhook]Endpoints---",
     "products",
     "assets",
     "productcategories",

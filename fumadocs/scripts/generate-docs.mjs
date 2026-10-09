@@ -15,6 +15,31 @@ const stagingDir = path.join(referenceDir, 'endpoints');
 
 // Nicer group titles than the auto-generated per-tag titles (which are just
 // the raw OpenAPI tag slug capitalized, e.g. "Productattributegroups").
+// Lucide icon per resource group, shown in the sidebar.
+const TAG_ICONS = {
+  products: "Package",
+  assets: "Image",
+  productcategories: "FolderTree",
+  assetcategories: "FolderTree",
+  assetlists: "List",
+  relationships: "Link2",
+  productrelationships: "Link",
+  relatedproducts: "Link2",
+  productfamilies: "Layers",
+  familyattributes: "ListTree",
+  productattributes: "Tags",
+  productattributegroups: "Group",
+  pimproductlists: "ListChecks",
+  channels: "Share2",
+  connections: "Plug",
+  ecatalogs: "BookOpen",
+  importprofiles: "Upload",
+  pdfcatalogs: "FileText",
+  productfamilymodels: "Boxes",
+  probes: "Activity",
+  unknown: "BarChart3"
+};
+
 const TAG_LABELS = {
   products: 'Products',
   assets: 'Assets',
@@ -109,6 +134,7 @@ for (const tag of orderedTags) {
   const tagMetaPath = path.join(to, 'meta.json');
   const tagMeta = JSON.parse(await readFile(tagMetaPath, 'utf-8'));
   tagMeta.title = TAG_LABELS[tag] ?? tagMeta.title;
+  if (TAG_ICONS[tag]) tagMeta.icon = TAG_ICONS[tag];
   tagMeta.pages = [...tagMeta.pages].sort(comparePages);
   await writeFile(tagMetaPath, JSON.stringify(tagMeta, null, 2) + '\n');
 
@@ -127,14 +153,14 @@ try {
   referenceMeta = { title: 'API Reference', root: true, pages: [] };
 }
 const cutIndex = referenceMeta.pages.findIndex(
-  (p) => p === '---Endpoints---' || p === 'endpoints',
+  (p) => p === '---[Webhook]Endpoints---' || p === '---Endpoints---' || p === 'endpoints',
 );
 const preservedPages = cutIndex === -1 ? referenceMeta.pages : referenceMeta.pages.slice(0, cutIndex);
 
 await writeFile(
   referenceMetaPath,
   JSON.stringify(
-    { ...referenceMeta, pages: [...preservedPages, '---Endpoints---', ...tagFolders] },
+    { ...referenceMeta, pages: [...preservedPages, '---[Webhook]Endpoints---', ...tagFolders] },
     null,
     2,
   ) + '\n',

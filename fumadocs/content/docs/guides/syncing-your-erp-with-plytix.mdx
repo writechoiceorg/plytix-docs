@@ -1,33 +1,27 @@
 ---
-title: Sync your ERP with Plytix
+title: Sync your ERP
 description: Read product data from Plytix, detect what changed, and push stock, price, and status updates back so your ERP and Plytix stay in sync.
 ---
 
-import { Download, TriangleAlert } from 'lucide-react';
+import { Download, Layers } from 'lucide-react';
 
-Keep product data consistent between your ERP and Plytix by reading changes from Plytix on a schedule and writing your own changes back through the same API. This guide covers both directions: pulling updates into your ERP, and pushing stock, price, or status changes back to Plytix.
-
-<Callout type="warn" title="v1/v2 vs v3">
-  Plytix's product team currently recommends v1/v2 for any workflow that creates, updates, or deletes products (ERP write-back, stock updates, price updates, status changes), while v3 write parity is still growing. The v3 endpoints below are confirmed working live today, but confirm with your Plytix contact which version to build against before committing to a production integration. See [Migrating to v3](/docs/guides/migrating-to-v3) for how the versions differ.
-</Callout>
+Keep product data consistent between your ERP and Plytix by reading changes from Plytix on a schedule and writing your own changes back through the same API. This guide covers both directions: pulling updates into your ERP, and pushing stock, price, or status changes back to Plytix. All requests use the V3 API with a bearer token. Read [Update and delete records](/docs/reference/v3/updates-and-deletes) before you write, because a `PATCH` that names the `attributes` map replaces the whole map.
 
 ## Prerequisites
 
+Before you start, make sure you have the following:
+
 - A Plytix account with API credentials (an `api_key` and `api_password` from **Account Administration > API**).
-- A way to exchange those credentials for a bearer token. See the [Quickstart](/docs/guides/quickstart) for the full authentication flow.
+- A way to exchange those credentials for a bearer token. See [Authentication](/docs/reference/v3/authentication), or the [Quickstart](/docs/guides/quickstart) for a first walkthrough.
 - A field in your ERP to store each product's Plytix product ID, so you can address a product directly instead of searching by SKU on every call.
 
-## Steps
+## Keep both systems in sync
+
+Follow the steps below to authenticate, read changes from Plytix, push your own updates back, and confirm they were applied.
 
 1. **Get an access token.**
 
-   ```bash
-   curl -X POST "https://auth.plytix.com/auth/api/get-token" \
-     -H "Content-Type: application/json" \
-     -d '{"api_key": "your_api_key", "api_password": "your_api_password"}'
-   ```
-
-   The token appears at `data[0].access_token` and expires after 15 minutes. Request a new one when a call returns `401`.
+   Exchange your `api_key` and `api_password` for a bearer token, as described in [Authentication](/docs/reference/v3/authentication). The token expires after 15 minutes, so request a new one when a call returns `401`.
 
 2. **Resolve a product's Plytix ID from its SKU, the first time you see that SKU.**
 
@@ -38,7 +32,7 @@ Keep product data consistent between your ERP and Plytix by reading changes from
      --data-urlencode "_fields=id"
    ```
 
-   Store the returned `id` alongside the SKU in your ERP so every later call can skip this lookup.
+   Storing the returned `id` alongside the SKU in your ERP is optional, because the SKU also works as the identifier in `GET /products/<identifier>`. It does make later calls steadier and faster, since they skip this lookup.
 
 3. **Read the current product state.**
 
@@ -59,7 +53,11 @@ Keep product data consistent between your ERP and Plytix by reading changes from
      --data-urlencode "_fields=sku"
    ```
 
-   `modified` is the last-modification timestamp, so this catches edits as well as new products. Filtering on `created` returns only products added since the cutoff and misses every update, which is rarely what a sync wants. Store the timestamp of each successful sync and reuse it as the next run's filter value.
+   `modified` is the last-modification timestamp, so this catches edits as well as new products. Filtering on `created` returns only products added since the cutoff and misses every update, which is rarely what a sync wants. Store the timestamp of each successful sync and reuse it as the next run's filter value. Search results are paged, with a default page size of 25. See [Pagination](/docs/reference/v3/pagination) for how to read every page.
+
+   {/* FLAG (open):
+     Filtering on `created` is confirmed in testing. Filtering on `modified[gt]`, and whether `modified` advances after an attribute `PATCH`, hasn't been tested yet. Verify both on your account before you rely on this step.
+   */}
 
 5. **Push an attribute change back to Plytix.**
 
@@ -80,7 +78,7 @@ Keep product data consistent between your ERP and Plytix by reading changes from
 
    Either way, a successful `PATCH` returns `204` with an empty body, so confirm the result with a read-back (step 7) rather than parsing the response.
 
-   Sending an empty string or an empty list stores that empty value instead of clearing the field. See [Working with Updates and Deletes](/docs/reference/v3/updates-and-deletes) for what each write returns and what DELETE removes.
+   See [Update and delete records](/docs/reference/v3/updates-and-deletes) for what each write returns and what DELETE removes.
 
 6. **Create a product your ERP has that Plytix doesn't have yet.**
 
@@ -91,7 +89,18 @@ Keep product data consistent between your ERP and Plytix by reading changes from
      -d '{"sku": "NEW-SKU-001", "label": "New Product"}'
    ```
 
-   `sku` is the only required field. Everything else, including `attributes` and `category_ids`, can follow in the same request or a later `PATCH`. A successful create returns `201` with the full created product, not only its ID, even though some Plytix API documentation describes `POST` as returning only an ID.
+   `sku` is the only required field. A successful create returns `201` with the product itself, not only its ID, so you can store the new `id` straight from the response without a follow-up read. Fields you didn't set are left out rather than returned empty.
+
+   One shape difference to code around: on a create, `data` is a single object. On a search it's an array. Reusing one response parser across both will bite you.
+
+   The request accepts and rejects these fields:
+
+   | Fields | Result |
+   |---|---|
+   | `label`, `gtin`, `status`, `attributes`, `thumbnail_id`, `product_family_id`, `parent_id` | Accepted in the same request. |
+   | `category_ids`, `static_list_ids`, `channel_ids`, `ecatalog_ids`, `product_data_sheet_ids` | Rejected with `422` and `"Extra inputs are not permitted"`, on create and on `PATCH` alike. |
+
+   Categories are attached afterwards with `POST /products/<product_id>/categories`, sending `{"id": "<category_id>"}`. See [Safely remove categories, assets, or relationships](/docs/guides/safely-removing-categories-assets-or-relationships) for the full link and unlink pattern.
 
 7. **Confirm the write took effect.**
 
@@ -104,15 +113,26 @@ Keep product data consistent between your ERP and Plytix by reading changes from
 
 ## Troubleshooting
 
-- **Problem:** `POST /products` returns `409 Conflict` with `"A product with the same name already exists"`-style text.
-  - **Solution:** The SKU already exists in this account. Look it up with a search instead of creating it again.
-  - **Prevention:** Check for an existing SKU before creating, using the lookup in step 2.
-- **Problem:** `GET /products/<identifier>` returns `404` instead of the product.
-  - **Solution:** Nothing in this account matches that identifier. Both the Plytix product ID and the SKU work in this position, but a SKU containing characters with special meaning in a URL has to be encoded first.
-  - **Prevention:** Store each product's Plytix ID in your ERP (step 2) so lookups don't depend on SKU formatting.
-- **Problem:** Attributes you didn't touch disappear after a sync run.
-  - **Solution:** A `PATCH` that names `attributes` replaces the whole map. Read the product's current attributes, merge your change into them, and send the result, as shown in step 5.
-  - **Prevention:** Never build a `PATCH` body with only the changed attribute in it.
+Check the problems below if you run into issues while following this guide.
+
+<Accordions type="multiple">
+  <Accordion title={<><code>POST /products</code> returns 409 Conflict</>} value="post-products-409">
+    If the response is `409` with an `AlreadyExists` error and the description `"product data validation failed"`, the SKU already exists in this account. The error doesn't name the field. Look it up with a search instead of creating it again, and check for an existing SKU before every create, using the lookup in step 2.
+  </Accordion>
+  <Accordion title={<><code>GET /products/&lt;identifier&gt;</code> returns 404</>} value="get-products-404">
+    If the request returns `404` instead of the product, nothing in this account matches that identifier. Both the Plytix product ID and the SKU work in this position, but a SKU containing characters with special meaning in a URL has to be encoded first.
+
+    To avoid SKU formatting issues altogether, store each product's Plytix ID in your ERP (step 2) so lookups don't depend on it.
+  </Accordion>
+  <Accordion title="Sending an empty string or empty list doesn't clear a field" value="empty-value-stored">
+    Sending an empty string or an empty list stores that empty value instead of clearing the field. See [Update and delete records](/docs/reference/v3/updates-and-deletes) for what each write returns and what `DELETE` removes.
+  </Accordion>
+  <Accordion title="Attributes you didn't touch disappear after a sync run" value="attributes-disappear">
+    A `PATCH` that names `attributes` replaces the whole map, so every attribute missing from your payload is removed. Read the product's current attributes, merge your change into them, and send the result.
+
+    To avoid this entirely, address each attribute at its own path instead, as shown in step 5. `PATCH /products/<product_id>/attributes/<name>` changes only the attribute you name and is the safer default for a sync loop.
+  </Accordion>
+</Accordions>
 
 ## Related articles
 
@@ -122,7 +142,7 @@ Now that you know how to keep your ERP and Plytix in sync, you can explore these
   <Card icon={<Download />} title="Export your full catalog" href="/docs/guides/exporting-your-full-catalog">
     Pull every product, with attributes and assets, in one paginated pass.
   </Card>
-  <Card icon={<TriangleAlert />} title="Safely remove categories, assets, or relationships" href="/docs/guides/safely-removing-categories-assets-or-relationships">
-    The right way to unassign data from a product without deleting it.
+  <Card icon={<Layers />} title="Bulk operations for large catalogs" href="/docs/guides/bulk-operations-for-large-catalogs">
+    Pace these single-item calls against your rate limit when the catalog is large.
   </Card>
 </Cards>

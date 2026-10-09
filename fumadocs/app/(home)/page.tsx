@@ -6,7 +6,7 @@ const cards = [
     title: 'Get started',
     icon: Rocket,
     description:
-      'Generate an API key, exchange it for a bearer token, and make your first authenticated request against API v3.',
+      'Generate an API key, exchange it for a bearer token, and make your first authenticated request against API V3.',
     bullets: ['Create an API key in your dashboard', 'Exchange it for a bearer token'],
     href: '/docs/guides/overview',
     linkLabel: 'Check the guides',

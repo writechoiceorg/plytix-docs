@@ -1,13 +1,14 @@
 {
   "title": "Guides",
+  "icon": "BookOpen",
   "root": true,
   "pages": [
-    "---Get Started---",
+    "---[Rocket]Get Started---",
     "overview",
     "quickstart",
     "data-model",
     "migrating-to-v3",
-    "---Integration Guides---",
+    "---[Workflow]Integration Guides---",
     "syncing-your-erp-with-plytix",
     "exporting-your-full-catalog",
     "auditing-product-data-quality-with-filters",
@@ -15,8 +16,7 @@
     "safely-removing-categories-assets-or-relationships",
     "reconstructing-parent-variant-hierarchies",
     "bulk-operations-for-large-catalogs",
-    "getting-notified-webhooks-and-automations",
-    "---Plytix MCPs---",
+    "---[Bot]Plytix MCPs---",
     "documentation-mcp",
     "platform-mcp"
   ]

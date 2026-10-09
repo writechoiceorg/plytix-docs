@@ -1,5 +1,6 @@
 {
   "title": "Accounts",
+  "icon": "User",
   "pages": [
     "apiCredentialSearch_api_v1_accounts_api_credentials_search_post",
     "membershipSearch_api_v1_accounts_memberships_search_post"

@@ -1,13 +1,11 @@
 ---
 title: Authentication
-description: Bearer-token request and response shapes, and how long a token stays valid.
+description: "Reference for exchanging your API key and password for a bearer token, using it in requests, and how long a token stays valid."
 ---
 
 import { Rocket, TriangleAlert } from 'lucide-react';
 
-The Plytix API uses bearer token authentication. Rather than sending your API key and password with every call, you exchange them once for a short-lived access token, then include that token in the `Authorization` header of every subsequent request instead. Your account administrator issues the API key and password from the account's API tab, and the role assigned to that key determines what it can access.
-
-This page documents that token exchange, and how to use the token you get back.
+The Plytix API uses bearer token authentication. Rather than sending your API key and password with every call, you exchange them once for a short-lived access token, then include that token in the `Authorization` header of every subsequent request instead. Your account administrator issues the API key and password from the account's API tab, and the role assigned to that key determines what it can access. This page documents that token exchange and how to use the token you get back.
 
 ## Get a bearer token
 
@@ -57,10 +55,10 @@ Tokens expire after 15 minutes. Once a token expires, requests using it return `
 
 If the request fails, you'll get one of the following:
 
-| Status code | Example response |
+| Status code | Response |
 |---|---|
-| 400 BAD REQUEST | The request body is malformed. Check the request and try again. |
-| 401 UNAUTHORIZED | `{"msg": "Bad api_key or api_password"}` |
+| 400 BAD REQUEST | Malformed request body. Check the request and try again. |
+| 401 AUTH FAILED | `{"msg": "Bad api_key or api_password"}` |
 
 ## Related resources
 

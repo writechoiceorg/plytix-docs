@@ -1,5 +1,6 @@
 {
   "title": "Asset Lists",
+  "icon": "List",
   "pages": [
     "search_asset_lists_api_v3_asset_lists_get",
     "create_asset_lists_api_v3_asset_lists_post",

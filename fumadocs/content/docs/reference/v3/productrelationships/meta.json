@@ -1,5 +1,6 @@
 {
   "title": "Product Relationships",
+  "icon": "Link",
   "pages": [
     "search_product_relationships_api_v3_product_relationships_get",
     "get_product_relationships_collection_api_v3_products__product_id__relationships_get",

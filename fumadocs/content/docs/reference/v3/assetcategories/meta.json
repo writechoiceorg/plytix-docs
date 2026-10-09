@@ -1,5 +1,6 @@
 {
   "title": "Asset Categories",
+  "icon": "FolderTree",
   "pages": [
     "search_asset_categories_api_v3_asset_categories_get",
     "create_asset_categories_api_v3_asset_categories_post",

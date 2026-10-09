@@ -1,5 +1,6 @@
 {
-  "title": "Products (v1)",
+  "title": "Products (V1)",
+  "icon": "Package",
   "pages": [
     "addNewProducts_api_v1_products_post",
     "productSearch_api_v1_products_search_post",

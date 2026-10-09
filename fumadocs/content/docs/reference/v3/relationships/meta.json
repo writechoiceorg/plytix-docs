@@ -1,5 +1,6 @@
 {
   "title": "Relationships",
+  "icon": "Link2",
   "pages": [
     "search_relationships_api_v3_relationships_get",
     "create_relationships_api_v3_relationships_post",

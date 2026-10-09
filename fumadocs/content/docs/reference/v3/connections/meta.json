@@ -1,5 +1,6 @@
 {
   "title": "Connections",
+  "icon": "Plug",
   "pages": [
     "search_connections_api_v3_connections_get",
     "create_connections_api_v3_connections_post",

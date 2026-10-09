@@ -1,5 +1,6 @@
 {
   "title": "Product Family Models",
+  "icon": "Boxes",
   "pages": [
     "search_product_family_models_api_v3_product_family_models_get",
     "get_product_family_models_api_v3_product_family_models__identifier__get",

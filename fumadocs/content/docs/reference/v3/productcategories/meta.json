@@ -1,5 +1,6 @@
 {
   "title": "Product Categories",
+  "icon": "FolderTree",
   "pages": [
     "search_product_categories_api_v3_product_categories_get",
     "create_product_categories_api_v3_product_categories_post",

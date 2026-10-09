@@ -1,0 +1,199 @@
+---
+title: Filtering and search
+description: Reference for the search request body in V1/V2, including filters, operators, returned attributes, and relationship filters.
+---
+
+import { ArrowRightLeft, ListOrdered } from 'lucide-react';
+
+Search endpoints in V1/V2 take their filters in a JSON request body, not in the query string. This page documents that body: how to write filter conditions, which operators exist, how to choose the attributes that come back, and how to filter products by their relationships.
+
+Key points on this page:
+
+- Every search is a `POST` to a `/search` path, such as `POST /api/v1/products/search`.
+- The request body can carry `filters`, `attributes`, and `pagination`.
+- A search returns only ID and SKU unless you list the attributes you want in `attributes`.
+- Filter and attribute names use the label of the field, and custom attributes need the `attributes.` prefix.
+- Invalid fields, operators, or values return `422`.
+
+{/* FLAG (open):
+  This page is built from the V1 Postman collection. Only `POST /api/v1/products/search` has been tested against the live API, and only with basic requests. The operator list and relationship filters haven't been checked live. V2 product search documents the same restrictions as V1, so this page applies to both unless noted.
+*/}
+
+## Search request body
+
+A search body has three parts, and all of them are optional:
+
+| Field | Type | Description |
+|---|---|---|
+| `filters` | array of arrays | The conditions a record must meet. Omit to match everything. |
+| `attributes` | array of strings | The fields to return in each record. |
+| `pagination` | object | The page, page size, and sort order. See [Pagination](/docs/reference/legacy/pagination). |
+
+Product search also accepts `relationship_filters`, covered in [Filter on relationships](#filter-on-relationships).
+
+## Write a filter
+
+A filter is built from three layers. Each layer adds one level of logic:
+
+| Layer | Shape | Logic |
+|---|---|---|
+| Simple filter | An object with `field`, `operator`, and `value` | One condition |
+| Compound filter | An array of simple filters | Every condition must be met (AND) |
+| Filter | An array of compound filters | Any compound filter can be met (OR) |
+
+A simple filter has these fields:
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `field` | string | Yes | The label of the field to test. |
+| `operator` | string | Yes | The test to run. |
+| `value` | string, array, or object | Depends on the operator | The value to compare against. Unary operators take none. |
+
+The `filters` field is the outer array of compound filters. This example finds products modified in November 2018 (AND), or whose `name` attribute contains "unicorn" (OR):
+
+```json
+{
+  "filters": [
+    [
+      { "field": "modified", "operator": "gt", "value": "2018-11-01" },
+      { "field": "modified", "operator": "lt", "value": "2018-11-30" }
+    ],
+    [
+      { "field": "attributes.name", "operator": "like", "value": "unicorn" }
+    ]
+  ]
+}
+```
+
+The inner arrays are the AND groups, and the outer array joins them with OR. To express AND only, send a single inner array. To express OR only, send one inner array per condition.
+
+## Operators
+
+The operators below are common to all search endpoints. Not every operator is allowed on every field, and some fields add operators of their own. Call the matching `/filters` endpoint to see what each field accepts.
+
+| Operator | Arity | Description |
+|---|---|---|
+| `exists` | Unary | True when the field has a value. |
+| `!exists` | Unary | True when the field has no value. |
+| `eq` | Binary | True when the field equals the value. Text comparison ignores case. |
+| `!eq` | Binary | True when the field doesn't equal the value. Text comparison ignores case. |
+| `like` | Binary | True when the field contains the supplied string. |
+| `in` | Binary | True when the field matches any value in the list. Multiselect and Dropdown attributes are case sensitive. |
+| `!in` | Binary | True when the field matches none of the values in the list. Multiselect and Dropdown attributes are case sensitive. |
+| `gt` | Binary | True when the field is greater than the value. |
+| `gte` | Binary | True when the field is greater than or equal to the value. |
+| `lt` | Binary | True when the field is less than the value. |
+| `lte` | Binary | True when the field is less than or equal to the value. |
+| `text_search` | Binary | Searches for the text across several fields. Pass the list of fields as `field`. |
+
+A unary operator takes no `value`. A binary operator needs one, and `in` and `!in` need a list.
+
+{/* FLAG (open):
+  The V1 Postman collection names the contains operator `like`. The [Migration reference](/docs/guides/migrating-to-v3/migration-reference) lists it as `contains`, and also lists `null` and `!null`, which the collection doesn't document. Confirm the operator names against the live API before publishing, and align the Migration reference with the result.
+*/}
+
+## Find available filters
+
+Each searchable resource has a matching endpoint that lists its fields, the operators each field allows, and the exact `key` to use in requests.
+
+| Resource | Endpoint |
+|---|---|
+| Products | `GET /api/v1/filters/product` |
+| Assets | `GET /api/v1/filters/asset` |
+| Relationships | `GET /api/v1/filters/relationships` |
+
+Use the `key` value from these responses as the `field` in a filter or as an entry in `attributes`. The same endpoint gives you each custom attribute's name and label. V3 has no equivalent of these endpoints.
+
+## Choose which attributes come back
+
+A search returns only the record's ID and SKU unless you ask for more. List the fields you want in `attributes`:
+
+```json
+{
+  "attributes": ["sku", "label", "attributes.in_stock", "attributes.volume_liters"]
+}
+```
+
+Follow these rules when you name attributes:
+
+- Custom attributes need the `attributes.` prefix, followed by the attribute's label. An attribute named In Stock with the label `in_stock` is `attributes.in_stock`.
+- Relationship columns need the `relationships.` prefix, followed by the relationship's label, such as `relationships.gift_basket`.
+- System fields, such as `modified` or `categories`, use their plain name.
+- You can sort by a field that isn't in `attributes`, but it isn't returned.
+- Asking for a field that doesn't exist returns `422`.
+
+A search also returns a `422` if more than 50 attributes are requested. System attributes and custom attributes both count toward the limit, and ID and SKU don't.
+
+{/* FLAG (open):
+  The attribute limit conflicts across sources. The product search description says 50 (plus ID and SKU). The collection's general search section says 20, and recommends fetching IDs and then reading each product when you need more. Confirm the limit for each search endpoint with Plytix before publishing.
+*/}
+
+## Filter on relationships
+
+Product search can filter products by their relationships, using a separate `relationship_filters` field. It follows the same shape as `filters`: an array of arrays, with AND inside each inner array and OR between them. You can select only one relationship in the filters.
+
+A relationship filter has these fields:
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `relationship_id` | string | Yes | The ID of the relationship. |
+| `operator` | string | Yes | `exists` or `!exists`. No other operator is supported. |
+| `product_ids` | array of objects | No | Constraints on specific related products. Only valid with `exists`. |
+
+Each entry in `product_ids` has these fields:
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `id` | string | Yes | The ID of the related product. |
+| `qty_operator` | string | Yes | The test to run on the relationship's quantity. |
+| `value` | array of integers | Depends on the operator | The quantity to compare against. `bte` takes two values. |
+
+This example finds products that have the Recommended products relationship with product `5d89c67796c8f4a322df4bb8`, where the quantity is greater than 2:
+
+```json
+{
+  "filters": [],
+  "attributes": ["relationships.recommended_products"],
+  "relationship_filters": [
+    [
+      {
+        "relationship_id": "5d89c6c696c8f4a322df4bbc",
+        "operator": "exists",
+        "product_ids": [
+          {
+            "id": "5d89c67796c8f4a322df4bb8",
+            "qty_operator": "gt",
+            "value": [2]
+          }
+        ]
+      }
+    ]
+  ],
+  "pagination": { "order": null, "page": 1, "page_size": 25 }
+}
+```
+
+The `value` field is an array even when you compare against one number. To find quantities between 1 and 2, use `"qty_operator": "bte"` with `"value": [1, 2]`.
+
+When a request includes a `relationships.` column in `attributes`, each product in the response carries a `relationships` array:
+
+| Field | Type | Description |
+|---|---|---|
+| `relationship_id` | string | The ID of the relationship. |
+| `label` | string | The label of the relationship. |
+| `related_products` | array | The related products, each with a `product_id` and a `quantity`. |
+
+{/* FLAG (open):
+  The collection lists `eq`, `in`, `gt`, `gte`, `lt`, `lte`, `bte`, and `last_days` as the operators under relationship filters, without saying which apply to `qty_operator`. Only `gt` and `bte` appear in its examples. Confirm the valid `qty_operator` values before publishing.
+*/}
+
+## Related resources
+
+<Cards>
+  <Card icon={<ListOrdered />} title="Pagination" href="/docs/reference/legacy/pagination">
+    Set the page, page size, and sort order of a search, and read the counts it returns.
+  </Card>
+  <Card icon={<ArrowRightLeft />} title="Migration reference" href="/docs/guides/migrating-to-v3/migration-reference">
+    Compare V1 filter operators with their V3 query-string equivalents.
+  </Card>
+</Cards>

@@ -1,5 +1,6 @@
 {
   "title": "Family Attributes",
+  "icon": "ListTree",
   "pages": [
     "search_family_attributes_api_v3_family_attributes_get",
     "get_family_attributes_collection_api_v3_product_families__product_family_id__attributes_get",

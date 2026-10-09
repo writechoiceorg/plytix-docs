@@ -1,18 +1,22 @@
 ---
 title: Audit product data quality with filters
-description: Find products with missing images, empty descriptions, or incomplete data before it reaches a channel.
+description: Learn how to find products with missing images, empty descriptions, or incomplete data before they reach a channel or marketplace.
 ---
 
 import { Download, SatelliteDish } from 'lucide-react';
 
-Catch incomplete product data before it reaches a channel or marketplace: products missing an image, an empty description, or a field that was never filled in. This guide covers the filter operators that make these checks possible, and where the built-in completeness attributes can save you from writing the checks yourself.
+Catch incomplete product data before it reaches a channel or marketplace: products missing an image, an empty description, or a field that was never filled in. This guide covers the filter operators that make these checks possible, and where the built-in completeness attributes can save you from writing the checks yourself. All requests use the V3 API with a bearer token. See [Filtering and Query Syntax](/docs/reference/v3/filtering-query-syntax) and [Pagination](/docs/reference/v3/pagination) for the full rules, and note that a search with no matches returns `data: []`.
 
 ## Prerequisites
 
-- A bearer token. See the Quickstart guide for the authentication flow.
-- Familiarity with the query-string filter syntax covered in "Filtering, Sorting & Pagination." This guide assumes you can already build a basic filter like `sku=BAG-10157`.
+Before you start, make sure you have the following:
 
-## Steps
+- A bearer token. See [Authentication](/docs/reference/v3/authentication), or the [Quickstart](/docs/guides/quickstart) for a first walkthrough.
+- Familiarity with the query-string filter syntax covered in [Filtering and Query Syntax](/docs/reference/v3/filtering-query-syntax). This guide assumes you can already build a basic filter like `sku=BAG-10157`.
+
+## Find incomplete products
+
+Follow the steps below to build the filters that surface missing fields, empty values, and low completeness scores.
 
 1. **Find products missing a required field with `!exists`.**
 
@@ -36,21 +40,29 @@ Catch incomplete product data before it reaches a channel or marketplace: produc
 
    Useful as a sanity check on the inverse of step 1, or to confirm how many products a required-field rollout still needs to reach.
 
-3. **Check for an empty value, in addition to a missing one, with `icontains`.**
+3. **Catch empty values as well as missing ones with `length`.**
 
-   `!exists` catches a field that was never set. A field that's present but empty (an empty string) needs a different check:
+   `!exists` finds a field that has no value. To also catch empty values, check the length instead:
 
    ```bash
    curl -G "https://pim.plytix.com/api/v3/products" \
      -H "Authorization: Bearer <access_token>" \
-     --data-urlencode "attributes.short_description[icontains]="
+     --data-urlencode "attributes.short_description[length]=0"
    ```
 
-   <Callout type="warn" title="FLAG">
-     This project confirmed `[icontains]` works for substring matching against a real value, but didn't independently test it with an empty string specifically to distinguish "empty" from "missing." Confirm this distinction behaves as expected for your account before relying on it, or combine both `exists` and a length check if your account supports one.
-   </Callout>
+   This matches empty values and missing ones together, which is usually what a data-quality audit wants. Flip it to `[length][gt]=0` for the products that have real content.
 
-4. **Narrow an audit to a set of statuses with `in`.**
+4. **Search text case-insensitively with `contains:ignorecase`.**
+
+   ```bash
+   curl -G "https://pim.plytix.com/api/v3/products" \
+     -H "Authorization: Bearer <access_token>" \
+     --data-urlencode "attributes.short_description[contains:ignorecase]=waterproof"
+   ```
+
+   Use `[contains]` when case matters. Plytix accepts a fixed set of filter operators, and sending one it doesn't recognize returns `400` with the list of valid operators in the error message, which shows you what's available.
+
+5. **Narrow an audit to a set of statuses with `in`.**
 
    ```bash
    curl -G "https://pim.plytix.com/api/v3/products" \
@@ -59,11 +71,11 @@ Catch incomplete product data before it reaches a channel or marketplace: produc
      --data-urlencode "status[in]=Completed"
    ```
 
-   Repeat the parameter for each value you want to match. This is the same pattern behind "products in category A or category B."
+   Repeat the parameter for each value you want to match.
 
-5. **Read the built-in completeness scores instead of writing your own checks.**
+6. **Read the built-in completeness scores instead of writing your own checks.**
 
-   Every product's `attributes` map already includes a set of automatically computed completeness fields, for example `basic_information_completeness`, `website_ready`, and `marketing_ready`, without any setup on your end:
+   Your account's completeness attributes appear in every product's `attributes` map alongside the values you set yourself, scored as numbers. Which ones exist depends on how your account is configured; a catalog set up for retail might carry `basic_information_completeness`, `website_ready`, and `marketing_ready`. Read one product to see yours:
 
    ```bash
    curl "https://pim.plytix.com/api/v3/products/<product_id>" \
@@ -78,21 +90,28 @@ Catch incomplete product data before it reaches a channel or marketplace: produc
      --data-urlencode "attributes.website_ready[gt]=90"
    ```
 
-   <Callout type="warn" title="FLAG">
-     Creating your own custom Completeness Attribute through the API is currently broken: sending a real attribute reference in the create request returns a server error. Use the automatically computed scores above instead of trying to create a new one until this is resolved.
-   </Callout>
+7. **Combine filters into one audit query.**
 
-6. **Combine filters and turn a recurring audit into a Smart List.**
+   Filters joined by `&` combine with AND. To match either condition, give each filter the same `_or[0]` prefix. For example, products with no main image or a `Draft` status:
 
-   Any combination of the filters above can also become a Smart List's saved query, so you don't have to rebuild the request each time. See "Building a Smart product list" in Core Concepts.
+   ```bash
+   curl -G "https://pim.plytix.com/api/v3/products" \
+     -H "Authorization: Bearer <access_token>" \
+     --data-urlencode "_or[0]attributes.main_image_link[!exists]=true" \
+     --data-urlencode "_or[0]status=Draft"
+   ```
+
+   See [Filtering and Query Syntax](/docs/reference/v3/filtering-query-syntax) for grouping rules. To reuse a filtered set of products, see step 1 of [Build a marketplace-specific product feed](/docs/guides/building-marketplace-specific-product-feeds), which creates a product list.
 
 ## Related articles
 
+Now that you know how to audit product data, you can explore these related guides.
+
 <Cards>
-  <Card icon={<Download />} title="Exporting Your Full Catalog" href="/docs/guides/exporting-your-full-catalog">
+  <Card icon={<Download />} title="Export your full catalog" href="/docs/guides/exporting-your-full-catalog">
     Pull the full catalog once you know which products need attention.
   </Card>
-  <Card icon={<SatelliteDish />} title="Build a Marketplace-Specific Product Feed" href="/docs/guides/building-marketplace-specific-product-feeds">
+  <Card icon={<SatelliteDish />} title="Build a marketplace-specific product feed" href="/docs/guides/building-marketplace-specific-product-feeds">
     Use the same filters to keep incomplete products out of a channel feed.
   </Card>
 </Cards>

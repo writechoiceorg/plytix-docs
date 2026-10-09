@@ -1,6 +1,12 @@
 {
-  "title": "Migrating to v3",
+  "title": "Migrating to V3",
+  "icon": "ArrowRightLeft",
   "pages": [
-    "migration-reference"
+    "authentication-and-base-urls",
+    "searching-and-pagination",
+    "filter-operators",
+    "responses-and-updates",
+    "endpoint-mapping",
+    "not-migrated-and-new-in-v3"
   ]
 }

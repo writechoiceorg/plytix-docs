@@ -1,5 +1,6 @@
 {
   "title": "eCatalogs",
+  "icon": "BookOpen",
   "pages": [
     "search_ecatalogs_api_v3_ecatalogs_get",
     "create_ecatalogs_api_v3_ecatalogs_post",

@@ -1,11 +1,11 @@
 ---
-title: "Filtering and Query Syntax"
-description: "Reference for v3's query syntax: filter operators, boolean grouping, functions, field selection, and filtering on attributes and related entities."
+title: "Filtering and query syntax"
+description: "Reference for V3's query syntax: filter operators, boolean grouping, functions, field selection, and filtering on attributes and related entities."
 ---
 
 import { ListOrdered, ArrowRightLeft } from 'lucide-react';
 
-In v3, you filter a search by adding query parameters to the URL. This page documents the operators, how to combine them, and how to filter on custom attributes and related entities.
+In V3, you filter a search by adding query parameters to the URL. This page documents the operators, how to combine them, and how to filter on custom attributes and related entities.
 
 Key points on this page:
 
@@ -185,7 +185,7 @@ Requesting a related entity's fields expands that entity in the response. There 
 |---|---|
 | Names starting with `_` are reserved | All fields and entities, except attribute names reached through `attributes.` |
 | Names starting with `.` or `__` are reserved | All fields and entities |
-| Names containing `.`, `[`, or `|` are not valid | All fields and entities |
+| Names containing `.`, `[`, or `\|` are not valid | All fields and entities |
 
 Values follow normal URL encoding. Spaces become `+` or `%20`, and `=`, `&`, `?`, `#`, and `%` carry meaning in a URL, so encode them when they appear inside a value. The operator brackets need encoding too, as described under [How a filter is written](#how-a-filter-is-written).
 
@@ -197,7 +197,7 @@ Now that you can filter a search, you can explore these related pages.
   <Card icon={<ListOrdered />} title="Pagination" href="/docs/reference/v3/pagination">
     Page through a filtered result set and read the pagination block.
   </Card>
-  <Card icon={<ArrowRightLeft />} title="Migration reference" href="/docs/guides/migrating-to-v3/migration-reference">
-    Map v1's JSON filter objects to the syntax on this page.
+  <Card icon={<ArrowRightLeft />} title="Filter operators" href="/docs/guides/migrating-to-v3/filter-operators">
+    Map V1's JSON filter objects to the syntax on this page.
   </Card>
 </Cards>
