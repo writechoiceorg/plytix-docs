@@ -89,7 +89,14 @@ Generated from `fumadocs/openapi.json` by `fumadocs-openapi`, one folder per res
 
 | Page title | File path | Page type | Status |
 |---|---|---|---|
-| API v1/v2 Reference | `fumadocs/content/docs/reference/legacy/api-v1-v2-reference.mdx` | Reference | Written |
+| API v1/v2 Reference | `fumadocs/content/docs/reference/legacy/api-v1-v2-reference.mdx` | Landing | Written |
+| Authentication | `fumadocs/content/docs/reference/legacy/token-authentication.mdx` | Reference | Draft, blocked on flags |
+| Errors and Status Codes | `fumadocs/content/docs/reference/legacy/errors-status-codes.mdx` | Reference | Draft, blocked on flags |
+| Rate Limits | `fumadocs/content/docs/reference/legacy/rate-limits.mdx` | Reference | Draft, blocked on flags |
+| Filtering and Search | `fumadocs/content/docs/reference/legacy/filtering-and-search.mdx` | Reference | Draft, blocked on flags |
+| Pagination | `fumadocs/content/docs/reference/legacy/pagination.mdx` | Reference | Draft, blocked on flags |
+
+> **Drafted 2026-10-08:** the five pages above mirror v3's Overview group. They are the "Core concepts" cards on the legacy landing page. The authentication page is `token-authentication.mdx`, not `authentication.mdx`, because the generated `authentication/` endpoint folder already owns that slug. Only the auth exchange and basic `POST /api/v1/products/search` were tested live; the rest comes from the v1 Postman collection, so each page carries FLAG callouts. Open conflicts: attribute cap 20 vs 50; `like` vs `contains`/`null` operator names (and `migration-reference.mdx` should be aligned once resolved); valid `qty_operator` values; which pagination fields every response carries; whether v1 rate limits match v3's. No "Updates and Deletes" page: v1/v2 sources only give per-endpoint status codes.
 
 Endpoint pages are generated from `fumadocs/openapi-v1v2.json`, one folder per resource under `fumadocs/content/docs/reference/legacy/`. Same rule: regenerate, don't hand-edit.
 

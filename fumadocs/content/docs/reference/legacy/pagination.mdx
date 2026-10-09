@@ -1,0 +1,123 @@
+---
+title: Pagination
+description: Reference for how v1 and v2 page search results, which pagination fields you send and get back, and the limits that apply.
+---
+
+import { Filter, ArrowRightLeft } from 'lucide-react';
+
+Search endpoints return results in pages. This page documents the `pagination` object you send in a search body, the `pagination` object you get back, and the limits on page size and sorting.
+
+Key points on this page:
+
+- You choose the page in the request body, with `page`, `page_size`, and `order`.
+- A search with no `pagination` field returns the first 25 records.
+- The response includes counts, including `total_count`, so you know how many pages remain.
+- `page_size` can't exceed 100 on product search.
+- Sorting a result set of more than 10000 products returns `428`.
+
+## Request pagination
+
+Add a `pagination` object to the search body. All three fields are optional:
+
+| Field | Type | Description |
+|---|---|---|
+| `page` | integer | The page to return. Defaults to the first page. |
+| `page_size` | integer | Records per page. Defaults to `25`. |
+| `order` | string | The sort order. See [Sort results](#sort-results). |
+
+This request returns page 3 of the results, with 25 records per page, sorted by SKU from Z to A:
+
+```json
+{
+  "filters": [],
+  "attributes": ["sku", "label"],
+  "pagination": {
+    "order": "-sku",
+    "page": 3,
+    "page_size": 25
+  }
+}
+```
+
+## Sort results
+
+The `order` field is a string made of an optional minus sign followed by the label of the field to sort by. With no minus sign the order is ascending, and with a minus sign it's descending.
+
+| Value | Result |
+|---|---|
+| `sku` | Sorted by SKU, ascending |
+| `-sku` | Sorted by SKU, descending |
+| `null` or an empty string | No sort order |
+
+You can sort by a field that isn't in `attributes`, but the field isn't returned.
+
+## Read the pagination response
+
+Search responses return a `pagination` object next to `data`. It describes the page you got and the full result set:
+
+```json
+{
+  "data": [],
+  "pagination": {
+    "count": 1,
+    "order": null,
+    "page": 1,
+    "page_size": 25,
+    "total_count": 3
+  }
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `count` | integer | The number of records on this page. |
+| `order` | string | The sort order you requested, or `null`. |
+| `page` | integer | The page number. |
+| `page_size` | integer | The page size. |
+| `total_count` | integer | The number of records that match the search. |
+
+Use `total_count` and `page_size` to work out how many pages there are, and loop from page 1 until you reach the last one. Only search operations return a `pagination` object. A request for a single record doesn't.
+
+<Callout type="warn" title="FLAG">
+  The collection's own examples are inconsistent about which of these fields appear: some responses omit `total_count`, and one omits `count`. Confirm which fields every search response carries before publishing, and whether `total_count` is always returned.
+</Callout>
+
+## Limits
+
+The following limits apply to product search. v2 product search documents the same ones.
+
+| Limit | Behavior |
+|---|---|
+| Maximum `page_size` | `100`. A larger value returns `422`. |
+| Default page | The first page, with `25` records, when you send no `pagination`. |
+| Sorting large result sets | If `order` is set and the search matches more than 10000 products, the API returns `428`. |
+
+To avoid the `428`, narrow the search with filters until it matches 10000 products or fewer, or leave `order` empty. See [Filtering and search](/docs/reference/legacy/filtering-and-search) for how to narrow a search.
+
+<Callout type="warn" title="FLAG">
+  These limits come from the product search endpoint description only. The collection doesn't say whether asset, category, family, or relationship searches share the same page size ceiling. Confirm before telling readers the limits apply to every search.
+</Callout>
+
+## How this differs from v3
+
+v3 pages through results with a link, not a page number, and it has no record counts. If you're migrating, anything that reads `total_count` has to change.
+
+| | v1 and v2 | v3 |
+|---|---|---|
+| Where you set it | `pagination` object in the body | `_page`, `_page_size`, and `_sort_by` in the query string |
+| Maximum page size | `100` on product search | `1000` |
+| Counts | `count` and `total_count` | None |
+| Moving to the next page | Increment `page` | Follow `next_page` |
+
+See [Pagination](/docs/reference/v3/pagination) in the v3 reference for the full v3 behavior.
+
+## Related resources
+
+<Cards>
+  <Card icon={<Filter />} title="Filtering and search" href="/docs/reference/legacy/filtering-and-search">
+    Narrow a search with filters and choose the attributes that come back.
+  </Card>
+  <Card icon={<ArrowRightLeft />} title="Migration reference" href="/docs/guides/migrating-to-v3/migration-reference">
+    Compare v1 pagination with v3, side by side.
+  </Card>
+</Cards>

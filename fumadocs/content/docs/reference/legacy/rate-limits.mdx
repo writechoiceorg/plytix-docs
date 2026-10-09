@@ -1,0 +1,37 @@
+---
+title: Rate Limits
+description: Reference for how rate limits work on v1 and v2, what happens when you exceed them, and where to find your plan's limits.
+---
+
+import { Key, TriangleAlert } from 'lucide-react';
+
+Plytix enforces rate limits on the API so that no single account can degrade the platform for everyone else. This page covers how those limits work on v1 and v2, what happens when you exceed them, and where to check the limits for your plan.
+
+<Callout type="warn" title="Checking your plan's limits">
+  Rate limits vary by account plan. To find the limits that apply to your account, check the [Plytix pricing page](https://www.plytix.com/pricing) or ask your account manager.
+</Callout>
+
+## How rate limits work
+
+Every request counts as one hit. For each hit, the API checks two conditions: you haven't reached your plan's limit for requests per 10 seconds, and you haven't reached its limit for requests per hour. A request counts against both windows at the same time, so whichever window you exhaust first blocks you.
+
+Your account plan sets the limits, and they apply to all resources in the API. For the standard plan values, see [Rate limits](/docs/reference/v3/rate-limits) in the v3 reference.
+
+<Callout type="warn" title="FLAG">
+  The standard plan values were confirmed against v3 only. This page assumes v1 and v2 draw on the same per-account limits, because all three versions accept the same token. Confirm with Plytix before publishing, including whether calls to v1, v2, and v3 add to one shared count.
+</Callout>
+
+## Exceeding your limit
+
+If you reach either limit, the API returns a `429 TOO MANY REQUESTS` status code. Every request you make keeps returning `429` until the time interval for the limit you hit expires. Pause when you see a `429` instead of retrying right away. See [Errors and status codes](/docs/reference/legacy/errors-status-codes) for the full list of status codes the API returns.
+
+## Related resources
+
+<Cards>
+  <Card icon={<Key />} title="Authentication" href="/docs/reference/legacy/token-authentication">
+    Get a bearer token, and see how long it stays valid.
+  </Card>
+  <Card icon={<TriangleAlert />} title="Errors and status codes" href="/docs/reference/legacy/errors-status-codes">
+    See the full set of status codes and error formats v1 and v2 return.
+  </Card>
+</Cards>

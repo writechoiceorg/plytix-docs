@@ -5,6 +5,11 @@
   "pages": [
     "---Overview---",
     "api-v1-v2-reference",
+    "token-authentication",
+    "errors-status-codes",
+    "rate-limits",
+    "filtering-and-search",
+    "pagination",
     "---Endpoints---",
     "accounts",
     "assets",

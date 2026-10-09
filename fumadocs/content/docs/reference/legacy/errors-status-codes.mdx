@@ -1,0 +1,145 @@
+---
+title: Errors and Status Codes
+description: Reference for the HTTP status codes and error response format the v1 and v2 APIs return, and how they differ from v3.
+---
+
+import { Gauge, Key } from 'lucide-react';
+
+This page documents the HTTP status codes and the response formats you encounter when you call the v1 and v2 APIs. Successful responses and error responses use different shapes, so it helps to know both before you write error handling.
+
+<Callout type="warn" title="Deprecation notice">
+  The API sends a custom `X-Plytix-Deprecation` header in the response when the endpoint you're calling is scheduled for deprecation soon. Log this header in your integration so you hear about a retirement before it happens.
+</Callout>
+
+## HTTP status codes
+
+The API uses a small subset of standard HTTP status codes, grouped by class:
+
+<Accordions type="multiple">
+  <Accordion title="200 - Success">
+    | Status code | Meaning |
+    |---|---|
+    | 200 OK | The request has succeeded. The response body usually contains a representation of the resource. |
+    | 201 CREATED | The request has succeeded and a resource has been created. The response body usually contains a representation of the resource, and its location is available in the `location` header. |
+    | 202 ACCEPTED | The request has been accepted but will be completed at some point in the future. |
+    | 204 NO CONTENT | The request has been fulfilled. There's no response body. |
+  </Accordion>
+  <Accordion title="400 - Client errors">
+    | Status code | Meaning |
+    |---|---|
+    | 400 BAD REQUEST | The request has invalid syntax. |
+    | 401 AUTH FAILED | The request lacks valid authentication credentials for the target resource. |
+    | 403 FORBIDDEN | The server understood the request but refuses to authorize it. |
+    | 404 NOT FOUND | The requested resource hasn't been found on the server. |
+    | 405 METHOD NOT ALLOWED | The HTTP method isn't allowed on the target resource. |
+    | 409 CONFLICT | The server understood the request, but it has no effect on the current state of the resource. |
+    | 422 UNPROCESSABLE ENTITY | The request is syntactically well formed but has semantic errors. |
+    | 428 PRECONDITION REQUIRED | The request can't be processed because some conditions aren't met. |
+    | 429 TOO MANY REQUESTS | The API rate limit has been exceeded. |
+  </Accordion>
+  <Accordion title="500 - Server errors">
+    | Status code | Meaning |
+    |---|---|
+    | 500 SERVER ERROR | The server wasn't able to fulfill the request. You can repeat the request later. |
+  </Accordion>
+</Accordions>
+
+On search endpoints, `422` means the search itself is invalid, and `428` means the search matches too many records to sort. See [Filtering and search](/docs/reference/legacy/filtering-and-search) for the exact rules.
+
+## Successful response format
+
+A successful response wraps its results in a `data` list. A single record still comes back as a list with one item, and a request that matches nothing returns an empty list.
+
+```json title="Single record"
+{
+  "data": [
+    {
+      "id": "123456789012345678901234",
+      "filename": "example.pdf",
+      "file_size": 30358
+    }
+  ]
+}
+```
+
+```json title="No match"
+{
+  "data": []
+}
+```
+
+Search responses add a `pagination` object next to `data`. See [Pagination](/docs/reference/legacy/pagination).
+
+## Error response format
+
+When an operation fails, the response contains an `error` object instead of `data`. The error object has these fields:
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `msg` | string | Yes | A general error message. |
+| `errors` | array | No | Detailed information about each problem. Present when more than one field is at fault. |
+
+Each entry in `errors` has two fields:
+
+| Field | Type | Description |
+|---|---|---|
+| `field` | string | The offending column, attribute, or field. |
+| `msg` | string | A detailed message about the problem. |
+
+A simple error carries only `msg`:
+
+```json
+{
+  "error": {
+    "msg": "Missing Authorization Header"
+  }
+}
+```
+
+A detailed error lists each field that failed validation:
+
+```json
+{
+  "error": {
+    "msg": "product data validation failed",
+    "errors": [
+      {
+        "field": "some_non-existing_attribute_to_patch",
+        "msg": "label does not exist"
+      },
+      {
+        "field": "some_decimal_number_attribute_to_patch_using_wrong_number_format",
+        "msg": "Not a valid decimal value. Format must be: ."
+      }
+    ]
+  }
+}
+```
+
+<Callout type="warn" title="FLAG">
+  The error shapes above come from the v1 Postman collection. Only the `401` body from the token request has been checked against the live API, and it matched the nested `error` object, though its `errors` entry names the field `http_status_code` rather than the credential at fault. Check other statuses against the live API before relying on their exact bodies.
+</Callout>
+
+## How this differs from v3
+
+v3 returns errors in a different envelope. If you handle both versions in one client, branch on the API version before you parse an error.
+
+| | v1 and v2 | v3 |
+|---|---|---|
+| Error location | `error` object | `errors` array |
+| Error entry | `msg`, optional `errors` with `field` and `msg` | `name` and `description` |
+| Successful body | `data` list | `data` list, plus an always-present `errors` array |
+| Validation failures | `422` with the `error` object | `422` with a `detail` array |
+
+See the [v3 errors reference](/docs/reference/v3/errors-status-codes) for the full v3 format.
+
+## Related resources
+
+<Cards>
+  <Card icon={<Key />} title="Authentication" href="/docs/reference/legacy/token-authentication">
+    Get a bearer token and handle the `401` that comes with an expired one.
+  </Card>
+  <Card icon={<Gauge />} title="Rate limits" href="/docs/reference/legacy/rate-limits">
+    See what happens when you reach your plan's request limits and get a `429`.
+  </Card>
+</Cards>
