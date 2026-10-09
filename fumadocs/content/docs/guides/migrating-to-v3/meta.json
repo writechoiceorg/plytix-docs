@@ -1,5 +1,6 @@
 {
   "title": "Migrating to V3",
+  "icon": "ArrowRightLeft",
   "pages": [
     "authentication-and-base-urls",
     "searching-and-pagination",

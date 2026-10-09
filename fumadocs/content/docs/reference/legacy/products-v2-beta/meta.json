@@ -1,5 +1,6 @@
 {
   "title": "Products (V2 beta)",
+  "icon": "Package",
   "pages": [
     "addNewProducts_api_v2_products_post",
     "productSearch_api_v2_products_search_post",

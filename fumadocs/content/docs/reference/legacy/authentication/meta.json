@@ -1,5 +1,6 @@
 {
   "title": "Authentication",
+  "icon": "KeyRound",
   "pages": [
     "retrievesAnAuthenticationToken_auth_api_get_token_post"
   ]

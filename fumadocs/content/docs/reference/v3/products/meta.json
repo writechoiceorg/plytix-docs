@@ -1,5 +1,6 @@
 {
   "title": "Products",
+  "icon": "Package",
   "pages": [
     "search_products",
     "create_products_api_v3_products_post",

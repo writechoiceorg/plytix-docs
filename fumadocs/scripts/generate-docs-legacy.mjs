@@ -27,6 +27,21 @@ const referenceDir = './content/docs/reference/legacy';
 const stagingDir = path.join(referenceDir, 'endpoints');
 
 // Nicer group titles than the auto-generated per-tag titles.
+// Lucide icon per resource group, shown in the sidebar.
+const TAG_ICONS = {
+  accounts: "User",
+  assets: "Image",
+  authentication: "KeyRound",
+  "available-filters": "Filter",
+  categories: "FolderTree",
+  "product-attribute-groups": "Group",
+  "product-attributes": "Tags",
+  "product-families": "Layers",
+  products: "Package",
+  "products-v2-beta": "Package",
+  relationships: "Link2"
+};
+
 const TAG_LABELS = {
   authentication: 'Authentication',
   accounts: 'Accounts',
@@ -81,6 +96,7 @@ for (const tag of stagingMeta.pages) {
   const tagMetaPath = path.join(to, 'meta.json');
   const tagMeta = JSON.parse(await readFile(tagMetaPath, 'utf-8'));
   tagMeta.title = TAG_LABELS[tag] ?? tagMeta.title;
+  if (TAG_ICONS[tag]) tagMeta.icon = TAG_ICONS[tag];
   await writeFile(tagMetaPath, JSON.stringify(tagMeta, null, 2) + '\n');
 
   tagFolders.push(tag);
@@ -98,14 +114,14 @@ try {
   referenceMeta = { title: 'Legacy (v1/v2)', root: true, pages: [] };
 }
 const cutIndex = referenceMeta.pages.findIndex(
-  (p) => p === '---Endpoints---' || p === 'endpoints',
+  (p) => p === '---[Webhook]Endpoints---' || p === '---Endpoints---' || p === 'endpoints',
 );
 const preservedPages = cutIndex === -1 ? referenceMeta.pages : referenceMeta.pages.slice(0, cutIndex);
 
 await writeFile(
   referenceMetaPath,
   JSON.stringify(
-    { ...referenceMeta, pages: [...preservedPages, '---Endpoints---', ...tagFolders] },
+    { ...referenceMeta, pages: [...preservedPages, '---[Webhook]Endpoints---', ...tagFolders] },
     null,
     2,
   ) + '\n',

@@ -1,5 +1,6 @@
 {
   "title": "Channels",
+  "icon": "Share2",
   "pages": [
     "search_channels_api_v3_channels_get",
     "create_channels_api_v3_channels_post",

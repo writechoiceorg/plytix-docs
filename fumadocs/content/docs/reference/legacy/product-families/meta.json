@@ -1,5 +1,6 @@
 {
   "title": "Product Families",
+  "icon": "Layers",
   "pages": [
     "addNewFamily_api_v1_product_families_post",
     "searchFamilies_api_v1_product_families_search_post",

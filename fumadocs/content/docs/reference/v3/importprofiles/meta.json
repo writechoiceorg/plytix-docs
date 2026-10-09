@@ -1,5 +1,6 @@
 {
   "title": "Import Profiles",
+  "icon": "Upload",
   "pages": [
     "search_import_profiles_api_v3_import_profiles_get",
     "create_import_profiles_api_v3_import_profiles_post",

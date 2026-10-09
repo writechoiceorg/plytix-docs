@@ -1,5 +1,6 @@
 {
   "title": "PIM Product Lists",
+  "icon": "ListChecks",
   "pages": [
     "search_pim_product_lists_api_v3_pim_product_lists_get",
     "create_pim_product_lists_api_v3_pim_product_lists_post",

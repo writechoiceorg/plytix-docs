@@ -1,5 +1,6 @@
 {
   "title": "Product Attribute Groups",
+  "icon": "Group",
   "pages": [
     "addNewProductAttributeGroup_api_v1_attribute_groups_product_post",
     "productAttributeGroupsSearch_api_v1_attribute_groups_product_search_post",
