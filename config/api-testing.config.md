@@ -5,7 +5,7 @@
 - **Auth base URL (prod, "API Docs" account)**: `https://auth.plytix.com` — ✅ confirmed live 2026-08-31.
 - **Auth base URL (DEV, "David's Dev Account")**: `https://auth.dev.plytix.com` — ✅ confirmed live 2026-09-04. **Different host per environment, not just per account** — the "API Docs" account's `api_key`/`api_password` get a hard `401 {"error":{"msg":"Bad api_key or api_password: Query did not throw any results"...}}` from this host (they don't exist here at all), and conversely the dev account's credentials 401 against `auth.plytix.com`. Always pair the right auth host with the right credential set.
 - **PIM base URL (v1)**: `https://pim.plytix.com/api/v1` — ✅ confirmed live 2026-08-31 (accepts the auth token, returns real data).
-- **PIM base URL (v3, prod/sandbox host)**: `https://pim.plytix.com/api/v3` — ❌ **unreachable** for the "API Docs" test account. Every path tried (`/products`, `/assets`, bare `/api/v3`, with/without trailing slash) returns an identical gateway `503 {"message":"name resolution failed"}`. Distinct from a wrong host entirely (`api.plytix.com` gave no HTTP response at all — DNS failure).
+- **PIM base URL (v3, prod/sandbox host)**: `https://pim.plytix.com/api/v3` — ⚠️ **status changed 2026-10-08, see quirk #103.** Previously (2026-08-31) every path returned a gateway `503 {"message":"name resolution failed"}`. As of 2026-10-08 it returns `401 {"detail": "Unauthorized"}` to a DEV-environment bearer token, which proves the host now routes v3 and the service answers. Not yet exercised with a valid prod credential — `bruno-collection/.env` currently holds only the DEV key pair, so the "API Docs" credentials would need re-adding to confirm end to end. Do not document this as the production base URL until that run happens, but do not treat it as unreachable either.
 - **PIM base URL (v3, DEV host)**: `https://pim.dev.plytix.com/api/v3` — ✅ **fully confirmed live and working, 2026-09-04**. `GET /api/v3/products?_fields=sku&_fields=status`, authenticated with a token from `auth.dev.plytix.com` for **"David's Dev Account"**, returns `200` with real product data (`data: [{id, sku, status}, ...]`) plus `pagination.next_page` (a full next-page URL). Response shape matches `openapi_pimv3.json`'s `SearchProductsResponse` schema exactly. Provided by Plytix (David), a separate account in Plytix's DEV environment, distinct from the "API Docs" account/host used for v1 testing above. **This fully resolves the earlier v3-unreachable blocker**: v3 exists, is live, and behaves as documented — it just isn't deployed/routed on the `pim.plytix.com` prod host for the "API Docs" account. It's on a separate dev host tied to a separate account with its own auth host. Bruno coverage: `02-Products-v3/` (auth + list, both scoped to `Dev` since v3 only exists there), run with `--env "Dev"`.
 - **Spec file**: `openapi_pimv3.json` (repo root) — 51 paths, no `servers`/`securitySchemes`/`security` declared in the spec itself; auth is documented only in the v1 Postman collection (`materials/api-references/Plytix_pimv1.postman_collection (5).json`).
 - **Bruno collection root**: `bruno-collection/`
@@ -607,6 +607,153 @@ unconfirmed on `fumadocs/content/docs/reference/v3/pagination.mdx` against
     2026-10-01, and a reminder to capture responses verbatim rather than
     tidying them.
 
+Confirmed live 2026-10-08 against "David's Dev Account", re-verifying the
+blocker claims in `output-reviewer-2026-10-08.md` and closing its six
+testable flags. **This session invalidates more prior findings than any
+before it** — quirks #12, #26, #27, #31, #54, #62, #72, #80 and the
+`icontains` note in `information-architecture.md` all changed. Treat every
+relationship-array and filter-operator finding older than this date as
+suspect until re-run.
+
+93. **BREAKING — all five `*_ids` relationship-array fields are now
+    REJECTED on both `POST /products` and `PATCH /products/{id}`,** despite
+    being declared in `ProductCreateDto` and `ProductUpdateInputDto`.
+    `category_ids`, `static_list_ids`, `channel_ids`, `ecatalog_ids` and
+    `product_data_sheet_ids` each return
+    `422 {"errors":[{"name":"InputDTOValidationError","description":"<field>: Extra inputs are not permitted"}]}`.
+    Still accepted on both verbs: `label`, `gtin`, `status`, `attributes`,
+    `thumbnail_id`, `product_family_id`, `parent_id`. This retracts quirk
+    #26 (`category_ids` applying on create) and quirk #27 (`PATCH` as the
+    reliable way to apply relationship arrays), and it removes the only
+    documented mechanism for category removal — see quirk #94 for the
+    replacement. It also supersedes the UEF feature gate (quirks #70, #81):
+    the three UEF-gated fields now fail validation before the permission
+    check, so the `403` is unreachable on this account.
+94. **Major — the 1:M link/unlink pattern from `API V3.md` is now
+    IMPLEMENTED for categories, and it is safe and scoped.** `POST
+    /products/{id}/categories` with body `{"id": "<category_id>"}` returns
+    `201 {"data":{"id":"<category_id>"},"errors":[]}`; a duplicate returns
+    `409 {"name":"AlreadyExists","description":"'<id>' is already linked to
+    products <product_id> through 'categories'"}`. `DELETE
+    /products/{id}/categories/{category_id}` returns `204` and removes
+    **only that one link** — confirmed via follow-up `GET` showing the
+    product fully intact (`sku`, `label`, `status`, `attributes` unchanged)
+    with the other category still attached. This is the second confirmed
+    safe scoped unlink after relationships (quirk #62), and it is the
+    replacement for the now-rejected `category_ids` array. Matches the
+    "1:M link / 1:M unlink" rows marked **Direct** in
+    `materials/api-references/API V3 - status map (08_10_2026).md`
+    (pp. 11-13).
+95. **The destructive-subpath hazard is gone, and the error messages are
+    now genuinely helpful.** Re-confirming quirk #31/#54's 2026-09-23
+    resolution with the new link/unlink surface in place: `DELETE
+    /products/{id}/categories` (bare collection) returns
+    `405 {"name":"MethodNotAllowed","description":"DELETE on 'categories'
+    requires exactly one linked id: DELETE /products/{id}/categories/{linked_id}"}`;
+    `DELETE /products/{id}/totally_made_up_xyz` returns
+    `404 {"name":"NotFoundError","description":"Product has no field
+    'totally_made_up_xyz'"}`; `PATCH /products/{id}/categories` returns
+    `405 {"name":"MethodNotAllowed","description":"PATCH is not allowed on
+    'categories': link or unlink here, and update a linked entity at its
+    own path."}`. The product survived all three, confirmed by `GET`. No
+    destructive behavior remains anywhere in this family of paths.
+96. **Assets do NOT support the link/unlink pattern — categories and
+    relationships are the only two that do.** `POST /products/{id}/assets`
+    with `{"id":"<asset_id>"}` returns `405 Method Not Allowed`; `DELETE
+    /products/{id}/assets/{asset_id}` returns
+    `404 "Product has no field 'assets/<id>'"`. Combined with quirk #93's
+    removal of every `*_ids` array, **there is now no API mechanism at all
+    to link or unlink a non-thumbnail asset to a product.** The only
+    asset-side write that works is `thumbnail_id` on `PATCH`. This is a
+    capability regression worth raising with Plytix.
+97. **Clearing `thumbnail_id` with an explicit `null` works** — `PATCH
+    /products/{id}` with `{"thumbnail_id": null}` returns `204`, and the
+    follow-up `GET` shows `thumbnail_id: null` with the `thumbnail` key
+    absent. Closes a long-standing untested case. Side effect worth
+    knowing: the product's `assets` array empties at the same time, because
+    on this fixture the thumbnail was the only linked asset — setting
+    `thumbnail_id` is what had auto-linked it.
+98. **RETRACTED quirk #72 — `parent_id` + `product_family_id` together on
+    `POST /products` now SUCCEEDS (`201`).** The real rule is narrower than
+    quirk #72 described: the conflict is not "both fields present," it is
+    **a family that differs from the parent's**. Sending the parent's own
+    family alongside `parent_id` works; sending a different family returns
+    `422 {"name":"ValidationError","description":"product data validation
+    failed"}` with no field named. Also confirmed: a variant created with
+    `parent_id` alone **inherits the parent's `product_family_id`
+    automatically**. `product_level` transitions re-confirmed (parent
+    `0`→`1`, variant `2`, `num_variations` increments).
+99. **BREAKING for docs — `icontains` is REJECTED; the operator is
+    `contains:ignorecase`.** This reverses the 2026-10-01 finding recorded
+    in `information-architecture.md` ("the case-insensitive operator is
+    `icontains`, not `contains:ignorecase`"). Live today:
+    `sku[icontains]=bag` → `400 {"name":"InvalidFilterOperator"...}`,
+    `sku[contains:ignorecase]=BAG` → `200`. The API now enumerates its full
+    operator set in the error, which is the authoritative list:
+    `!contains, !contains:ignorecase, !eq, !exists, !gt, !gte, !in,
+    !includes, !intersects, !lt, !lte, !null, contains,
+    contains:ignorecase, eq, exists, gt, gte, in, includes, intersects, lt,
+    lte, null`. Note `includes`/`!includes` appear here and in no Plytix
+    source material. Any invalid operator returns the same enumerated list,
+    which makes this trivially re-checkable in future sessions.
+100. **Both `[length]` and `[len]` work — resolves the Oct 8 status map's
+    open question #2.** On a field that is missing or empty,
+    `attributes.short_description[length]=0` and `[len]=0` both return the
+    same 16 results as `[!exists]=true`; `[length][gt]=0` and `[len][gt]=0`
+    both return the same 25 as `[exists]=true`. They are functions, not
+    operators, which is why neither appears in quirk #99's operator list.
+    Also confirmed this session: `[null]`/`[!null]` work, `[intersects]`
+    works on a traversed field (`categories.name[intersects]=Backpacks`),
+    `_or[#]`/`_and[#]` grouping works, `_fields=*` works, `_sort_by=-<field>`
+    (descending) works, and `_total_count` still returns `400 "Field
+    '_total_count' does not exist."` (re-confirms quirk #89). **Does not
+    work:** the `_![bool][#]` NOT-grouping form that the status map marks
+    Direct — `_![eq][0]status=Draft` returns `400 "Field '_![eq][0]status'
+    does not exist."`
+101. **`PATCH /channels/{id}` returns `204`,** confirming quirk #84's
+    behavior change extends to channels (it was explicitly untested there).
+    Two further channel findings: **(a)** `{"rebuild_periodically": true}`
+    sent alone on a fresh channel now returns **`502
+    {"name":"BadGatewayError","description":"There was an error processing
+    your request. Please try again later"}`** — worse than quirk #40's
+    unhelpful `422`, and a 5xx on what is a validation case. Sending all
+    five schedule fields together returns `204` as expected. **(b)** The
+    `webhook` block is **silently discarded**: `PATCH` with
+    `{"webhook":{"webhook_url":...,"webhook_headers":{...},"webhook_body":{...}}}`
+    returns `204`, but a follow-up `GET` shows the key absent and
+    `_fields=webhook` is silently dropped from the search response.
+    (`webhook_body` must be a dictionary, not a string — a string returns
+    `422 "webhook.webhook_body: Input should be a valid dictionary"`.) So
+    the channel webhook cannot be configured through the API today, which
+    answers the open flag on
+    `guides/getting-notified-webhooks-and-automations.mdx`.
+102. **Rate limits are NOT enforced on the v3 PIM host, and no PIM response
+    carries a rate-limit header.** The JWT's account claims state
+    `rate_limit: [{limit: 20, window_size: 10}, {limit: 5000, window_size:
+    3600}]`, but 80 requests issued 40-way parallel in roughly two seconds
+    (4x the stated 10-second burst limit) all returned `200`, with no
+    `RateLimit-*`, `X-RateLimit-*` or `Retry-After` header on any response.
+    No `429` could be produced. The auth endpoint *does* enforce and
+    advertise a limit, and it has changed since quirk #3: now
+    `RateLimit-Limit: 15` / `X-RateLimit-Limit-Second: 15` (was 8).
+    **Consequence for docs:** the `429`-and-back-off advice in
+    `guides/bulk-operations-for-large-catalogs.mdx` is unverified, and the
+    `429` response shape remains uncaptured. Ask Plytix whether the JWT
+    limits are advisory, enforced elsewhere (a gateway in front of prod),
+    or not yet wired up on the dev host.
+103. **`pim.plytix.com/api/v3` is reachable now — the `503 "name resolution
+    failed"` recorded in Environment is stale.** `GET
+    https://pim.plytix.com/api/v3/products` with the DEV bearer token
+    returns `401 {"detail": "Unauthorized"}`, not a gateway error. A `401`
+    proves the host routes v3 and the service answers; it rejects this
+    token only because the token belongs to the dev environment. **Not a
+    full confirmation**: `bruno-collection/.env` no longer holds the "API
+    Docs" prod credentials, so v3 on the prod host could not be exercised
+    with a valid credential this session. Re-add a prod credential and
+    re-run before documenting `https://pim.plytix.com/api/v3` as the
+    production base URL — but the host is no longer disproven, and the
+    guides that use it are no longer presumed wrong.
+
 ## Known gaps
 
 - The ~70 pre-existing `.bru` files from Phases 0-5 that predate the
@@ -621,8 +768,8 @@ unconfirmed on `fumadocs/content/docs/reference/v3/pagination.mdx` against
 1. **`FormulaAttribute` creation is capped per account** (confirmed on "David's Dev Account", already at its limit of 2). `POST /product-attributes` with `type: "FormulaAttribute"` → `422 "This account reached the limit of 2 formula attributes"` regardless of body validity. No known way to raise the limit from the API itself — would need Plytix/dashboard-side confirmation of how this cap is configured, and whether it's raisable for testing purposes.
 2. **PDF Catalogs feature is disabled entirely for "David's Dev Account."** `POST /pdf-catalogs` → `422 "Cannot create new items the feature pdfs for account ..."` regardless of body validity — an account-level feature flag, not a per-request gate. `GET` still works (returns an empty list). No known way to enable it via the API.
 3. **Ecatalogs feature is also disabled entirely for "David's Dev Account"** — identical pattern to #2: `POST /ecatalogs` → `422 "Cannot create new items the feature ecatalogs for account ..."` regardless of body validity. `GET` still works (this account has one real pre-existing ecatalog, "Plytix Brand Portal"). No known way to enable it via the API. Combined with #2, this account cannot exercise either distribution-output creation path — anyone extending this collection to Channels/Ecatalogs output testing needs a different account.
-4. **"Automatic inheritance" for product-family attribute levels is disabled for "David's Dev Account."** `PATCH /product-families/{id}/attributes/{attribute_id}` with a `level` change → `403 {"errors":[{"name":"PermissionError","description":"Automatic inheritance is not available for this account"}]}` regardless of the target level — confirmed 2026-09-15, an account-level feature flag, not a request problem. Blocks confirming this PATCH's success response shape. No known way to enable it via the API. Note this account-wide feature-gate pattern is now 3 for 3 (PDF Catalogs, Ecatalogs, automatic inheritance) — worth asking Plytix in one conversation whether "David's Dev Account" is simply provisioned on a lower plan tier that gates several premium features at once.
-5. **New, confirmed 2026-09-22 — "UEF feature" blocks `channel_ids`/`ecatalog_ids` on `PATCH /products/{id}`.** `403 {"errors":[{"name":"PermissionError","description":"UEF feature is not enabled for this account"}]}`, regardless of body validity, whether the field is sent alone or together with the other. A 5th feature gate on this account (see quirk #70). No known way to enable it via the API. **Update 2026-09-22 (quirk #73)**: the same gate also blocks `parent_attributes`/`variant_attributes` on `POST /product-families` create — only the plain `attributes` array (always `no_level`) is usable on this account, at create time or via the dedicated link endpoint.
+4. ✅ **Re-confirmed 2026-10-08, still gated, with a changed error `name`:** `Forbidden` (was `PermissionError`); description unchanged. Consequence found this session: because inheritance is off, a parent's attribute value never propagates to its variants, so `overwritten_attributes` **stays `[]` even after a variant explicitly overrides a value**. This makes the `overwritten_attributes` contents and the "delete a variant's value to resolve back to the parent's" behavior **untestable on this account** — both remain open flags on `guides/reconstructing-parent-variant-hierarchies.mdx` and need either an ungated account or an answer from Plytix. **"Automatic inheritance" for product-family attribute levels is disabled for "David's Dev Account."** `PATCH /product-families/{id}/attributes/{attribute_id}` with a `level` change → `403 {"errors":[{"name":"PermissionError","description":"Automatic inheritance is not available for this account"}]}` regardless of the target level — confirmed 2026-09-15, an account-level feature flag, not a request problem. Blocks confirming this PATCH's success response shape. No known way to enable it via the API. Note this account-wide feature-gate pattern is now 3 for 3 (PDF Catalogs, Ecatalogs, automatic inheritance) — worth asking Plytix in one conversation whether "David's Dev Account" is simply provisioned on a lower plan tier that gates several premium features at once.
+5. ⚠️ **Superseded 2026-10-08 (quirk #93): this gate is now unreachable.** `channel_ids`, `ecatalog_ids` and `product_data_sheet_ids` are rejected at validation (`422 "Extra inputs are not permitted"`) before the permission check runs, so the `403` below can no longer be produced. Whether the UEF flag is still set on the account is unknown and untestable from the API. Original finding preserved below. **New, confirmed 2026-09-22 — "UEF feature" blocks `channel_ids`/`ecatalog_ids` on `PATCH /products/{id}`.** `403 {"errors":[{"name":"PermissionError","description":"UEF feature is not enabled for this account"}]}`, regardless of body validity, whether the field is sent alone or together with the other. A 5th feature gate on this account (see quirk #70). No known way to enable it via the API. **Update 2026-09-22 (quirk #73)**: the same gate also blocks `parent_attributes`/`variant_attributes` on `POST /product-families` create — only the plain `attributes` array (always `no_level`) is usable on this account, at create time or via the dedicated link endpoint.
 
 ## Async / webhook-driven resources
 
@@ -691,3 +838,10 @@ unconfirmed on `fumadocs/content/docs/reference/v3/pagination.mdx` against
 26. **New, from 2026-10-01 (quirk #92) — a concrete bug with a one-line fix.** Every `pagination.next_page`/`previous_page` link is generated with the `http` scheme, 301s to `https`, and silently costs the caller their `Authorization` header on any client that doesn't forward auth across a scheme-changing redirect. Can Plytix emit `https` links? Until then every "follow the next_page URL" instruction in the docs needs a warning attached.
 27. **New, from 2026-10-01 (quirk #89).** v1 returned `total_count` on every search; v3 has no count mechanism at all (`_total_count`/`_filtered_count` both 400, and the `Pagination` schema carries no counts). Is this deliberate, or still-to-come? It's a real capability regression for anyone building a UI that shows "N results" or a progress bar over an export, and it's the kind of thing a migrating v1 customer will hit immediately.
 28. **New, from 2026-10-01 (quirk #91).** The spec's `Pagination` schema says `string | null`, but the API omits the keys instead. Should the spec be corrected, or the API changed to emit explicit nulls? Either is fine for docs, but right now a generated client built from the spec will have a nullable field that is never actually null, only absent.
+29. **New, from 2026-10-08 (quirk #93) — the most urgent question this session.** All five `*_ids` relationship-array fields are now rejected on `POST`/`PATCH /products` with `"Extra inputs are not permitted"`, although `openapi_pimv3.json` still declares every one of them. Was this an intentional move to the new link/unlink subpaths (quirk #94), and if so is the spec going to be corrected? Three published guides are built on `category_ids` and currently teach a call that `422`s.
+30. **New, from 2026-10-08 (quirk #96).** With `*_ids` gone and no link/unlink support on `/products/{id}/assets`, there is no way to attach or detach a non-thumbnail asset to a product through the API. Is an asset link/unlink endpoint coming, matching what categories and relationships now have? This is a capability regression, not just a docs gap.
+31. **New, from 2026-10-08 (quirk #99).** The case-insensitive operator flipped back from `icontains` to `contains:ignorecase` between 2026-10-01 and today. Which is the supported spelling going forward? Also: `includes`/`!includes` appear in the API's own operator list and in none of Plytix's source material — what do they do, and how do they differ from `contains` and `intersects`?
+32. **New, from 2026-10-08 (quirk #101a).** `PATCH /channels/{id}` with `{"rebuild_periodically": true}` alone returns `502 BadGatewayError`. A missing-companion-field validation case should not produce a 5xx. Clear bug report.
+33. **New, from 2026-10-08 (quirk #101b).** The channel `webhook` block accepts a `204` and then silently discards the value, and `_fields=webhook` is dropped from search responses. Is channel webhook configuration meant to be API-writable at all, or is it dashboard-only? The docs currently can't say either way.
+34. **New, from 2026-10-08 (quirk #102).** The JWT advertises per-account rate limits that the v3 host does not appear to enforce (80 requests in ~2s all returned `200`), and no PIM response carries a rate-limit header. Are the limits advisory, enforced only on the prod host, or not yet wired up? Docs currently tell readers to handle `429` without anyone having seen one.
+35. **New, from 2026-10-08 (quirk #103).** `pim.plytix.com/api/v3` now answers `401` rather than `503`. Is it the production v3 base URL customers should use? Please also re-issue a prod ("API Docs") credential so this can be confirmed end to end — the current `.env` holds only the DEV pair.

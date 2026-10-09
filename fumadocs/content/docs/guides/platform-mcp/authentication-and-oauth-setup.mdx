@@ -102,20 +102,22 @@ Remove access when the agent no longer needs it, or when you're done testing. Tw
 
 ## Troubleshooting
 
-- **Problem:** The assistant reports being connected but every request fails.
-  - **Solution:** Check the credential first, then the role. A credential that isn't valid and a role with no access fail at different points, and the status code tells you which: `401` means the credential wasn't accepted, `403` means it was accepted but the role isn't allowed.
-  - **Prevention:** Verify with a read-only question before granting write access.
+Check the problems below if you run into issues while authorizing a client.
 
-- **Problem:** A long-running job stops partway through with an authorization error.
-  - **Solution:** Reconnect and rerun only the remaining items. Ask the agent what it completed before retrying, so you don't duplicate work.
-  - **Prevention:** Bearer tokens from the current Plytix auth flow are short-lived, which `roadmap.md` records as a known pain point for long-running integrations. {/* Whether the same lifetime applies to the MCP, and whether clients refresh automatically, is [PENDING]. */}Keep agent-driven jobs short and run large batches as code.
-
-- **Problem:** The agent can read your catalog but can't change anything.
-  - **Solution:** That's a role boundary, not a bug. Check the role's permissions for the specific area, whether that's products, attributes, categories, or assets.
-  - **Prevention:** Decide read-only or read-write before you create the credential, rather than adjusting it after the agent hits a wall.
-
-- **Problem:** An attribute stays unchanged even though the role has Edit rights on it.
-  - **Solution:** Check whether the change went through an import. Attribute-level permissions apply in the Plytix interface but not in the importer, so permissions can behave differently depending on the path a write takes. See [Permissions and security considerations](/docs/guides/platform-mcp/permissions-and-security).
+<Accordions type="multiple">
+  <Accordion title="The assistant reports being connected but every request fails" value="connected-all-fail">
+    Check the credential first and the role second, because the two fail at different points and the status code tells you which you're looking at. A `401` means the credential itself wasn't accepted, so the key, the password, or the way your client stores them is wrong. A `403` means the credential was fine but its role isn't allowed to do what the agent asked. Verifying with a read-only question before you grant write access keeps these two cases from arriving at the same time.
+  </Accordion>
+  <Accordion title="A long-running job stops partway through with an authorization error" value="long-job-auth-expiry">
+    Bearer tokens from the current Plytix auth flow last 15 minutes, which is short enough that an agent working through a large batch can outlive its own token. Reconnect, ask the agent what it finished before you retry, and rerun only the remainder so you don't duplicate work. The durable fix is to keep agent-driven jobs short and run large batches as code with its own token handling, as in [Bulk operations for large catalogs](/docs/guides/bulk-operations-for-large-catalogs).
+  </Accordion>
+  <Accordion title="The agent can read your catalog but can't change anything" value="read-but-not-write">
+    That's a role boundary doing its job, not a bug. Check the role's permissions for the specific area the agent was working in, whether that's products, attributes, categories, or assets, since they're set independently of each other. Deciding read-only or read-write before you create the credential saves discovering the limit partway through a task.
+  </Accordion>
+  <Accordion title="An attribute stays unchanged even though the role has Edit rights on it" value="attribute-permission-import-gap">
+    Check whether the change went through an import rather than a direct edit. Attribute-level permissions apply in the Plytix interface but not in the importer, so the same role can be blocked on one path and allowed on the other. Setting Import to View or None on that role closes the gap; see [Permissions and security considerations](/docs/guides/platform-mcp/permissions-and-security).
+  </Accordion>
+</Accordions>
 
 ## Related articles
 

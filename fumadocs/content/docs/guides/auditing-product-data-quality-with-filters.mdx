@@ -12,7 +12,9 @@ Catch incomplete product data before it reaches a channel or marketplace: produc
 - A bearer token. See the Quickstart guide for the authentication flow.
 - Familiarity with the query-string filter syntax covered in "Filtering, Sorting & Pagination." This guide assumes you can already build a basic filter like `sku=BAG-10157`.
 
-## Steps
+## Find incomplete products
+
+Follow the steps below to build the filters that surface missing fields, empty values, and low completeness scores.
 
 1. **Find products missing a required field with `!exists`.**
 
@@ -36,21 +38,35 @@ Catch incomplete product data before it reaches a channel or marketplace: produc
 
    Useful as a sanity check on the inverse of step 1, or to confirm how many products a required-field rollout still needs to reach.
 
-3. **Check for an empty value, in addition to a missing one, with `icontains`.**
+3. **Catch empty values as well as missing ones with `length`.**
 
-   `!exists` catches a field that was never set. A field that's present but empty (an empty string) needs a different check:
+   `!exists` finds a field that was never set. A field that's present but holds an empty string slips past it, so check the length instead:
 
    ```bash
    curl -G "https://pim.plytix.com/api/v3/products" \
      -H "Authorization: Bearer <access_token>" \
-     --data-urlencode "attributes.short_description[icontains]="
+     --data-urlencode "attributes.short_description[length]=0"
    ```
 
-   {/* FLAG (open):
-     This project confirmed `[icontains]` works for substring matching against a real value, but didn't independently test it with an empty string specifically to distinguish "empty" from "missing." Confirm this distinction behaves as expected for your account before relying on it, or combine both `exists` and a length check if your account supports one.
-   */}
+   This matches empty values and missing ones together, which is usually what a data-quality audit wants. Flip it to `[length][gt]=0` for the products that have real content. If you need to tell the two cases apart, run `[!exists]=true` alongside it: anything in the `length=0` set but not the `!exists` set is present but empty.
 
-4. **Narrow an audit to a set of statuses with `in`.**
+4. **Search text case-insensitively with `contains:ignorecase`.**
+
+   ```bash
+   curl -G "https://pim.plytix.com/api/v3/products" \
+     -H "Authorization: Bearer <access_token>" \
+     --data-urlencode "attributes.short_description[contains:ignorecase]=waterproof"
+   ```
+
+   Use `[contains]` when case matters. Plytix accepts a fixed set of filter operators, and sending one it doesn't recognize returns `400` with the full list in the error message, which is a quick way to check what's available:
+
+   ```text
+   !contains, !contains:ignorecase, !eq, !exists, !gt, !gte, !in, !includes,
+   !intersects, !lt, !lte, !null, contains, contains:ignorecase, eq, exists,
+   gt, gte, in, includes, intersects, lt, lte, null
+   ```
+
+5. **Narrow an audit to a set of statuses with `in`.**
 
    ```bash
    curl -G "https://pim.plytix.com/api/v3/products" \
@@ -61,9 +77,9 @@ Catch incomplete product data before it reaches a channel or marketplace: produc
 
    Repeat the parameter for each value you want to match. This is the same pattern behind "products in category A or category B."
 
-5. **Read the built-in completeness scores instead of writing your own checks.**
+6. **Read the built-in completeness scores instead of writing your own checks.**
 
-   Every product's `attributes` map already includes a set of automatically computed completeness fields, for example `basic_information_completeness`, `website_ready`, and `marketing_ready`, without any setup on your end:
+   Your account's completeness attributes appear in every product's `attributes` map alongside the values you set yourself, scored as numbers. Which ones exist depends on how your account is configured; a catalog set up for retail might carry `basic_information_completeness`, `website_ready`, and `marketing_ready`. Read one product to see yours:
 
    ```bash
    curl "https://pim.plytix.com/api/v3/products/<product_id>" \
@@ -78,7 +94,7 @@ Catch incomplete product data before it reaches a channel or marketplace: produc
      --data-urlencode "attributes.website_ready[gt]=90"
    ```
 
-6. **Combine filters and turn a recurring audit into a Smart List.**
+7. **Combine filters and turn a recurring audit into a Smart List.**
 
    Any combination of the filters above can also become a Smart List's saved query, so you don't have to rebuild the request each time. See "Building a Smart product list" in Core Concepts.
 

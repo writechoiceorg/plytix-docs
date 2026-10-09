@@ -1,0 +1,152 @@
+meta {
+  name: Unlink Category from Product
+  type: http
+  seq: 18
+}
+
+delete {
+  url: {{pim_base_url_v3}}/products/REPLACE_WITH_PRODUCT_ID/categories/REPLACE_WITH_CATEGORY_ID
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Accept: application/json
+}
+
+docs {
+  `DELETE /api/v3/products/{product_id}/categories/{category_id}` — remove one
+  category from a product, leaving the product and its other categories intact.
+  Confirmed live 2026-10-08 against "David's Dev Account" on a disposable product
+  (`WC-REV-1008-A`) that had two categories linked; since deleted.
+
+  ## This is now a SAFE, SCOPED unlink — the hazard is fully gone
+  This exact path has a long history in this collection. It was originally
+  confirmed **destructive** (quirk #54, 2026-09-11: it deleted the entire
+  product), then **safe but non-functional** (2026-09-23: `404 "Product has no
+  field 'categories/<id>'"`). **As of 2026-10-08 it works as intended**: `204`,
+  and a follow-up `GET /products/{id}` shows the product fully intact — `sku`,
+  `label`, `status` and `attributes` all unchanged — with only the named category
+  removed and the other one still attached. Verified in the same run.
+
+  This is the second confirmed safe scoped unlink in v3, after
+  `DELETE /products/{id}/relationships/{relationship_id}` (quirk #62). It
+  implements the "1:M unlink an entity instance" row that
+  `materials/api-references/API V3 - status map (08_10_2026).md` marks **Direct**
+  (pp. 11-13).
+
+  ## Why you need this: `category_ids` no longer works
+  The previously-documented removal method — `PATCH /products/{id}` with a
+  reduced `category_ids` array — is **rejected** as of 2026-10-08 with
+  `422 "category_ids: Extra inputs are not permitted"` (quirk #93). This endpoint
+  is now the only way to remove a category from a product via the API.
+
+  ## Sibling paths and their errors (all confirmed non-destructive)
+  - `DELETE /products/{id}/categories` (bare collection) → `405`
+    `{"name":"MethodNotAllowed","description":"DELETE on 'categories' requires
+    exactly one linked id: DELETE /products/{id}/categories/{linked_id}"}`
+  - `DELETE /products/{id}/<unrecognized>` → `404`
+    `{"name":"NotFoundError","description":"Product has no field '<unrecognized>'"}`
+  - `PATCH /products/{id}/categories` → `405`
+    `{"name":"MethodNotAllowed","description":"PATCH is not allowed on
+    'categories': link or unlink here, and update a linked entity at its own
+    path."}`
+
+  The product survived all three, confirmed by follow-up `GET`.
+
+  ## Not available for assets
+  `DELETE /products/{id}/assets/{asset_id}` returns `404 "Product has no field
+  'assets/<id>'"` — assets do not support this pattern (quirk #96). With
+  `category_ids`-style arrays gone, there is currently **no** way to detach a
+  non-thumbnail asset from a product.
+}
+
+example {
+  name: Unlink Category - 204 No Content
+  description: Real response captured 2026-10-08 against "David's Dev Account". Product WC-REV-1008-A had two categories; this removed only "WC Test Category" and left "WC Test Child Category" attached.
+
+  request: {
+    url: {{pim_base_url_v3}}/products/6ac7ef509c6194f8c08e24aa/categories/6a9f1b482b6fd055ffb7c7dc
+    method: delete
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 204
+      text: No Content
+    }
+    headers: {}
+    body: {
+      type: text
+      content: ''
+    }
+  }
+}
+
+example {
+  name: Verify After Unlink - Product Intact, One Category Left
+  description: Follow-up GET captured 2026-10-08 immediately after the 204 above, proving the unlink is scoped and the product survived.
+
+  request: {
+    url: {{pim_base_url_v3}}/products/6ac7ef509c6194f8c08e24aa/categories
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json
+    }
+    body: {
+      type: json
+      content: '''
+        {"data": [{"id": "6a9f1b542b6fd055ffb7c7dd", "name": "WC Test Child Category", "parent_id": "6a9f1b482b6fd055ffb7c7dc", "path": ["WC Test Category", "WC Test Child Category"], "slug": "wc-test-child-category", "order": 1, "n_children": 0}], "errors": [], "pagination": {}}
+      '''
+    }
+  }
+}
+
+example {
+  name: Unlink Category - 405 Bare Collection
+  description: Real response captured 2026-10-08, omitting the category id. Non-destructive; the product was confirmed intact afterwards.
+
+  request: {
+    url: {{pim_base_url_v3}}/products/6ac7ef509c6194f8c08e24aa/categories
+    method: delete
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 405
+      text: Method Not Allowed
+    }
+    headers: {
+      content-type: application/json
+    }
+    body: {
+      type: json
+      content: '''
+        {"data": [], "errors": [{"name": "MethodNotAllowed", "description": "DELETE on 'categories' requires exactly one linked id: DELETE /products/{id}/categories/{linked_id}"}]}
+      '''
+    }
+  }
+}

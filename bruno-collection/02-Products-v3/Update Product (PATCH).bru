@@ -52,11 +52,31 @@ docs {
     (adds `assets`, `categories`, `relationships` arrays, `created_user_audit`/
     `modified_user_audit`, `product_type`) -- same shape as a plain `GET`.
 
+  ## ⚠️ TWO CORRECTIONS, 2026-10-08
+  **(a) This endpoint returns `204`, not `200`.** The "What it does" section
+  above still describes the 2026-09-15 behavior. `PATCH` switched to `204 No
+  Content` with an empty body somewhere between 2026-09-23 and 2026-10-01
+  (quirk #84) and was re-confirmed `204` on 2026-10-08. There is no response
+  body to read; verify with a follow-up `GET`.
+
+  **(b) Every `*_ids` field is now REJECTED on `PATCH`.** `category_ids`,
+  `static_list_ids`, `channel_ids`, `ecatalog_ids` and
+  `product_data_sheet_ids` each return `422 {"errors":[{"name":
+  "InputDTOValidationError","description":"<field>: Extra inputs are not
+  permitted"}]}`, although `ProductUpdateInputDto` still declares all five
+  (quirk #93). Confirmed still accepted: `label`, `gtin`, `status`,
+  `attributes`, `thumbnail_id`, `product_family_id`, `parent_id`. Category
+  linking moved to `POST /products/{id}/categories` and
+  `DELETE /products/{id}/categories/{category_id}` -- see
+  `Link Category to Product.bru` and `Unlink Category from Product.bru`.
+
+  Also confirmed 2026-10-08: `{"thumbnail_id": null}` clears the thumbnail
+  (`204`, follow-up `GET` shows `thumbnail_id: null`) -- quirk #97.
+
   ## Related, resource-specific quirks (see config for the full list)
-  - `category_ids`/other relationship-array fields reliably apply via
+  - ~~`category_ids`/other relationship-array fields reliably apply via
     `PATCH` even when silently dropped on `POST` for some resources
-    (quirk #27) -- not re-tested here since this file focuses on plain
-    scalar fields, but relevant if extending this request.
+    (quirk #27)~~ -- **retracted 2026-10-08, see correction (b) above.**
   - `DELETE /products/{id}/{path}` used to ignore `{path}` and delete the
     whole product (quirk #31) -- confirmed FIXED 2026-09-23, now safely
     rejects with `405`/`404` instead. See "Delete Product.bru" for the

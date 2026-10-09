@@ -98,7 +98,24 @@ Decided 2026-10-06. Never start a section with a bullet list, numbered list, or 
 
 ### Procedure section headings
 
-Decided 2026-10-06. Never title a procedure section "Steps". Use a task-based heading that relates to what the guide does, usually the guide title without product-name suffixes. Example: for the guide "Sync your ERP", the section is `## Sync your ERP`. Guide titles themselves also drop "with Plytix" style suffixes when the product is already obvious (e.g. "Sync your ERP", not "Sync your ERP with Plytix").
+Decided 2026-10-06, revised 2026-10-08. Never title a procedure section "Steps", "Integration Steps", or anything else generic.
+
+**Name the real task.** Write a verb-first heading that says what the procedure actually achieves, worded differently from the page title so the heading adds information instead of repeating the H1 directly above it. The earlier version of this rule said to reuse the guide title; that produced an H2 that restated the H1, so it was dropped.
+
+| Guide title | Procedure heading |
+|---|---|
+| Export your full catalog | `## Export the catalog page by page` |
+| Audit product data quality with filters | `## Find incomplete products` |
+| Build a marketplace-specific product feed | `## Create the feed and connect it` |
+| Bulk operations for large catalogs | `## Build the processing loop` |
+| Reconstruct parent/variant hierarchies | `## Build and read the hierarchy` |
+| Quickstart | `## Connect to the API` |
+
+**Split when a guide covers more than one task.** If the procedure contains two or more things a reader would come looking for separately, give each its own H2 rather than numbering them all under one heading. "Safely remove categories, assets, or relationships" splits into `## Remove a category from a product`, `## Remove a relationship from a product`, and `## Change or clear a product's thumbnail`. Each H2 then answers one question, which also satisfies the answer-first H2 rule under "Answer-engine formatting".
+
+Guide titles themselves drop "with Plytix" style suffixes when the product is already obvious (e.g. "Sync your ERP", not "Sync your ERP with Plytix").
+
+> `syncing-your-erp-with-plytix.mdx` still uses `## Sync your ERP`, the old title-echo form. Leave it or rename it to something like `## Keep both systems in sync` next time the page is touched; it is not worth a standalone edit.
 
 ### User interface elements
 

@@ -1,0 +1,53 @@
+---
+title: "Not migrated and new in v3"
+description: "Reference for the v1 endpoints that have no v3 counterpart, the resources that are new in v3, and what the v2 products beta covers."
+---
+
+import { Table2, BookOpen } from 'lucide-react';
+
+Not every v1 call has somewhere to go. This page lists the endpoints that stay where they are, the resources v3 added with no v1 ancestor, and the narrow slice of the API that v2 covers. Together they explain why a migrated integration usually ends up calling two versions rather than one. It's part of the reference set for [Migrating to v3](/docs/guides/migrating-to-v3).
+
+## Endpoints with no v3 equivalent
+
+These v1 paths have no counterpart in the v3 spec. The first four keep working on v1 and are the usual reason an integration stays split across versions.
+
+| v1 endpoint | What to do |
+|---|---|
+| `PUT /api/v1/assets/{asset_id}/content` | Keep on v1. v3 takes content only at asset creation |
+| `POST` and `DELETE /api/v1/products/{product_id}/assets[/{asset_id}]` | Keep on v1. v3 has no product-to-asset link path. `thumbnail_id` on the product sets a single image, which is not the same thing |
+| `GET /api/v1/filters/product`, `/filters/asset`, `/filters/relationships` | Keep on v1, or build filters from the attribute definitions returned by `GET /api/v3/product-attributes` |
+| `POST /api/v1/products/{parent_product_id}/variants/resync` | Keep on v1 |
+| `POST /api/v1/accounts/api-credentials/search` | Manage API keys in the Plytix interface, under the **API** tab |
+| `POST /api/v1/accounts/memberships/search` | Manage users in the Plytix interface, under the **Team** tab |
+
+## Bulk operations
+
+Neither v1 nor v3 offers bulk writes as a generally available feature. The v3 bulk API is restricted to large and enterprise accounts; contact your account manager to find out whether your account has access. See [Bulk operations for large catalogs](/docs/guides/bulk-operations-for-large-catalogs).
+
+## Resources that are new in v3
+
+These have no v1 equivalent, so they're additions rather than migrations.
+
+| v3 resource | Covers |
+|---|---|
+| `/api/v3/asset-lists` | Saved asset lists |
+| `/api/v3/family-attributes` | Attribute definitions across families, read-only |
+| `/api/v3/product-relationships` | Relationship records, read-only |
+| `/api/v3/related-products` | The products on the far side of a relationship, read-only |
+
+## What v2 covers
+
+v2 is a products-only beta served from the same base URL. It mirrors the v1 product endpoints and adds two operations v1 lacks: `DELETE /api/v2/products/{product_id}/relationships/{relationship_id}` and `DELETE /api/v2/products/{product_id}/categories/{category_id}`. Everything outside products, including assets, attributes, categories, families, and relationship definitions, stays on v1.
+
+## Related resources
+
+Now that you know what doesn't move, you can explore these related pages.
+
+<Cards>
+  <Card icon={<Table2 />} title="Endpoint mapping" href="/docs/guides/migrating-to-v3/endpoint-mapping">
+    Find the v3 equivalent of each v1 and v2 endpoint, resource by resource.
+  </Card>
+  <Card icon={<BookOpen />} title="API v1/v2 reference" href="/docs/reference/legacy/api-v1-v2-reference">
+    Browse the endpoints your integration keeps calling on the older versions.
+  </Card>
+</Cards>

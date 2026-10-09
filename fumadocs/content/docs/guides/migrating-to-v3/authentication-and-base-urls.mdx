@@ -1,0 +1,49 @@
+---
+title: "Authentication and base URLs"
+description: "Reference for the base URL, path prefix, and token flow shared by the v1, v2, and v3 Plytix APIs, and what stays the same when you migrate."
+---
+
+import { Search, KeyRound } from 'lucide-react';
+
+Authentication is the part of a migration that doesn't change. v1, v2, and v3 are served from the same host, authenticate against the same service, and accept the same token. This page records what you send with every request, and the one routing question that isn't settled yet. It's part of the reference set for [Migrating to v3](/docs/guides/migrating-to-v3).
+
+## Base URLs and paths
+
+| | v1 and v2 | v3 |
+|---|---|---|
+| Base URL | `https://pim.plytix.com` | `https://pim.plytix.com` |
+| Path prefix | `/api/v1`, `/api/v2` | `/api/v3` |
+| Auth service | `https://auth.plytix.com` | Same |
+| Token request | `POST /auth/api/get-token` with `api_key` and `api_password` | Same |
+| Request header | `Authorization: Bearer <token>` | Same |
+
+Credentials, their roles, and token-refresh logic carry over unchanged, and the same token works against both versions. That matters, because an integration that keeps some calls on v1 doesn't need a second auth flow.
+
+## Token flow
+
+The exchange is the same one a v1 integration already makes. Post your API key and password, and send the token back as a bearer header on every call to either version:
+
+```bash
+curl --request POST \
+  --url https://auth.plytix.com/auth/api/get-token \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "api_key": "your.api.key",
+    "api_password": "your.secret.api.password"
+  }'
+```
+
+Nothing in a migration requires new credentials, a second token, or a change to your refresh logic. See [Quickstart](/docs/guides/quickstart) for the full flow, including how long a token lasts.
+
+## Related resources
+
+Now that you know what to send with every request, you can explore these related pages.
+
+<Cards>
+  <Card icon={<Search />} title="Searching and pagination" href="/docs/guides/migrating-to-v3/searching-and-pagination">
+    Convert a v1 search body into a v3 query string and page through the results.
+  </Card>
+  <Card icon={<KeyRound />} title="Authentication" href="/docs/reference/v3/authentication">
+    Read the v3 token flow in full, including expiry and refresh.
+  </Card>
+</Cards>

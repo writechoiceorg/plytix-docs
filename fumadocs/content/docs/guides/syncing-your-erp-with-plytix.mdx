@@ -85,7 +85,11 @@ Follow the steps below to authenticate, read changes from Plytix, push your own 
      -d '{"sku": "NEW-SKU-001", "label": "New Product"}'
    ```
 
-   `sku` is the only required field. Everything else, including `attributes` and `category_ids`, can follow in the same request or a later `PATCH`. A successful create returns `201` with the full created product, not only its ID, even though some Plytix API documentation describes `POST` as returning only an ID.
+   `sku` is the only required field. A successful create returns `201` with the product itself, not only its ID, so you can store the new `id` straight from the response without a follow-up read. Fields you didn't set are left out rather than returned empty.
+
+   One shape difference to code around: on a create, `data` is a single object. On a search it's an array. Reusing one response parser across both will bite you.
+
+   You can send `label`, `gtin`, `status`, `attributes`, `thumbnail_id`, `product_family_id`, and `parent_id` in the same request. You can't send `category_ids`, `static_list_ids`, `channel_ids`, `ecatalog_ids`, or `product_data_sheet_ids`: those return `422` with `"Extra inputs are not permitted"` on create and on `PATCH` alike. Categories are attached afterwards with `POST /products/<product_id>/categories`, sending `{"id": "<category_id>"}`. See [Safely remove categories, assets, or relationships](/docs/guides/safely-removing-categories-assets-or-relationships) for the full link and unlink pattern.
 
 7. **Confirm the write took effect.**
 
@@ -110,9 +114,9 @@ Check the problems below if you run into issues while following this guide.
     To avoid SKU formatting issues altogether, store each product's Plytix ID in your ERP (step 2) so lookups don't depend on it.
   </Accordion>
   <Accordion title="Attributes you didn't touch disappear after a sync run" value="attributes-disappear">
-    A `PATCH` that names `attributes` replaces the whole map, so every attribute missing from your payload is removed. Read the product's current attributes, merge your change into them, and send the result, as shown in step 5.
+    A `PATCH` that names `attributes` replaces the whole map, so every attribute missing from your payload is removed. Read the product's current attributes, merge your change into them, and send the result.
 
-    To avoid this, never build a `PATCH` body with only the changed attribute in it.
+    To avoid this entirely, address each attribute at its own path instead, as shown in step 5. `PATCH /products/<product_id>/attributes/<name>` changes only the attribute you name and is the safer default for a sync loop.
   </Accordion>
 </Accordions>
 

@@ -12,7 +12,9 @@ Pull your entire product catalog, with attributes and assets included, without a
 - A bearer token. See the Quickstart guide for the authentication flow.
 - An idea of which fields you actually need. Requesting only those fields keeps each page smaller and the export faster.
 
-## Steps
+## Export the catalog page by page
+
+Follow the steps below to request the fields you need, walk the pages until you reach the end, and read related data straight out of each product.
 
 1. **Request the first page with the fields you need.**
 
@@ -27,11 +29,9 @@ Pull your entire product catalog, with attributes and assets included, without a
      --data-urlencode "_page_size=100"
    ```
 
-   `_fields` accepts repeated values. Requesting `categories` or `assets` returns them fully expanded, with no separate call and no `_expand` parameter needed.
+   `_fields` accepts repeated values. Requesting `categories` or `assets` returns them fully expanded, with no separate call needed.
 
-   {/* FLAG (open):
-     `_expand` does not work on this endpoint in this project's testing, despite appearing in some Plytix API documentation. Expansion happens automatically per `_fields` value instead, as shown above.
-   */}
+   Don't add `_expand`, the v3 search endpoint rejects it with `400` and `"Field '_expand' does not exist in model 'Product'."` Expansion happens automatically for each `_fields` value you name.
 
 2. **Follow the `next_page` link until it stops appearing.**
 
@@ -44,7 +44,7 @@ Pull your entire product catalog, with attributes and assets included, without a
    }
    ```
 
-   Request `pagination.next_page` directly. It's a complete URL, including every filter and field you sent on the first call. The default page size is 25; the maximum is 1000, so setting `_page_size` explicitly (as in step 1) cuts the number of requests for a large catalog substantially. Stop when a response has no `next_page` key — on the last page the key is absent, not `null`.
+   Request `pagination.next_page` directly. It's a complete URL, including every filter and field you sent on the first call. The default page size is 25; the maximum is 1000, so setting `_page_size` explicitly (as in step 1) cuts the number of requests for a large catalog substantially. Stop when a response has no `next_page` key: on the last page the key is absent, not `null`.
 
    <Callout type="warn" title="Rewrite the link to https before you request it">
      Plytix generates these links with the `http` scheme. That address `301`-redirects to `https`, and many HTTP clients drop the `Authorization` header across a scheme change, so the redirected request comes back `401 {"detail": "Unauthorized"}`. Swap `http://` for `https://` before requesting the URL, or configure your client to keep the auth header across redirects (`curl --location-trusted`).
@@ -79,14 +79,19 @@ Pull your entire product catalog, with attributes and assets included, without a
 
 ## Troubleshooting
 
-- **Problem:** A field you requested with `_fields` doesn't appear in the response, but you also don't see an error.
-  - **Solution:** Some invalid field names are silently dropped rather than rejected. Double-check the exact field name against the product's full response shape.
-  - **Prevention:** Confirm a field name against one full, unfiltered product response before building it into a bulk export.
-- **Problem:** Requesting `_fields=category_ids` (or another field ending in `_ids`) returns an error instead of the field.
-  - **Solution:** This is intentional. Plytix hides `_ids`-suffixed fields from API responses to avoid exposing internal data structure. Use the expanded plural form instead, for example `_fields=categories`, which returns the same relationship fully expanded.
-  - **Prevention:** Request the expanded relationship (`categories`, `assets`) directly rather than its `_ids` field, as shown in step 1.
-- **Problem:** `_fields` doesn't seem to narrow the response on a single-product lookup.
-  - **Solution:** `_fields` only applies to the search endpoint (`GET /products`), not to `GET /products/{id}`, which always returns the full product. Use the search endpoint for a sparse-field export.
+Check the problems below if you run into issues while following this guide.
+
+<Accordions type="multiple">
+  <Accordion title={<>A field you asked for with <code>_fields</code> is missing, with no error</>} value="fields-silently-dropped">
+    Plytix drops some unrecognized field names rather than rejecting them, so a typo costs you the field and tells you nothing. Compare the name against one full, unfiltered product response, which is the authoritative list of what a product actually carries. Reading a single product once before you build the export list is the cheapest way to avoid this across a long run.
+  </Accordion>
+  <Accordion title={<><code>_fields=category_ids</code> returns 400 instead of the field</>} value="fields-ids-hidden">
+    Any field ending in `_ids` is hidden from API responses, so this returns a `HiddenFieldError`. That's deliberate: Plytix doesn't expose the denormalized ID arrays behind its relationships. Ask for the expanded plural form instead, so `categories` rather than `category_ids`, and `assets` rather than `asset_ids`. The expanded form returns the full objects and includes the IDs you were after anyway.
+  </Accordion>
+  <Accordion title={<><code>_fields</code> doesn't narrow a single-product lookup</>} value="fields-single-product">
+    `_fields` only applies to the search endpoint. `GET /products/{id}` always returns the complete product whatever you pass, so a sparse-field read has to go through `GET /products` with a filter that matches the one product you want.
+  </Accordion>
+</Accordions>
 
 ## Related articles
 

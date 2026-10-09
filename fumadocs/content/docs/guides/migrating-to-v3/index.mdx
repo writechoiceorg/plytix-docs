@@ -9,6 +9,15 @@ v3 reorganized the Plytix API rather than replicating it. Most of what a v1 or v
 
 This guide covers that split: what moves, what stays, and how to convert the parts that move. Your authentication doesn't change either way.
 
+Six reference pages sit under this guide and carry the detail the steps below point to:
+
+- [Authentication and base URLs](/docs/guides/migrating-to-v3/authentication-and-base-urls) — the base URL, path prefix, and token flow both versions share.
+- [Searching and pagination](/docs/guides/migrating-to-v3/searching-and-pagination) — the v1 search body translated into a v3 query string, and how v3 pages.
+- [Filter operators](/docs/guides/migrating-to-v3/filter-operators) — every operator, boolean grouping, and custom attributes.
+- [Responses and updates](/docs/guides/migrating-to-v3/responses-and-updates) — what each write returns, and the behaviors that break migrated code.
+- [Endpoint mapping](/docs/guides/migrating-to-v3/endpoint-mapping) — every v1 and v2 endpoint with its v3 equivalent, resource by resource.
+- [Not migrated and new in v3](/docs/guides/migrating-to-v3/not-migrated-and-new-in-v3) — what has no v3 counterpart, what v3 added, and what v2 covers.
+
 ## Prerequisites
 
 Before you start, you need:
@@ -66,7 +75,7 @@ Before you start, you need:
      }'
    ```
 
-   Your existing credentials, their roles, and your token-refresh logic all carry over. See [Quickstart](/docs/guides/quickstart) for the full flow.
+   Your existing credentials, their roles, and your token-refresh logic all carry over. See [Authentication and base URLs](/docs/guides/migrating-to-v3/authentication-and-base-urls) for the shared base URLs, and [Quickstart](/docs/guides/quickstart) for the full flow.
 
 3. **Convert your searches from a POST body to a GET query.**
 
@@ -116,7 +125,7 @@ Before you start, you need:
    _or[0]status=Draft&_or[0]status=Review
    ```
 
-   Custom attributes are addressed directly rather than through a field name string: `attributes.name[eq]=value`. [Migration reference](/docs/guides/migrating-to-v3/migration-reference) carries the full operator mapping.
+   Custom attributes are addressed directly rather than through a field name string: `attributes.name[eq]=value`. [Filter operators](/docs/guides/migrating-to-v3/filter-operators) carries the full operator mapping.
 
    {/* FLAG (open):
      Confirm the v1 grouping semantics (AND within an inner array, OR between outer arrays) with `endpoint-tester` before publishing. `openapi_pimv1.json` was converted from a Postman collection and its own description says the shapes were inferred from saved examples rather than verified against the live API. The v3 side is confirmed.
@@ -143,7 +152,7 @@ Before you start, you need:
      v3 exposes per-relation subpaths such as `GET /products/{identifier}/categories` and `GET /products/{identifier}/assets`, but they currently return an empty array even for a product that genuinely has those relations. Request the same relations as `_fields` on the search endpoint instead, which returns them correctly. The `relationships` and `attributes` subpaths are unaffected.
    </Callout>
 
-   See [Migration reference](/docs/guides/migrating-to-v3/migration-reference) for the complete mapping.
+   See [Endpoint mapping](/docs/guides/migrating-to-v3/endpoint-mapping) for the complete mapping.
 
 5. **Replace array-field linking with the link and unlink endpoints.**
 
@@ -252,8 +261,8 @@ Before you start, you need:
 Now that you know which parts of your integration move and how to convert them, you can explore these related pages.
 
 <Cards>
-  <Card icon={<Table2 />} title="Migration reference" href="/docs/guides/migrating-to-v3/migration-reference">
-    Look up the full endpoint, operator, and response mapping side by side.
+  <Card icon={<Table2 />} title="Endpoint mapping" href="/docs/guides/migrating-to-v3/endpoint-mapping">
+    Look up every v1 and v2 endpoint next to its v3 equivalent.
   </Card>
   <Card icon={<BookOpen />} title="v3 API reference" href="/docs/reference/v3">
     Browse the v3 resources and their parameters in detail.

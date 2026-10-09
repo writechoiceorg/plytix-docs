@@ -14,8 +14,8 @@ This page explains what each entity is, how the entities reference each other, a
 - The product is the center of the model. Everything else describes it, groups it, or links it to something.
 - A handful of fields live directly on the product (`sku`, `label`, `gtin`, `status`), everything else lives inside its `attributes` map.
 - A Product Family controls which attributes apply to a product and how values flow from a parent down to its variants.
-- Categories, Assets, Relationships, and lists are separate entities that products reference by ID. They are not copies stored on the product.
-- Some structural pieces, notably creating a Product Family, are dashboard-only. The API assigns products into structures that already exist.
+- Categories, Assets, Relationships, and lists are separate entities. Ask for one by name and Plytix returns the full object, already expanded.
+- Almost all of the model is writable through the API. The main exception is inheritance between family levels, which is a paid feature configured in the dashboard.
 
 ## The core entities
 
@@ -91,15 +91,19 @@ Inheritance is configured per attribute inside the family. Turning inheritance o
 
 The family's own structure is readable through `/api/v3/product-family-models`, which returns `parent_attribute_labels`, `variant_attribute_labels`, and `no_level_attribute_labels`: the attributes that apply at each level.
 
-<Callout type="warn" title="Product Families are dashboard-only">
-  Creating a Product Family, choosing its attributes, and configuring inheritance are dashboard-only actions. The API can assign a product into an existing family through `product_family_id`, but it can't build the family itself.
+You can build a family through the API. `POST /api/v3/product-families` creates one, `POST /api/v3/product-families/{product_family_id}/attributes` adds an attribute to it, and `PATCH` on the family renames it. Assigning a product into a family still works the way you'd expect, through `product_family_id`.
+
+<Callout type="warn" title="Inheritance levels are configured in the dashboard">
+  Creating a family and choosing its attributes both work through the API, but moving an attribute between levels (which is what turns inheritance on) returns `403 Automatic inheritance is not available for this account` unless your plan includes it. A family's own `PATCH` accepts `name` only, because changing which attributes belong to a family propagates across every product in it.
 </Callout>
 
 ## Product Categories
 
 Categories are a tree. Each category has a `parent_id`, a `path` array holding the full chain of names down to it, a `slug`, and an `n_children` count.
 
-A product can belong to more than one category, and its `categories` field holds a list of IDs rather than the category objects themselves. Ask for the expanded form when you need names instead of IDs.
+A product can belong to more than one category. Its `categories` field returns the full category objects, each with its `id`, `name`, and `path`, so you don't need a second call to turn an ID into a name.
+
+Adding and removing categories happens through dedicated endpoints: `POST /api/v3/products/{id}/categories` links one, and `DELETE /api/v3/products/{id}/categories/{category_id}` unlinks it. See [Safely remove categories, assets, or relationships](/docs/guides/safely-removing-categories-assets-or-relationships).
 
 Assets have their own separate tree, `/api/v3/asset-categories`. Product categories and asset categories don't share nodes.
 
@@ -120,6 +124,8 @@ A relationship connects products to other products. Setting one up takes two ste
 
 Each link can carry a `quantity`, which is what makes relationships usable for bundles and packs rather than only for recommendations.
 
+Both steps are writable. `POST /api/v3/relationships` creates the type, and `POST`, `PATCH`, and `DELETE` on `/api/v3/products/{product_id}/relationships/{relationship_id}` link products, change a link's quantity, and unlink again. The unlink is scoped: it removes the link and leaves both products intact.
+
 Relationships are directional in the API: you read them from a product, through its `product_relationships` field.
 
 ## Lists
@@ -131,11 +137,16 @@ Both products and assets support lists, and both come in two flavors:
 
 A product's `static_lists` field shows the static lists it belongs to.
 
-## What a product references versus what it contains
+## How related data comes back
 
-Products carry read-only links to the places their content gets published: `channels`, `ecatalogs`, and `product_data_sheets`. These return IDs only, and only when you ask for them explicitly.
+Plytix expands related entities for you. Ask for `categories`, `assets`, or `product_relationships` and you get the objects themselves, not a list of IDs to resolve separately. There's no `_expand` parameter to set, and passing one returns an error.
 
-Everything else a product points at (categories, assets, family, parent, and relationships) is stored as an ID. Plytix returns the full object only when you request expansion. That keeps responses small by default, and it's why a product read can look emptier than you expect until you ask for more.
+What you can't ask for is the underlying ID array. Every field ending in `_ids` is hidden from responses, so `_fields=category_ids` returns `400` with a `HiddenFieldError`. Use the plural name instead: `categories`, not `category_ids`.
+
+Two more things worth knowing about reads:
+
+- `_fields` only narrows the response on the search endpoint. `GET /api/v3/products/{id}` always returns the full product, whatever you pass.
+- Products also carry `channels`, `ecatalogs`, and `product_data_sheets`, which record where their content gets published. These are read-only.
 
 ## Related articles
 
