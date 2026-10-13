@@ -7,15 +7,15 @@ import { Network, Filter } from 'lucide-react';
 
 Every endpoint in the Plytix API returns some view of the same underlying model: a product, the values that describe it, and the other entities it's connected to. Understanding that model up front saves you from discovering it one `404` at a time.
 
-This page explains what each entity is, how the entities reference each other, and where the API's reach ends.
+This page explains what each entity is, how the entities reference each other, and where the API's reach ends. Paths, fields, and response conventions on this page refer to the V3 API.
 
 In short:
 
 - The product is the center of the model. Everything else describes it, groups it, or links it to something.
-- A handful of fields live directly on the product (`sku`, `label`, `gtin`, `status`), everything else lives inside its `attributes` map.
+- Your custom attribute values live in the product's `attributes` map. System fields, relationship fields, timestamps, and foreign keys sit at the top level of the product.
 - A product family controls which attributes apply to a product and how values flow from a parent down to its variants.
 - Categories, assets, relationships, and lists are separate entities. Ask for one by name and Plytix returns the full object, already expanded.
-- Products, attributes, families, categories, relationships, and lists are writable through the API. Attaching assets to a product (other than the thumbnail) isn't available through the API. Inheritance between family levels is an account-level feature that isn't available on every account.
+- Products, attributes, families, categories, relationships, and lists are writable through the API. A product's main image is set through `thumbnail_id`, and other assets connect to it through media attributes. There's no separate endpoint for linking an asset to a product. Inheritance between family levels is an account-level feature that isn't available on every account.
 
 ## The core entities
 
@@ -35,7 +35,7 @@ In short:
 
 A product is the unit everything else attaches to. It carries two kinds of data, and the difference matters when you write queries.
 
-System fields sit at the top level of the product object. These are the System Attributes that ship with every Plytix account. You can't rename or delete them. They include `id`, `sku`, `label`, `gtin`, `status`, `thumbnail_id`, `thumbnail`, `categories`, `assets`, `product_family_id`, `parent_id` (shown as "Variant of" in the dashboard), `num_variations`, `created`, and `modified`.
+Everything that isn't a custom attribute value sits at the top level of the product object. That includes system fields (`id`, `sku`, `label`, `gtin`, `status`, `product_level`, `num_variations`), relationship fields (`categories`, `assets`, `product_relationships`, `static_lists`), timestamps (`created`, `modified`), and foreign keys that point at other entities (`product_family_id`, `parent_id`, which the dashboard shows as "Variant of", and `thumbnail_id`). The system fields are the System Attributes that ship with every Plytix account. You can't rename or delete them.
 
 Your own attribute values sit inside the `attributes` map, keyed by attribute name:
 
@@ -65,7 +65,7 @@ An attribute is a field definition, created once and reused across products. Cre
 
 Each attribute has a type that determines what it can hold and how you can filter on it. Plytix supports short text, paragraph, HTML, integer, decimal, dropdown, multi-select, date, URL, boolean, media, media gallery, hierarchy, completeness, and formula attributes.
 
-Two of those types are worth calling out because Plytix fills them in for you:
+Two of those types hold values that Plytix calculates rather than values you set. You configure them on the attribute itself through `/api/v3/product-attributes` (the completeness rule or the formula), and Plytix calculates the result on each product:
 
 - Completeness attributes score how filled-in a product is against a rule you configure, and appear in the `attributes` map like any other value. Common examples are `basic_information_completeness` and `website_ready`.
 - Formula attributes compute a value from other attributes rather than storing one you set.
@@ -76,7 +76,7 @@ Attribute Groups are a separate entity that controls how attributes are grouped 
 
 A Product Family answers two questions for a group of similar products: which attributes apply and how values pass down a hierarchy.
 
-Products can nest up to four levels deep, tracked in the product's `product_level` field:
+A product's `product_level` field holds one of four values. `0` marks a standalone product outside any hierarchy, and `1` to `3` mark the three levels a hierarchy can have: parent, variant, and sub-variant.
 
 | `product_level` | Meaning |
 |---|---|
@@ -89,7 +89,7 @@ A product becomes a variant when you set its `parent_id`. The parent's own `prod
 
 Inheritance is configured per attribute inside the family. Turning inheritance on at Level 1 pushes a parent's values down to its variants and sub-variants; turning it on at Level 2 pushes a variant's values down to its sub-variants. When a variant overrides an inherited value, the attribute name appears in that product's `overwritten_attributes` array.
 
-The family's own structure is readable through `/api/v3/product-family-models`, which returns `parent_attribute_labels`, `variant_attribute_labels`, and `no_level_attribute_labels`: the attributes that apply at each level.
+A family's structure lives in its family attributes: one row per attribute linked to the family, each with the linked `attribute` and a `level` of `parent_level`, `variant_level`, or `no_level`. Read them with `GET /api/v3/product-families/{product_family_id}/attributes`, or request `_fields=family_attributes.*` on `/api/v3/product-families`.
 
 You can build a family through the API. `POST /api/v3/product-families` creates one, `POST /api/v3/product-families/{product_family_id}/attributes` adds an attribute to it, and `PATCH` on the family renames it. Assigning a product into a family still works the way you'd expect, through `product_family_id`.
 
@@ -109,7 +109,7 @@ Assets have their own separate tree, `/api/v3/asset-categories`. Product categor
 
 ## Assets
 
-An asset is a file stored in Plytix DAM: an image, video, document, spreadsheet, or other file type. Assets exist independently of products, and linking one to a product is a separate action from uploading it. Through the API, only a product's thumbnail can be set. Attaching or detaching other assets isn't available.
+An asset is a file stored in Plytix DAM: an image, video, document, spreadsheet, or other file type. Assets exist independently of products, and uploading one with `POST /api/v3/assets` is separate from connecting it to a product. A product connects to assets in two ways: `thumbnail_id` sets its single main image, and media and media gallery attributes hold other assets as attribute values in the `attributes` map. There's no dedicated endpoint for linking or unlinking an asset.
 
 Each asset carries file metadata (`filename`, `extension`, `content_type`, `file_size`, `checksum`), an `alt_text` field, a `public` flag, and two counters that are handy for cleanup work: `n_products` and `n_catalogs` tell you how many places reference the asset before you delete it.
 
@@ -140,6 +140,14 @@ A product's `static_lists` field shows the static lists it belongs to.
 ## How related data comes back
 
 Plytix expands related entities for you. Ask for `categories`, `assets`, or `product_relationships` and you get the objects themselves, not a list of IDs to resolve separately. There's no `_expand` parameter to set, and passing one returns an error.
+
+The shape of an expanded field depends on the relation. To-many relations, such as `categories` and `assets`, come back as arrays. To-one relations, such as `thumbnail`, `parent`, and `product_family`, come back as a single object.
+
+Expansion isn't narrowed by your filters. This request finds products in the Backpacks category, but each product still returns all of its categories and assets, not only the matching category:
+
+```http
+GET /api/v3/products?categories.name[intersects]=Backpacks&_fields=sku&_fields=categories&_fields=assets
+```
 
 What you can't ask for is the underlying ID array. Every field ending in `_ids` is hidden from responses, so `_fields=category_ids` returns `400` with a `HiddenFieldError`. Use the plural name instead: `categories`, not `category_ids`.
 
