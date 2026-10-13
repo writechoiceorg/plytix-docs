@@ -4,9 +4,9 @@
 >
 > The skill may add new entries automatically when it encounters undocumented terms during a writing session. Review new entries before the next session to confirm accuracy.
 >
-> Source: `materials/project-references/Plytix Content Guidelines 2026 (1).pdf`, §3 ("How we talk about Plytix and Plytix products") and §7 ("Word list").
+> Source: `materials/project-references/brand-and-style/Plytix Content Guidelines 2026.pdf`, §3 ("How we talk about Plytix and Plytix products") and §7 ("Word list").
 >
-> Additional entries below (Bulk API, Destinations, MCP Server, Smart List, Webhooks) are sourced from `materials/project-references/before-writing.md`, §3 ("Product Roadmap") — a meeting-prep doc, not the content-guidelines PDF. Capitalization for these is marked `[PENDING]` where the source doesn't state it explicitly; confirm with the project lead before publishing content that uses them.
+> Additional entries below (Bulk API, Destinations, MCP Server, Smart List, Webhooks) are sourced from `materials/project-references/brief/before-writing.md`, §3 ("Product Roadmap") — a meeting-prep doc, not the content-guidelines PDF. Capitalization for these is marked `[PENDING]` where the source doesn't state it explicitly; confirm with the project lead before publishing content that uses them.
 
 ---
 
@@ -18,7 +18,7 @@
 
 **Capitalisation:** Automations `[PENDING]`
 **Definition:** A dashboard-only, if/then rule engine that changes or fills in product data automatically when a product matches a condition (e.g. setting a default Brand value when one is missing).
-**Notes:** Sourced from `materials/help-center/automations.md` and `materials/project-references/before-writing.md`, not the content-guidelines PDF. Unrelated to Channel webhooks despite Plytix's roadmap describing Automations as the planned "entry point" for an upcoming webhooks capability — that pairing isn't live yet. No corresponding API endpoint exists; confirm shipped status of any API surface before publishing.
+**Notes:** Sourced from `materials/help-center/automations.md` and `materials/project-references/brief/before-writing.md`, not the content-guidelines PDF. Unrelated to Channel webhooks despite Plytix's roadmap describing Automations as the planned "entry point" for an upcoming webhooks capability — that pairing isn't live yet. No corresponding API endpoint exists; confirm shipped status of any API surface before publishing.
 
 ---
 

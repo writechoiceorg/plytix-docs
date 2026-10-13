@@ -285,8 +285,8 @@ Re-tested all four on 2026-09-22: all still leaking.
 **What was tested:** Full CRUD on `/channels` confirmed working. `POST` (multiple format variants), `GET`, `PATCH`, `DELETE`, and the `PATCH /channels/{id}/products` subpath are all confirmed live.
 
 **The problem:** Three sources conflict:
-- `materials/project-references/before-writing.md` states flatly: "Channels are not in the API."
-- `materials/project-references/Writechoice - Project Requirements.pdf` describes a Channels endpoint as "currently being developed... provided it is confirmed as part of the public API v3 scope."
+- `materials/project-references/brief/before-writing.md` states flatly: "Channels are not in the API."
+- `materials/project-references/brief/Writechoice - Project Requirements.pdf` describes a Channels endpoint as "currently being developed... provided it is confirmed as part of the public API v3 scope."
 - `openapi_pimv3.json` and live testing show a fully working `/channels` CRUD resource today.
 
 **Consequence:** All Channels endpoint behavior is confirmed and documented in the Bruno collection, but whether to include Channels in the public-facing documentation cannot be decided without Plytix's explicit confirmation. Writing docs for Channels before that confirmation risks including an officially-unsupported endpoint.

@@ -7,7 +7,7 @@
 >
 > If a rule needs to change mid-project, update it here and note the change date. Do not create separate override files.
 >
-> Voice, tone, and most grammar/formatting rules below are sourced from `materials/project-references/Plytix Content Guidelines 2026 (1).pdf` (owner: Jessie Schnaible, last updated 2026-02-04). Where that source and the generic defaults disagreed, the Plytix guidelines took priority. Sections marked with a PDF reference cite the section number in that document.
+> Voice, tone, and most grammar/formatting rules below are sourced from `materials/project-references/brand-and-style/Plytix Content Guidelines 2026.pdf` (owner: Jessie Schnaible, last updated 2026-02-04). Where that source and the generic defaults disagreed, the Plytix guidelines took priority. Sections marked with a PDF reference cite the section number in that document.
 
 ---
 
@@ -15,7 +15,7 @@
 
 The goal of this guide is to ensure all Plytix documentation is clear, accurate, and helpful. The content transforms complex technical information into guides that empower Plytix PIM and DAM users — product content, ecommerce, and catalog teams — to use the platform.
 
-For API documentation specifically, the audience is more technical and distinct from the in-product UI audience above. Calibrate voice and depth to whichever of these personas the page is for (source: `materials/project-references/before-writing.md`, §1):
+For API documentation specifically, the audience is more technical and distinct from the in-product UI audience above. Calibrate voice and depth to whichever of these personas the page is for (source: `materials/project-references/brief/before-writing.md`, §1):
 
 - **Technical Internal User / Automation Builder** — a technical person inside a Plytix customer account, comfortable with APIs but not always a professional developer. Automates repetitive tasks (bulk exports, scheduled reports, data quality checks). Needs conceptual clarity more than technical depth.
 - **Integration Engineer** — employed by a Plytix customer (brand, retailer, or agency) to build and maintain the connection between Plytix and their ERP, ecommerce platform, or marketplace. A power user who needs the full data model, query capabilities, and sync patterns, but isn't a Plytix expert going in.
@@ -343,7 +343,7 @@ Use the exact `Cards`/`Card` tag syntax and icon import pattern defined in `proj
 
 ## Project-specific overrides
 
-> These rules take priority over the defaults above when there is a conflict. Sourced from `materials/project-references/Plytix Content Guidelines 2026 (1).pdf`.
+> These rules take priority over the defaults above when there is a conflict. Sourced from `materials/project-references/brand-and-style/Plytix Content Guidelines 2026.pdf`.
 
 ### Protected terminology
 

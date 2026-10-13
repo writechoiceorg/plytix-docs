@@ -71,8 +71,8 @@ When checking factual claims, use this order (highest first), per the project's 
 
 1. Verified live API findings (Bruno collection results, `endpoint-tester` logs)
 2. OpenAPI specs: `openapi_pimv3_20261002 (Latest spec).json` for v3 (the older `openapi_pimv3.json` is superseded), `openapi_pimv1.json` for v1/v2
-3. Raw source materials in `materials/` (API V3.md, project references, transcripts)
-4. Scraped help center (`materials/help-center/`) and existing docs
+3. Raw source materials in `materials/`: `api-references/v3-reference/` (API V3.md, newest dated PDF, status map), `api-references/endpoint-reviews/` (public vs internal endpoints), `api-references/v1-reference/` and `bulk-operations/`, `project-references/brief/` (requirements, before-writing, feedback), `transcripts/`. Brand/voice questions go to `project-references/brand-and-style/`.
+4. Scraped help center (`materials/help-center/`) and `api-references/existing-docs-scrape/`
 
 If a page's claim is supported only by a lower-trust source and contradicted by a higher one, it's a finding. If the prose `API V3.md` and the OpenAPI spec disagree, the page should follow the spec; flag the discrepancy either way.
 

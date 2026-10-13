@@ -1,0 +1,21 @@
+Page,"Page Link",Section,Status,Assignee,"Due Date"
+Overview,,Guides,Done,guilherme.souza@writechoice.io,2026-09-18
+"Setting Up the Plytix MCP",,Guides,Blocked,,
+"Working with Updates and Deletes",,"API Ref",Done,guilherme.souza@writechoice.io,2026-09-29
+"Pagination Reference",,"API Ref",Done,guilherme.souza@writechoice.io,2026-09-29
+"Filtering & Query Syntax Reference",,"API Ref",Done,guilherme.souza@writechoice.io,2026-09-29
+"Rate Limits",,"API Ref","WC Review",guilherme.souza@writechoice.io,
+"Errors & Status Codes",,"API Ref",Done,marcos@writechoice.io,
+Authentication,,"API Ref",Blocked,,
+"API Reference Overview",,"API Ref","In Progress",guilherme.souza@writechoice.io,
+"Bulk Operations for Large Catalogs",,Guides,"WC Review",,
+Quickstart,,Guides,Blocked,,2026-09-18
+"Reconstructing Parent/Variant Hierarchies",,Guides,"WC Review",,
+"Safely Removing Categories, Assets, or Relationships from a Product",,Guides,"WC Review",,
+"Build a marketplace-specific product feed",,Guides,"WC Review",,
+"Auditing Product Data Quality with Filters",,Guides,"WC Review",,
+"Exporting Your Full Catalog",,Guides,"WC Review",,
+"Syncing Your ERP with Plytix",,Guides,Done,guilherme.souza@writechoice.io,
+"Choosing Between v1/v2 and v3",,Guides,Blocked,,2026-09-18
+"The Plytix Data Model",,Guides,Done,guilherme.souza@writechoice.io,2026-09-18
+"Products (OAS)",,"API Ref","WC Review",marcos@writechoice.io,2026-09-25

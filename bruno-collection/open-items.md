@@ -27,8 +27,8 @@ Consolidated from the "## Open items" section of every `bruno-collection/*/READM
 - [x] Ask Plytix: is `GET /products/<sku>` meant to work on v3? (See
       config open question #5.)
       — **Answered as a confirmed doc-vs-live conflict**, not just an open
-      question. `materials/api-references/API V3.md` and the newer
-      `materials/project-references/API_V3-04_09_2026.pdf` (p.13) both claim
+      question. `materials/api-references/v3-reference/API V3.md` and the newer
+      `materials/api-references/v3-reference/API_V3-04_09_2026.pdf` (p.13) both claim
       SKU works as an identifier; live testing 422s
       (`config/api-testing.config.md` quirk #14), and the newer PDF still
       repeats the same unfixed claim (quirk #58). Reframe the ask to Plytix
@@ -189,9 +189,9 @@ Consolidated from the "## Open items" section of every `bruno-collection/*/READM
       inconsistency (config open question #17).
       — No material explains this further; keep as-is.
 - [ ] **New**: resolve a three-way scope conflict on whether Channels is
-      actually part of the public v3 API. `materials/project-references/before-writing.md`
+      actually part of the public v3 API. `materials/project-references/brief/before-writing.md`
       states flatly "Channels are not in the API," while
-      `materials/project-references/Writechoice - Project Requirements.pdf`
+      `materials/project-references/brief/Writechoice - Project Requirements.pdf`
       separately describes a Channels endpoint "currently being
       developed... provided it is confirmed as part of the public API v3
       scope" — yet `openapi_pimv3.json` and live testing show a fully
