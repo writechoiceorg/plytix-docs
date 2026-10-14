@@ -17,9 +17,9 @@ The structural change is the verb: what used to be a POST body is now a query st
 | Filters | `filters` array in the body | Query parameters in bracket syntax |
 | Field selection | `attributes` array in the body | `_fields=<name>`, repeated per field |
 | Paging | `pagination` object in the body | `_page`, `_page_size`, `_sort_by` |
-| No filter given | The V1 collection always shows a body | Returns all records |
+| No filter given | The V1 collection always shows a body | Returns the whole collection, one page at a time |
 
-That last row is worth pausing on. A V3 search with no recognized parameter means "get all," so a filter that fails to translate doesn't error, it quietly returns the whole collection. [Filter operators](/docs/guides/migrating-to-v3/filter-operators) covers the syntax each V1 operator becomes.
+That last row is worth pausing on. A V3 search with no filter parameters returns the whole collection, paged like any other search: the first 25 records, plus a `next_page` link for the rest. It doesn't return every record in one response, and a page of unfiltered results looks much like a page of filtered ones. Test each translated filter against a set of records you can predict, so a filter that didn't convert correctly shows up straight away. [Filter operators](/docs/guides/migrating-to-v3/filter-operators) covers the syntax each V1 operator becomes.
 
 ## Pagination
 
@@ -28,23 +28,73 @@ Both versions page, but V3 reports its position differently and drops counts ent
 | | V1/V2 | V3 |
 |---|---|---|
 | Request | `"pagination": {"page": 1, "page_size": 25, "order": "sku"}` in the body | `_page=1&_page_size=25&_sort_by=sku` in the query string |
-| Bounds | Not documented in the V1 collection | `_page >= 1` and `_page_size <= 1000`; both return `422` outside those bounds |
-| Default page size | Not documented in the V1 collection | `25` |
-| Descending sort | Not documented in the V1 collection | `_sort_by=-<field>` |
+| Defaults | Page `1`, page size `25` when `pagination` is omitted | `_page=1`, `_page_size=25` |
+| Bounds | `page_size` maximum `100`, which returns `422` when exceeded | `_page` 1 or greater, `_page_size` between `1` and `1000`; outside those bounds returns `422` |
+| Descending sort | `"order": "-<field>"` | `_sort_by=-<field>` |
+| Sort by several fields | One `order` value | Repeat `_sort_by`, applied in the order you send them |
 | Record counts | `total_count` always returned | None available |
 | Response keys | `count`, `order`, `page`, `page_size`, `total_count` | `next_page`, `previous_page` |
 
-V3 returns page URLs rather than a page number to increment, so a paging loop follows `next_page` until that key stops appearing instead of counting pages. The keys are omitted when they don't apply rather than set to `null`, so a client written as `if (pagination.next_page !== null)` is wrong. Test for presence.
+The V1/V2 defaults and the 100 limit are documented on product search (V1 and V2) and on category search. Asset, attribute, and relationship search don't document them, so confirm the limit against the endpoint you're migrating. On the V3 side, repeat the parameter to sort by more than one field, as in `_sort_by=-modified&_sort_by=id`.
 
-<Callout type="warn" title="No counts in v3">
-  V1 returned `total_count` on every search. V3 has no equivalent: the pagination block carries no counts, and there is no parameter that adds one. Requesting `_total_count` or `_filtered_count` returns `400 InvalidFieldError`.
+V3 returns page URLs rather than a page number to increment, so a paging loop follows `next_page` instead of counting pages. Live responses leave the key out when it doesn't apply, and the `Pagination` schema also allows `null`, so a client written as `if (pagination.next_page !== null)` is wrong. Continue the loop only while `next_page` holds a URL you can request, which covers an absent key and a null one.
+
+Paging doesn't freeze the result set. Each request runs the query again, so records added, deleted, or re-sorted while you're paging can come back twice or not at all. For a run that has to be consistent, filter on a stable field such as a date range. [Export your full catalog](/docs/guides/exporting-your-full-catalog) walks through the full pattern.
+
+<Callout type="warn" title="No counts in V3">
+  V1 returned `total_count` on every search. V3 has no equivalent: the pagination block carries no counts, and there is no parameter that adds one. Requesting `_total_count` or `_filtered_count` returns `400` with `InvalidFieldError: Field '_total_count' does not exist.`, confirmed on products and assets.
 
   Anything in your integration that reads a total (a progress bar, a "showing N of M" label, a pre-sized buffer) has to page to the end and tally. See [Pagination](/docs/reference/v3/pagination).
 </Callout>
 
-<Callout type="warn" title="next_page URLs use the http scheme">
-  Every `next_page` and `previous_page` link comes back as `http://`, then `301`s to `https`. Clients that don't forward `Authorization` across a scheme-changing redirect drop it and get a `401`. Rewrite the scheme before following the link, or use `curl -L --location-trusted`.
+<Callout type="warn" title="Rewrite next_page links to https">
+  Pagination links currently come back as `http://` URLs that `301` to `https`. Clients that don't forward `Authorization` across a scheme-changing redirect drop it and get a `401`. Rewrite the scheme to `https` before you follow the link. This is a link-generation issue rather than a convention of the API, so don't build your integration around the `http` form.
 </Callout>
+
+## Convert a product search
+
+This pair shows the same search in both versions: draft products created after January 1, 2024, returning five fields, sorted by SKU, five per page. The V1/V2 call sends it as a body.
+
+```json title="POST /api/v1/products/search"
+{
+  "filters": [
+    [
+      {"field": "status", "operator": "eq", "value": "Draft"},
+      {"field": "created", "operator": "gt", "value": "2024-01-01"}
+    ]
+  ],
+  "attributes": ["sku", "label", "created"],
+  "pagination": {"order": "sku", "page": 1, "page_size": 5}
+}
+```
+
+The V3 call sends the same search as a query string, with each field named by its own `_fields` parameter.
+
+```bash title="GET /api/v3/products"
+curl --globoff --request GET \
+  --url 'https://<v3-base-url>/api/v3/products?status=Draft&created[gt]=2024-01-01&_fields=id&_fields=sku&_fields=label&_fields=status&_fields=created&_sort_by=sku&_page=1&_page_size=5' \
+  --header 'Authorization: Bearer <token>'
+```
+
+The response wraps the records in `data` and the links in `pagination`:
+
+```json
+{
+  "data": [
+    {
+      "id": "6aa022262b6fd055ffb7caa4",
+      "sku": "WC-TEST-FULL-001",
+      "label": "WC Test Full Product",
+      "status": "Draft",
+      "created": "2026-09-08T14:56:38.319000"
+    }
+  ],
+  "errors": [],
+  "pagination": {}
+}
+```
+
+This result set fits on one page, so `pagination` is empty. When more records match, it carries a `next_page` URL to follow. [Pagination](/docs/reference/v3/pagination) has the full loop.
 
 ## Related resources
 
