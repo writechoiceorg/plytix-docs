@@ -1,11 +1,11 @@
 ---
 title: Safely remove categories, assets, or relationships
-description: Remove a single category or product relationship, or change a thumbnail, through the Plytix API without affecting anything else on the product.
+description: Remove a category or a relationship link from a product, or change its thumbnail, through the V3 API while keeping the product's other links.
 ---
 
 import { RotateCw, Network } from 'lucide-react';
 
-Remove one category or one product relationship from a product without touching the rest of it. Each of these is a separate link between two entities, and Plytix V3 gives you a dedicated endpoint to add or remove that link: `POST` to the collection to link, `DELETE` on the specific link to unlink. Neither affects any other data on the product. This guide covers categories and relationships, which both work this way, and explains what to do about assets, which don't. All requests use the V3 API with a bearer token, and every `PATCH` and `DELETE` returns an empty body, so each procedure ends with a read-back.
+Remove one category from a product, or remove a product's link to one relationship type, without touching the product's other links. Each is a link between two entities, and Plytix V3 gives you a dedicated endpoint to add or remove it: `POST` to the collection to link, `DELETE` on the specific link to unlink. Removing a relationship link removes every related product the product has under that relationship type, so it isn't a way to remove a single related product. The relationship type and the products themselves stay. This guide covers categories and relationships, and explains how a product's thumbnail and other assets are set. All requests use the V3 API with a bearer token. A successful `PATCH` or `DELETE` returns `204` with an empty body, which confirms the change. Read the product back when you need to inspect the result.
 
 ## Prerequisites
 
@@ -16,7 +16,7 @@ Before you start, make sure you have the following:
 
 ## Remove a category from a product
 
-Follow the steps below to read a product's current categories, remove one of them, and confirm the result.
+Follow the steps below to read a product's current categories, remove one of them, and check the result.
 
 1. **Read the product's current categories.**
 
@@ -27,7 +27,7 @@ Follow the steps below to read a product's current categories, remove one of the
 
    The response lists each linked category in full, including its `id`, `name`, and `path`. You need the `id` of the one you're removing.
 
-   You can also get the same data from the search endpoint with `_fields=categories`, which is useful when you're looking up several products at once. What you can't do is ask for `category_ids`: Plytix hides every `_ids`-suffixed field from responses and returns `400` if you request one.
+   You can also get the same data from the search endpoint with `_fields=categories`, which is useful when you're looking up several products at once. What you can't do is ask for `category_ids`: Plytix hides the ID arrays behind a product's links, such as `category_ids` and `asset_ids`, and returns `400` if you request one.
 
 2. **Unlink the category.**
 
@@ -36,7 +36,7 @@ Follow the steps below to read a product's current categories, remove one of the
      -H "Authorization: Bearer <access_token>"
    ```
 
-   This removes only the category you name. The product keeps its other categories, and every other field on it is untouched. A successful unlink returns `204` with an empty body.
+   This removes only the category you name. The product keeps its other categories and its other data. A successful unlink returns `204` with an empty body.
 
 3. **Link a category, if you're moving a product rather than only removing it.**
 
@@ -47,16 +47,16 @@ Follow the steps below to read a product's current categories, remove one of the
      -d '{"id": "<category_id>"}'
    ```
 
-   The body is an object with a single `id` key, not an array and not a `category_ids` wrapper. A successful link returns `201` and echoes back the category's ID. Linking a category that's already linked returns `409`.
+   The body is an object with a single `id` key, not an array and not a `category_ids` wrapper. A successful link returns `201` with the linked category's ID: `{"data": {"id": "<category_id>"}, "errors": []}`. Linking a category that's already linked returns `409`, described in [Troubleshooting](#troubleshooting).
 
-4. **Confirm the change took effect.**
+4. **Check the result, if your integration needs it.**
 
    ```bash
    curl "https://pim.plytix.com/api/v3/products/<product_id>/categories" \
      -H "Authorization: Bearer <access_token>"
    ```
 
-   The response should list exactly the categories you expect. Because the unlink returns no body, this read-back is the only way to verify it.
+   The `204` already confirms the unlink. Read the categories back when your integration needs to inspect the resulting state.
 
 ## Remove a relationship from a product
 
@@ -82,11 +82,11 @@ Follow the steps below to remove a relationship link without deleting the relati
      -H "Authorization: Bearer <access_token>"
    ```
 
-   This removes the link between this product and the products related to it under that relationship. It returns `204`. The relationship type itself survives, and so does every product that was on the other end of the link.
+   This removes the product's link to that relationship type, including every related product listed under it for this product. You can't use it to remove one related product. It returns `204`. The relationship type itself survives, and so does every product that was on the other end of the link.
 
-3. **Confirm the product's `product_relationships` is now empty for that type.**
+3. **Check the result, if your integration needs it.**
 
-   Repeat the read from step 1. The entry for that `relationship_id` should be gone, with the rest of the product unchanged.
+   Repeat the read from step 1. The entry for that `relationship_id` should be gone.
 
 <Callout type="warn" title="Deleting the relationship type is a different action">
   `DELETE /relationships/{relationship_id}` deletes the relationship type from your whole account. Check what uses it before you call it. Use the product-scoped path above when you only mean to unlink one product.
@@ -114,11 +114,11 @@ A product's thumbnail is set through `thumbnail_id` on the product itself, not t
      -d '{"thumbnail_id": null}'
    ```
 
-   Both return `204`. Clearing the thumbnail also drops that asset from the product's `assets` list when the thumbnail was the only thing linking it.
+   Both return `204`. Clearing the thumbnail changes only the product's reference to the asset. The asset itself stays in Plytix DAM; deleting it is a separate action, `DELETE /api/v3/assets/<asset_id>`, which removes it from your account. In testing, a product whose only asset was its thumbnail also showed an empty `assets` list once the thumbnail was cleared. Whether an asset that a media attribute still references stays in `assets` hasn't been confirmed.
 
-## Manage assets from the dashboard
+## Connect other assets to a product
 
-Assets are the gap in the API today. There's no link or unlink endpoint for them, and the product's asset array isn't writable either, so `thumbnail_id` is the only asset-side write available through the API today. To attach or detach any other asset, use the Plytix dashboard. If you need this programmatically, it's worth raising with your Plytix contact, since the equivalent endpoints already exist for categories and relationships.
+There's no link or unlink endpoint for assets: `POST /products/<product_id>/assets` returns `405`. The product schema describes other assets as managed through media and media gallery attributes, which hold assets as values in the product's `attributes` map. The value format these attributes accept in a `PATCH` hasn't been confirmed yet, so test it on a scratch product before you rely on it, or manage those assets in Plytix.
 
 ## Troubleshooting
 
@@ -131,14 +131,17 @@ Check the problems below if you run into issues while following this guide.
   <Accordion title={<><code>DELETE /products/&lt;id&gt;/categories</code> returns 405</>} value="delete-categories-405">
     The unlink endpoint needs to know which link to remove, so the category ID is part of the path, not optional. The error message spells out the shape it wants: `DELETE /products/{id}/categories/{linked_id}`. Add the category ID and the request succeeds.
   </Accordion>
+  <Accordion title={<><code>DELETE /products/&lt;id&gt;/categories/&lt;category_id&gt;</code> returns 404</>} value="delete-category-link-404">
+    If the description says the category is not linked to that product through `categories`, the link is already gone, so a repeated unlink can treat it as done. Any other `404` means the request didn't reach a linked pair, for example because the product ID is wrong: check the product with `GET /products/<product_id>` before retrying.
+  </Accordion>
   <Accordion title={<><code>POST /products/&lt;id&gt;/categories</code> returns 409</>} value="post-categories-409">
-    The category is already linked to this product, and the message names both sides so you can confirm which pairing it means. Read the product's categories first if you're not sure what's already attached, and treat a `409` here as success rather than an error when your code is making a link idempotent.
+    If the response is `409` with `AlreadyExists` and a description like `"'<category_id>' is already linked to products <product_id> through 'categories'"`, that category is already linked to that product. When your code makes links idempotent, treat the `409` as success only if the IDs in the description match the category and product you sent, or a read of the product's categories shows the link. Handle any other `409` as an error.
   </Accordion>
   <Accordion title={<><code>_fields=category_ids</code> returns 400</>} value="fields-category-ids-400">
-    Plytix hides every field ending in `_ids` from API responses to avoid exposing its internal structure, so this returns a `HiddenFieldError`. Ask for the expanded plural form instead: `_fields=categories` returns the full category objects, which include the IDs you were after.
+    Plytix hides the ID arrays behind a product's links, such as `category_ids` and `asset_ids`, to avoid exposing its internal structure, so this returns a `HiddenFieldError`. Ask for the expanded plural form instead: `_fields=categories` returns the full category objects, which include the IDs you were after.
   </Accordion>
   <Accordion title="A write returned 204 and you can't tell whether it worked" value="write-204-empty">
-    Every successful `PATCH` and `DELETE` in V3 returns `204` with an empty body, so there's nothing in the response to check. This is expected, not a failure. Confirm the result with a follow-up `GET`, as each procedure above does in its last step.
+    Every successful `PATCH` and `DELETE` in V3 returns `204` with an empty body. That status confirms the write succeeded. If your integration needs to inspect the resulting state, read it back with a `GET`.
   </Accordion>
 </Accordions>
 

@@ -1,11 +1,11 @@
 ---
 title: Audit product data quality with filters
-description: Learn how to find products with missing images, empty descriptions, or incomplete data before they reach a channel or marketplace.
+description: Learn how to find products that break your own catalog rules, such as a missing GTIN, an empty description, or a low completeness score.
 ---
 
-import { Download, SatelliteDish } from 'lucide-react';
+import { Download, Filter } from 'lucide-react';
 
-Catch incomplete product data before it reaches a channel or marketplace: products missing an image, an empty description, or a field that was never filled in. This guide covers the filter operators that make these checks possible, and where the built-in completeness attributes can save you from writing the checks yourself. All requests use the V3 API with a bearer token. See [Filtering and Query Syntax](/docs/reference/v3/filtering-query-syntax) and [Pagination](/docs/reference/v3/pagination) for the full rules, and note that a search with no matches returns `data: []`.
+Find products that break your own catalog's data rules: a required field that's missing or empty, an image your process expects, or a completeness score below your threshold. This guide covers how to define those rules, the filters that check them, and how to collect a full audit result across pages. Passing an audit means products meet the rules you defined, not that a marketplace or channel will accept them. All requests use the V3 API with a bearer token. See [Filtering and Query Syntax](/docs/reference/v3/filtering-query-syntax) and [Pagination](/docs/reference/v3/pagination) for the full rules, and note that a search with no matches returns `data: []`.
 
 ## Prerequisites
 
@@ -13,95 +13,129 @@ Before you start, make sure you have the following:
 
 - A bearer token. See [Authentication](/docs/reference/v3/authentication), or the [Quickstart](/docs/guides/quickstart) for a first walkthrough.
 - Familiarity with the query-string filter syntax covered in [Filtering and Query Syntax](/docs/reference/v3/filtering-query-syntax). This guide assumes you can already build a basic filter like `sku=BAG-10157`.
+- The rules your catalog applies: which fields each product needs, based on its family, product level, status, or where you publish it.
 
 ## Find incomplete products
 
-Follow the steps below to build the filters that surface missing fields, empty values, and low completeness scores.
+Follow the steps below to define your rules, check each one with a filter, and collect the products that fail.
 
-1. **Find products missing a required field with `!exists`.**
+1. **Write down the rules you're auditing.**
+
+   What counts as incomplete depends on your catalog. Before you build filters, list each rule as a field and the products it applies to, for example:
+
+   | Rule | Applies to | Scope filter |
+   |---|---|---|
+   | GTIN is required | Families you sell through retailers that ask for one | `product_family_id=<family_id>` |
+   | A thumbnail is required | Products that are ready to publish | `status=Completed` |
+   | Short description has content | One level of a parent/variant hierarchy | `product_level=<level>` |
+
+   GTIN is optional in the API: only `sku` is required when you create a product. Treat GTIN as required only where one of your rules says so. To scope a rule to several statuses, repeat the parameter:
 
    ```bash
    curl -G "https://pim.plytix.com/api/v3/products" \
      -H "Authorization: Bearer <access_token>" \
-     --data-urlencode "gtin[!exists]=true" \
+     --data-urlencode "status%5Bin%5D=Draft" \
+     --data-urlencode "status%5Bin%5D=Completed"
+   ```
+
+   The examples in this guide encode the brackets in each parameter name as `%5B` and `%5D`, because curl's `--data-urlencode` encodes only the value after `=`.
+
+2. **Find products where a field is missing, null, or empty.**
+
+   A field can fail a rule in three ways, and each has its own check:
+
+   - `[!exists]=true` matches a product where the field isn't set at all.
+   - `[null]` matches a product where the field is set to `null`.
+   - `[length]=0` matches an empty string or an empty list.
+
+   To catch all three, put them in one OR group, and add your scope filter outside the group:
+
+   ```bash
+   curl -G "https://pim.plytix.com/api/v3/products" \
+     -H "Authorization: Bearer <access_token>" \
+     --data-urlencode "product_family_id=<family_id>" \
+     --data-urlencode "_or%5B0%5Dgtin%5B!exists%5D=true" \
+     --data "_or%5B0%5Dgtin%5Bnull%5D" \
+     --data-urlencode "_or%5B0%5Dgtin%5Blength%5D=0" \
      --data-urlencode "_fields=id" \
-     --data-urlencode "_fields=sku"
+     --data-urlencode "_fields=sku" \
+     --data-urlencode "_fields=gtin"
    ```
 
-   Swap `gtin` for any field. `attributes.main_image_link[!exists]=true` finds products with no main image, and the same pattern works for any custom attribute, for example `attributes.short_description[!exists]=true`.
+   `[null]` takes no value, so it's sent with `--data` as it is. The same pattern works for a custom attribute, such as `attributes.short_description`. Whether V3 treats an empty value as missing for `[!exists]` hasn't been confirmed, so keep all three checks when your audit has to catch every case.
 
-2. **Find products that do have a field set, with `exists`.**
+3. **Treat whitespace as empty in your own code.**
+
+   `[exists]=true` and `[length][gt]=0` show that a field holds a value, not that the value is useful. A description made only of spaces passes both. After you read the results, trim each text value and treat one that's empty after trimming as failing the rule.
+
+4. **Check images with the field your rule actually needs.**
+
+   A product can hold images in more than one place, so a missing value in one field doesn't prove the product has no images. Pick the field that matches your rule:
+
+   - **Thumbnail:** the top-level `thumbnail_id`, checked with `_or%5B0%5Dthumbnail_id%5B!exists%5D=true` and `_or%5B0%5Dthumbnail_id%5Bnull%5D`.
+   - **A required media attribute:** `attributes.<media_attribute>`, with the three checks from step 2.
+   - **A media gallery attribute:** `attributes.<gallery_attribute>`, with the three checks from step 2. `[length]=0` finds a gallery with no assets in it.
+
+   Media and media gallery attributes are named per account. Find yours in the attribute definitions, where their `type` is `MediaAttribute` or `MediaGalleryAttribute`. A custom attribute that stores an image link, such as `main_image_link` in some accounts, is a text field like any other.
+
+5. **Search text case-insensitively with `contains:ignorecase`.**
 
    ```bash
    curl -G "https://pim.plytix.com/api/v3/products" \
      -H "Authorization: Bearer <access_token>" \
-     --data-urlencode "attributes.main_image_link[exists]=true"
+     --data-urlencode "attributes.short_description%5Bcontains:ignorecase%5D=waterproof"
    ```
 
-   Useful as a sanity check on the inverse of step 1, or to confirm how many products a required-field rollout still needs to reach.
+   Use `[contains]` when case matters. [Filtering and Query Syntax](/docs/reference/v3/filtering-query-syntax) lists the supported operators. If you send one Plytix doesn't recognize, the request returns `400` and the error lists the operators it accepts.
 
-3. **Catch empty values as well as missing ones with `length`.**
+6. **Check completeness scores against your own threshold.**
 
-   `!exists` finds a field that has no value. To also catch empty values, check the length instead:
+   Completeness attributes are configured per account: which ones exist, what they're called, and which attributes each one scores. Names such as `website_ready` are examples from one account, not attributes every product has. Reading one product doesn't show this setup, so list your attribute definitions instead and look for `"type": "CompletenessAttribute"`. Each one's `attributes` field lists the attributes it scores:
+
+   ```bash
+   curl -G "https://pim.plytix.com/api/v3/product-attributes" \
+     -H "Authorization: Bearer <access_token>" \
+     --data-urlencode "_page_size=100"
+   ```
+
+   In testing, completeness values came back as numbers between 0 and 100, such as `85.71`. Check the values in your own account before you pick a threshold. To find the products that need attention, filter below it:
 
    ```bash
    curl -G "https://pim.plytix.com/api/v3/products" \
      -H "Authorization: Bearer <access_token>" \
-     --data-urlencode "attributes.short_description[length]=0"
+     --data-urlencode "attributes.website_ready%5Blt%5D=90" \
+     --data-urlencode "_fields=id" \
+     --data-urlencode "_fields=sku" \
+     --data-urlencode "_fields=attributes"
    ```
 
-   This matches empty values and missing ones together, which is usually what a data-quality audit wants. Flip it to `[length][gt]=0` for the products that have real content.
-
-4. **Search text case-insensitively with `contains:ignorecase`.**
-
-   ```bash
-   curl -G "https://pim.plytix.com/api/v3/products" \
-     -H "Authorization: Bearer <access_token>" \
-     --data-urlencode "attributes.short_description[contains:ignorecase]=waterproof"
-   ```
-
-   Use `[contains]` when case matters. Plytix accepts a fixed set of filter operators, and sending one it doesn't recognize returns `400` with the list of valid operators in the error message, which shows you what's available.
-
-5. **Narrow an audit to a set of statuses with `in`.**
-
-   ```bash
-   curl -G "https://pim.plytix.com/api/v3/products" \
-     -H "Authorization: Bearer <access_token>" \
-     --data-urlencode "status[in]=Draft" \
-     --data-urlencode "status[in]=Completed"
-   ```
-
-   Repeat the parameter for each value you want to match.
-
-6. **Read the built-in completeness scores instead of writing your own checks.**
-
-   Your account's completeness attributes appear in every product's `attributes` map alongside the values you set yourself, scored as numbers. Which ones exist depends on how your account is configured; a catalog set up for retail might carry `basic_information_completeness`, `website_ready`, and `marketing_ready`. Read one product to see yours:
-
-   ```bash
-   curl "https://pim.plytix.com/api/v3/products/<product_id>" \
-     -H "Authorization: Bearer <access_token>"
-   ```
-
-   Filter on one of these the same way as any other field:
-
-   ```bash
-   curl -G "https://pim.plytix.com/api/v3/products" \
-     -H "Authorization: Bearer <access_token>" \
-     --data-urlencode "attributes.website_ready[gt]=90"
-   ```
+   `[lt]=90` matches scores under 90, so a product at exactly 90 passes. Use `[lte]` if 90 should still need attention. A product with no score doesn't match `[lt]`, so add `[!exists]` in an OR group if those count too. A high score means the attributes your account configured are filled in, not that a marketplace or channel will accept the product.
 
 7. **Combine filters into one audit query.**
 
-   Filters joined by `&` combine with AND. To match either condition, give each filter the same `_or[0]` prefix. For example, products with no main image or a `Draft` status:
+   Filters joined by `&` combine with AND. To match either condition, give each filter the same `_or[0]` prefix. For example, products with no thumbnail or a `Draft` status:
 
    ```bash
    curl -G "https://pim.plytix.com/api/v3/products" \
      -H "Authorization: Bearer <access_token>" \
-     --data-urlencode "_or[0]attributes.main_image_link[!exists]=true" \
-     --data-urlencode "_or[0]status=Draft"
+     --data-urlencode "_or%5B0%5Dthumbnail_id%5B!exists%5D=true" \
+     --data-urlencode "_or%5B0%5Dstatus=Draft"
    ```
 
-   See [Filtering and Query Syntax](/docs/reference/v3/filtering-query-syntax) for grouping rules. To reuse a filtered set of products, see step 1 of [Build a marketplace-specific product feed](/docs/guides/building-marketplace-specific-product-feeds), which creates a product list.
+   See [Filtering and Query Syntax](/docs/reference/v3/filtering-query-syntax) for grouping rules.
+
+8. **Collect every page and record the failed rules per product.**
+
+   One request returns one page. Select `id`, `sku`, and the fields you're auditing with `_fields`, add `_sort_by=id`, and follow `pagination.next_page` while it holds a usable URL, as described in [Export your full catalog](/docs/guides/exporting-your-full-catalog). When you run several checks, merge the results by `id` and keep the list of rules each product fails, so a product that fails three checks appears once:
+
+   ```json
+   {
+     "6a38f614c3d65a5f868b1a06": {
+       "sku": "BAG-10157",
+       "failed_rules": ["gtin_required", "thumbnail_required"]
+     }
+   }
+   ```
 
 ## Related articles
 
@@ -111,7 +145,7 @@ Now that you know how to audit product data, you can explore these related guide
   <Card icon={<Download />} title="Export your full catalog" href="/docs/guides/exporting-your-full-catalog">
     Pull the full catalog once you know which products need attention.
   </Card>
-  <Card icon={<SatelliteDish />} title="Build a marketplace-specific product feed" href="/docs/guides/building-marketplace-specific-product-feeds">
-    Use the same filters to keep incomplete products out of a channel feed.
+  <Card icon={<Filter />} title="Filtering and Query Syntax" href="/docs/reference/v3/filtering-query-syntax">
+    Look up every operator and function this guide's checks use.
   </Card>
 </Cards>
