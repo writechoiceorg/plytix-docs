@@ -35,6 +35,7 @@ Writer → Reviewer → Plytix feedback → [FEEDBACK CORRECTOR] → reply to Da
 | 6. Approval gate | Wait for the user's decision | No |
 | 7. Apply and log | Apply approved corrections, run checks, update the shared `feedback-flags.md` | Yes, approved items only |
 | 8. Reply to David | Draft a short, paste-ready list of the changes made, to send back to David | No |
+| 9. Save the run | Add this run's output to the shared `feedback-corrector-log.md` | No (log file only) |
 
 Do not skip or merge phases. Never move past Phase 6 without an explicit approval message from the user.
 
@@ -304,7 +305,88 @@ Rules for the reply:
 - List only changes that were actually applied in Phase 7. Never describe a change as done if it was skipped or is still pending.
 - Follow the style guide (no em dashes, V1/V2 and V3 naming, glossary terms), but keep the tone conversational.
 - Keep it short: a few bullets, a sentence each.
-- Don't save it to a file or send it anywhere. The user sends it.
+- Don't send it anywhere. The user sends it. Phase 9 saves a copy in the run log.
+
+Then continue straight to Phase 9 in the same response.
+
+---
+
+## Phase 9: Save the run to the run log
+
+Save this run's output to **one file**: `feedback-corrector-log.md` at the repo root. It's the record of every run, so the analysis, the applied changes, and the reply to David can be found later. Never create a separate file per page or per date.
+
+This file is separate from `feedback-flags.md`: the flag log tracks open questions for Plytix, while the run log keeps what each run found and changed.
+
+**If the file doesn't exist**, create it from the template below.
+
+**If it exists**, read it first, then edit it in place with the Edit tool:
+
+- **Page already has a section** → add this run as a new `### Run YYYY-MM-DD` block at the **top** of that page's runs, so the newest run comes first. Leave earlier runs unchanged. If the page has two runs on the same date, add a suffix: `### Run 2026-10-14 (2)`.
+- **Page has no section yet** → add a new page section at the end.
+- Update the index table at the top (runs count and last run date) and set **Last updated**.
+
+Record what actually happened. Copy the reply to David exactly as given in Phase 8, and the applied changes exactly as made in Phase 7. If the user edited a correction before approving it, record the version that was applied.
+
+Template:
+
+````markdown
+# Feedback corrector run log
+
+Record of every `feedback-corrector` run: the feedback received, what our sources said, what changed on the page, and the reply sent to David. One section per page, newest run first. Open questions for Plytix live in [`feedback-flags.md`](feedback-flags.md).
+
+**Last updated:** YYYY-MM-DD
+
+## Index
+
+| Page | Runs | Last run |
+|---|---|---|
+| [Page title](#page-title) | N | YYYY-MM-DD |
+
+---
+
+## [Page title]
+
+**Page:** `fumadocs/content/docs/...mdx` · **Page type:** Concept | How-to | Reference | Tutorial
+
+### Run YYYY-MM-DD
+
+**Feedback from:** David, [source/context]
+**Approved by the user:** [all | F1, F3 | ...]
+
+#### Feedback items
+
+| # | Feedback (short) | Type | Location | Verdict | Outcome |
+|---|---|---|---|---|---|
+| F1 | ... | Factual | [Heading], line N | Supported | Applied |
+
+#### Applied changes
+
+| # | Change made | Source |
+|---|---|---|
+| F1 | [what changed, quoting the new wording when short] | `path` → quoted line / schema path |
+
+#### Not changed
+
+- **F3:** [reason]
+
+#### Flags
+
+Added: FB-00N, ... · Resolved: FB-00N, ... (details in [`feedback-flags.md`](feedback-flags.md))
+
+#### Follow-ups on other pages
+
+- [page or file]: [what needs doing]
+
+#### Reply to David
+
+```text
+[the Phase 8 reply, verbatim]
+```
+````
+
+Use `####` headings inside a run only in this log file. The heading-depth rule applies to docs pages, not to this file.
+
+In the response, end with one line linking to the updated run log.
 
 ---
 
@@ -339,4 +421,5 @@ In Phase 7, every flag that is still open becomes a row in `feedback-flags.md`. 
 - **Stay in scope.** Edit only the page identified in Phase 1. Anything else goes to "Follow-ups on other pages".
 - **Don't silently correct.** Every change maps to a numbered feedback item and appears in the close-out summary.
 - **One flag log.** All flags go to `feedback-flags.md`, edited in place. Never overwrite it, start a new one, or delete earlier flags; resolve them instead.
+- **One run log.** Every run is saved to `feedback-corrector-log.md`, edited in place. Never overwrite it, start a new one, or delete earlier runs.
 - **Ask once, wait.** Each question to the user is a single message, followed by a stop.
