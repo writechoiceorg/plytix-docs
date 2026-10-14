@@ -231,3 +231,11 @@ Consolidated from the "## Open items" section of every `bruno-collection/*/READM
       at all — this is now stale/incorrect given the confirmed working,
       safe `DELETE /products/{id}/relationships/{relationship_id}`. Needs
       a correction independent of Plytix's answer above.
+
+## 2026-10-13 retest against `openapi_pimv3_20261002 (Latest spec).json` (config quirks #104-118)
+- [x] `*_ids` removal and link/unlink surface confirmed and now matches the spec (config open question #29 closed).
+- [x] `CompletenessAttribute` 500 fixed (open question #18 closed); `HierarchyAttribute` removed from spec and API (open question #10 closed).
+- [x] Cross-tenant leak on `/family-attributes`, `/product-relationships`, `/related-products` no longer reproduces; `relationship_id` filter 504/500 fixed. Verified by id ownership on one account only; ask Plytix to confirm.
+- [ ] `product-family-models` removed (404): retire `13-Product-Families/Get Product Family Model by ID.bru`.
+- [ ] **New bug:** `PATCH /channels/{id}` with a `webhook` block makes `GET /channels/{id}` return 422 until `webhook` is patched to `null` (quirk #114).
+- [ ] Still open: `rebuild_periodically` alone -> 502; `next_page` is `http://`; `products/{id}/relationships/{rid}/related-products` returns empty; no asset-to-product link endpoint; ecatalog and product-data-sheet link success shapes untested (feature-gated / no scratch fixture).

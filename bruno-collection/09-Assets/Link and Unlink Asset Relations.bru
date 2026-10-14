@@ -1,0 +1,137 @@
+meta {
+  name: Link and Unlink Asset Relations
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{pim_base_url_v3}}/assets/REPLACE_WITH_ASSET_ID/categories
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {
+    "id": "REPLACE_WITH_ASSET_CATEGORY_ID"
+  }
+}
+
+docs {
+  Link/unlink endpoints new in `openapi_pimv3_20261002 (Latest spec).json`:
+  `POST /assets/{id}/categories`, `DELETE /assets/{id}/categories/{id}`,
+  `POST /assets/{id}/static_lists`, `DELETE /assets/{id}/static_lists/{id}`.
+  All four confirmed live 2026-10-13 against "David's Dev Account" on a
+  disposable asset, category and static asset list (all since deleted).
+
+  `category_ids` / `static_list_ids` are no longer accepted on `POST`/`PATCH /assets`
+  (`422 "Extra inputs are not permitted"`); these endpoints replace them.
+  Body is `{"id": "<linked_id>"}` for both resources.
+
+  - `POST` -> `201 {"data": {"id": "<linked_id>"}, "errors": []}`
+  - duplicate `POST` -> `409 AlreadyExists` ("'<id>' is already linked to assets <asset_id> through '<relation>'")
+  - `GET /assets/{id}/categories` and `.../static_lists` reflect the link immediately
+  - `DELETE .../{linked_id}` -> `204`, removes only that link; follow-up `GET` returns `[]`
+  - bare `DELETE /assets/{id}/categories` -> `405` ("requires exactly one linked id")
+}
+
+example {
+  name: Link Asset Category - 201 Created
+  description: Real response captured 2026-10-13 against "David's Dev Account".
+
+  request: {
+    url: {{pim_base_url_v3}}/assets/6aced75008d0fd44347d7209/categories
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "id": "6aced73408d0fd44347d7205"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 201
+      text: Created
+    }
+    headers: {
+      content-type: application/json
+    }
+    body: {
+      type: json
+      content: '''
+        {"data": {"id": "6aced73408d0fd44347d7205"}, "errors": []}
+      '''
+    }
+  }
+}
+
+example {
+  name: Link Asset Category - 409 Already Linked
+  description: Real response captured 2026-10-13, re-sending the identical request.
+
+  request: {
+    url: {{pim_base_url_v3}}/assets/6aced75008d0fd44347d7209/categories
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "id": "6aced73408d0fd44347d7205"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 409
+      text: Conflict
+    }
+    headers: {
+      content-type: application/json
+    }
+    body: {
+      type: json
+      content: '''
+        {"data": [], "errors": [{"name": "AlreadyExists", "description": "'6aced73408d0fd44347d7205' is already linked to assets 6aced75008d0fd44347d7209 through 'categories'"}]}
+      '''
+    }
+  }
+}
+
+example {
+  name: Unlink Asset Static List - 204 No Content
+  description: Real response captured 2026-10-13. Empty body.
+
+  request: {
+    url: {{pim_base_url_v3}}/assets/6aced75008d0fd44347d7209/static_lists/6aced73608d0fd44347d7207
+    method: delete
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 204
+      text: No Content
+    }
+  }
+}
