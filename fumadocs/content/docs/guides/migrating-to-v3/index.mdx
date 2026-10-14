@@ -7,7 +7,7 @@ import { Table2, KeyRound, Search, Filter, FilePen, PackageX } from 'lucide-reac
 
 V3 reorganized the Plytix API rather than replicating it. Most of what a V1/V2 integration does moves across and gets better in the process, but a few operations have no V3 equivalent at all, so a working integration usually ends up calling both versions rather than cutting over wholesale.
 
-This guide covers that split: what moves, what stays, and how to convert the parts that move. Your authentication doesn't change either way.
+This guide covers that split: what moves, what stays, and how to convert the parts that move. V1/V2 keep their current authentication, and V3 is moving to a new model whose details aren't published yet.
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ Before you start, you need:
 
 - **A working V1/V2 integration**, and access to its source. This guide assumes you're changing existing code, not starting fresh.
 - **A test account or a safe dataset.** Write behavior differs between versions in ways that are hard to spot until something is already deleted.
-- **Your current API credentials.** They keep working, so you don't need new ones.
+- **Your current API credentials** for the calls you keep on V1/V2. V3 authentication is changing; see step 2.
 
 ## Migrate your integration
 
@@ -33,28 +33,26 @@ Before you start, you need:
    | Adding and removing product relationships | V3's `DELETE /products/{product_id}/relationships/{relationship_id}` is a scoped unlink; V1 needs a separate `/unlink` call |
    | Creating variants | `parent_id` and `product_family_id` on the product itself |
 
-   **Keep these on V1/V2.** No V3 equivalent exists today, so these calls stay where they are:
+   **Keep these on V1/V2.** They have no confirmed V3 equivalent today:
 
    | Operation | V1 endpoint | Status in V3 |
    |---|---|---|
    | Replacing the binary content of an existing asset | `PUT /api/v1/assets/{asset_id}/content` | No equivalent. V3 accepts `url` or `content` only when the asset is created; its update schema carries only `filename` and `alt_text` |
-   | Linking and unlinking assets on a product | `POST` and `DELETE /api/v1/products/{product_id}/assets` | No equivalent, and not supported. V3 has no product-to-asset link path and no `asset_ids` field on the product. `thumbnail_id` is the one exception, and it sets a single image |
+   | Linking and unlinking assets on a product | `POST` and `DELETE /api/v1/products/{product_id}/assets` | No dedicated endpoint. V3 manages a product's assets through media and media gallery attributes, and `thumbnail_id` sets the main image. The value format for media attributes isn't confirmed yet, so keep this call on V1 for now |
    | Discovering the available filters for a resource | `GET /api/v1/filters/product`, `/filters/asset`, `/filters/relationships` | No equivalent. Build filters from `GET /api/v3/product-attributes` instead |
    | Resyncing variants against their parent | `POST /api/v1/products/{parent_product_id}/variants/resync` | No equivalent |
    | Reading a total result count | `total_count` on every V1 search response | No equivalent anywhere in V3. See step 6 |
+   | Searching API credentials and account memberships | `POST /api/v1/accounts/api-credentials/search`, `/accounts/memberships/search` | No equivalent. Managing keys and users in the Plytix dashboard doesn't replace searching them through the API |
 
-   **These are gone from both.** Plan around them rather than migrating them:
+   **Bulk writes aren't in V3 yet.** The current V3 contract has no bulk create, update, or delete endpoints. Bulk endpoints are part of Plytix's V3 design (planned), so a large change is many single requests for now, paced under your [rate limit](/docs/reference/v3/rate-limits).
 
-   - **Bulk writes.** V3 has no bulk create, update, or delete endpoints. A Bulk API exists in V2, but it isn't available to every account; confirm access with your Plytix contact. See [Bulk operations for large catalogs](/docs/guides/bulk-operations-for-large-catalogs).
-   - **API credential and membership management** (`POST /api/v1/accounts/api-credentials/search`, `/accounts/memberships/search`). Manage these in the Plytix dashboard. API Keys are under the **API** tab.
-
-   <Callout type="info" title="Running both versions is the normal end state">
-     Both versions take the same bearer token against the same auth service, so calling V1 for asset content and V3 for everything else needs no extra credentials and no second auth flow. Treat the mixed setup as the destination, not as an unfinished migration.
+   <Callout type="info" title="Keeping some calls on V1/V2">
+     If your integration keeps some calls on V1/V2, each version authenticates in its own way. V1/V2 keep the current token flow, and V3's new model isn't published yet, so don't assume one token covers both.
    </Callout>
 
-2. **Keep your authentication as it is.**
+2. **Plan authentication for each version.**
 
-   Both versions use the same auth service. You exchange your API Key and password once, then send the token as a bearer header. Your existing credentials, their roles, and your token-refresh logic all carry over. See [Authentication and base URLs](/docs/guides/migrating-to-v3/authentication-and-base-urls) for the shared base URLs, [Authentication](/docs/reference/v3/authentication) for the token request, and [Quickstart](/docs/guides/quickstart) for the full flow.
+   V1/V2 keep their current authentication: you exchange your API Key and password for a bearer token and send it in the `Authorization` header. Your credentials, their roles, and your token-refresh logic keep working for those calls. V3 is moving to a new token-based model whose details aren't published yet, so don't build V3 calls on the assumption that the V1/V2 flow carries over. See [Authentication and base URLs](/docs/guides/migrating-to-v3/authentication-and-base-urls) for the V1/V2 flow and the status of V3 authentication.
 
 3. **Convert your searches from a POST body to a GET query.**
 
@@ -82,7 +80,7 @@ Before you start, you need:
      <Tab value="V3">
        ```bash
        curl --globoff --request GET \
-         --url 'https://pim.plytix.com/api/v3/products?status=Draft&categories[in]=5c4ed7f62f0985001c233274&_fields=label&_fields=status&_fields=categories&_sort_by=sku&_page=1&_page_size=25' \
+         --url 'https://pim.plytix.com/api/v3/products?status=Draft&categories.id[intersects]=5c4ed7f62f0985001c233274&_fields=label&_fields=status&_fields=categories&_sort_by=sku&_page=1&_page_size=25' \
          --header 'Authorization: Bearer <token>'
        ```
      </Tab>
@@ -92,16 +90,16 @@ Before you start, you need:
 
    | V1 body key | V3 equivalent |
    |---|---|
-   | `filters` | Query parameters in bracket syntax, such as `status=Draft` or `categories[in]=<id>` |
+   | `filters` | Query parameters in bracket syntax, such as `status=Draft` or `categories.id[intersects]=<id>` |
    | `attributes` | `_fields=<name>`, repeated once per field |
    | `pagination` | `_page`, `_page_size`, and `_sort_by` |
 
-   The operators change shape but not meaning. `{"operator": "eq"}` becomes `field=value` or `field[eq]=value`, `!exists` becomes `field[!exists]=true`, `in` becomes `field[in]=value` repeated per value, and the comparison operators become `field[gt]`, `field[gte]`, `field[lt]`, and `field[lte]`.
+   Most operators change shape and keep their meaning. `{"operator": "eq"}` becomes `field=value` or `field[eq]=value`, `!exists` becomes `field[!exists]=true`, `in` becomes `field[in]=value` repeated per value, and the comparison operators become `field[gt]`, `field[gte]`, `field[lt]`, and `field[lte]`. Missing fields, `null`, empty values, and negated operators are the exception: V3 tests them separately and V1 doesn't define them, so check those filters against [Missing, null, and empty values](/docs/guides/migrating-to-v3/filter-operators#missing-null-and-empty-values). For list fields such as `categories`, use `[intersects]` rather than `[in]`.
 
    Boolean grouping changes too. In V1, filters nest as arrays: items inside one array combine with AND, and the outer arrays combine with OR. In V3, `&` is AND, and OR uses an indexed prefix:
 
    ```text
-   _or[0]status=Draft&_or[0]status=Review
+   _or[0]status=Draft&_or[0]status=Completed
    ```
 
    Custom attributes are addressed directly rather than through a field name string: `attributes.name[eq]=value`. [Filter operators](/docs/guides/migrating-to-v3/filter-operators) carries the full operator mapping.
@@ -158,41 +156,37 @@ Before you start, you need:
 
 7. **Change how your code reads write responses.**
 
-   V3 returns the full entity on a create, so code that reads a create response keeps working. An update returns nothing at all, so code that reads a PATCH response has to change.
+   V3 returns a body on a create but not on an update, and the body's shape changes:
 
    | Operation | V3 response |
    |---|---|
-   | Create | `201` with the full created entity |
+   | Create | `201` with `data` as an object holding the resource's creation representation. For products, that leaves out expanded relations such as `categories` and `assets`. V1/V2 return the created record inside an array |
    | Update (PATCH) | `204` with no body |
    | Delete | `204` with no body |
    | Duplicate on create | `409` |
 
-   Anywhere your V1 code reads values out of a PATCH response, add a follow-up GET instead.
-
-   <Callout type="warn" title="PATCH recently changed to 204">
-     Earlier V3 releases returned `200` with the full updated entity on PATCH. It now returns `204` with an empty body, so an integration written against the older behavior breaks on any code that parses an update response. POST is unaffected: it still returns `201` with the full created entity.
-   </Callout>
+   Code that reads `data[0]` from a V1 create has to read `data` instead, and anywhere your V1 code reads values out of a PATCH response needs a follow-up GET. See [Responses and updates](/docs/guides/migrating-to-v3/responses-and-updates) for each shape.
 
 8. **Re-check your delete and update logic before you run it.**
 
    Two V3 behaviors catch migrated code out:
 
-   - **PATCH replaces the `attributes` map rather than merging into it.** Sending only the attributes that changed deletes every attribute you left out, with no error and no warning. Read the current map, merge, then send it back, or use `PATCH /products/{identifier}/attributes/{name}` with a bare value to scope the change to one attribute.
+   - **PATCH replaces the `attributes` map rather than merging into it.** Sending only the attributes that changed deletes every attribute you left out, with no error and no warning. See the [before-and-after example](/docs/guides/migrating-to-v3/responses-and-updates#how-patch-treats-the-attributes-map). To change one attribute, send its bare JSON value to `PATCH /products/{identifier}/attributes/{name}`. To change several, read the current map, merge, and send it back. V3 has no conditional write, so a change someone else makes between your read and your write is overwritten.
    - **DELETE erases** the entity or the field it's applied to. It doesn't set the value to null or reset it to a default, and removing a field can cause inheritance to resolve for it instead. Confirm on a test record that a delete does what your V1 code assumed.
 
    See [Update and delete records](/docs/reference/v3/updates-and-deletes).
 
-9. **Run both versions side by side before cutting over.**
+9. **Compare both versions on test data before cutting over.**
 
-   Point a copy of your integration at V3 while the V1 one keeps running, and compare the results: record counts from the same filter, the fields that come back, and the relations each product reports. A count that differs usually means a filter didn't translate the way you expected, and it's far cheaper to find that in a comparison than in production. Since V3 won't give you a total, get the count by paging to the end on both sides.
+   Compare reads on a stable test dataset that nothing else changes while you compare. Run the same filters against both versions with a fixed sort, such as `sku` on both sides, and compare the record counts, the fields, the response shapes, the relations each product reports, and the errors each version returns for the same bad request. Since V3 won't give you a total, get the count by paging to the end on both sides. Test writes on isolated test records, not by running both integrations against the same products, where each would overwrite the other's changes.
 
 ## Troubleshooting
 
 Check the problems below if you run into issues while following this guide.
 
 <Accordions type="multiple">
-  <Accordion title="A v3 search returns everything, ignoring your filter" value="search-returns-everything">
-    A search with no recognized filter means "get all," and an unrecognized parameter is common when you type the bracket syntax by hand. Check the bracket syntax and the URL encoding, then compare counts against the same V1 filter before you trust a converted query.
+  <Accordion title="A V3 search returns more records than the same V1 search" value="search-returns-everything">
+    A V3 search with no filter parameters returns the whole collection, paged. A filter on a field that doesn't exist isn't ignored: it returns `400 InvalidFieldError`, and an unknown operator returns `400 InvalidFilterOperator`. If the search succeeds but returns more than expected, check that each filter arrived as you wrote it: curl needs `--globoff` for bracket syntax, and other clients may need the brackets URL-encoded. Then compare counts against the same V1 filter.
   </Accordion>
 
   <Accordion title="Your code breaks after a successful update" value="code-breaks-after-update">
@@ -200,7 +194,7 @@ Check the problems below if you run into issues while following this guide.
   </Accordion>
 
   <Accordion title="Attributes you didn't touch disappeared after an update" value="attributes-disappeared">
-    PATCH replaced the whole `attributes` map with what you sent. Restore the missing values, then switch to read-merge-write, or patch one attribute at a time through `PATCH /products/{identifier}/attributes/{name}`.
+    PATCH replaced the whole `attributes` map with what you sent. Restore the missing values, then patch one attribute at a time through `PATCH /products/{identifier}/attributes/{name}`. Use read-merge-write only where nothing else edits the same products at the same time, because it overwrites changes made between your read and your write.
   </Accordion>
 
   <Accordion title={<>A link request returns <code>404</code> or <code>405</code></>} value="link-request-404-405">
@@ -215,8 +209,8 @@ Check the problems below if you run into issues while following this guide.
     The URL came back as `http` and redirected to `https`, and your client dropped the `Authorization` header. Rewrite the scheme to `https` before requesting it.
   </Accordion>
 
-  <Accordion title="You can't find the v3 endpoint for uploading asset content or attaching an asset to a product" value="no-v3-asset-endpoint">
-    There isn't one. Both operations stay on V1, as step 1 explains.
+  <Accordion title="You can't find the V3 endpoint for replacing an asset's file or attaching an asset to a product" value="no-v3-asset-endpoint">
+    V3 has neither. Uploading a new asset works in V3 with `POST /api/v3/assets` and a `url` or `content`, but replacing the file of an existing asset stays on V1. Attaching an asset to a product goes through media and media gallery attributes in V3, and their value format isn't confirmed yet, so keep that on V1 for now, as step 1 explains.
   </Accordion>
 </Accordions>
 
@@ -226,7 +220,7 @@ Six reference pages sit under this guide and carry the detail the steps above po
 
 <Cards>
   <Card icon={<KeyRound />} title="Authentication and base URLs" href="/docs/guides/migrating-to-v3/authentication-and-base-urls">
-    The base URL, path prefix, and token flow both versions share.
+    The base URLs and path prefixes, the V1/V2 token flow, and the status of V3 authentication.
   </Card>
   <Card icon={<Search />} title="Searching and pagination" href="/docs/guides/migrating-to-v3/searching-and-pagination">
     The V1 search body translated into a V3 query string, and how V3 pages.

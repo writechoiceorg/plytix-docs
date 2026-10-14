@@ -5,39 +5,45 @@ description: "Reference for the V1 endpoints that have no V3 counterpart, the re
 
 import { Table2, BookOpen } from 'lucide-react';
 
-Not every V1 call has somewhere to go. This page lists the endpoints that stay where they are, the resources V3 added with no V1 ancestor, and the narrow slice of the API that V2 covers. Together they explain why a migrated integration usually ends up calling two versions rather than one. It's part of the reference set for [Migrating to V3](/docs/guides/migrating-to-v3).
+Not every V1 call has a V3 counterpart yet. This page lists the V1 endpoints missing from the current V3 contract, the entry points that are new in V3, and the slice of the API that V2 covers. It reflects the V3 OpenAPI dated 2026-10-02 and will change as V3 expands. Keep a legacy call wherever your integration needs a capability with no confirmed public V3 equivalent, and move everything else to V3. It's part of the reference set for [Migrating to V3](/docs/guides/migrating-to-v3).
 
-## Endpoints with no V3 equivalent
+Each entry below falls into one of these groups:
 
-These V1 paths have no counterpart in the V3 spec. The first four keep working on V1.
+- **Legacy only:** documented in V1 and absent from the current V3 contract. Keep calling V1.
+- **Alternative in V3:** V3 has no matching endpoint but does the job another way. Where that way isn't confirmed yet, the entry says so.
+- **Planned:** described in Plytix's V3 design, but not part of the current V3 contract.
 
-| V1 endpoint | What to do |
-|---|---|
-| `PUT /api/v1/assets/{asset_id}/content` | Keep on V1. V3 takes content only at asset creation |
-| `POST` and `DELETE /api/v1/products/{product_id}/assets[/{asset_id}]` | Keep on V1. V3 has no product-to-asset link path. `thumbnail_id` on the product sets a single image, which is not the same thing |
-| `GET /api/v1/filters/product`, `/filters/asset`, `/filters/relationships` | Keep on V1, or build filters from the attribute definitions returned by `GET /api/v3/product-attributes` |
-| `POST /api/v1/products/{parent_product_id}/variants/resync` | Keep on V1 |
-| `POST /api/v1/accounts/api-credentials/search` | Manage API Keys in the Plytix dashboard, under the **API** tab |
-| `POST /api/v1/accounts/memberships/search` | Manage users in the Plytix dashboard |
+## V1 endpoints missing from the V3 contract
+
+All six endpoints below remain documented in the [V1/V2 reference](/docs/reference/legacy/api-v1-v2-reference), and none of them is in the current V3 contract.
+
+| V1 endpoint | Status | What to do |
+|---|---|---|
+| `PUT /api/v1/assets/{asset_id}/content` | Legacy only | Keep on V1. V3 takes a file only when it creates an asset. An asset update changes `filename` and `alt_text`, not the file. |
+| `POST` and `DELETE /api/v1/products/{product_id}/assets[/{asset_id}]` | Alternative in V3, unconfirmed | V3 has no product-to-asset link path. The V3 product schema manages assets through media and media gallery attributes, and `thumbnail_id` sets the main image. The value format for media attributes isn't confirmed yet, so keep this call on V1 for now. |
+| `GET /api/v1/filters/product`, `/filters/asset`, `/filters/relationships` | Alternative in V3, partial | `GET /api/v3/product-attributes` returns your product attribute definitions, including each attribute's `type`. It doesn't list system fields, asset or relationship fields, or the supported operators: see [Filtering and query syntax](/docs/reference/v3/filtering-query-syntax) for those. Keep on V1 if you need the full list from the API. |
+| `POST /api/v1/products/{parent_product_id}/variants/resync` | Legacy only | Keep on V1. |
+| `POST /api/v1/accounts/api-credentials/search` | Legacy only | Keep on V1. You can manage API keys in the Plytix dashboard under the **API** tab, but that doesn't replace searching them through the API. |
+| `POST /api/v1/accounts/memberships/search` | Legacy only | Keep on V1. You can manage users in the Plytix dashboard, but that doesn't replace searching them through the API. |
 
 ## Bulk operations
 
-V3 has no bulk create, update, or delete endpoints. A Bulk API exists in V2, but it isn't available to every account; confirm access with your Plytix contact. See [Bulk operations for large catalogs](/docs/guides/bulk-operations-for-large-catalogs).
+The current V3 contract has no bulk create, update, or delete endpoints. Bulk endpoints are part of Plytix's V3 design (planned), but there's no V3 bulk call to migrate to yet. To change many products in V3, send single-item requests paced under your [rate limit](/docs/reference/v3/rate-limits).
 
-## Resources that are new in V3
+## New entry points in V3
 
-These examples have no V1 equivalent, so they're additions rather than migrations. The list isn't exhaustive; see the [V3 API reference](/docs/reference/v3) for every resource.
+These V3 entry points have no V1 path of their own. One is a new resource. The other three are new top-level views of associations that V1 already managed under families and products. The list isn't exhaustive; see the [V3 API reference](/docs/reference/v3) for every resource.
 
-| V3 resource | Covers |
-|---|---|
-| `/api/v3/asset-lists` | Saved asset lists |
-| `/api/v3/family-attributes` | Attribute definitions across families, read-only |
-| `/api/v3/product-relationships` | Relationship records, read-only |
-| `/api/v3/related-products` | The products on the far side of a relationship, read-only |
+| V3 entry point | What it is | Managed through |
+|---|---|---|
+| `/api/v3/asset-lists` | A new resource: saved asset lists | Its own endpoints |
+| `/api/v3/family-attributes` | A view of family-to-attribute associations and their levels. Narrow it with `product_family_id` | Read-only here. Link, change, and unlink attributes through `/api/v3/product-families/{product_family_id}/attributes` |
+| `/api/v3/product-relationships` | A view of product relationship records: which products link to which relationship | Read-only here. Manage them through `/api/v3/products/{product_id}/relationships` |
+| `/api/v3/related-products` | A view of related-product entries, including `quantity` and an optional expanded `product` | Read-only here. Change them through `/api/v3/products/{product_id}/relationships/{relationship_id}` |
 
 ## What V2 covers
 
-V2 is a products-only beta served from the same base URL. It covers a subset of the V1 product endpoints and adds one operation V1 lacks: `DELETE /api/v2/products/{product_id}/relationships/{relationship_id}`. Everything outside products, including assets, attributes, categories, families, and relationship definitions, stays on V1.
+V2 is a products-only beta served from the same base URL. It covers a subset of the V1 product endpoints. Its `DELETE /api/v2/products/{product_id}/relationships/{relationship_id}` removes products from a relationship, the same job V1 does with `/api/v1/products/{product_id}/relationships/{relationship_id}/unlink`, so it's a different route rather than a new capability. Everything outside products, including assets, attributes, categories, families, and relationship definitions, stays on V1.
 
 ## Related resources
 

@@ -17,6 +17,11 @@ Record of every `feedback-corrector` run: the feedback received, what our source
 | [Audit product data quality with filters](#audit-product-data-quality-with-filters) | 1 | 2026-10-14 |
 | [Build a marketplace-specific product feed](#build-a-marketplace-specific-product-feed) | 1 | 2026-10-14 |
 | [Safely remove categories, assets, or relationships](#safely-remove-categories-assets-or-relationships) | 1 | 2026-10-14 |
+| [Reconstruct parent/variant hierarchies](#reconstruct-parentvariant-hierarchies) | 1 | 2026-10-14 |
+| [Bulk operations for large catalogs (internal draft)](#bulk-operations-for-large-catalogs-internal-draft) | 1 | 2026-10-14 |
+| [Connect an AI assistant to the Plytix docs](#connect-an-ai-assistant-to-the-plytix-docs) | 1 | 2026-10-14 |
+| [Not migrated and new in V3](#not-migrated-and-new-in-v3) | 1 | 2026-10-14 |
+| [Migrating to V3](#migrating-to-v3) | 1 | 2026-10-14 |
 
 ---
 
@@ -703,4 +708,378 @@ Open questions:
 - Does clearing thumbnail_id remove the asset from the product's assets list even when a media or media gallery attribute still references it?
 - What does DELETE /products/{id}/categories/{category_id} return when the product doesn't exist, and is the "is not linked to" description stable enough for clients to match on?
 - What value does a media or media gallery attribute accept in a product PATCH?
+```
+
+---
+
+## Reconstruct parent/variant hierarchies
+
+**Page:** `fumadocs/content/docs/guides/reconstructing-parent-variant-hierarchies.mdx` · **Page type:** How-to
+
+### Run 2026-10-14
+
+**Feedback from:** David, written review (reconstruction workflow, family-model endpoint, children and sub-variants, family and inheritance rules, `overwritten_attributes`, prerequisites and response handling, unlinking)
+**Approved by the user:** all
+
+#### Feedback items
+
+| # | Feedback (short) | Type | Location | Verdict | Outcome |
+|---|---|---|---|---|---|
+| F1 | Lead with reading existing products and assembling the structure | Structure / flow | Build and read the hierarchy, lines 17-81 | Supported | Applied |
+| F2 | Keep creation as an optional example, or rename the guide | Structure / flow | Same | Supported | Applied |
+| F3 | Replace `/product-family-models/{family_id}` | Factual | Step 5, lines 72-79 | Supported | Applied |
+| F4 | Use family attribute endpoints; explain `level` and `attribute_id` | Factual | Step 5, line 79 | Supported | Applied |
+| F5 | `product_level`/`num_variations` don't list children; add a `parent_id` query | Factual / scope | Step 4, line 70 | Supported (spec; untested live) | Applied, flagged FB-035 |
+| F6 | Handle pagination | Scope | Not on the page | Supported | Applied |
+| F7 | Explain how to get sub-variants | Scope | Not on the page | Supported (spec; untested live) | Applied, flagged FB-035 |
+| F8 | Select `id`, `sku`, `parent_id`, `product_family_id`, `product_level` | Scope | Not on the page | Supported | Applied |
+| F9 | Verify that a variant gets its family from the parent | Factual | Step 3, line 61 | Supported (verified live) | Applied |
+| F10 | Verify the matching-family rule and the exact error | Factual | Step 3, line 61 | Supported (verified live) | Applied |
+| F11 | Verify the account restriction and the exact error | Factual | Step 5, line 81 | Supported (verified live) | Applied |
+| F12 | Show the link `level`; document the default if omittable | Factual | Step 1, line 39 | Level: Supported. Default: Unverifiable | Applied, flagged FB-036 |
+| F13 | Qualify `overwritten_attributes` | Factual | Read which values a variant overrides, line 89 | Supported | Applied, flagged FB-037 |
+| F14 | An existing family shouldn't be a prerequisite | Structure | Prerequisites, line 15 | Supported | Applied |
+| F15 | Match the create response to the schema; don't promise omitted fields | Factual | Step 2, line 50 | Supported | Applied |
+| F16 | Add a compact rebuilt-output example | Scope | Not on the page | Supported | Applied |
+| F17 | If unlinking is added, use `PATCH {"parent_id": null}` | Factual (conditional) | Not on the page | Not applicable | Not changed |
+
+#### Applied changes
+
+| # | Change made | Source |
+|---|---|---|
+| F1 | New first procedure "Rebuild the hierarchy from existing products": read all products, group by `parent_id`, read one branch, read family levels, assemble output. Intro and description rewritten around reconstruction. | Page title; `information-architecture.md:45` |
+| F2 | Creation moved to a final "Create a hierarchy to test against" section; title kept | Same |
+| F3 | `GET /product-family-models/<family_id>` step removed | `config/api-testing.config.md` → quirk #111: "all -> `404 NotFoundError`"; absent from the 2026-10-02 spec |
+| F4 | Rebuild step 4 reads `GET /product-families/<family_id>/attributes` and explains `attribute_id` and `level` (`parent_level`, `variant_level`, `no_level`, or `null`); mentions `_fields=family_attributes.*` | Spec → `FamilyAttributeOutputDto.level`, `ProductFamilyOutputDto.family_attributes` |
+| F5 | Rebuild step 2: "Don't rebuild the tree from `product_level` or `num_variations`… `parent_id` is the only field that connects a child to its parent." Step 3 shows `parent_id=<parent_id>` and `parent.sku=<sku>` | Spec → `GET /api/v3/products` filter grammar; `_API V3 - 08_10_2026.pdf` → `parent.sku=ABC` |
+| F6 | Follow `pagination.next_page` until missing, `null`, or empty; rewrite `http://` to `https://`; link to Export your full catalog | Spec → `Pagination`; quirk #92 / FB-012 |
+| F7 | Grouping produces level 3 because a sub-variant's `parent_id` points at its variant; per-branch query repeats with the variant's ID | Spec → `ProductLevel`: "SUB_VARIANT (3): Sub-variant of a variant"; V1 Postman variants section |
+| F8 | `_fields` for the five fields in steps 1 and 3 | Spec → `ProductOutputDto` |
+| F9 | "Leave `product_family_id` out: the variant takes its family from the parent." | Quirk #98 (2026-10-08) |
+| F10 | "A different family returns `422` with an error that names no field: `{"name": "ValidationError", "description": "product data validation failed"}`." | Quirk #98 |
+| F11 | `403` limited to the level-change `PATCH` and `parent_attributes`/`variant_attributes` on family create, with the full `Forbidden` body | Status-gating rule #4 (2026-10-14); quirks #61, #73 |
+| F12 | Link example sends `"level": "no_level"`; "Send it on every link, because the level an attribute gets when you leave it out isn't documented." | `_API V3 - 08_10_2026.pdf`; `Create Family Attribute Link.bru` |
+| F13 | Overrides section: the array lists overrides only; a missing attribute may be inherited, `no_level`, calculated, or unset; empty on accounts without inheritance; combine with `level` and parent/variant values | Spec → `overwritten_attributes`: "Overwritten attribute names"; FB-021 retest |
+| F14 | Prerequisite is now "Products already linked as parents and variants", linking to the creation section | — |
+| F15 | "returns `201` with the new product in `data`, without expanded relations"; removed "leaving out any field you didn't set" | Spec → `CreateProductsResponse.data` → `ProductCreateOutputDto`: "without relationship expansions" |
+| F16 | Rebuild step 5 adds a nested JSON example, labeled as integration output, not an API response | — |
+
+#### Not changed
+
+- **F17:** the guide doesn't add unlinking. The spec supports `PATCH {"parent_id": null}` (`ProductUpdateInputDto.parent_id`), untested live (FB-022).
+
+#### Checklist
+
+- Possible Fail on "Fields with their own allowed values are listed as bullets": `product_level` and `level` values stay inline in prose, as on the previous version. Reported, not changed.
+
+#### Flags
+
+Added: FB-035, FB-036, FB-037 · Resolved: none · Updated: FB-005 (F3), FB-008 (October 13 spec) (details in [`feedback-flags.md`](feedback-flags.md))
+
+#### Follow-ups on other pages
+
+- `.claude/skills/writer/references/style-guide.md` ("Procedure section headings" table): replace "Build and read the hierarchy" with "Rebuild the hierarchy from existing products".
+- `fumadocs/content/docs/guides/migrating-to-v3/endpoint-mapping.mdx`: its FLAG comment says this guide reads the hierarchy from `num_variations`.
+- `.claude/skills/writer/references/glossary.md`, Variant entry: still says "up to four levels".
+- Run `endpoint-tester` on `parent_id=` and `parent.sku=` filters, a sub-variant create, and a family-attribute link without `level` (FB-035, FB-036).
+
+#### Reply to David
+
+```text
+Thanks, David. I've updated Reconstruct parent/variant hierarchies:
+
+- Workflow: the guide now leads with reconstruction. It reads every product with id, sku, parent_id, product_family_id, and product_level, groups them by parent_id, and assembles the tree. Creating a family, parent, and variant is now an optional last section for testing, and the title stays.
+- Family-model endpoint: removed. The guide reads levels from GET /product-families/{id}/attributes (or family_attributes.* on the family search) and explains each row's attribute_id and level.
+- Children and sub-variants: a new step lists one parent's children with parent_id=<id> (or parent.sku), paged through next_page. Sub-variants come from the same query with a variant's ID, or from the same grouping. The page also says product_level and num_variations don't list children.
+- Family and inheritance rules: we verified the family assignment and the matching-family rule live, and the page now shows the exact 422 error. The 403 is limited to the two requests we've seen it on, with the exact body. The link example now sends "level": "no_level", and the page says to always send level, since the default isn't documented.
+- overwritten_attributes: qualified as you suggested, including that the array stays empty on accounts without inheritance, even when a variant holds its own value.
+- Prerequisites and responses: an existing family is no longer required, the create response is described as the new product without expanded relations (no promise about omitted fields), and there's a compact example of the rebuilt output.
+- Unlinking: not added, since the guide doesn't cover it. If we add it later, it'll use PATCH with {"parent_id": null}, separate from DELETE.
+
+Open questions:
+- Is filtering products by parent_id and parent.sku supported, and is a sub-variant created by setting parent_id to a variant's ID?
+- Does a parent's num_variations count its sub-variants, or only its direct variants?
+- Which level does a family-attribute link get when level is left out?
+- When exactly does Plytix add an attribute to overwritten_attributes?
+```
+
+---
+
+## Bulk operations for large catalogs (internal draft)
+
+**Page:** `internal-drafts/guides/bulk-operations-for-large-catalogs.mdx` (moved from `fumadocs/content/docs/guides/bulk-operations-for-large-catalogs.mdx`) · **Page type:** How-to
+
+### Run 2026-10-14
+
+**Feedback from:** David, written review (keep the guide unpublished as an internal draft; remove public Bulk API references; split topics if published later; code example, `409` handling, unsupported statements)
+**Approved by the user:** all (F1 as Option A, F5, F6, F7; inbound pages not included)
+
+#### Feedback items
+
+| # | Feedback (short) | Type | Location | Verdict | Outcome |
+|---|---|---|---|---|---|
+| F1 | Keep the guide unpublished as an internal draft: no public URL, nav, search, links, MCP, or llms exports | Scope | Whole page; `guides/meta.json` line 18 | Supported | Applied (Option A) |
+| F2 | "We could see if we want it in a url but not indexed or linked" | Question / future option | n/a | Not applicable now | Not changed |
+| F3 | Remove public Bulk API references elsewhere | Scope | Other pages (endpoint mapping and Documentation MCP guide not locatable) | Not applicable to this page | Not changed; follow-up, FB-038 |
+| F4 | Split into a V3-only guide if publication is revisited | Structure | Whole page | Future | Not changed |
+| F5 | Code has no pacing or retries and discards the error response | Factual | Step 4, lines 58-63 | Supported | Applied |
+| F6 | Don't treat every `409` as success | Factual | Step 5, line 67 | Supported | Applied |
+| F7 | Remove unsupported statements about silent failures and customer feedback | Factual | "Before reaching for the older Bulk API", lines 69-78 | Contradicted as "unsupported" (`before-writing.md`), section removed under F1/F3 | Applied |
+
+#### Applied changes
+
+| # | Change made | Source |
+|---|---|---|
+| F1 | File moved to `internal-drafts/guides/` at the repo root (outside `fumadocs/content/`, so no route, search, MCP, or llms export) with `git mv`; `"bulk-operations-for-large-catalogs"` removed from `fumadocs/content/docs/guides/meta.json` | `materials/transcripts/kick_off_2.md` → "which is not public because we are not offering to everyone"; `fumadocs/lib/source.ts` loads all of `content/docs` into the source used by search, MCP, and llms routes |
+| F5 | Step 4 loop paces with `pause=0.5`, retries `429`, `5xx`, and `000` up to three times with a growing delay, and logs ID, status, and response body to `results.log`; explanation paragraph added | Page steps 3-4; FB-028 |
+| F6 | "A retried `POST` for a SKU that already exists returns `409`, but don't count that as success on its own… Search for the SKU, confirm it's the product you meant to create, and `PATCH` it if its values differ." | `config/api-testing.config.md` → quirk #33; Sync ERP guide line 154 |
+| F7 | Removed the "Before reaching for the older Bulk API" section (and its FLAG comment), the Bulk API clause in the intro, and the Bulk API mention in the description (now "Process large product catalogs reliably with paced single-item V3 requests, per-item result tracking, and retries limited to the items that failed.", 147 characters) | Feedback F1/F3; `Bulks Documentation (API) (Limited to Large Clients).pdf` |
+
+#### Not changed
+
+- **F2:** a later decision; would need code changes (filter from search, MCP, and llms, plus `noindex`).
+- **F3:** other pages; listed as follow-ups. The user approved this page only.
+- **F4:** only if publication is revisited. The draft now covers V3 only.
+
+#### Flags
+
+Added: FB-038 (open), FB-039 (resolved) · Resolved: FB-039 · Updated: FB-028 (F5) (details in [`feedback-flags.md`](feedback-flags.md))
+
+#### Follow-ups on other pages
+
+- 11 inbound references on 9 pages now 404 and some mention the Bulk API: `guides/migrating-to-v3/index.mdx`, `guides/migrating-to-v3/not-migrated-and-new-in-v3.mdx`, `guides/syncing-your-erp-with-plytix.mdx`, `reference/v3/pagination.mdx`, `reference/v3/updates-and-deletes.mdx`, and four `guides/platform-mcp/` pages.
+- `.claude/skills/writer/references/information-architecture.md` line 46 and the style guide's procedure-heading table still list the guide.
+- Redeploy if the site is live, and check whether the old URL was indexed.
+
+#### Reply to David
+
+```text
+Thanks, David. I've taken Bulk operations for large catalogs off the portal:
+
+- Keep the draft private: I moved the guide out of the docs site into an internal drafts folder in our repo and removed it from the navigation. After the next deploy it has no URL and isn't in search, related articles, the Documentation MCP, or the Markdown/llms exports.
+- Remove public references elsewhere: not done yet. Other pages still link to the guide, and the migration guide still mentions the Bulk API. I'll clean those up in a separate pass.
+- Separate the two topics: noted for when we revisit publication. The Bulk API section is already out of the draft, so what remains covers only V3.
+- Code example: the loop now paces requests, retries 429, 5xx, and failed connections, and logs each item's status and response body.
+- 409 handling: the draft no longer treats a 409 as success. It says to search for the SKU, confirm it's the intended product, and update it if its values differ.
+- Unsupported statements: removed along with the Bulk API section.
+
+Open questions:
+- For the MCP guide, did you mean the Platform MCP guide? The Documentation MCP guide doesn't mention the Bulk API, but the Platform MCP practical examples link to this guide for large batches.
+- We couldn't find a Bulk API reference on the Endpoint mapping page. Is there one we missed?
+```
+
+---
+
+## Connect an AI assistant to the Plytix docs
+
+**Page:** `fumadocs/content/docs/guides/documentation-mcp.mdx` · **Page type:** How-to
+
+### Run 2026-10-14
+
+**Feedback from:** David, written editorial review (WriteChoice implements the server, so Plytix can't validate its behavior independently)
+**Approved by the user:** all (F1, F4, F5, F8; X1 not included)
+
+#### Feedback items
+
+| # | Feedback (short) | Type | Location | Verdict | Outcome |
+|---|---|---|---|---|---|
+| F1 | Say it searches and reads public docs, no account access; replace "can't write anything anywhere" | Tone / factual | Intro, line 8; Prerequisites, line 23; accordion "read-only", line 148 | Supported | Applied |
+| F2 | Confirm endpoint, client configs, authentication, tool names, responses against the deployment | Factual | Whole page; FLAG, lines 12-14 | Unverifiable until deployed | Not changed; FB-040 |
+| F3 | Add a successful connection and a cited query example | Scope | Verify the connection | Unverifiable until deployed | Not changed; FB-040 |
+| F4 | Replace the API-key-to-bearer-token test question | Tone / factual | Verify the connection, step 2, line 93 | Supported | Applied |
+| F5 | Make troubleshooting less absolute | Factual | Step 3, line 104; accordion "server-failed", line 139 | Supported | Applied |
+| F6 | Keep the Bulk draft and private Channels docs out of MCP, search, and llms exports | Scope | Not on this page | Not applicable | Not changed; added to FB-038 |
+| F7 | Keep Documentation MCP and Platform MCP distinct; Platform MCP link only if approved | Scope | No Platform MCP reference on the page | Already aligned | Not changed; FB-041 |
+| F8 | Retrieval is something the assistant can use, not a guarantee; encourage citations | Tone / wording | Description, line 3; intro; lines 108, 116; accordion "no-citation", line 145 | Preference (passes) | Applied |
+
+#### Applied changes
+
+| # | Change made | Source |
+|---|---|---|
+| F1 | Intro: "lets an AI assistant search and read the public pages of these docs". Prerequisites: "The Documentation MCP searches and reads the public documentation only. Its tools can't access or change your Plytix account data. That applies to this server's tools: other servers or tools connected to your assistant keep their own capabilities." Accordion: "The Documentation MCP's tools search and read the published pages only. They have no access to your Plytix account, so they can't read or change your products." | `fumadocs/app/api/mcp/route.ts` (`registerSourceTools`, `registerDocsSearchTool`; no auth, no PIM calls) |
+| F4 | Step 2 example: "Using the Plytix Documentation MCP, explain V3 product filtering and cite the relevant page.", with a link to Filtering and query syntax and a note that an uncited answer may come from the model's own knowledge | FB-002; `reference/v3/filtering-query-syntax.mdx` |
+| F5 | Step 3: a tool list "means the server is up and answering", then check client configuration; the browser description lists supported protocol versions. Accordion: check the endpoint itself, since the site and endpoint "can be up or down independently" | `route.ts` (`GET` returns `protocolVersions`, `listTools()` uses the same request as the curl); `INFRA-DEPLOYMENT-OPTIONS.md` Option 1 |
+| F8 | Description: "…so it can search and cite the current docs." (143 characters). Intro: "Whether it uses the server for a given answer depends on your client and your prompt, so ask it to cite the page it used." Line 108: "Your assistant decides when to call them… asking for the source page makes it more likely to use them, and lets you check the answer." Line 116: "Together, they help with questions that are slow to answer by hand, such as:". Accordion prompt: "Using the Plytix Documentation MCP, …" | Feedback F8; style guide |
+
+#### Not changed
+
+- **F2, F3:** need the final domain and a deployed endpoint; example output would be invented until then (FB-040).
+- **F6:** not on this page. The Bulk draft already left `content/docs/`; the Channels reference pages are an existing follow-up.
+- **F7:** the page has no Platform MCP reference; the Platform MCP pages in the sidebar are raised as FB-041.
+- **X1 (not from David):** the Authentication card's "exchange API credentials for a bearer token" wording (FB-002). Offered, not approved.
+
+#### Flags
+
+Added: FB-040, FB-041 · Resolved: none · Updated: FB-038 (F6, partly answered) (details in [`feedback-flags.md`](feedback-flags.md))
+
+#### Follow-ups on other pages
+
+- `reference/v3/channels/` and `reference/v3/meta.json`: remove from the public site (F6).
+- `guides/meta.json` and `guides/platform-mcp/`: remove from the portal if FB-041 isn't approved.
+- `glossary.md`: add a "Documentation MCP" entry.
+- After deployment: test the client configurations and curl check, then add captured output to "Verify the connection" (FB-040).
+
+#### Reply to David
+
+```text
+Thanks, David. I've updated Connect an AI assistant to the Plytix docs:
+
+- Scope: the page now says the server searches and reads the public documentation only and can't access or change Plytix account data. "Can't write anything anywhere" is gone, and the page notes that other tools connected to an assistant keep their own capabilities.
+- Setup against the deployment: not done yet. We'll test every client configuration, the authentication requirements, the tool names, and the responses once the final endpoint is live, and add a real example of a connection and a cited answer then.
+- Verification question: replaced with "Using the Plytix Documentation MCP, explain V3 product filtering and cite the relevant page."
+- Troubleshooting: a working tool list now means the server is up, not that everything else is client configuration, and readers check the MCP endpoint itself rather than the docs site. We'll recheck the curl request against the protocol version on the final deployment.
+- Approved public content only: the Bulk draft is out of the site, so it leaves the MCP tools, search, and the Markdown and llms exports at the next deploy. This page never linked to it. The Channels reference pages are still published, and I'll remove them in a separate pass.
+- Platform MCP: this page doesn't mention or link the Platform MCP.
+- Retrieval: the page now says the assistant can use the docs, depending on the client and the prompt, and encourages asking for the source page.
+
+Open questions:
+- What will the production docs domain be, and which hosting option has your infrastructure team chosen?
+- Has the Platform MCP roadmap message been approved? Its pages are still in the guides navigation. If not, we'll take them out of the portal.
+```
+
+---
+
+## Not migrated and new in V3
+
+**Page:** `fumadocs/content/docs/guides/migrating-to-v3/not-migrated-and-new-in-v3.mdx` · **Page type:** Reference
+
+### Run 2026-10-14
+
+**Feedback from:** David, written review against the October 13 OpenAPI ("Required changes" 1-7, plus dating and status groups)
+**Approved by the user:** all (F1 as Option A)
+
+#### Feedback items
+
+| # | Feedback (short) | Type | Location | Verdict | Outcome |
+|---|---|---|---|---|---|
+| F1 | Bulk API is V1, not V2; separate the V3 contract, legacy, and future V3 | Factual | Bulk operations, line 25 | Supported, but conflicts with David's Bulk-draft instruction | Applied (Option A, no legacy mention); FB-042 |
+| F2 | Product-to-asset: media attributes are the V3 route; keep asset content separate | Factual | Table, line 17 | Supported | Applied; added to FB-006 |
+| F3 | Account search: legacy status explicit for all six rows; dashboard isn't a replacement; no retirement | Factual | Line 12; rows 20-21 | Supported | Applied; FB-043 |
+| F4 | Filter discovery: say what `product-attributes` gives; link filtering reference | Factual | Row, line 18 | Supported | Applied |
+| F5 | New entry points vs. views; read-only search vs. nested management; public scope | Factual / structure | Lines 27-36 | Supported | Applied |
+| F6 | V2 products-only beta; relationship `DELETE` is a new route, not capability | Factual | Line 40 | Supported | Applied; added to FB-023 |
+| F7 | "Two versions" made conditional | Tone / factual | Intro, line 8 | Supported | Applied |
+| F8 | Date the inventory; distinguish status groups | Structure | Intro, tables | Supported | Applied |
+
+#### Applied changes
+
+| # | Change made | Source |
+|---|---|---|
+| F1 | Bulk section: "The current V3 contract has no bulk create, update, or delete endpoints. Bulk endpoints are part of Plytix's V3 design (planned), but there's no V3 bulk call to migrate to yet." Points to rate limits; legacy Bulk API mention and the hidden-draft link removed | Bulk PDF (`/api/v1/bulk/products`); status map "Bulk operations (pp. 13–15)"; no `bulk` path in the 2026-10-02 spec; Bulk-draft feedback F3 |
+| F2 | Asset link row: "Alternative in V3, unconfirmed", media and media gallery attributes plus `thumbnail_id`, keep on V1 for now. Asset content row: an update changes `filename` and `alt_text`, not the file | Spec → `ProductUpdateInputDto`: "Assets are managed through media attributes"; `AssetUpdateInputDto` (`filename`, `alt_text`); `openapi_pimv1.json` → "Link an existing asset to a product media attribute" |
+| F3 | Lead-in: "All six endpoints below remain documented in the V1/V2 reference…"; account rows "Legacy only" with "doesn't replace searching them through the API" | `openapi_pimv1.json` → tag `accounts` |
+| F4 | Filter row: `product-attributes` returns definitions with `type`, not system fields, asset or relationship fields, or operators; links Filtering and query syntax | Spec → `ProductAttributeGetBaseOutputDto` |
+| F5 | Section renamed "New entry points in V3"; table columns "What it is" and "Managed through"; three entries described as views of existing associations, read-only, managed through nested paths | Spec (GET-only collections, nested write paths); `openapi_pimv1.json` (V1 family attribute and relationship paths); `endpoint-reviews/Plytix API v3 - endpoint visibility.xlsx` (all Public); quirk #74 |
+| F6 | V2 `DELETE` described as "the same job V1 does with `/api/v1/products/{product_id}/relationships/{relationship_id}/unlink`, so it's a different route rather than a new capability" | `openapi_pimv1.json` → both titled "Remove products from a relationship"; tag "products V2 BETA" |
+| F7 | "Keep a legacy call wherever your integration needs a capability with no confirmed public V3 equivalent, and move everything else to V3." | Feedback F7 |
+| F8 | Intro: "It reflects the V3 OpenAPI dated 2026-10-02 and will change as V3 expands." Status groups list (Legacy only, Alternative in V3, Planned) and a Status column | `openapi_pimv3_20261002 (Latest spec).json`; FB-008 |
+
+#### Not changed
+
+- Title and description kept; still accurate.
+
+#### Flags
+
+Added: FB-042, FB-043 · Resolved: none · Updated: FB-006 (F2), FB-023 (F6), FB-008 (October 13 spec) (details in [`feedback-flags.md`](feedback-flags.md))
+
+#### Follow-ups on other pages
+
+- `guides/migrating-to-v3/index.mdx`: make "usually ends up calling both versions" (line 8) and the "Running both versions is the normal end state" callout (line 51) conditional; remove the V2 Bulk API sentence and hidden-draft link (line 48).
+- `guides/migrating-to-v3/endpoint-mapping.mdx`: align its rows with the same status groups.
+
+#### Reply to David
+
+```text
+Thanks, David. I've updated Not migrated and new in V3. The page is now dated against the V3 OpenAPI of 2026-10-02 and sorts every entry into legacy only, alternative in V3, or planned:
+
+1. Bulk operations: the section now says only that the current V3 contract has no bulk endpoints and that bulk is planned in the V3 design. Following your note on the Bulk draft, it no longer mentions the legacy Bulk API or links to that guide.
+2. Product-to-asset assignment: listed as an unconfirmed V3 alternative through media and media gallery attributes, kept separate from replacing an asset's file, which stays on V1.
+3. Account search: all six rows are marked as documented in V1, and the dashboard is described as no replacement for searching through the API. Nothing implies retirement.
+4. Filter discovery: the row explains what GET /api/v3/product-attributes returns and links to the V3 filtering reference for system fields, operators, and the rest.
+5. New entry points: asset lists are a new resource, and the other three are described as read-only views of existing associations, managed through the nested family and product endpoints. All four are marked Public in the endpoint visibility review.
+6. V2: the products-only beta description matches the legacy reference, and the relationship DELETE is now described as a different route for what V1 does with /unlink.
+7. Migration outcome: the page now says to keep a legacy call only where the integration needs a capability with no confirmed public V3 equivalent.
+
+Open questions:
+- Should migration pages mention the legacy V1 Bulk API at all, for example as "available to some accounts, ask your Plytix contact", or stay silent? Can we say publicly that bulk is planned for V3?
+- Are credential and membership search planned for V3, staying V1-only, or due for retirement?
+- What value does a media or media gallery attribute accept in a product PATCH?
+- Could you share the October 13 OpenAPI? This page is checked against the October 2 version, the newest we hold.
+```
+
+---
+
+## Migrating to V3
+
+**Page:** `fumadocs/content/docs/guides/migrating-to-v3/index.mdx` · **Page type:** How-to
+
+### Run 2026-10-14
+
+**Feedback from:** David, written review ("Required corrections" on authentication, legacy bulk, creation responses, and filters; "Technical claims requiring confirmation" 5-6; "Migration validation")
+**Approved by the user:** all (F2 as Option A; X1-X3 not included)
+
+#### Feedback items
+
+| # | Feedback (short) | Type | Location | Verdict | Outcome |
+|---|---|---|---|---|---|
+| F1 | Authentication: V1/V2 keep the current system, V3 model pending | Factual | Intro line 10; Prerequisites line 18; callout lines 51-53; step 2 lines 55-57; card line 229 | Supported | Applied |
+| F2 | Bulk: not "gone from both"; distinguish legacy, availability, V3 contract | Factual | Step 1, lines 46-49 | Supported, conflicts with David's Bulk-draft instruction | Applied (Option A); FB-042 |
+| F3 | Create responses: settle ID vs. full entity; shape per operation, array to object | Factual | Step 7, lines 161-174 | Supported (spec and live over internal docs) | Applied; FB-018 |
+| F4a | `status=Review` isn't valid | Factual | Step 3, line 104 | Supported | Applied |
+| F4b | Category filter should target `categories.id` | Factual | Step 3, lines 85, 95 | Supported by spec, untested live | Applied; FB-016 |
+| F4c | Operators don't keep exactly the same meaning | Factual | Step 3, line 99 | Supported | Applied |
+| F5 | Assets: replace vs. create vs. media-attribute assignment | Factual | Step 1 table, line 41; accordion, lines 218-220 | Supported | Applied |
+| F6a | PATCH replaces the attributes map: example, concurrency, single-attribute | Factual | Step 8, line 180; accordion, line 203 | Claim confirmed live; caveat added | Applied; FB-019, FB-020 |
+| F6b | Unrecognized filters silently ignored | Factual | Accordion, lines 194-196 | Page claim contradicted by live tests | Applied; FB-010 |
+| F7 | Validation on stable test data, isolated write records | Structure | Step 9, lines 185-187 | Supported | Applied |
+
+#### Applied changes
+
+| # | Change made | Source |
+|---|---|---|
+| F1 | Intro: "V1/V2 keep their current authentication, and V3 is moving to a new model whose details aren't published yet." Prerequisite: credentials "for the calls you keep on V1/V2". Callout "Keeping some calls on V1/V2": "don't assume one token covers both". Step 2 retitled "Plan authentication for each version" and rewritten; links to the V3 Authentication reference and Quickstart removed. Card: "the V1/V2 token flow, and the status of V3 authentication" | `migrating-to-v3/authentication-and-base-urls.mdx`; FB-001, FB-002 |
+| F2 | "These are gone from both" block replaced by "Bulk writes aren't in V3 yet… Bulk endpoints are part of Plytix's V3 design (planned)", linking rate limits; hidden-draft link removed. Account search moved into the "Keep these on V1/V2" table: "Managing keys and users in the Plytix dashboard doesn't replace searching them through the API" | Bulk PDF; status map "Bulk operations"; no `bulk` path in the 2026-10-02 spec; `openapi_pimv1.json` tag `accounts`; Bulk-draft feedback |
+| F3 | Step 7 intro and Create row: "`201` with `data` as an object holding the resource's creation representation… V1/V2 return the created record inside an array"; "Code that reads `data[0]`… has to read `data`"; link to Responses and updates. "PATCH recently changed to 204" callout removed | Spec `CreateProductsResponse.data` → `ProductCreateOutputDto`; quirk #84; `API V3.md:222` (ID only, lower trust) |
+| F4a | `_or[0]status=Review` → `_or[0]status=Completed` | Spec `ProductStatus` enum |
+| F4b | `categories[in]=<id>` → `categories.id[intersects]=<id>` (V3 tab and mapping table) | Spec `ProductOutputDto.categories` (array of category objects); October 8 PDF `categories.name=Shoes`; quirk #99 `categories.name[intersects]` |
+| F4c | "Most operators change shape and keep their meaning… Missing fields, `null`, empty values, and negated operators are the exception…" with a link to Missing, null, and empty values; "For list fields such as `categories`, use `[intersects]` rather than `[in]`." | `filter-operators.mdx` § Missing, null, and empty values; FB-015, FB-016 |
+| F5 | Asset link row: "No dedicated endpoint. V3 manages a product's assets through media and media gallery attributes… keep this call on V1 for now". Table intro: "They have no confirmed V3 equivalent today". Accordion: uploading a new asset works with `POST /api/v3/assets`; replacing a file stays on V1; attaching goes through media attributes (unconfirmed format). Title uses "V3" | Spec `ProductUpdateInputDto`, `AssetUpdateInputDto`; FB-006 |
+| F6a | Step 8 bullet links the before-and-after example, gives the single-attribute path with a bare JSON value, and adds "V3 has no conditional write, so a change someone else makes between your read and your write is overwritten." Accordion: patch one at a time; read-merge-write only without concurrent editors | Quirks #85, #87; `responses-and-updates.mdx` § How PATCH treats the attributes map |
+| F6b | Accordion retitled "A V3 search returns more records than the same V1 search"; unknown field returns `400 InvalidFieldError`, unknown operator `400 InvalidFilterOperator`; check `--globoff` and URL encoding | `config/api-testing.config.md` quirks #99, #116, 2026-10-13 retest |
+| F7 | Step 9 retitled "Compare both versions on test data before cutting over": stable test dataset, fixed sort (`sku`), counts, fields, response shapes, relations, errors; writes on isolated test records | Feedback F7 |
+
+#### Not changed
+
+- **X1 (not from David):** line 127 says the SKU works as a product path identifier; live tests return `422` (quirks #14, #58). Offered, not approved.
+- **X2 (not from David):** lines 153-155 suggest `curl -L --location-trusted` (FB-012). Offered, not approved.
+- **X3 (not from David):** line 8 "usually ends up calling both versions". Offered, not approved.
+
+#### Flags
+
+Added: none · Resolved: none · Updated: FB-001, FB-002 (F1), FB-042 (F2), FB-018 (F3), FB-016 (F4b), FB-010 (F6b), FB-019, FB-020 (F6a) (details in [`feedback-flags.md`](feedback-flags.md))
+
+#### Follow-ups on other pages
+
+- `reference/v3/filtering-query-syntax.mdx` line 119: `status=Review` and `categories[in]`.
+- This page: X1-X3 above.
+
+#### Reply to David
+
+```text
+Thanks, David. I've updated Migrating to V3:
+
+- Authentication: the introduction, prerequisites, callout, step 2, and the Authentication and base URLs card now say V1/V2 keep the current flow and V3 is moving to a new model whose details aren't published yet. Nothing says credentials, roles, or refresh logic carry over to V3.
+- Legacy bulk operations: the "gone from both" section is gone. The page now says the current V3 contract has no bulk endpoints and that bulk is planned in the V3 design. Following your note on the Bulk draft, it doesn't describe the legacy Bulk API. Account search moved into the "keep on V1/V2" table, since it's documented in V1.
+- Creation responses: the page now follows the October 2 OpenAPI and our live tests: a create returns 201 with data as an object holding the creation representation, without expanded relations for products, and code that read data[0] in V1 has to read data. The "keeps working" claim and the full-entity callout are gone. PATCH and DELETE stay at 204 with no body.
+- Filter examples and semantics: status=Review is now status=Completed, the category filter uses categories.id[intersects], and the page now points out that missing, null, and empty values and negated operators need separate handling, with a link to the filter operators page.
+- 5. Assets: replacing an existing asset's file, uploading a new asset with url or content, and assigning assets through media and media gallery attributes are now separate. The troubleshooting entry no longer suggests uploads are unavailable in V3.
+- 6. Attribute updates: the claim stays, because our live test confirmed it, and the page now links the before-and-after example, shows the single-attribute PATCH, and explains that read-merge-write can overwrite concurrent changes.
+- 6. Invalid filters: removed. Our live tests show an unknown filter field returns 400 InvalidFieldError and an unknown operator returns 400 InvalidFilterOperator, so the troubleshooting entry now says that.
+- Migration validation: step 9 now compares reads on a stable test dataset with a fixed sort, covering counts, fields, response shapes, relations, and errors, and tests writes on isolated records.
+
+Open questions:
+- Should migration pages mention the legacy V1 Bulk API at all, given your note on the Bulk draft to remove it from migration comparisons?
+- Is the creation representation (the record without expanded relations) the final create response, or will creates move to the ID-only response in the internal documentation?
+- Does categories.id[intersects]=<id> match products in a category the same way V1's categories "in" filter does?
+- Is replacing the whole attributes map on PATCH intended, and does the single-attribute PATCH take a bare JSON value for every attribute type?
 ```

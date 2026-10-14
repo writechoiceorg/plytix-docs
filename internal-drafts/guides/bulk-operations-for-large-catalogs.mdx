@@ -1,11 +1,11 @@
 ---
 title: Bulk operations for large catalogs
-description: Learn how to process large product catalogs reliably with single-item requests, and what to know before reaching for the older Bulk API.
+description: Process large product catalogs reliably with paced single-item V3 requests, per-item result tracking, and retries limited to the items that failed.
 ---
 
 import { Download, RotateCw } from 'lucide-react';
 
-Process a large catalog of products reliably. The V3 API has no bulk create, update, or delete endpoints, so the working approach today is a loop of single-item requests paced against your account's rate limit. This guide covers how to find that limit, how to page through reads efficiently, how to track per-item results so a partial failure doesn't cost you the whole run, and what to know before reaching for the older Bulk API. Everything here uses V3 with a bearer token. See [Rate Limits](/docs/reference/v3/rate-limits) and [Pagination](/docs/reference/v3/pagination) for the full rules. Limits can vary by account and plan.
+Process a large catalog of products reliably. The V3 API has no bulk create, update, or delete endpoints, so the working approach today is a loop of single-item requests paced against your account's rate limit. This guide covers how to find that limit, how to page through reads efficiently, how to track per-item results so a partial failure doesn't cost you the whole run. Everything here uses V3 with a bearer token. See [Rate Limits](/docs/reference/v3/rate-limits) and [Pagination](/docs/reference/v3/pagination) for the full rules. Limits can vary by account and plan.
 
 ## Prerequisites
 
@@ -56,26 +56,30 @@ Follow the steps below to find your rate limit, page through reads, pace your wr
    Since there's no bulk endpoint returning a combined success and failure report, log each item's outcome (its ID, the status code, and any error message) as you process it. This gives you your own record of what succeeded, what failed, and why, which you'll need for step 5. A minimal loop looks like this:
 
    ```bash
+   pause=0.5  # 20 requests per 10 seconds; set this from your own token's limit
    while read -r id; do
-     status=$(curl -s -o /dev/null -w "%{http_code}" -X PATCH        "https://pim.plytix.com/api/v3/products/$id"        -H "Authorization: Bearer <access_token>"        -H "Content-Type: application/json"        -d '{"label": "Updated label"}')
-     echo "$id $status" >> results.log
+     for attempt in 1 2 3; do
+       : > response.json
+       status=$(curl -s -o response.json -w "%{http_code}" -X PATCH \
+         "https://pim.plytix.com/api/v3/products/$id" \
+         -H "Authorization: Bearer <access_token>" \
+         -H "Content-Type: application/json" \
+         -d '{"label": "Updated label"}')
+       case "$status" in
+         429|5??|000) sleep $((attempt * 5)) ;;
+         *) break ;;
+       esac
+     done
+     printf '%s\t%s\t%s\n' "$id" "$status" "$(tr -d '\n' < response.json)" >> results.log
+     sleep "$pause"
    done < product_ids.txt
    ```
 
+   The loop waits between requests to stay under the limit from step 1, and retries a `429`, a `5xx`, or a failed connection (`000`) up to three times with a growing delay. Each line of `results.log` holds the product ID, the final status code, and the response body, so a failure keeps its error message. A successful `PATCH` returns `204` with an empty body.
+
 5. **Retry only the items that actually failed.**
 
-   Use the log from step 4 to retry failed items specifically, instead of reprocessing the whole catalog. A retried `POST` for a SKU that already exists returns `409`, so treat that response as success. This is the main efficiency you lose without a bulk endpoint, and the main thing to build deliberately into your own processing loop.
-
-## Before reaching for the older Bulk API
-
-{/* FLAG (open):
-  The availability and error-response shape of the Bulk API are unconfirmed, and this section comes from project notes only. Confirm both with Plytix before relying on it, and link its documentation here if Plytix supplies it.
-*/}
-
-Plytix's V2 API includes a Bulk API for batch operations, but it comes with two caveats before you build against it:
-
-- **It isn't available to every account.** Confirm with your Plytix contact whether your account has access before planning around it.
-- **Partial failures aren't clearly reported.** A Bulk API response doesn't reliably distinguish between an item that was skipped because nothing changed and one that failed silently, which has been a recurring point of customer feedback. If you do use it, don't assume every item not showing an explicit success actually failed; expect to verify results the same way described in steps 4 and 5 above.
+   Use the log from step 4 to retry failed items specifically, instead of reprocessing the whole catalog. A retried `POST` for a SKU that already exists returns `409`, but don't count that as success on its own. The error doesn't name the field, and the existing product may not hold the values you sent. Search for the SKU, confirm it's the product you meant to create, and `PATCH` it if its values differ. This is the main efficiency you lose without a bulk endpoint, and the main thing to build deliberately into your own processing loop.
 
 ## Related articles
 
