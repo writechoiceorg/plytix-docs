@@ -754,6 +754,112 @@ suspect until re-run.
     production base URL — but the host is no longer disproven, and the
     guides that use it are no longer presumed wrong.
 
+Confirmed live 2026-10-13 against "David's Dev Account", retesting every
+change between `openapi_pimv3.json` (63 paths) and `openapi_pimv3_20261002
+(Latest spec).json` (76 paths, +18 operations, -3 `product-family-models`
+paths, 4 schemas added, 8 removed). All scratch data was created and swept
+(name prefix `WC Retest`); the account is back to its documented fixtures.
+
+104. **The Oct 2 spec now matches the live API on the `*_ids` removal and the
+    link/unlink surface.** The spec drops `category_ids`/`static_list_ids`
+    from `ProductCreateDto`/`ProductUpdateInputDto`/`AssetCreateInputDto`/
+    `AssetUpdateInputDto`, plus `channel_ids`/`ecatalog_ids`/
+    `product_data_sheet_ids` from `ProductUpdateInputDto`, plus `group_ids`
+    from every attribute create DTO and `attribute_labels` from
+    `ProductAttributeGroupCreateInputDto`. Live: every one of those fields
+    is rejected `422 "<field>: Extra inputs are not permitted"` on both
+    `POST` and `PATCH`. **Closes open question #29** (quirk #93 is now
+    spec-confirmed, not just observed).
+105. **All 18 new operations work as specced.** `POST`/`DELETE` link/unlink
+    on `products/{id}/{categories,static_lists,channels,ecatalogs,
+    product_data_sheets}`, `assets/{id}/{categories,static_lists}` and
+    `product-attributes/{id}/groups`. Body is `IdLinkInput` (`{"id": "..."}`).
+    `POST` -> `201 {"data":{"id":"<linked>"},"errors":[]}`; duplicate -> `409
+    AlreadyExists` naming both sides; `DELETE .../{linked_id}` -> `204`,
+    scoped to that one link; unlinked/unknown id -> `404 NotFoundError`
+    ("... is not linked to <resource> <id> through '<relation>'"); bare
+    `DELETE` on the collection -> `405`. Linked-id existence is checked
+    (`404 "Linked id '...' not found in relationship '<name>'"`). Verified
+    end to end for categories, static_lists (products and assets) and
+    attribute groups, including the reflected `attribute_labels` on the group.
+    New `.bru` files: `09-Assets/Link and Unlink Asset Relations.bru`,
+    `06-Product-Attributes/Link and Unlink Attribute Group.bru`. Product
+    category link already covered by `02-Products-v3/Link Category to Product.bru`.
+106. **`channels`/`ecatalogs`/`product_data_sheets` link endpoints exist, but
+    only `channels` could be tried with a real id.** Real channel ->
+    `403 {"name":"Forbidden","description":"UEF feature is not enabled for this
+    account"}` (the UEF gate from status-gating #5 is reachable again, now on
+    this endpoint rather than the removed `channel_ids` field). Unknown ids
+    on all three -> `404`. Ecatalogs/data sheets were not linked with real
+    ids (no scratch ecatalog can be created; the one existing ecatalog is a
+    read-only fixture), so their success shape stays unconfirmed.
+107. **Assets still cannot be linked to a product.** `POST /products/{id}/assets`
+    -> `405`, `DELETE /products/{id}/assets/{asset_id}` -> `404 "Product has
+    no field 'assets/<id>'"`. Unchanged from quirk #96, and the spec does not
+    declare it either. Open question #30 stays open.
+108. **`PATCH /product-attribute-groups/{id}` and `.../{path}` now exist** and
+    return `204`; only `name` is patchable (`ProductAttributeGroupUpdateInputDto`).
+    New `.bru`: `05-Product-Attribute-Groups/Update Product Attribute Group.bru`.
+109. **`CompletenessAttribute` 500 (quirk #47) is FIXED.** `POST
+    /product-attributes` with `attributes: [{"id": "<attr_id>"}]` -> `201`,
+    echoing `attributes: [{id, label}]`. The spec's new
+    `RelatedAttributeInputDto` describes that shape. Reclassify quirk #47 as
+    resolved and open question #18 as closed. Note `label` must match
+    `^[a-z0-9_]+$` on attribute create (422 otherwise), which the Bruno
+    fixtures' mixed-case labels would not satisfy.
+110. **`HierarchyAttribute` is gone** (quirk #23). The spec drops its three
+    schemas and the live discriminator list now has 13 types; sending it ->
+    `422 "Input tag 'HierarchyAttribute' ... does not match any of the expected
+    tags"` instead of `500`. Closes open question #10.
+111. **`product-family-models` is removed** (3 paths dropped from the spec).
+    `GET /product-family-models`, `.../{id}` and `.../{id}/{path}` all ->
+    `404 NotFoundError "Not Found"`. `13-Product-Families/Get Product Family
+    Model by ID.bru` is now stale and should be retired.
+112. **Cross-tenant leak (quirk #59) appears FIXED.** Pulled all rows from
+    `GET /family-attributes` (182), `/product-relationships` (30) and
+    `/related-products` (67) with no filter and checked every `product_id`/
+    `product_family_id` against the account's own products/families: zero
+    foreign rows. `account_id` is no longer a field or filter on any of the
+    three (`400 InvalidFieldError`). The `relationship_id` filter bugs
+    (quirk #64: `504` and `500`) are also fixed — both now `200` and fast.
+    Caveat: judged only by ownership of returned ids on one account, not by
+    a second tenant. **Still broken:** `GET /products/{id}/relationships/
+    {rid}/related-products` returns `{"data":[]}` for a link that exists
+    (quirk #63).
+113. **`product_relationships` embedded on a product shrank again:** `GET
+    /products/{id}?_fields=product_relationships` now returns only
+    `{relationship_id, relationship_label}` — the `related_products` array is
+    gone (supersedes quirks #65/#74's shapes). Use `GET /related-products?
+    product_id=` for the targets.
+114. **New bug: `PATCH /channels/{id}` with a `webhook` block `204`s, then
+    breaks the channel.** After the PATCH, `GET /channels/{id}` returns `422
+    "webhook_notification_configuration_id: Value error, Id must be of type
+    PydanticObjectId"` — the channel can no longer be read by id (the list
+    endpoint still returns it). `PATCH {"webhook": null}` restores it. Worse
+    than quirk #101b (silent discard). Do not document channel webhooks as
+    writable.
+115. **Unchanged from 2026-10-08:** `PATCH /channels/{id}` `{"rebuild_periodically":
+    true}` alone -> `502 BadGatewayError` (quirk #101a); `next_page`/
+    `previous_page` still `http://` (quirk #92); `sku[icontains]` rejected,
+    `contains:ignorecase` is the operator (quirk #99); `_total_count` -> `400`
+    (quirk #89).
+116. **Spec status codes now match live.** `POST` create -> `201` (spec was
+    `200`), `PATCH` -> `204` empty body, `DELETE` -> `204`. The refreshed spec
+    declares the full error set (400/401/402/403/404/409/422/500/502). List
+    endpoints now declare `_fields`, `_page`, `_page_size`, `_sort_by`, and
+    a `filters` query parameter; `_page_size` max 1000 and `_page` min 1 are
+    enforced (`422`). The declared `filters` param does **not** work as a
+    query key: `?filters={}` -> `400 "Field 'filters' does not exist"`; real
+    filters are the `field[operator]=value` query-string form (quirk #11).
+117. **Create responses return `data` as an object, not an array** (`POST`
+    categories/lists/products/assets/groups/attributes/channels). Earlier
+    notes and some Bruno examples assumed `data[0]`.
+118. **Vague `422 "product data validation failed"` on an invalid `gtin`
+    checksum.** `PATCH /products/{id}` `{"gtin":"1234567890123"}` -> that
+    message with no field named; `{"gtin":"4006381333931"}` (valid GTIN-13)
+    -> `204`; `{"gtin":"12345"}` -> `422 "gtin: String should have at least
+    8 characters"`. Same no-field-named family as quirk #40/#98.
+
 ## Known gaps
 
 - The ~70 pre-existing `.bru` files from Phases 0-5 that predate the

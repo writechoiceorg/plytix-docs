@@ -1,0 +1,110 @@
+meta {
+  name: Link and Unlink Attribute Group
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{pim_base_url_v3}}/product-attributes/REPLACE_WITH_ATTRIBUTE_ID/groups
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {
+    "id": "REPLACE_WITH_ATTRIBUTE_GROUP_ID"
+  }
+}
+
+docs {
+  New in `openapi_pimv3_20261002 (Latest spec).json`:
+  `POST /product-attributes/{id}/groups` and
+  `DELETE /product-attributes/{id}/groups/{group_id}`. Confirmed live
+  2026-10-13 against "David's Dev Account" (scratch attribute and group,
+  since deleted).
+
+  `group_ids` is no longer accepted on `POST /product-attributes`
+  (`422 "TextAttribute.group_ids: Extra inputs are not permitted"`), and
+  `attribute_labels` is no longer accepted on `POST`/`PATCH /product-attribute-groups`.
+  These endpoints are the replacement. This supersedes the `group_ids`
+  behavior recorded in quirk #75.
+
+  - `POST` -> `201 {"data": {"id": "<group_id>"}, "errors": []}`
+  - duplicate -> `409 AlreadyExists` ("... already linked to product-attributes <id> through 'groups'")
+  - the group's `attribute_labels` updates immediately; `GET /product-attributes/{id}/groups` lists the group
+  - `DELETE .../groups/{group_id}` -> `204`; the group's `attribute_labels` empties
+}
+
+example {
+  name: Link Attribute to Group - 201 Created
+  description: Real response captured 2026-10-13 against "David's Dev Account".
+
+  request: {
+    url: {{pim_base_url_v3}}/product-attributes/6aced76a08d0fd44347d720b/groups
+    method: post
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "id": "6aced75008d0fd44347d720a"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 201
+      text: Created
+    }
+    headers: {
+      content-type: application/json
+    }
+    body: {
+      type: json
+      content: '''
+        {"data": {"id": "6aced75008d0fd44347d720a"}, "errors": []}
+      '''
+    }
+  }
+}
+
+example {
+  name: Group After Link - attribute_labels updated
+  description: GET /product-attribute-groups/{id} immediately after the link above.
+
+  request: {
+    url: {{pim_base_url_v3}}/product-attribute-groups/6aced75008d0fd44347d720a
+    method: get
+    mode: none
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Accept: application/json
+    }
+  }
+
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+    headers: {
+      content-type: application/json
+    }
+    body: {
+      type: json
+      content: '''
+        {"data": {"id": "6aced75008d0fd44347d720a", "name": "WC Retest AG 940403", "order": 12, "attribute_labels": ["wc_retest_940403"], "created": "2026-10-14T01:13:52.995000", "modified": "2026-10-14T01:13:52.998000"}, "errors": []}
+      '''
+    }
+  }
+}

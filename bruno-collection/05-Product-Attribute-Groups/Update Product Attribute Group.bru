@@ -1,0 +1,100 @@
+meta {
+  name: Update Product Attribute Group
+  type: http
+  seq: 6
+}
+
+patch {
+  url: {{pim_base_url_v3}}/product-attribute-groups/REPLACE_WITH_GROUP_ID
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {
+    "name": "WC Test Attribute Group renamed"
+  }
+}
+
+docs {
+  `PATCH /product-attribute-groups/{identifier}` is new in
+  `openapi_pimv3_20261002 (Latest spec).json` (previously only `DELETE` was
+  declared). Confirmed live 2026-10-13: `204 No Content`, empty body; a
+  follow-up `GET` shows the new `name`. `PATCH .../{path}` with a bare string
+  (`.../name`) also returns `204`.
+
+  Only `name` is patchable. `attribute_labels` is rejected on `PATCH` and on
+  `POST` with `422 "attribute_labels: Extra inputs are not permitted"` - membership
+  is managed via `POST/DELETE /product-attributes/{id}/groups`.
+}
+
+example {
+  name: Update Group Name - 204 No Content
+  description: Real response captured 2026-10-13 against "David's Dev Account".
+
+  request: {
+    url: {{pim_base_url_v3}}/product-attribute-groups/6aced75008d0fd44347d720a
+    method: patch
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "name": "WC Retest AG renamed 940403"
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 204
+      text: No Content
+    }
+  }
+}
+
+example {
+  name: Update attribute_labels - 422 Extra Inputs
+  description: Real response captured 2026-10-13.
+
+  request: {
+    url: {{pim_base_url_v3}}/product-attribute-groups/6aced75008d0fd44347d720a
+    method: patch
+    mode: json
+    headers: {
+      Authorization: Bearer {{access_token}}
+      Content-Type: application/json
+      Accept: application/json
+    }
+    body:json: {
+      {
+        "attribute_labels": ["x"]
+      }
+    }
+  }
+
+  response: {
+    status: {
+      code: 422
+      text: Unprocessable Content
+    }
+    headers: {
+      content-type: application/json
+    }
+    body: {
+      type: json
+      content: '''
+        {"data": [], "errors": [{"name": "InputDTOValidationError", "description": "attribute_labels: Extra inputs are not permitted"}]}
+      '''
+    }
+  }
+}
