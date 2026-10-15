@@ -72,7 +72,7 @@ Custom attributes are addressed directly in V3 rather than through a field-name 
 |---|---|---|
 | Custom attribute | `{"field": "attributes.name", "operator": "<op>", "value": "<value>"}` | `attributes.name[<op>]=value` |
 | Related entity field | Not possible | `categories.name[<op>]=value`, for example `categories.name=Backpacks` |
-| Product relationships | `relationship_filters` with nested `product_ids` objects | `product_relationships.relationship_id=<id>&product_relationships.related_products.related_product_id=<id>` |
+| Product relationships | `relationship_filters` with nested `product_ids` objects | `product_relationships.relationship_id=<id>&product_relationships.related_products.product_id=<id>` |
 
 {/* FLAG (open):
   The `product_relationships` filter in the last row comes from the internal API V3 reference and the 2026-10-02 spec's field names. It hasn't been tested live. Confirm with `endpoint-tester`, including whether the relationship, product, and quantity conditions apply to the same related product.

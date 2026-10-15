@@ -136,15 +136,18 @@ V3 has separate ways to clear data, and they aren't interchangeable:
 
 | What you send | What happens |
 |---|---|
-| `""` or `[]` in a POST or PATCH | Stored as the value. An empty value isn't a deletion |
+| `""` or `[]` in a POST or PATCH | On the attribute types we tested, no value is stored. A text attribute set to `""` or to only spaces, and a multiselect attribute set to `[]`, end up absent from the product, as if you had never set them |
 | `null` in a PATCH | Depends on the field. On a product, `parent_id: null` detaches a variant from its parent, `product_family_id: null` unassigns its family, and `thumbnail_id: null` clears its thumbnail. `gtin` doesn't accept `null` and returns a validation error |
 | DELETE on a record, such as `/products/{identifier}` | Deletes the record |
 | DELETE on an attribute, `/products/{identifier}/attributes/{name}` | Erases that attribute's value on the product, rather than setting it to `null` or a default |
 | DELETE on a link, such as `/products/{identifier}/categories/{id}` | Removes only that link. The product and the category both remain |
 
-<Callout type="warn" title="Erasing an attribute can change what the product shows">
-  Because DELETE erases a value rather than setting it to `null`, it can let inheritance resolve for that attribute. If a variant overrides a value from its parent, deleting the override can make the variant show the parent's value again, so the attribute changes rather than going empty. Test on a disposable record first.
+<Callout type="warn" title="Erasing an override doesn't bring back the parent's value">
+  If a variant overrides a value it inherits from its parent, deleting that override leaves the variant with no value for the attribute. It doesn't make the variant show the parent's value again, and the attribute stays listed in the variant's `overwritten_attributes` array. Sending `null` to `PATCH /products/{identifier}/attributes/{name}` has the same result. We haven't found a way to make an overridden variant inherit again, so test on a disposable record first.
 </Callout>
+
+{/* FLAG (open):
+  Observed 2026-10-15 on the development account, with the attribute linked at `parent_level` (FB-021, FB-037). Plytix hasn't confirmed this is the intended behavior, or how to restore inheritance after an override. */}
 
 For the full V3 write rules, see [Update and delete records](/docs/reference/v3/updates-and-deletes).
 

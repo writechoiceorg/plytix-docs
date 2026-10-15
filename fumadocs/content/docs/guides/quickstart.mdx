@@ -133,7 +133,7 @@ The sample response is trimmed for readability. A `200` here confirms the whole 
 
 Three details in that response are worth noticing now, because they shape every integration you build on top of it:
 
-- **Every response is an envelope.** `data`, `errors`, and `pagination` are always there. Your own values live in `attributes`, keyed by attribute name, while fields like `sku` and `status` sit at the top level.
+- **Every response is an envelope.** `data`, `errors`, and `pagination` are always there. Your own values live in `attributes`, keyed by attribute label, while fields like `sku` and `status` sit at the top level.
 - **`next_page` is a complete URL, and it uses `http`.** That address redirects to `https`, and many HTTP clients drop the `Authorization` header across a scheme change, which turns page two into a surprise `401`. Rewrite the scheme to `https` before you request it.
 - **There's no total count.** Page until `next_page` stops appearing; on the last page the key is absent rather than `null`.
 

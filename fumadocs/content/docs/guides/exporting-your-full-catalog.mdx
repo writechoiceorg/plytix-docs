@@ -202,9 +202,6 @@ Check the problems below if you run into issues while following this guide.
   <Accordion title={<><code>_fields=category_ids</code> returns 400 instead of the field</>} value="fields-ids-hidden">
     Any field ending in `_ids` is hidden from API responses, so this returns a `HiddenFieldError`. That's deliberate: Plytix doesn't expose the denormalized ID arrays behind its relationships. Ask for the expanded plural form instead, so `categories` rather than `category_ids`, and `assets` rather than `asset_ids`. The expanded form returns the full objects and includes the IDs you were after anyway.
   </Accordion>
-  <Accordion title={<><code>_fields</code> doesn't narrow a single-product lookup</>} value="fields-single-product">
-    `_fields` only applies to the search endpoint. `GET /products/{id}` always returns the complete product whatever you pass, so a sparse-field read has to go through `GET /products` with a filter that matches the one product you want.
-  </Accordion>
 </Accordions>
 
 ## Related articles

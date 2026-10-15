@@ -37,7 +37,7 @@ A product is the unit everything else attaches to. It carries two kinds of data,
 
 Everything that isn't a custom attribute value sits at the top level of the product object. That includes system fields (`id`, `sku`, `label`, `gtin`, `status`, `product_level`, `num_variations`), relationship fields (`categories`, `assets`, `product_relationships`, `static_lists`), timestamps (`created`, `modified`), and foreign keys that point at other entities (`product_family_id`, `parent_id`, which the dashboard shows as "Variant of", and `thumbnail_id`). The system fields are the System Attributes that ship with every Plytix account. You can't rename or delete them.
 
-Your own attribute values sit inside the `attributes` map, keyed by attribute name:
+Your own attribute values sit inside the `attributes` map, keyed by each attribute's label, its snake-case identifier such as `short_description` (not its display name):
 
 ```json
 {
@@ -87,15 +87,18 @@ A product's `product_level` field holds one of four values. `0` marks a standalo
 
 A product becomes a variant when you set its `parent_id`. The parent's own `product_level` shifts from `0` to `1` automatically, and its `num_variations` increases.
 
-Inheritance is configured per attribute inside the family. Turning inheritance on at Level 1 pushes a parent's values down to its variants and sub-variants; turning it on at Level 2 pushes a variant's values down to its sub-variants. When a variant overrides an inherited value, the attribute name appears in that product's `overwritten_attributes` array.
+Inheritance is configured per attribute inside the family. Turning inheritance on at Level 1 pushes a parent's values down to its variants and sub-variants; turning it on at Level 2 pushes a variant's values down to its sub-variants. A variant follows its parent's value until it overrides it. When a variant overrides an inherited value, the attribute appears in that product's `overwritten_attributes` array as `attributes.<label>`, for example `attributes.brand`, and the variant stops following later changes to the parent. Deleting the override leaves the variant with no value, and the attribute stays in the array.
 
 A family's structure lives in its family attributes: one row per attribute linked to the family, each with the linked `attribute` and a `level` of `parent_level`, `variant_level`, or `no_level`. Read them with `GET /api/v3/product-families/{product_family_id}/attributes`, or request `_fields=family_attributes.*` on `/api/v3/product-families`.
 
 You can build a family through the API. `POST /api/v3/product-families` creates one, `POST /api/v3/product-families/{product_family_id}/attributes` adds an attribute to it, and `PATCH` on the family renames it. Assigning a product into a family still works the way you'd expect, through `product_family_id`.
 
 <Callout type="warn" title="Inheritance levels depend on your account">
-  Creating a family and choosing its attributes both work through the API, but moving an attribute between levels (which is what turns inheritance on) returns `403 Automatic inheritance is not available for this account` unless inheritance is available for your account. A family's own `PATCH` accepts `name` only, because changing which attributes belong to a family propagates across every product in it.
+  Creating a family and choosing its attributes both work through the API. Two calls return `403 Automatic inheritance is not available for this account` unless inheritance is available for your account: changing an existing link's `level` with `PATCH`, and sending `parent_attributes` or `variant_attributes` when you create a family. Linking an attribute with `"level": "parent_level"` through `POST /api/v3/product-families/{product_family_id}/attributes` worked in testing, and variants then inherited the value. A family's own `PATCH` accepts `name` only, because changing which attributes belong to a family propagates across every product in it.
 </Callout>
+
+{/* FLAG (open):
+  The `POST` link at `parent_level` succeeded on an account where the other two calls return `403` (FB-036, 2026-10-15). Confirm with Plytix whether that route is meant to work without automatic inheritance. */}
 
 ## Product Categories
 

@@ -146,7 +146,7 @@ For product relationships, the relationship and the related product are separate
 | Goal | Syntax |
 |---|---|
 | Products in a given relationship | `product_relationships.relationship_id=<relationship_id>` |
-| Products linked to a specific product | `product_relationships.relationship_id=<id>&product_relationships.related_product_id=<product_id>` |
+| Products linked to a specific product | `product_relationships.relationship_id=<id>&product_relationships.related_products.product_id=<product_id>` |
 | Linked with a quantity above a threshold | `product_relationships.related_products.quantity[gt]=2` |
 
 ## Choose which fields come back

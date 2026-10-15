@@ -35,7 +35,7 @@ Both versions page, but V3 reports its position differently and drops counts ent
 | Record counts | `total_count` always returned | None available |
 | Response keys | `count`, `order`, `page`, `page_size`, `total_count` | `next_page`, `previous_page` |
 
-The V1/V2 defaults and the 100 limit are documented on product search (V1 and V2) and on category search. Asset, attribute, and relationship search don't document them, so confirm the limit against the endpoint you're migrating. On the V3 side, repeat the parameter to sort by more than one field, as in `_sort_by=-modified&_sort_by=id`.
+The V1/V2 defaults and the 100 limit are documented on product search (V1 and V2) and on category search. Asset, attribute, and relationship search don't document them, so confirm the limit against the endpoint you're migrating. On the V3 side, repeat the parameter to sort by more than one field, as in `_sort_by=-modified&_sort_by=id`. Name each field once: sorting by the same field twice returns `400 Sorting by '<field>' more than once is not allowed.` When you use `_fields`, a field you sort by must also be in `_fields`, and some fields, such as `thumbnail_id`, can't be sorted at all.
 
 V3 returns page URLs rather than a page number to increment, so a paging loop follows `next_page` instead of counting pages. Live responses leave the key out when it doesn't apply, and the `Pagination` schema also allows `null`, so a client written as `if (pagination.next_page !== null)` is wrong. Continue the loop only while `next_page` holds a URL you can request, which covers an absent key and a null one.
 

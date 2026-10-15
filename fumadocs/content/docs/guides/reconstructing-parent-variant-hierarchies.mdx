@@ -103,12 +103,11 @@ Follow the steps below to read your products, group them by parent, and add the 
 ## Read which values a variant overrides
 
 {/* FLAG (open):
-  This behavior is unverified. Inheritance is gated on the development account used for testing, so `overwritten_attributes` couldn't be tested, and the spec describes it only as "Overwritten attribute names". Confirm with Plytix before relying on it.
-*/}
+  Verified 2026-10-15 on the development account only, with one attribute linked at `parent_level` (FB-037). The spec describes the field only as "Overwritten attribute names". Confirm with Plytix when entries are added and whether they are ever removed. */}
 
-When inheritance is enabled and a variant overrides a value it would otherwise inherit, Plytix records that attribute's name in the variant's `overwritten_attributes` array. Use it to find the attributes a variant customized.
+When a variant overrides a value it inherits, Plytix adds that attribute to the variant's `overwritten_attributes` array as `attributes.<label>`, for example `attributes.brand`. Use it to find the attributes a variant customized. In testing, the entry stayed in the array after the override was deleted, so the array records that an override happened, not that the variant currently holds a value.
 
-The array doesn't tell you where the rest of the variant's values come from. An attribute missing from it may be inherited, but it may also be linked at `no_level`, calculated by Plytix, or not set at all. On accounts without inheritance, the array stays empty even when a variant holds its own value. To work out where a value comes from, combine the attribute's `level` from step 4 with the parent's and the variant's values for that attribute.
+The array doesn't tell you where the rest of the variant's values come from. An attribute missing from it may be inherited, but it may also be linked at `no_level`, calculated by Plytix, or not set at all. For an attribute that isn't linked at `parent_level` or `variant_level`, the array stays empty even when a variant holds its own value. To work out where a value comes from, combine the attribute's `level` from step 4 with the parent's and the variant's values for that attribute.
 
 ## Create a hierarchy to test against
 
@@ -134,13 +133,13 @@ If your account has no parent and variant products yet, follow the steps below t
      -d '{"attribute_id": "<attribute_id>", "level": "no_level"}'
    ```
 
-   `level` takes `parent_level`, `variant_level`, or `no_level`. Send it on every link, because the level an attribute gets when you leave it out isn't documented. `no_level` links the attribute without inheritance. The other two levels depend on automatic inheritance: on accounts without it, changing a link's level with `PATCH /api/v3/product-families/<family_id>/attributes/<attribute_id>`, or sending `parent_attributes` or `variant_attributes` when you create a family, returns `403`:
+   `level` takes `parent_level`, `variant_level`, or `no_level`. If you leave it out, the attribute is linked at `no_level`, but sending it on every link keeps your intent visible. `no_level` links the attribute without inheritance. The other two levels depend on automatic inheritance: on accounts without it, changing a link's level with `PATCH /api/v3/product-families/<family_id>/attributes/<attribute_id>`, or sending `parent_attributes` or `variant_attributes` when you create a family, returns `403`:
 
    ```json
    {"errors": [{"name": "Forbidden", "description": "Automatic inheritance is not available for this account"}]}
    ```
 
-   This comes from an account-level setting, not from anything wrong with your request.
+   This comes from an account-level setting, not from anything wrong with your request. Linking an attribute with `parent_level` or `variant_level` through this `POST` call succeeded in testing, so set the level when you link rather than changing it afterward.
 
 3. **Create the parent product in that family.**
 

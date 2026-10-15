@@ -89,7 +89,7 @@ Follow the steps below on each scheduled run to read the products that changed s
    `modified` is the last-modification timestamp, so this returns edits as well as new products. Filtering on `created` instead returns only products added in the window. Read every page. Each page runs the query again, so a product edited while you're paging moves out of the window and can shift the pages after it. See [Searching and pagination](/docs/guides/migrating-to-v3/searching-and-pagination) for that risk, and the reconciliation in [Propagate archives and deletions](#propagate-archives-and-deletions) for the safety net.
 
    {/* FLAG (open):
-     `modified[gte]` and `modified[lt]` haven't been tested, alone or together, and neither has a full timestamp such as `2026-10-14T08:55:00Z` as a filter value (only dates, on `created[gt]`). Whether `modified` advances after an attribute `PATCH`, and after archiving, is also untested. Verify with `endpoint-tester` before publishing (FB-027).
+     Retested 2026-10-15 on the development account (FB-027): `modified[gte]` and `modified[lt]` combine in one request, full UTC timestamps, fractional seconds, and offsets are all accepted, `modified` advances after a single-attribute `PATCH` and after archiving, and archived products stay in the results with `status: Archived`. An invalid date returns `200` with an empty list instead of an error, so validate timestamps before sending. Still open: whether any call lists products deleted since a given time.
    */}
 
 3. **Skip what you've already applied.**

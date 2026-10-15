@@ -38,7 +38,7 @@ Before you start, you need:
    | Operation | V1 endpoint | Status in V3 |
    |---|---|---|
    | Replacing the binary content of an existing asset | `PUT /api/v1/assets/{asset_id}/content` | No equivalent. V3 accepts `url` or `content` only when the asset is created; its update schema carries only `filename` and `alt_text` |
-   | Linking and unlinking assets on a product | `POST` and `DELETE /api/v1/products/{product_id}/assets` | No dedicated endpoint. V3 manages a product's assets through media and media gallery attributes, and `thumbnail_id` sets the main image. The value format for media attributes isn't confirmed yet, so keep this call on V1 for now |
+   | Linking and unlinking assets on a product | `POST` and `DELETE /api/v1/products/{product_id}/assets` | No dedicated endpoint. Set a media or media gallery attribute to the asset ID with `PATCH /api/v3/products/{identifier}/attributes/{label}` and clear it with `DELETE` on the same path. `thumbnail_id` sets the main image |
    | Discovering the available filters for a resource | `GET /api/v1/filters/product`, `/filters/asset`, `/filters/relationships` | No equivalent. Build filters from `GET /api/v3/product-attributes` instead |
    | Resyncing variants against their parent | `POST /api/v1/products/{parent_product_id}/variants/resync` | No equivalent |
    | Reading a total result count | `total_count` on every V1 search response | No equivalent anywhere in V3. See step 6 |
@@ -172,7 +172,7 @@ Before you start, you need:
    Two V3 behaviors catch migrated code out:
 
    - **PATCH replaces the `attributes` map rather than merging into it.** Sending only the attributes that changed deletes every attribute you left out, with no error and no warning. See the [before-and-after example](/docs/guides/migrating-to-v3/responses-and-updates#how-patch-treats-the-attributes-map). To change one attribute, send its bare JSON value to `PATCH /products/{identifier}/attributes/{name}`. To change several, read the current map, merge, and send it back. V3 has no conditional write, so a change someone else makes between your read and your write is overwritten.
-   - **DELETE erases** the entity or the field it's applied to. It doesn't set the value to null or reset it to a default, and removing a field can cause inheritance to resolve for it instead. Confirm on a test record that a delete does what your V1 code assumed.
+   - **DELETE erases** the entity or the field it's applied to. It doesn't set the value to null or reset it to a default. Deleting a variant's override leaves the variant empty instead of showing the parent's value again. Confirm on a test record that a delete does what your V1 code assumed.
 
    See [Update and delete records](/docs/reference/v3/updates-and-deletes).
 
