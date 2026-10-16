@@ -3,9 +3,9 @@ title: "Filter operators"
 description: "Reference for mapping V1 filter objects to V3 bracket syntax, including boolean grouping, custom attributes, and related-entity filters."
 ---
 
-import { Search, Filter } from 'lucide-react';
+import { FilterRegular, SearchRegular } from '@/components/icons';
 
-V1 expresses a filter as an object with `field`, `operator`, and `value`. V3 puts the operator in brackets after the field name, and equality needs no operator at all. This page maps the operators one to one, then covers the two areas where the translation isn't mechanical: boolean grouping and custom attributes. It's part of the reference set for [Migrating to V3](/docs/guides/migrating-to-v3).
+V1 expresses a filter as an object with `field`, `operator`, and `value`. V3 puts the operator in brackets after the field name, and equality needs no operator at all. Equality and numeric comparisons map directly. Text matching, missing or empty values, and multi-value fields need more care, because the two versions don't always treat them the same way. This page maps each operator, notes where results can differ, and covers boolean grouping and custom attributes. It's part of the reference set for [Migrating to V3](/docs/guides/migrating-to-v3).
 
 ## Operators
 
@@ -20,32 +20,49 @@ V1 expresses a filter as an object with `field`, `operator`, and `value`. V3 put
 | Less than | `lt` | `field[lt]=value` |
 | Less or equal | `lte` | `field[lte]=value` |
 | Between | Two comparisons | `field[gte]=<low>&field[lte]=<high>` |
-| Contains, case-insensitive | `contains` | `field[contains:ignorecase]=value` |
-| Contains, case-sensitive | `contains` | `field[contains]=value` |
-| Field exists | `exists` | `field[exists]=true` |
-| Field does not exist | `!exists` | `field[!exists]=true` |
-| Field is null | `null` | `field[null]` |
-| Field is not null | `!null` | `field[!null]` |
-| Empty string or empty list | Not available | `field[length]=0` |
-| Arrays intersect | Not available | `field[intersects]=value`, negated as `field[!intersects]=value` |
-| Length comparison | Not available | `field[length][gt]=value`, and the other comparison operators |
+| Contains text | `like` | `field[contains]=value` (case-sensitive) or `field[contains:ignorecase]=value`. See [Text matching](#text-matching) |
+| Doesn't contain text | `!like` | `field[!contains]=value` or `field[!contains:ignorecase]=value`. See [Text matching](#text-matching) |
+| Text in any of several fields | `text_search` | No confirmed direct equivalent. See [Text matching](#text-matching) |
+| Field exists | `exists` | `field[exists]=true`. See [Missing, null, and empty values](#missing-null-and-empty-values) |
+| Field does not exist | `!exists` | `field[!exists]=true`. See [Missing, null, and empty values](#missing-null-and-empty-values) |
+| Field is null | No documented operator | `field[null]` |
+| Field is not null | No documented operator | `field[!null]` |
+| Empty string or empty list | No confirmed direct equivalent | `field[length]=0` |
+| Arrays share a value | No confirmed direct equivalent. See [Multi-value fields](#multi-value-fields) | `field[intersects]=value`, negated as `field[!intersects]=value` |
+| Length comparison | No confirmed direct equivalent | `field[length][gt]=value`, and the other comparison operators |
 
 [Filtering and Query Syntax](/docs/reference/v3/filtering-query-syntax) covers each operator in full, along with the gotchas.
 
+### Text matching
+
+V3 splits text matching by case: `[contains]` is case-sensitive and `[contains:ignorecase]` isn't, and `[!contains]` and `[!contains:ignorecase]` are the negated forms. The legacy documentation describes `like` as a contains check but doesn't say how it treats case, so neither V3 operator is a confirmed match for `like` or `!like`. Before you switch, run the V3 search both ways against records you know, and keep the operator that returns what `like` returns today.
+
+`text_search` matched text across several fields, passed as a list in `field`. V3 has no `text_search` operator. The nearest form is an OR group with one `contains` filter per field, such as `_or[0]sku[contains:ignorecase]=kettle&_or[0]label[contains:ignorecase]=kettle`. That form isn't a confirmed equivalent, so compare the results before you rely on it.
+
+### Missing, null, and empty values
+
+A field can be absent, `null`, an empty string, or an empty list. The two versions describe these cases differently:
+
+- V1 documents only `exists` (the value is defined) and `!exists` (the value is undefined). It doesn't say how a `null`, an empty string, or an empty list is treated.
+- V3 separates them. `[exists]` and `[!exists]` test whether the field is defined, `[null]` and `[!null]` test for `null`, and `[length]=0` matches an empty string or an empty list.
+- V3's negated comparisons, such as `[!eq]` and `[!in]`, skip records where the field is `null` or undefined. To include those records, add an OR group, as shown in [Filtering and Query Syntax](/docs/reference/v3/filtering-query-syntax).
+
+Because V1 doesn't define these cases, test any `exists`, `!exists`, or negated filter against records with empty values before you rely on the translation.
+
+### Multi-value fields
+
+Matching one value against a set and matching values inside a list are different operations. `[in]` checks whether a single-value field, such as `status`, equals one of the values you send. `[intersects]` checks whether a list field, such as `categories.name`, shares at least one value with the values you send. V1 uses `in` for both kinds of field, and its documentation notes that multiselect and dropdown values are compared case-sensitively. V3 also accepts `includes` and `!includes`, which aren't documented yet. It isn't confirmed whether V3's `[in]` on a list field returns the same records as V1's `in`, so test multi-value filters before you switch.
+
 ## Boolean grouping
 
-V1 nests filters as arrays. V3 uses `&` for AND and an indexed `_or` prefix for OR, which makes combinations that V1 couldn't express directly.
+V1 nests filters as arrays: filters inside one inner array are combined with AND, and the inner arrays are combined with OR. V3 uses `&` for AND and an indexed `_or` prefix for OR, which expresses some combinations more compactly.
 
 | Logic | V1 | V3 |
 |---|---|---|
 | A AND B | Both objects in the same inner array `[[A, B]]` | `A&B` |
 | A OR B | Separate inner arrays `[[A], [B]]` | `_or[0]A&_or[0]B` |
-| (A OR B) AND (C OR D) | Not expressible directly | `_or[0]A&_or[0]B&_or[1]C&_or[1]D` |
-| (A AND B) OR (C AND D) | Not expressible directly | `_or[0]_and[0]A&_or[0]_and[0]B&_or[0]_and[1]C&_or[0]_and[1]D` |
-
-{/* FLAG (open):
-  The V1 rows are unconfirmed. The nesting semantics come from the Postman-derived spec's saved example rather than from documented behavior. The V3 rows for AND, OR, and nested grouping are confirmed.
-*/}
+| (A OR B) AND (C OR D) | Expand into every pairing: `[[A, C], [A, D], [B, C], [B, D]]` | `_or[0]A&_or[0]B&_or[1]C&_or[1]D` |
+| (A AND B) OR (C AND D) | `[[A, B], [C, D]]` | `_or[0]_and[0]A&_or[0]_and[0]B&_or[0]_and[1]C&_or[0]_and[1]D` |
 
 ## Custom attributes and related entities
 
@@ -54,22 +71,69 @@ Custom attributes are addressed directly in V3 rather than through a field-name 
 | Target | V1 | V3 |
 |---|---|---|
 | Custom attribute | `{"field": "attributes.name", "operator": "<op>", "value": "<value>"}` | `attributes.name[<op>]=value` |
-| Related entity field | Not possible | `related-entity.attribute[<op>]=value` |
-| Product relationships | `relationship_filters` with nested `product_ids` objects | `product_relationships.relationship_id=<id>&product_relationships.related_product_id=<id>` |
+| Related entity field | Not possible | `categories.name[<op>]=value`, for example `categories.name=Backpacks` |
+| Product relationships | `relationship_filters` with nested `product_ids` objects | `product_relationships.relationship_id=<id>&product_relationships.related_products.product_id=<id>` |
 
 {/* FLAG (open):
-  The V1 operator names in the first table are unverified. `openapi_pimv1.json` shows only `eq`, `in`, `!exists`, and `like` in its examples, and `like` is the V1 contains operator there. The V3 `product_relationships` filter form in the last row is also unverified; it appears only in the internal API V3 reference. Confirm both with `endpoint-tester` before publishing.
+  The `product_relationships` filter in the last row comes from the internal API V3 reference and the 2026-10-02 spec's field names. It hasn't been tested live. Confirm with `endpoint-tester`, including whether the relationship, product, and quantity conditions apply to the same related product.
 */}
+
+## Convert a filter
+
+The pairs below show the same filter in both versions, using only equality and numeric comparisons, which map directly. Encode the brackets when you send the V3 form, as described in [Filtering and Query Syntax](/docs/reference/v3/filtering-query-syntax).
+
+### A custom attribute
+
+This filter finds products whose `qty` custom attribute is greater than 10. V1/V2 names the attribute with an `attributes.` prefix inside the filter object:
+
+```json
+{
+  "filters": [
+    [{"field": "attributes.qty", "operator": "gt", "value": 10}]
+  ]
+}
+```
+
+V3 uses the same path in the query string:
+
+```text
+attributes.qty[gt]=10
+```
+
+Both return the products with a `qty` value above 10.
+
+### A boolean group
+
+This filter finds products that are drafts or were created after January 1, 2026, and that also have a `qty` above 10 or a `price` below 20. V1/V2 expands the two OR groups into every pairing:
+
+```json
+{
+  "filters": [
+    [{"field": "status", "operator": "eq", "value": "Draft"}, {"field": "attributes.qty", "operator": "gt", "value": 10}],
+    [{"field": "status", "operator": "eq", "value": "Draft"}, {"field": "attributes.price", "operator": "lt", "value": 20}],
+    [{"field": "created", "operator": "gt", "value": "2026-01-01"}, {"field": "attributes.qty", "operator": "gt", "value": 10}],
+    [{"field": "created", "operator": "gt", "value": "2026-01-01"}, {"field": "attributes.price", "operator": "lt", "value": 20}]
+  ]
+}
+```
+
+V3 writes each OR group once:
+
+```text
+_or[0]status=Draft&_or[0]created[gt]=2026-01-01&_or[1]attributes.qty[gt]=10&_or[1]attributes.price[lt]=20
+```
+
+Both return the same products: each is a draft or was created after January 1, 2026, and has a `qty` above 10 or a `price` below 20.
 
 ## Related resources
 
 Now that you can translate a filter, you can explore these related pages.
 
 <Cards>
-  <Card icon={<Search />} title="Searching and pagination" href="/docs/guides/migrating-to-v3/searching-and-pagination">
+  <Card icon={<SearchRegular />} title="Searching and pagination" href="/docs/guides/migrating-to-v3/searching-and-pagination">
     Put the translated filters into a V3 search and page through the results.
   </Card>
-  <Card icon={<Filter />} title="Filtering and query syntax" href="/docs/reference/v3/filtering-query-syntax">
+  <Card icon={<FilterRegular />} title="Filtering and query syntax" href="/docs/reference/v3/filtering-query-syntax">
     Read the full V3 filter reference, including encoding rules and gotchas.
   </Card>
 </Cards>

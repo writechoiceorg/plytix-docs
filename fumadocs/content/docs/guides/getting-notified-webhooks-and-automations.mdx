@@ -3,7 +3,7 @@ title: "Get notified about changes"
 description: "Learn how Plytix notifies you about changes today: channel webhooks, Automations, and polling through the API."
 ---
 
-import { RotateCw, SatelliteDish } from 'lucide-react';
+import { ArrowClockwiseRegular, RadarRegular } from '@/components/icons';
 
 Plytix has two separate features for reacting to change: channel-processing webhooks, which notify you when an export finishes, and Automations, which apply rules to your product data as it changes. Neither is driven through the public API today. This page explains what each one does and where the API fits in now.
 
@@ -38,10 +38,10 @@ If your integration needs to react to a channel finishing, use a dashboard-confi
 Now that you know how Plytix notifies you about change, you can explore these related guides.
 
 <Cards>
-  <Card icon={<RotateCw />} title="Sync your ERP" href="/docs/guides/syncing-your-erp-with-plytix">
+  <Card icon={<ArrowClockwiseRegular />} title="Sync your ERP" href="/docs/guides/syncing-your-erp-with-plytix">
     Poll for changes with the incremental-sync pattern.
   </Card>
-  <Card icon={<SatelliteDish />} title="Build a marketplace-specific product feed" href="/docs/guides/building-marketplace-specific-product-feeds">
+  <Card icon={<RadarRegular />} title="Build a marketplace-specific product feed" href="/docs/guides/building-marketplace-specific-product-feeds">
     Configure the channel a webhook would notify you about.
   </Card>
 </Cards>

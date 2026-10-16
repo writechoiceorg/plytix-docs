@@ -2,14 +2,116 @@
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
 @import 'fumadocs-openapi/css/preset.css';
+@import '@fluentui/react-icons/headless/styles.css';
 
+/*
+ * Plytix design system (materials/visual-design/*.svg).
+ * Ink #201A32, purple #7A52FF, lilac #BDA8FF, cyan #47C6FF.
+ */
 :root {
+  --color-fd-background: #f8f8f8;
+  --color-fd-foreground: #201a32;
+  --color-fd-muted: #f0eef6;
+  --color-fd-muted-foreground: #595369;
+  --color-fd-popover: #ffffff;
+  --color-fd-popover-foreground: #201a32;
+  --color-fd-card: #ffffff;
+  --color-fd-card-foreground: #201a32;
+  --color-fd-border: #e4e0ee;
   --color-fd-primary: #7a52ff;
   --color-fd-primary-foreground: #ffffff;
+  --color-fd-secondary: #f0eef6;
+  --color-fd-secondary-foreground: #201a32;
+  --color-fd-accent: #f0eef6;
+  --color-fd-accent-foreground: #201a32;
+  --color-fd-ring: #bda8ff;
+
+  --plytix-header-border: #e5e5e5;
+  --plytix-pill-bg: #f0eef6;
+  --plytix-pill-border: #e4e0ee;
+  --plytix-toggle-thumb: #ffffff;
+  --plytix-link: #7a52ff;
+  --plytix-subtle: #77708c;
+
+  /* Cards, code blocks, playground. */
+  --plytix-surface-fill: linear-gradient(rgb(255 255 255 / 0.1), rgb(255 255 255 / 0.05));
+  --plytix-surface-border: #ffffff;
+  --plytix-surface-shadow: 0 0 20px rgb(32 26 50 / 0.08);
+
+  /* Callouts: Warning, Note, Wrong, Information. */
+  --callout-warning-bg: #fff5db;
+  --callout-warning-icon: #e6a800;
+  --callout-note-bg: #efebff;
+  --callout-note-icon: #7a52ff;
+  --callout-error-bg: #fce0df;
+  --callout-error-icon: #d33e36;
+  --callout-info-bg: #d6f2ff;
+  --callout-info-icon: #47c6ff;
+
+  /* Decorative sidebar panel: lilac + cyan glows fading in from the top. */
+  --plytix-sidebar-glow:
+    radial-gradient(120% 45% at 30% 100%, rgb(189 168 255 / 0.75), transparent 70%),
+    radial-gradient(110% 40% at 60% 62%, rgb(71 198 255 / 0.28), transparent 70%),
+    linear-gradient(#f8f8f8 10%, transparent 40%);
+}
+
+.dark {
+  --color-fd-background: #201a32;
+  --color-fd-foreground: #ffffff;
+  --color-fd-muted: #2d2741;
+  --color-fd-muted-foreground: #e4e0ee;
+  --color-fd-popover: #2a2440;
+  --color-fd-popover-foreground: #ffffff;
+  --color-fd-card: #2a2440;
+  --color-fd-card-foreground: #ffffff;
+  --color-fd-border: #77708c;
+  --color-fd-primary: #bda8ff;
+  --color-fd-primary-foreground: #201a32;
+  --color-fd-secondary: #595369;
+  --color-fd-secondary-foreground: #ffffff;
+  --color-fd-accent: #595369;
+  --color-fd-accent-foreground: #ffffff;
+  --color-fd-ring: #7a52ff;
+
+  --plytix-header-border: #77708c;
+  --plytix-pill-bg: #595369;
+  --plytix-pill-border: #77708c;
+  --plytix-toggle-thumb: #201a32;
+  --plytix-link: #bda8ff;
+  --plytix-subtle: #b9b3cc;
+
+  --plytix-surface-fill: linear-gradient(rgb(255 255 255 / 0.1), rgb(255 255 255 / 0.05));
+  --plytix-surface-border: rgb(255 255 255 / 0.15);
+  --plytix-surface-shadow: 0 0 20px rgb(0 0 0 / 0.25);
+
+  --callout-warning-bg: rgb(255 245 219 / 0.2);
+  --callout-warning-icon: #e6a800;
+  --callout-note-bg: rgb(239 235 255 / 0.2);
+  --callout-note-icon: #bda8ff;
+  --callout-error-bg: rgb(252 224 223 / 0.2);
+  --callout-error-icon: #ef6d66;
+  --callout-info-bg: rgb(214 242 255 / 0.2);
+  --callout-info-icon: #47c6ff;
+
+  --plytix-sidebar-glow:
+    radial-gradient(120% 45% at 30% 100%, rgb(189 168 255 / 0.55), transparent 70%),
+    radial-gradient(110% 40% at 40% 62%, rgb(71 198 255 / 0.22), transparent 70%),
+    linear-gradient(#201a32 10%, transparent 40%);
+}
+
+/* The neutral preset re-tints the dark sidebar; keep our tokens instead. */
+.dark #nd-sidebar {
+  --color-fd-muted: #2d2741;
+  --color-fd-secondary: #595369;
+  --color-fd-muted-foreground: #e4e0ee;
 }
 
 html {
   scrollbar-gutter: stable;
+}
+
+body {
+  background-color: var(--color-fd-background);
 }
 
 html > body[data-scroll-locked] {
@@ -17,9 +119,279 @@ html > body[data-scroll-locked] {
   --removed-body-scroll-bar-size: 0px !important;
 }
 
+[data-callout='warning'] {
+  --callout-bg: var(--callout-warning-bg);
+  --callout-icon: var(--callout-warning-icon);
+}
+[data-callout='note'] {
+  --callout-bg: var(--callout-note-bg);
+  --callout-icon: var(--callout-note-icon);
+}
+[data-callout='error'] {
+  --callout-bg: var(--callout-error-bg);
+  --callout-icon: var(--callout-error-icon);
+}
+[data-callout='info'] {
+  --callout-bg: var(--callout-info-bg);
+  --callout-icon: var(--callout-info-icon);
+}
+
+@layer components {
+  .plytix-surface {
+    border-radius: 16px;
+    border: 1px solid var(--plytix-surface-border);
+    background: var(--plytix-surface-fill), var(--color-fd-background);
+    box-shadow: var(--plytix-surface-shadow);
+  }
+}
+
+/* Page action pills (Copy Markdown / Open). Unlayered so they win over the
+   utility classes on Fumadocs' Open trigger. */
+.plytix-pill-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  height: 2.25rem;
+  padding-inline: 0.875rem;
+  border-radius: 9999px;
+  border: 1px solid var(--color-fd-foreground);
+  background: transparent;
+  color: var(--color-fd-foreground);
+  font-size: 0.875rem;
+  transition: background-color 150ms;
+}
+.plytix-pill-button:hover {
+  background: var(--color-fd-secondary);
+}
+.plytix-pill-button:disabled {
+  opacity: 0.6;
+}
+.plytix-pill-button svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+
+/* ---------- Header ---------- */
+
+#nd-nav > *,
+#nd-subnav [data-header-body] {
+  border-color: var(--plytix-header-border);
+}
+
+#nd-subnav [data-header-tabs] {
+  border-color: var(--plytix-header-border);
+  height: 3rem;
+  align-items: stretch;
+  gap: 0.5rem;
+}
+
+/* Guides / API Reference tabs: the active tab is a filled block. */
+#nd-subnav [data-header-tabs] > a {
+  padding: 0 1.25rem;
+  margin: 0;
+  border-bottom: 0;
+  border-radius: 0;
+  color: var(--color-fd-foreground);
+  font-weight: 400;
+  font-size: 1rem;
+}
+#nd-subnav [data-header-tabs] > a[class*='border-fd-primary'] {
+  background: var(--color-fd-secondary);
+  color: var(--color-fd-foreground);
+}
+
+/* Desktop docs header: logo on the left, then search and theme on the right. */
+@media (min-width: 768px) {
+  #nd-subnav [data-header-body] > div:first-child,
+  #nd-subnav [data-header-body] > div:last-child {
+    flex: 0 0 auto;
+  }
+  #nd-subnav [data-header-body] [data-search-full] {
+    margin-inline-start: auto;
+    max-width: 280px;
+  }
+  #nd-subnav [data-header-body] > div:last-child > div:has([data-theme-toggle]) {
+    order: -1;
+  }
+}
+
+[data-search-full] {
+  border-radius: 9999px !important;
+}
+
+/* ---------- Sidebar ---------- */
+
+@media (min-width: 768px) {
+  #nd-sidebar {
+    position: relative;
+    isolation: isolate;
+  }
+  #nd-sidebar::before {
+    content: '';
+    position: absolute;
+    inset: 1.5rem 1rem 0 1rem;
+    z-index: -1;
+    background: var(--plytix-sidebar-glow);
+    pointer-events: none;
+  }
+}
+
 /* Start the desktop sidebar items closer to the top (default is 1rem). */
 @media (min-width: 1024px) {
   #nd-sidebar .overscroll-contain {
     padding-top: 0.5rem;
   }
+}
+
+#nd-sidebar a,
+#nd-sidebar button {
+  color: var(--color-fd-foreground);
+}
+
+/* Section titles ("---Title---" separators in meta.json). */
+#nd-sidebar p {
+  color: var(--color-fd-foreground);
+  font-weight: 500;
+}
+
+#nd-sidebar a[data-active='true'] {
+  background: var(--color-fd-secondary);
+  color: var(--color-fd-foreground);
+  font-weight: 400;
+}
+
+/* ---------- Page content ---------- */
+
+/* Heading anchors are links too; keep them plain. */
+.prose :where(h1, h2, h3, h4, h5, h6) a {
+  text-decoration: none !important;
+  color: inherit !important;
+}
+
+#nd-page h1 {
+  font-size: 32px;
+  line-height: 1.2;
+  font-weight: 500;
+}
+
+.prose {
+  --tw-prose-body: var(--color-fd-foreground);
+  --tw-prose-headings: var(--color-fd-foreground);
+  --tw-prose-links: var(--color-fd-foreground);
+  font-size: 16px;
+  line-height: 1.3;
+}
+
+.prose :where(h2):not(:where(.not-prose *)) {
+  font-size: 22px;
+  line-height: 1.4;
+  font-weight: 500;
+}
+.prose :where(h3):not(:where(.not-prose *)) {
+  font-size: 18px;
+  line-height: 1.4;
+  font-weight: 500;
+}
+.prose :where(h4):not(:where(.not-prose *)) {
+  font-size: 16px;
+  line-height: 1.4;
+  font-weight: 500;
+}
+.prose :where(p, li):not(:where(.not-prose *)) {
+  line-height: 1.3;
+}
+.prose :where(a:not([data-card])):not(:where(.not-prose *)) {
+  color: var(--color-fd-foreground);
+  font-weight: 400;
+  text-decoration: underline;
+  text-decoration-color: currentColor;
+  text-underline-offset: 3px;
+}
+.prose :where(a:not([data-card])):not(:where(.not-prose *)):hover {
+  color: var(--plytix-link);
+}
+.prose :where(small):not(:where(.not-prose *)) {
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--plytix-subtle);
+}
+
+/* ---------- Code blocks ---------- */
+
+figure.shiki {
+  border-radius: 16px;
+  border: 1px solid var(--plytix-surface-border);
+  background: var(--plytix-surface-fill), var(--color-fd-background);
+  box-shadow: var(--plytix-surface-shadow);
+}
+figure.shiki pre {
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+/* ---------- Table of contents ---------- */
+
+#nd-toc #toc-title {
+  font-size: 16px;
+  color: var(--color-fd-foreground);
+}
+#nd-toc #toc-title svg {
+  display: none;
+}
+
+/* No progress track; the current section gets a pill instead. Fumadocs marks
+   every heading in view as active, so only the first one is highlighted. */
+#nd-toc .relative.flex.flex-col > .absolute {
+  display: none;
+}
+#nd-toc a {
+  align-self: flex-start;
+  color: var(--color-fd-foreground);
+  margin-inline-start: 0;
+  padding-inline-start: 12px !important;
+  padding-block: 6px;
+  padding-inline-end: 12px;
+  border-radius: 4px;
+}
+#nd-toc a[data-active='true'] {
+  background: var(--color-fd-secondary);
+}
+#nd-toc a[data-active='true'] ~ a[data-active='true'] {
+  background: transparent;
+}
+
+/* ---------- API playground (fumadocs-openapi) ---------- */
+
+form:has(> div > button[type='submit']) {
+  border-radius: 16px;
+  border: 1px solid var(--plytix-surface-border);
+  background: var(--plytix-surface-fill), var(--color-fd-background);
+  box-shadow: var(--plytix-surface-shadow);
+}
+form:has(> div > button[type='submit']) > div:first-child {
+  padding: 1rem 1.25rem;
+  font-size: 1rem;
+}
+form:has(> div > button[type='submit']) > div:first-child > span {
+  color: #0b66ce;
+}
+.dark form:has(> div > button[type='submit']) > div:first-child > span {
+  color: #5dabeb;
+}
+form > div > button[type='submit'] {
+  width: auto;
+  padding: 0.4rem 1.5rem;
+  border-radius: 9999px;
+  background: var(--color-fd-foreground);
+  color: var(--color-fd-background);
+  font-size: 0.875rem;
+  font-weight: 400;
+}
+form > div > button[type='submit']:hover {
+  background: color-mix(in oklab, var(--color-fd-foreground) 85%, transparent);
+}
+
+a[data-card] {
+  text-decoration: none;
 }

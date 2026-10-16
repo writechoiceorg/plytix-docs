@@ -3,20 +3,20 @@
 import { usePathname } from 'fumadocs-core/framework';
 import Link from 'fumadocs-core/link';
 import { Popover, PopoverContent, PopoverTrigger } from 'fumadocs-ui/components/ui/popover';
-import { Archive, Check, ChevronsUpDown, Sparkles } from 'lucide-react';
+import { ArchiveRegular, CheckmarkRegular, ChevronUpDownRegular, SparkleRegular } from './icons';
 import { useState, type ComponentProps } from 'react';
 import { cn } from '@/lib/cn';
 
 const VERSIONS = [
   {
     title: 'V3 (Current)',
-    icon: Sparkles,
+    icon: SparkleRegular,
     url: '/docs/reference/v3',
     prefix: '/docs/reference/v3',
   },
   {
     title: 'Legacy (V1/V2)',
-    icon: Archive,
+    icon: ArchiveRegular,
     url: '/docs/reference/legacy/api-v1-v2-reference',
     prefix: '/docs/reference/legacy',
   },
@@ -40,7 +40,7 @@ export function ReferenceVersionSwitcher() {
       <PopoverTrigger className="flex items-center gap-2 rounded-lg p-2 border bg-fd-secondary/50 text-start text-fd-secondary-foreground transition-colors hover:bg-fd-accent data-[popup-open]:bg-fd-accent data-[popup-open]:text-fd-accent-foreground">
         <selected.icon className="shrink-0 size-4 text-fd-muted-foreground" />
         <span className="text-sm font-medium">{selected.title}</span>
-        <ChevronsUpDown className="shrink-0 ms-auto size-4 text-fd-muted-foreground" />
+        <ChevronUpDownRegular className="shrink-0 ms-auto size-4 text-fd-muted-foreground" />
       </PopoverTrigger>
       <PopoverContent className="flex flex-col gap-1 w-(--anchor-width) p-1">
         {VERSIONS.map((version) => (
@@ -52,7 +52,7 @@ export function ReferenceVersionSwitcher() {
           >
             <version.icon className="shrink-0 size-4 text-fd-muted-foreground" />
             <span className="flex-1 text-sm font-medium leading-none">{version.title}</span>
-            <Check
+            <CheckmarkRegular
               className={cn(
                 'shrink-0 size-3.5 text-fd-primary',
                 version.url !== selected.url && 'invisible',

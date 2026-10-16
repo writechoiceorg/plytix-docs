@@ -3,9 +3,9 @@ import {
   DocsBody,
   DocsPage,
   DocsTitle,
-  MarkdownCopyButton,
   ViewOptionsPopover,
 } from 'fumadocs-ui/layouts/notebook/page';
+import { MarkdownCopyButton } from '@/components/page-actions';
 import { notFound } from 'next/navigation';
 import { getMDXComponents } from '@/components/mdx';
 import type { Metadata } from 'next';
@@ -27,9 +27,10 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
   return (
     <DocsPage toc={page.data.toc} full={page.data.full}>
       <DocsTitle>{page.data.title}</DocsTitle>
-      <div className="flex flex-row gap-2 items-center border-b pb-6">
+      <div className="flex flex-row gap-2 items-center pb-4">
         <MarkdownCopyButton markdownUrl={markdownUrl} />
         <ViewOptionsPopover
+          className="plytix-pill-button"
           markdownUrl={markdownUrl}
           githubUrl={`https://github.com/${gitConfig.user}/${gitConfig.repo}/blob/${gitConfig.branch}/content/docs/${page.path}`}
         />

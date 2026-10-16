@@ -1,41 +1,62 @@
 ---
 title: "Authentication and base URLs"
-description: "Reference for the base URL, path prefix, and token flow shared by the V1/V2 and V3 Plytix APIs, and what stays the same when you migrate."
+description: "Reference for the V1/V2 base URL, token request, and bearer header, plus the V3 base URL while its new authentication model is pending."
 ---
 
-import { Search, KeyRound } from 'lucide-react';
+import { KeyRegular, SearchRegular } from '@/components/icons';
 
-Authentication is the part of a migration that doesn't change. V1/V2 and V3 authenticate against the same service and accept the same token. This page records what you send with every request. It's part of the reference set for [Migrating to V3](/docs/guides/migrating-to-v3).
+V1/V2 share one authentication flow, and V3 is moving to a new token-based model whose details aren't published yet. This page lists the base URLs, path prefixes, and authentication details for each. It's part of the reference set for [Migrating to V3](/docs/guides/migrating-to-v3).
 
-## Base URLs and paths
+## V1/V2 base URL and authentication
 
-| | V1/V2 | V3 |
+V1/V2 share one authentication flow. You exchange your API credentials for a bearer token, then send that token with every request to either version.
+
+| Item | Value |
+|---|---|
+| API base URL | `https://pim.plytix.com` |
+| API path prefixes | `/api/v1`, `/api/v2` |
+| Token endpoint | `POST https://auth.plytix.com/auth/api/get-token` |
+| Credentials in the token request | `api_key` and `api_password`, in a JSON body |
+| Header on every API request | `Authorization: Bearer <token>` |
+
+### API credentials and bearer tokens
+
+Your API credentials and your bearer token do different jobs. The credentials identify you once, at the token endpoint. The token authenticates every API request after that.
+
+| | API credentials | Bearer token |
 |---|---|---|
-| Base URL | `https://pim.plytix.com` | `https://pim.plytix.com` |
-| Path prefix | `/api/v1`, `/api/v2` | `/api/v3` |
-| Auth service | `https://auth.plytix.com` | Same |
-| Token request | `POST /auth/api/get-token` with `api_key` and `api_password` | Same |
-| Request header | `Authorization: Bearer <token>` | Same |
+| What it is | Your API Key and password | A short-lived access token, returned as `access_token` |
+| Where it comes from | An account administrator issues them from the **API** tab in the account's Admin section | The token endpoint, in exchange for your credentials |
+| Where you send it | Only in the body of the token request | In the `Authorization` header of every V1/V2 request |
+
+A token expires after 15 minutes. When it expires, or the API can't verify it, requests return `401`, and you request a new token with the same credentials. See [Authentication](/docs/reference/legacy/token-authentication) for the full token request, response, and errors.
+
+## V3 base URL and authentication
+
+V3 runs on the same base URL as V1/V2, under its own path prefix:
+
+| Item | Value |
+|---|---|
+| API base URL | `https://pim.plytix.com` |
+| API path prefix | `/api/v3` |
 
 {/* FLAG (open):
-  The V3 base URL `https://pim.plytix.com/api/v3` and the claim that one token works against both versions are not fully confirmed. Live testing confirmed V3 only on `pim.dev.plytix.com` with a dev token. On the production host, V3 returned `401` to a dev token. Re-test with a production credential before relying on this table for V3.
+  The V3 base URL `https://pim.plytix.com/api/v3` isn't confirmed on production. Live testing confirmed V3 only on `pim.dev.plytix.com` with a dev token. On the production host, V3 returned `401` to a dev token. Re-test with a production credential before relying on this table for V3.
 */}
 
-Credentials, their roles, and token-refresh logic carry over unchanged. An integration that keeps some calls on V1 doesn't need a second auth flow.
-
-## Token flow
-
-Post your API Key and password to the auth service, and send the token back as a bearer header on every call. Nothing in a migration requires new credentials, a second token, or a change to your refresh logic. See [Authentication](/docs/reference/v3/authentication) for the token request, and [Quickstart](/docs/guides/quickstart) for the full flow, including how long a token lasts.
+<Callout type="info" title="V3 authentication is changing">
+  V3 is moving to a new token-based authentication model, and its details aren't published yet. See [V3 authentication](/docs/reference/v3/authentication) for the model once it's documented.
+</Callout>
 
 ## Related resources
 
-Now that you know what to send with every request, you can explore these related pages.
+Now that you know how V1/V2 requests authenticate, you can explore these related pages.
 
 <Cards>
-  <Card icon={<Search />} title="Searching and pagination" href="/docs/guides/migrating-to-v3/searching-and-pagination">
+  <Card icon={<SearchRegular />} title="Searching and pagination" href="/docs/guides/migrating-to-v3/searching-and-pagination">
     Convert a V1 search body into a V3 query string and page through the results.
   </Card>
-  <Card icon={<KeyRound />} title="Authentication" href="/docs/reference/v3/authentication">
-    Read the V3 token flow in full, including expiry and refresh.
+  <Card icon={<KeyRegular />} title="Authentication" href="/docs/reference/legacy/token-authentication">
+    Request a V1/V2 bearer token, and see how long it lasts and the errors it can return.
   </Card>
 </Cards>
