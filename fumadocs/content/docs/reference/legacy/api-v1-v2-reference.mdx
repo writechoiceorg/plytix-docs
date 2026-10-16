@@ -3,23 +3,7 @@ title: "API V1/V2 Reference"
 description: "Reference for the V1 and V2 (beta) APIs for teams not yet on V3: core concepts, every resource, and guidance on moving to V3."
 ---
 
-import {
-  Key,
-  Building2,
-  Image,
-  FolderTree,
-  Box,
-  Beaker,
-  Link as LinkIcon,
-  Layers,
-  Tag,
-  Tags,
-  Filter,
-  TriangleAlert,
-  Gauge,
-  Search,
-  ListOrdered,
-} from 'lucide-react';
+import { BeakerRegular, BoxRegular, BuildingRegular, FilterRegular, FolderListRegular, GaugeRegular, ImageRegular, KeyRegular, LayerRegular, LinkRegular, SearchRegular, TagMultipleRegular, TagRegular, TextNumberListLtrRegular, WarningRegular } from '@/components/icons';
 
 This is the reference for Plytix's V1 API, plus the small set of V2 (beta) endpoints that mirror some V1 product operations with a slightly different shape. New integrations should use [API Reference (V3)](/docs/reference/v3); see [Migrating to V3](/docs/guides/migrating-to-v3) for what's different and how to migrate.
 
@@ -30,19 +14,19 @@ Every request here uses the same bearer-token authentication as V3: get a token 
 Before integrating with a specific resource, review these fundamental patterns. They apply to every V1/V2 endpoint, and several differ from V3.
 
 <Cards>
-  <Card icon={<Key />} title="Authentication" href="/docs/reference/legacy/token-authentication">
+  <Card icon={<KeyRegular />} title="Authentication" href="/docs/reference/legacy/token-authentication">
     Get and use a bearer token for every request.
   </Card>
-  <Card icon={<TriangleAlert />} title="Errors and status codes" href="/docs/reference/legacy/errors-status-codes">
+  <Card icon={<WarningRegular />} title="Errors and status codes" href="/docs/reference/legacy/errors-status-codes">
     Understand the success and error response formats.
   </Card>
-  <Card icon={<Gauge />} title="Rate limits" href="/docs/reference/legacy/rate-limits">
+  <Card icon={<GaugeRegular />} title="Rate limits" href="/docs/reference/legacy/rate-limits">
     See how request limits work and what a 429 means.
   </Card>
-  <Card icon={<Search />} title="Filtering and search" href="/docs/reference/legacy/filtering-and-search">
+  <Card icon={<SearchRegular />} title="Filtering and search" href="/docs/reference/legacy/filtering-and-search">
     Write search bodies with filters, operators, and relationship filters.
   </Card>
-  <Card icon={<ListOrdered />} title="Pagination" href="/docs/reference/legacy/pagination">
+  <Card icon={<TextNumberListLtrRegular />} title="Pagination" href="/docs/reference/legacy/pagination">
     Page through results and read the counts a search returns.
   </Card>
 </Cards>
@@ -52,37 +36,37 @@ Before integrating with a specific resource, review these fundamental patterns. 
 Each resource below links to its endpoints, with request and response schemas and examples.
 
 <Cards>
-  <Card icon={<Key />} title="Authentication" href="/docs/reference/legacy/authentication/retrievesAnAuthenticationToken_auth_api_get_token_post">
+  <Card icon={<KeyRegular />} title="Authentication" href="/docs/reference/legacy/authentication/retrievesAnAuthenticationToken_auth_api_get_token_post">
     Get a bearer token from the V1 auth endpoint.
   </Card>
-  <Card icon={<Building2 />} title="Accounts" href="/docs/reference/legacy/accounts/apiCredentialSearch_api_v1_accounts_api_credentials_search_post">
+  <Card icon={<BuildingRegular />} title="Accounts" href="/docs/reference/legacy/accounts/apiCredentialSearch_api_v1_accounts_api_credentials_search_post">
     Search account memberships and API credentials.
   </Card>
-  <Card icon={<Image />} title="Assets" href="/docs/reference/legacy/assets/addNewAssets_api_v1_assets_post">
+  <Card icon={<ImageRegular />} title="Assets" href="/docs/reference/legacy/assets/addNewAssets_api_v1_assets_post">
     Upload, search, update, and delete digital assets.
   </Card>
-  <Card icon={<FolderTree />} title="Categories" href="/docs/reference/legacy/categories/addNewFileCategory_api_v1_categories_file_post">
+  <Card icon={<FolderListRegular />} title="Categories" href="/docs/reference/legacy/categories/addNewFileCategory_api_v1_categories_file_post">
     Manage both asset and product category trees.
   </Card>
-  <Card icon={<Box />} title="Products (V1)" href="/docs/reference/legacy/products/addNewProducts_api_v1_products_post">
+  <Card icon={<BoxRegular />} title="Products (V1)" href="/docs/reference/legacy/products/addNewProducts_api_v1_products_post">
     Create, update, delete, and search products, plus their variants, assets, categories, and relationships.
   </Card>
-  <Card icon={<Beaker />} title="Products (V2 beta)" href="/docs/reference/legacy/products-v2-beta/addNewProducts_api_v2_products_post">
+  <Card icon={<BeakerRegular />} title="Products (V2 beta)" href="/docs/reference/legacy/products-v2-beta/addNewProducts_api_v2_products_post">
     The same product operations under `/api/v2`, with minor request/response differences from V1.
   </Card>
-  <Card icon={<LinkIcon />} title="Relationships" href="/docs/reference/legacy/relationships/addNewRelationship_api_v1_relationships_post">
+  <Card icon={<LinkRegular />} title="Relationships" href="/docs/reference/legacy/relationships/addNewRelationship_api_v1_relationships_post">
     Create and manage relationships between products.
   </Card>
-  <Card icon={<Layers />} title="Product Families" href="/docs/reference/legacy/product-families/addNewFamily_api_v1_product_families_post">
+  <Card icon={<LayerRegular />} title="Product Families" href="/docs/reference/legacy/product-families/addNewFamily_api_v1_product_families_post">
     Manage product families and the attributes linked to them.
   </Card>
-  <Card icon={<Tag />} title="Product Attributes" href="/docs/reference/legacy/product-attributes/addNewProductAttribute_api_v1_attributes_product_post">
+  <Card icon={<TagRegular />} title="Product Attributes" href="/docs/reference/legacy/product-attributes/addNewProductAttribute_api_v1_attributes_product_post">
     Create and manage custom product attributes.
   </Card>
-  <Card icon={<Tags />} title="Product Attribute Groups" href="/docs/reference/legacy/product-attribute-groups/addNewProductAttributeGroup_api_v1_attribute_groups_product_post">
+  <Card icon={<TagMultipleRegular />} title="Product Attribute Groups" href="/docs/reference/legacy/product-attribute-groups/addNewProductAttributeGroup_api_v1_attribute_groups_product_post">
     Organize product attributes into groups.
   </Card>
-  <Card icon={<Filter />} title="Available Filters" href="/docs/reference/legacy/available-filters/getAvailableAssetFilters_api_v1_filters_asset_get">
+  <Card icon={<FilterRegular />} title="Available Filters" href="/docs/reference/legacy/available-filters/getAvailableAssetFilters_api_v1_filters_asset_get">
     Look up which fields are filterable for assets, products, and relationships.
   </Card>
 </Cards>

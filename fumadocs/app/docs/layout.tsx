@@ -11,7 +11,7 @@ export default function Layout({ children }: LayoutProps<'/docs'>) {
       tree={source.getPageTree()}
       tabMode="navbar"
       nav={{ ...nav, mode: 'top' }}
-      sidebar={{ banner: SidebarBanner }}
+      sidebar={{ banner: SidebarBanner, collapsible: false }}
       tabs={{
         // v3/legacy are their own root folders (so the sidebar shows only the
         // active version's pages), but the navbar should always show Guides

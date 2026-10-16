@@ -3,7 +3,7 @@ title: "Permissions and security considerations"
 description: "Reference for the role and permission boundaries and security practices that are expected to apply when an AI agent acts on your Plytix account."
 ---
 
-import { KeyRound, ListChecks } from 'lucide-react';
+import { KeyRegular, TaskListLtrRegular } from '@/components/icons';
 
 {/* FLAG: Feature not yet available (open):
   The Plytix Platform MCP is a roadmap feature and is not yet available. The permission model below is Plytix's existing role model, sourced from the help center, which documents the Plytix interface and API Keys. Whether the Platform MCP inherits that model is unconfirmed. No scope list exists for the Platform MCP, and none has been shared. Items marked "not yet confirmed" need an answer from the product team before this page is published.
@@ -133,10 +133,10 @@ Individual record writes made through the API are not confirmed to appear in the
 Now that you know where the access boundaries sit, you can explore these related pages.
 
 <Cards>
-  <Card icon={<KeyRound />} title="Authentication and OAuth setup" href="/docs/guides/platform-mcp/authentication-and-oauth-setup">
+  <Card icon={<KeyRegular />} title="Authentication and OAuth setup" href="/docs/guides/platform-mcp/authentication-and-oauth-setup">
     Authorize a client to act on your Plytix account.
   </Card>
-  <Card icon={<ListChecks />} title="Practical examples" href="/docs/guides/platform-mcp/practical-examples">
+  <Card icon={<TaskListLtrRegular />} title="Practical examples" href="/docs/guides/platform-mcp/practical-examples">
     See the read-then-write pattern applied to four common workflows.
   </Card>
 </Cards>

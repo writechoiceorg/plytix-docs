@@ -3,7 +3,7 @@ title: "Responses and updates"
 description: "Reference for V3 response conventions and the update and delete behaviors that break migrated code, including the empty 204 returned by PATCH."
 ---
 
-import { Table2, FilePen } from 'lucide-react';
+import { DocumentEditRegular, TableRegular } from '@/components/icons';
 
 V3 changed what a write gives back and what a write does. The status codes are the visible part; the behavioral differences underneath them are what actually break migrated code. This page covers both, and it's part of the reference set for [Migrating to V3](/docs/guides/migrating-to-v3).
 
@@ -156,10 +156,10 @@ For the full V3 write rules, see [Update and delete records](/docs/reference/v3/
 Now that you know what a V3 write returns and what it does, you can explore these related pages.
 
 <Cards>
-  <Card icon={<Table2 />} title="Endpoint mapping" href="/docs/guides/migrating-to-v3/endpoint-mapping">
+  <Card icon={<TableRegular />} title="Endpoint mapping" href="/docs/guides/migrating-to-v3/endpoint-mapping">
     Find the V3 equivalent of each V1/V2 endpoint, resource by resource.
   </Card>
-  <Card icon={<FilePen />} title="Update and delete records" href="/docs/reference/v3/updates-and-deletes">
+  <Card icon={<DocumentEditRegular />} title="Update and delete records" href="/docs/reference/v3/updates-and-deletes">
     Read the full V3 rules for partial updates, map fields, and deletions.
   </Card>
 </Cards>

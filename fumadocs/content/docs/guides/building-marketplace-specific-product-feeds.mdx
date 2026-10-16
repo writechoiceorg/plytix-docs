@@ -3,7 +3,7 @@ title: Build a marketplace-specific product feed
 description: Learn how to read a filtered product set from the V3 API and turn it into a marketplace feed file that your own integration builds and delivers.
 ---
 
-import { Download, Search } from 'lucide-react';
+import { ArrowDownloadRegular, SearchRegular } from '@/components/icons';
 
 Produce a feed for one marketplace or retailer, for example a UK-only product file, by reading a filtered product set from Plytix and shaping it in your own integration. This guide covers mapping the marketplace's fields to Plytix fields, requesting and paging through the products in scope, transforming them into feed rows, and delivering the file on your schedule. Your integration builds and delivers the feed: this guide doesn't create or configure a Plytix channel. If you'd rather have Plytix build and publish the feed, set up a channel in Plytix instead, as described in [Creating a channel](https://help.plytix.com/en/creating-a-channel) and [Managing channels](https://help.plytix.com/en/managing-channels) in the Help Center. All requests use the V3 API at `https://pim.plytix.com/api/v3`. See [Filtering and Query Syntax](/docs/reference/v3/filtering-query-syntax) for the filter rules and [Pagination](/docs/reference/v3/pagination) for paging.
 
@@ -103,10 +103,10 @@ Follow the steps below to map the fields, read the products in scope, and turn t
 Now that you know how to build a marketplace feed from product data, you can explore these related guides.
 
 <Cards>
-  <Card icon={<Download />} title="Export your full catalog" href="/docs/guides/exporting-your-full-catalog">
+  <Card icon={<ArrowDownloadRegular />} title="Export your full catalog" href="/docs/guides/exporting-your-full-catalog">
     Page through every product with the fields your feed needs.
   </Card>
-  <Card icon={<Search />} title="Audit product data quality with filters" href="/docs/guides/auditing-product-data-quality-with-filters">
+  <Card icon={<SearchRegular />} title="Audit product data quality with filters" href="/docs/guides/auditing-product-data-quality-with-filters">
     Find products that miss the marketplace's required fields before you build the feed.
   </Card>
 </Cards>

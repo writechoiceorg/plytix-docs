@@ -3,7 +3,7 @@ title: "Endpoint mapping"
 description: "Reference for every V1/V2 endpoint and its V3 equivalent, resource by resource, including the dedicated link and unlink endpoints."
 ---
 
-import { Ban, BookOpen } from 'lucide-react';
+import { BookOpenRegular, ProhibitedRegular } from '@/components/icons';
 
 This page maps the V1/V2 endpoints most integrations use to their V3 equivalents, one resource at a time, and ends with the link and unlink endpoints that replaced V1's array fields. The Notes column records where the payload, the scope of the operation, or the response shape changes, because a similar-looking path doesn't always have the same effect. "No V3 equivalent" means V3 can't do the operation, and "No dedicated endpoint" means V3 has no matching endpoint but may cover the operation through another workflow. [Not migrated and new in V3](/docs/guides/migrating-to-v3/not-migrated-and-new-in-v3) collects those in one place. It's part of the reference set for [Migrating to V3](/docs/guides/migrating-to-v3).
 
@@ -190,10 +190,10 @@ V1 links through dedicated subpaths. V3 originally accepted `category_ids` and `
 Now that you have the mapping, you can explore these related pages.
 
 <Cards>
-  <Card icon={<Ban />} title="Not migrated and new in V3" href="/docs/guides/migrating-to-v3/not-migrated-and-new-in-v3">
+  <Card icon={<ProhibitedRegular />} title="Not migrated and new in V3" href="/docs/guides/migrating-to-v3/not-migrated-and-new-in-v3">
     See which V1 calls have no V3 counterpart and which resources are new.
   </Card>
-  <Card icon={<BookOpen />} title="V3 API reference" href="/docs/reference/v3">
+  <Card icon={<BookOpenRegular />} title="V3 API reference" href="/docs/reference/v3">
     Browse the V3 resources and their parameters in detail.
   </Card>
 </Cards>

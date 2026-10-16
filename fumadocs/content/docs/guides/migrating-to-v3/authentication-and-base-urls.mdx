@@ -3,7 +3,7 @@ title: "Authentication and base URLs"
 description: "Reference for the V1/V2 base URL, token request, and bearer header, plus the V3 base URL while its new authentication model is pending."
 ---
 
-import { Search, KeyRound } from 'lucide-react';
+import { KeyRegular, SearchRegular } from '@/components/icons';
 
 V1/V2 share one authentication flow, and V3 is moving to a new token-based model whose details aren't published yet. This page lists the base URLs, path prefixes, and authentication details for each. It's part of the reference set for [Migrating to V3](/docs/guides/migrating-to-v3).
 
@@ -53,10 +53,10 @@ V3 runs on the same base URL as V1/V2, under its own path prefix:
 Now that you know how V1/V2 requests authenticate, you can explore these related pages.
 
 <Cards>
-  <Card icon={<Search />} title="Searching and pagination" href="/docs/guides/migrating-to-v3/searching-and-pagination">
+  <Card icon={<SearchRegular />} title="Searching and pagination" href="/docs/guides/migrating-to-v3/searching-and-pagination">
     Convert a V1 search body into a V3 query string and page through the results.
   </Card>
-  <Card icon={<KeyRound />} title="Authentication" href="/docs/reference/legacy/token-authentication">
+  <Card icon={<KeyRegular />} title="Authentication" href="/docs/reference/legacy/token-authentication">
     Request a V1/V2 bearer token, and see how long it lasts and the errors it can return.
   </Card>
 </Cards>

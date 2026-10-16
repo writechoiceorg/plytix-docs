@@ -3,7 +3,7 @@ title: "Searching and pagination"
 description: "Reference for converting a V1 search POST body into a V3 GET query, and for paging through a V3 result set that returns no record counts."
 ---
 
-import { Filter, ListOrdered } from 'lucide-react';
+import { FilterRegular, TextNumberListLtrRegular } from '@/components/icons';
 
 A V1 search is a POST with a JSON body. A V3 search is a GET with query parameters. This page maps the two request shapes onto each other and covers what changes once the results come back, including the two pagination behaviors that break migrated paging loops. It's part of the reference set for [Migrating to V3](/docs/guides/migrating-to-v3).
 
@@ -101,10 +101,10 @@ This result set fits on one page, so `pagination` is empty. When more records ma
 Now that you can convert a search and page through its results, you can explore these related pages.
 
 <Cards>
-  <Card icon={<Filter />} title="Filter operators" href="/docs/guides/migrating-to-v3/filter-operators">
+  <Card icon={<FilterRegular />} title="Filter operators" href="/docs/guides/migrating-to-v3/filter-operators">
     Map each V1 filter object to its V3 bracket syntax.
   </Card>
-  <Card icon={<ListOrdered />} title="Pagination" href="/docs/reference/v3/pagination">
+  <Card icon={<TextNumberListLtrRegular />} title="Pagination" href="/docs/reference/v3/pagination">
     Read the V3 pagination block and its parameters in full.
   </Card>
 </Cards>

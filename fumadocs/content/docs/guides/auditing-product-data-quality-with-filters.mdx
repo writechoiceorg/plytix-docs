@@ -3,7 +3,7 @@ title: Audit product data quality with filters
 description: Learn how to find products that break your own catalog rules, such as a missing GTIN, an empty description, or a low completeness score.
 ---
 
-import { Download, Filter } from 'lucide-react';
+import { ArrowDownloadRegular, FilterRegular } from '@/components/icons';
 
 Find products that break your own catalog's data rules: a required field that's missing or empty, an image your process expects, or a completeness score below your threshold. This guide covers how to define those rules, the filters that check them, and how to collect a full audit result across pages. Passing an audit means products meet the rules you defined, not that a marketplace or channel will accept them. All requests use the V3 API with a bearer token. See [Filtering and Query Syntax](/docs/reference/v3/filtering-query-syntax) and [Pagination](/docs/reference/v3/pagination) for the full rules, and note that a search with no matches returns `data: []`.
 
@@ -142,10 +142,10 @@ Follow the steps below to define your rules, check each one with a filter, and c
 Now that you know how to audit product data, you can explore these related guides.
 
 <Cards>
-  <Card icon={<Download />} title="Export your full catalog" href="/docs/guides/exporting-your-full-catalog">
+  <Card icon={<ArrowDownloadRegular />} title="Export your full catalog" href="/docs/guides/exporting-your-full-catalog">
     Pull the full catalog once you know which products need attention.
   </Card>
-  <Card icon={<Filter />} title="Filtering and Query Syntax" href="/docs/reference/v3/filtering-query-syntax">
+  <Card icon={<FilterRegular />} title="Filtering and Query Syntax" href="/docs/reference/v3/filtering-query-syntax">
     Look up every operator and function this guide's checks use.
   </Card>
 </Cards>

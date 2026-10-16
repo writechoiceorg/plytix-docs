@@ -3,7 +3,7 @@ title: "Connect an AI assistant to the Plytix docs"
 description: "Connect Claude, Cursor, VS Code, or another MCP-compatible AI assistant to the Plytix documentation so it can search and cite the current docs."
 ---
 
-import { KeyRound, BookOpen } from 'lucide-react';
+import { BookOpenRegular, KeyRegular } from '@/components/icons';
 
 The Plytix documentation runs a Model Context Protocol (MCP) server that lets an AI assistant search and read the public pages of these docs. Once it's connected, your assistant can look up endpoint names, parameters, and examples in the published pages instead of relying on what it already knows. Whether it uses the server for a given answer depends on your client and your prompt, so ask it to cite the page it used.
 
@@ -154,10 +154,10 @@ Check the problems below if you run into issues while connecting.
 Now that your assistant can read the Plytix documentation, you can explore these related guides.
 
 <Cards>
-  <Card icon={<KeyRound />} title="Authentication" href="/docs/reference/v3/authentication">
+  <Card icon={<KeyRegular />} title="Authentication" href="/docs/reference/v3/authentication">
     Learn how to exchange API credentials for a bearer token when you call the API.
   </Card>
-  <Card icon={<BookOpen />} title="API Reference" href="/docs/reference/v3">
+  <Card icon={<BookOpenRegular />} title="API Reference" href="/docs/reference/v3">
     Browse the resources and endpoints your assistant will be reading about.
   </Card>
 </Cards>

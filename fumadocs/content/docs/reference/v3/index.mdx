@@ -3,33 +3,7 @@ title: API reference overview
 description: "Learn how the V3 API reference is organized, which resources it covers, and where to start with authentication, filtering, and paging."
 ---
 
-import {
-  Key,
-  TriangleAlert,
-  Gauge,
-  Filter,
-  ListOrdered,
-  PencilLine,
-  UsersRound,
-  Share2,
-  ListTree,
-  Box,
-  Network,
-  Layers,
-  Workflow,
-  Tag,
-  Tags,
-  Link as LinkIcon,
-  Image,
-  FolderTree,
-  List,
-  RadioTower,
-  Plug,
-  BookOpen,
-  FileText,
-  FileInput,
-  ListChecks,
-} from 'lucide-react';
+import { BookOpenRegular, BoxRegular, DocumentArrowLeftRegular, DocumentTextRegular, EditRegular, FilterRegular, FlowchartRegular, FolderListRegular, GaugeRegular, ImageRegular, KeyRegular, LayerRegular, LinkRegular, ListRegular, LiveRegular, OrganizationRegular, PeopleRegular, PlugConnectedRegular, ShareRegular, TagMultipleRegular, TagRegular, TaskListLtrRegular, TextBulletListTreeRegular, TextNumberListLtrRegular, WarningRegular } from '@/components/icons';
 
 The Plytix API platform provides a suite of functionalities for managing your product content programmatically. It's built on standard REST principles and secured with bearer token authentication.
 
@@ -40,22 +14,22 @@ This lets you connect your own systems, such as an ERP or storefront, to your Pl
 Before integrating with a specific resource, review these fundamental patterns. Understanding them up front will save you from surprises once you start building.
 
 <Cards>
-  <Card icon={<Key />} title="Authentication" href="/docs/reference/v3/authentication">
+  <Card icon={<KeyRegular />} title="Authentication" href="/docs/reference/v3/authentication">
     Get and use a bearer token for every request.
   </Card>
-  <Card icon={<TriangleAlert />} title="HTTP status and error codes" href="/docs/reference/v3/errors-status-codes">
+  <Card icon={<WarningRegular />} title="HTTP status and error codes" href="/docs/reference/v3/errors-status-codes">
     Understand the API's success and error response formats.
   </Card>
-  <Card icon={<Gauge />} title="Rate limits" href="/docs/reference/v3/rate-limits">
+  <Card icon={<GaugeRegular />} title="Rate limits" href="/docs/reference/v3/rate-limits">
     Learn how request limits work and what happens when you exceed them.
   </Card>
-  <Card icon={<Filter />} title="Filtering and query syntax" href="/docs/reference/v3/filtering-query-syntax">
+  <Card icon={<FilterRegular />} title="Filtering and query syntax" href="/docs/reference/v3/filtering-query-syntax">
     Narrow a search with operators, grouping, and field selection.
   </Card>
-  <Card icon={<ListOrdered />} title="Pagination" href="/docs/reference/v3/pagination">
+  <Card icon={<TextNumberListLtrRegular />} title="Pagination" href="/docs/reference/v3/pagination">
     Page through large result sets with the pagination block.
   </Card>
-  <Card icon={<PencilLine />} title="Updates and deletes" href="/docs/reference/v3/updates-and-deletes">
+  <Card icon={<EditRegular />} title="Updates and deletes" href="/docs/reference/v3/updates-and-deletes">
     Choose the right method for a write and know what it returns.
   </Card>
 </Cards>
@@ -65,61 +39,61 @@ Before integrating with a specific resource, review these fundamental patterns. 
 The API is organized by resource. Each one below is fully documented in the API Reference, with endpoints, request/response schemas, and examples.
 
 <Cards>
-  <Card icon={<Box />} title="Products" href="/docs/reference/v3/products/search_products">
+  <Card icon={<BoxRegular />} title="Products" href="/docs/reference/v3/products/search_products">
     Create, update, delete, and search the products in your catalog.
   </Card>
-  <Card icon={<Network />} title="Product Categories" href="/docs/reference/v3/productcategories/search_product_categories_api_v3_product_categories_get">
+  <Card icon={<OrganizationRegular />} title="Product Categories" href="/docs/reference/v3/productcategories/search_product_categories_api_v3_product_categories_get">
     Organize products into a category hierarchy.
   </Card>
-  <Card icon={<Layers />} title="Product Families" href="/docs/reference/v3/productfamilies/search_product_families_api_v3_product_families_get">
+  <Card icon={<LayerRegular />} title="Product Families" href="/docs/reference/v3/productfamilies/search_product_families_api_v3_product_families_get">
     Create, update, delete, and search the product families that group variants under shared attributes.
   </Card>
-  <Card icon={<Workflow />} title="Product Family Models" href="/docs/reference/v3/productfamilymodels/search_product_family_models_api_v3_product_family_models_get">
+  <Card icon={<FlowchartRegular />} title="Product Family Models" href="/docs/reference/v3/productfamilymodels/search_product_family_models_api_v3_product_family_models_get">
     Read the attribute structure a product family's variants share.
   </Card>
-  <Card icon={<Tag />} title="Product Attributes" href="/docs/reference/v3/productattributes/search_product_attributes_api_v3_product_attributes_get">
+  <Card icon={<TagRegular />} title="Product Attributes" href="/docs/reference/v3/productattributes/search_product_attributes_api_v3_product_attributes_get">
     Create and manage the custom attributes that describe your products.
   </Card>
-  <Card icon={<ListTree />} title="Family Attributes" href="/docs/reference/v3/familyattributes/search_family_attributes_api_v3_family_attributes_get">
+  <Card icon={<TextBulletListTreeRegular />} title="Family Attributes" href="/docs/reference/v3/familyattributes/search_family_attributes_api_v3_family_attributes_get">
     Search the attributes assigned to your product families.
   </Card>
-  <Card icon={<Tags />} title="Product Attribute Groups" href="/docs/reference/v3/productattributegroups/search_product_attribute_groups_api_v3_product_attribute_groups_get">
+  <Card icon={<TagMultipleRegular />} title="Product Attribute Groups" href="/docs/reference/v3/productattributegroups/search_product_attribute_groups_api_v3_product_attribute_groups_get">
     Organize product attributes into groups.
   </Card>
-  <Card icon={<LinkIcon />} title="Relationships" href="/docs/reference/v3/relationships/search_relationships_api_v3_relationships_get">
+  <Card icon={<LinkRegular />} title="Relationships" href="/docs/reference/v3/relationships/search_relationships_api_v3_relationships_get">
     Create, update, delete, and search the relationships that link related products, such as accessories or replacements.
   </Card>
-  <Card icon={<UsersRound />} title="Product Relationships" href="/docs/reference/v3/productrelationships/search_product_relationships_api_v3_product_relationships_get">
+  <Card icon={<PeopleRegular />} title="Product Relationships" href="/docs/reference/v3/productrelationships/search_product_relationships_api_v3_product_relationships_get">
     Search the relationships assigned to your products.
   </Card>
-  <Card icon={<Share2 />} title="Related Products" href="/docs/reference/v3/relatedproducts/search_related_products_api_v3_related_products_get">
+  <Card icon={<ShareRegular />} title="Related Products" href="/docs/reference/v3/relatedproducts/search_related_products_api_v3_related_products_get">
     Search the products linked to other products through a relationship.
   </Card>
-  <Card icon={<Image />} title="Assets" href="/docs/reference/v3/assets/search_assets_api_v3_assets_get">
+  <Card icon={<ImageRegular />} title="Assets" href="/docs/reference/v3/assets/search_assets_api_v3_assets_get">
     Create, update, and search the digital assets linked to your products.
   </Card>
-  <Card icon={<FolderTree />} title="Asset Categories" href="/docs/reference/v3/assetcategories/search_asset_categories_api_v3_asset_categories_get">
+  <Card icon={<FolderListRegular />} title="Asset Categories" href="/docs/reference/v3/assetcategories/search_asset_categories_api_v3_asset_categories_get">
     Organize assets into a category hierarchy.
   </Card>
-  <Card icon={<List />} title="Asset Lists" href="/docs/reference/v3/assetlists/search_asset_lists_api_v3_asset_lists_get">
+  <Card icon={<ListRegular />} title="Asset Lists" href="/docs/reference/v3/assetlists/search_asset_lists_api_v3_asset_lists_get">
     Group assets into lists for reuse across products.
   </Card>
-  <Card icon={<RadioTower />} title="Channels" href="/docs/reference/v3/channels/search_channels_api_v3_channels_get">
+  <Card icon={<LiveRegular />} title="Channels" href="/docs/reference/v3/channels/search_channels_api_v3_channels_get">
     Manage the channels you use to syndicate product data to marketplaces and other platforms.
   </Card>
-  <Card icon={<Plug />} title="Connections" href="/docs/reference/v3/connections/search_connections_api_v3_connections_get">
+  <Card icon={<PlugConnectedRegular />} title="Connections" href="/docs/reference/v3/connections/search_connections_api_v3_connections_get">
     Manage the FTP/SFTP and Dropbox connections used to feed product data into Plytix.
   </Card>
-  <Card icon={<BookOpen />} title="eCatalogs" href="/docs/reference/v3/ecatalogs/search_ecatalogs_api_v3_ecatalogs_get">
+  <Card icon={<BookOpenRegular />} title="eCatalogs" href="/docs/reference/v3/ecatalogs/search_ecatalogs_api_v3_ecatalogs_get">
     Create and manage shareable digital catalogs of your products.
   </Card>
-  <Card icon={<FileText />} title="PDF Catalogs" href="/docs/reference/v3/pdfcatalogs/search_pdf_catalogs_api_v3_pdf_catalogs_get">
+  <Card icon={<DocumentTextRegular />} title="PDF Catalogs" href="/docs/reference/v3/pdfcatalogs/search_pdf_catalogs_api_v3_pdf_catalogs_get">
     Generate PDF catalogs from your product data.
   </Card>
-  <Card icon={<FileInput />} title="Import Profiles" href="/docs/reference/v3/importprofiles/search_import_profiles_api_v3_import_profiles_get">
+  <Card icon={<DocumentArrowLeftRegular />} title="Import Profiles" href="/docs/reference/v3/importprofiles/search_import_profiles_api_v3_import_profiles_get">
     Manage the saved column-matching settings used to import product data.
   </Card>
-  <Card icon={<ListChecks />} title="PIM Product Lists" href="/docs/reference/v3/pimproductlists/search_pim_product_lists_api_v3_pim_product_lists_get">
+  <Card icon={<TaskListLtrRegular />} title="PIM Product Lists" href="/docs/reference/v3/pimproductlists/search_pim_product_lists_api_v3_pim_product_lists_get">
     Group products into smart or static lists.
   </Card>
 </Cards>

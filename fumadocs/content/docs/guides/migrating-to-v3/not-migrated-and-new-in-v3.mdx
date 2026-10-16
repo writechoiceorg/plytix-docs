@@ -3,7 +3,7 @@ title: "Not migrated and new in V3"
 description: "Reference for the V1 endpoints that have no V3 counterpart, the resources that are new in V3, and what the V2 products beta covers."
 ---
 
-import { Table2, BookOpen } from 'lucide-react';
+import { BookOpenRegular, TableRegular } from '@/components/icons';
 
 Not every V1 call has a V3 counterpart yet. This page lists the V1 endpoints missing from the current V3 contract, the entry points that are new in V3, and the slice of the API that V2 covers. It reflects the V3 OpenAPI dated 2026-10-02 and will change as V3 expands. Keep a legacy call wherever your integration needs a capability with no confirmed public V3 equivalent, and move everything else to V3. It's part of the reference set for [Migrating to V3](/docs/guides/migrating-to-v3).
 
@@ -50,10 +50,10 @@ V2 is a products-only beta served from the same base URL. It covers a subset of 
 Now that you know what doesn't move, you can explore these related pages.
 
 <Cards>
-  <Card icon={<Table2 />} title="Endpoint mapping" href="/docs/guides/migrating-to-v3/endpoint-mapping">
+  <Card icon={<TableRegular />} title="Endpoint mapping" href="/docs/guides/migrating-to-v3/endpoint-mapping">
     Find the V3 equivalent of each V1/V2 endpoint, resource by resource.
   </Card>
-  <Card icon={<BookOpen />} title="API V1/V2 reference" href="/docs/reference/legacy/api-v1-v2-reference">
+  <Card icon={<BookOpenRegular />} title="API V1/V2 reference" href="/docs/reference/legacy/api-v1-v2-reference">
     Browse the endpoints your integration keeps calling on the older versions.
   </Card>
 </Cards>

@@ -3,7 +3,7 @@ title: Rate limits
 description: "Learn how Plytix API rate limits work, what happens when you exceed them, and where to find the limits that apply to your plan."
 ---
 
-import { BookOpen, Rocket, TriangleAlert } from 'lucide-react';
+import { BookOpenRegular, RocketRegular, WarningRegular } from '@/components/icons';
 
 Plytix enforces rate limits on the API so that no single account can degrade the platform for everyone else. This page covers how those limits work, what happens when you exceed them, and where to check the limits for your plan.
 
@@ -31,10 +31,10 @@ See [Status codes and error codes](/docs/reference/v3/errors-status-codes) for t
 ## Related resources
 
 <Cards>
-  <Card icon={<Rocket />} title="Get started with the API" href="/docs/guides/quickstart">
+  <Card icon={<RocketRegular />} title="Get started with the API" href="/docs/guides/quickstart">
     Authentication and making your first request.
   </Card>
-  <Card icon={<TriangleAlert />} title="Status codes and error codes" href="/docs/reference/v3/errors-status-codes">
+  <Card icon={<WarningRegular />} title="Status codes and error codes" href="/docs/reference/v3/errors-status-codes">
     The full set of HTTP status codes and error response formats the API returns, including 429.
   </Card>
 </Cards>

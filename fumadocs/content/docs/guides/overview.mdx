@@ -3,7 +3,7 @@ title: Overview
 description: Learn what the Plytix API does, who it's for, how this documentation relates to the Plytix Help Center, and where to start.
 ---
 
-import { Rocket, BookOpen, Network, Workflow, History, ArrowRightLeft } from 'lucide-react';
+import { ArrowSwapRegular, BookOpenRegular, FlowchartRegular, HistoryRegular, OrganizationRegular, RocketRegular } from '@/components/icons';
 
 ## What it is
 
@@ -18,16 +18,16 @@ It is separate from the [Plytix Help Center](https://help.plytix.com/en), which 
 Follow these steps to go from credentials to a working integration:
 
 <Cards>
-  <Card icon={<Rocket />} title="Quickstart" href="/docs/guides/quickstart">
+  <Card icon={<RocketRegular />} title="Quickstart" href="/docs/guides/quickstart">
     Set up authentication and make your first authenticated request.
   </Card>
-  <Card icon={<Network />} title="The Plytix data model" href="/docs/guides/data-model">
+  <Card icon={<OrganizationRegular />} title="The Plytix data model" href="/docs/guides/data-model">
     Learn how products, attributes, product families, categories, assets, and relationships fit together before you write to them.
   </Card>
-  <Card icon={<Workflow />} title="Integration guides" href="/docs/guides/syncing-your-erp-with-plytix">
+  <Card icon={<FlowchartRegular />} title="Integration guides" href="/docs/guides/syncing-your-erp-with-plytix">
     Start with syncing your ERP, then pick the guide for your use case, from full catalog exports to marketplace feeds.
   </Card>
-  <Card icon={<BookOpen />} title="V3 API reference" href="/docs/reference/v3">
+  <Card icon={<BookOpenRegular />} title="V3 API reference" href="/docs/reference/v3">
     Find the endpoints you need, with parameters, request bodies, and example responses for every resource.
   </Card>
 </Cards>
@@ -37,10 +37,10 @@ Follow these steps to go from credentials to a working integration:
 This documentation covers both versions of the Plytix API. V3 is the current API and the one to use for new integrations. V1/V2 remains available for existing integrations, and a few of its operations have no V3 equivalent yet.
 
 <Cards>
-  <Card icon={<History />} title="V1/V2 API reference" href="/docs/reference/legacy/api-v1-v2-reference">
+  <Card icon={<HistoryRegular />} title="V1/V2 API reference" href="/docs/reference/legacy/api-v1-v2-reference">
     Look up V1 endpoints and the V2 (beta) product endpoints that an existing integration depends on.
   </Card>
-  <Card icon={<ArrowRightLeft />} title="Migrating to V3" href="/docs/guides/migrating-to-v3">
+  <Card icon={<ArrowSwapRegular />} title="Migrating to V3" href="/docs/guides/migrating-to-v3">
     Decide which parts of a V1/V2 integration move to V3, which stay, and how to convert the parts that move.
   </Card>
 </Cards>

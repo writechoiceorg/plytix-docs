@@ -3,7 +3,7 @@ title: "Filter operators"
 description: "Reference for mapping V1 filter objects to V3 bracket syntax, including boolean grouping, custom attributes, and related-entity filters."
 ---
 
-import { Search, Filter } from 'lucide-react';
+import { FilterRegular, SearchRegular } from '@/components/icons';
 
 V1 expresses a filter as an object with `field`, `operator`, and `value`. V3 puts the operator in brackets after the field name, and equality needs no operator at all. Equality and numeric comparisons map directly. Text matching, missing or empty values, and multi-value fields need more care, because the two versions don't always treat them the same way. This page maps each operator, notes where results can differ, and covers boolean grouping and custom attributes. It's part of the reference set for [Migrating to V3](/docs/guides/migrating-to-v3).
 
@@ -130,10 +130,10 @@ Both return the same products: each is a draft or was created after January 1, 2
 Now that you can translate a filter, you can explore these related pages.
 
 <Cards>
-  <Card icon={<Search />} title="Searching and pagination" href="/docs/guides/migrating-to-v3/searching-and-pagination">
+  <Card icon={<SearchRegular />} title="Searching and pagination" href="/docs/guides/migrating-to-v3/searching-and-pagination">
     Put the translated filters into a V3 search and page through the results.
   </Card>
-  <Card icon={<Filter />} title="Filtering and query syntax" href="/docs/reference/v3/filtering-query-syntax">
+  <Card icon={<FilterRegular />} title="Filtering and query syntax" href="/docs/reference/v3/filtering-query-syntax">
     Read the full V3 filter reference, including encoding rules and gotchas.
   </Card>
 </Cards>

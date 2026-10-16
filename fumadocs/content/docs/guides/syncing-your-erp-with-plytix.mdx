@@ -3,7 +3,7 @@ title: Sync your ERP
 description: Read product data from Plytix, detect what changed, and push stock, price, and status updates back so your ERP and Plytix stay in sync.
 ---
 
-import { Download, Layers } from 'lucide-react';
+import { ArrowDownloadRegular, LayerRegular } from '@/components/icons';
 
 Keep product data consistent between your ERP and Plytix with a recurring sync: an initial import that reads the whole catalog once, then scheduled runs that read only what changed in Plytix and write your ERP's changes back. This guide covers both directions, how archives and deletions travel, and how to recover when a run fails partway. All requests use the V3 API at `https://pim.plytix.com/api/v3`. Searches return `data` as an array with a `pagination` object, single-product reads and creates return `data` as one object, and a successful `PATCH` returns `204` with no body. Read [Update and delete records](/docs/reference/v3/updates-and-deletes) before you write, because a `PATCH` that names the `attributes` map replaces the whole map.
 
@@ -198,10 +198,10 @@ Check the problems below if you run into issues while following this guide.
 Now that you know how to keep your ERP and Plytix in sync, you can explore these related guides.
 
 <Cards>
-  <Card icon={<Download />} title="Export your full catalog" href="/docs/guides/exporting-your-full-catalog">
+  <Card icon={<ArrowDownloadRegular />} title="Export your full catalog" href="/docs/guides/exporting-your-full-catalog">
     Pull every product, with attributes and assets, in one paginated pass.
   </Card>
-  <Card icon={<Layers />} title="Bulk operations for large catalogs" href="/docs/guides/bulk-operations-for-large-catalogs">
+  <Card icon={<LayerRegular />} title="Bulk operations for large catalogs" href="/docs/guides/bulk-operations-for-large-catalogs">
     Pace these single-item calls against your rate limit when the catalog is large.
   </Card>
 </Cards>

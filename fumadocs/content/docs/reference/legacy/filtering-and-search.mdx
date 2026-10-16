@@ -3,7 +3,7 @@ title: Filtering and search
 description: Reference for the search request body in V1/V2, including filters, operators, returned attributes, and relationship filters.
 ---
 
-import { ArrowRightLeft, ListOrdered } from 'lucide-react';
+import { ArrowSwapRegular, TextNumberListLtrRegular } from '@/components/icons';
 
 Search endpoints in V1/V2 take their filters in a JSON request body, not in the query string. This page documents that body: how to write filter conditions, which operators exist, how to choose the attributes that come back, and how to filter products by their relationships.
 
@@ -190,10 +190,10 @@ When a request includes a `relationships.` column in `attributes`, each product 
 ## Related resources
 
 <Cards>
-  <Card icon={<ListOrdered />} title="Pagination" href="/docs/reference/legacy/pagination">
+  <Card icon={<TextNumberListLtrRegular />} title="Pagination" href="/docs/reference/legacy/pagination">
     Set the page, page size, and sort order of a search, and read the counts it returns.
   </Card>
-  <Card icon={<ArrowRightLeft />} title="Migration reference" href="/docs/guides/migrating-to-v3/migration-reference">
+  <Card icon={<ArrowSwapRegular />} title="Migration reference" href="/docs/guides/migrating-to-v3/migration-reference">
     Compare V1 filter operators with their V3 query-string equivalents.
   </Card>
 </Cards>

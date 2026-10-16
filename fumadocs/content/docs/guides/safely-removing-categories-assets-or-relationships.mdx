@@ -3,7 +3,7 @@ title: Safely remove categories, assets, or relationships
 description: Remove a category or a relationship link from a product, or change its thumbnail, through the V3 API while keeping the product's other links.
 ---
 
-import { RotateCw, Network } from 'lucide-react';
+import { ArrowClockwiseRegular, OrganizationRegular } from '@/components/icons';
 
 Remove one category from a product, or remove a product's link to one relationship type, without touching the product's other links. Each is a link between two entities, and Plytix V3 gives you a dedicated endpoint to add or remove it: `POST` to the collection to link, `DELETE` on the specific link to unlink. Removing a relationship link removes every related product the product has under that relationship type, so it isn't a way to remove a single related product. The relationship type and the products themselves stay. This guide covers categories and relationships, and explains how a product's thumbnail and other assets are set. All requests use the V3 API with a bearer token. A successful `PATCH` or `DELETE` returns `204` with an empty body, which confirms the change. Read the product back when you need to inspect the result.
 
@@ -150,10 +150,10 @@ Check the problems below if you run into issues while following this guide.
 Now that you know how to unlink data from a product, you can explore these related guides.
 
 <Cards>
-  <Card icon={<RotateCw />} title="Sync your ERP" href="/docs/guides/syncing-your-erp-with-plytix">
+  <Card icon={<ArrowClockwiseRegular />} title="Sync your ERP" href="/docs/guides/syncing-your-erp-with-plytix">
     The broader pattern for reading and writing product data safely.
   </Card>
-  <Card icon={<Network />} title="Reconstruct parent/variant hierarchies" href="/docs/guides/reconstructing-parent-variant-hierarchies">
+  <Card icon={<OrganizationRegular />} title="Reconstruct parent/variant hierarchies" href="/docs/guides/reconstructing-parent-variant-hierarchies">
     Read how a parent product and its variants are structured in a product family.
   </Card>
 </Cards>

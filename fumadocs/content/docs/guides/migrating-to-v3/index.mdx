@@ -3,7 +3,7 @@ title: "Migrating to V3"
 description: "Decide which parts of a V1/V2 integration move to V3, which have to stay where they are, and how to convert the parts that move."
 ---
 
-import { Table2, KeyRound, Search, Filter, FilePen, PackageX } from 'lucide-react';
+import { BoxDismissRegular, DocumentEditRegular, FilterRegular, KeyRegular, SearchRegular, TableRegular } from '@/components/icons';
 
 V3 reorganized the Plytix API rather than replicating it. Most of what a V1/V2 integration does moves across and gets better in the process, but a few operations have no V3 equivalent at all, so a working integration usually ends up calling both versions rather than cutting over wholesale.
 
@@ -219,22 +219,22 @@ Check the problems below if you run into issues while following this guide.
 Six reference pages sit under this guide and carry the detail the steps above point to:
 
 <Cards>
-  <Card icon={<KeyRound />} title="Authentication and base URLs" href="/docs/guides/migrating-to-v3/authentication-and-base-urls">
+  <Card icon={<KeyRegular />} title="Authentication and base URLs" href="/docs/guides/migrating-to-v3/authentication-and-base-urls">
     The base URLs and path prefixes, the V1/V2 token flow, and the status of V3 authentication.
   </Card>
-  <Card icon={<Search />} title="Searching and pagination" href="/docs/guides/migrating-to-v3/searching-and-pagination">
+  <Card icon={<SearchRegular />} title="Searching and pagination" href="/docs/guides/migrating-to-v3/searching-and-pagination">
     The V1 search body translated into a V3 query string, and how V3 pages.
   </Card>
-  <Card icon={<Filter />} title="Filter operators" href="/docs/guides/migrating-to-v3/filter-operators">
+  <Card icon={<FilterRegular />} title="Filter operators" href="/docs/guides/migrating-to-v3/filter-operators">
     Every operator, boolean grouping, and custom attributes.
   </Card>
-  <Card icon={<FilePen />} title="Responses and updates" href="/docs/guides/migrating-to-v3/responses-and-updates">
+  <Card icon={<DocumentEditRegular />} title="Responses and updates" href="/docs/guides/migrating-to-v3/responses-and-updates">
     What each write returns, and the behaviors that break migrated code.
   </Card>
-  <Card icon={<Table2 />} title="Endpoint mapping" href="/docs/guides/migrating-to-v3/endpoint-mapping">
+  <Card icon={<TableRegular />} title="Endpoint mapping" href="/docs/guides/migrating-to-v3/endpoint-mapping">
     The V1/V2 endpoints with their V3 equivalents, resource by resource.
   </Card>
-  <Card icon={<PackageX />} title="Not migrated and new in V3" href="/docs/guides/migrating-to-v3/not-migrated-and-new-in-v3">
+  <Card icon={<BoxDismissRegular />} title="Not migrated and new in V3" href="/docs/guides/migrating-to-v3/not-migrated-and-new-in-v3">
     What has no V3 counterpart, what V3 added, and what V2 covers.
   </Card>
 </Cards>

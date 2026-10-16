@@ -3,7 +3,7 @@ title: Export your full catalog
 description: Learn how to export every product with its attributes, categories, and asset metadata by paging through the V3 product search, and resume a long run.
 ---
 
-import { Search, RefreshCw } from 'lucide-react';
+import { ArrowSyncRegular, SearchRegular } from '@/components/icons';
 
 Pull your entire product catalog, with attributes, categories, and asset metadata included, without a separate call per product or per asset. This guide covers two ways to page through a large result set, expanding related data inline, and keeping a long export resumable: the pattern behind tools like catalog-production plugins and platform migrations. Here, full catalog means every product your request selects, with the fields you name. It doesn't include other Plytix resources, such as attribute definitions or product families, or the asset files themselves, so on its own it isn't a complete, restorable backup. All requests use the V3 API with a bearer token. Access tokens expire after 15 minutes, so a long export can start returning `401` partway through. If that happens, request a new token and resume from the page you were on.
 
@@ -209,10 +209,10 @@ Check the problems below if you run into issues while following this guide.
 Now that you know how to export the catalog, you can explore these related guides.
 
 <Cards>
-  <Card icon={<Search />} title="Audit product data quality with filters" href="/docs/guides/auditing-product-data-quality-with-filters">
+  <Card icon={<SearchRegular />} title="Audit product data quality with filters" href="/docs/guides/auditing-product-data-quality-with-filters">
     Find products with missing images, empty fields, or incomplete data before an export.
   </Card>
-  <Card icon={<RefreshCw />} title="Sync your ERP" href="/docs/guides/syncing-your-erp-with-plytix">
+  <Card icon={<ArrowSyncRegular />} title="Sync your ERP" href="/docs/guides/syncing-your-erp-with-plytix">
     Keep your ERP and Plytix in sync after the first full read.
   </Card>
 </Cards>
