@@ -1,11 +1,11 @@
 ---
 title: "Connect an AI assistant to the Plytix docs"
-description: "Connect Claude, Cursor, VS Code, or any MCP-compatible AI assistant to the Plytix documentation so it answers from the current docs."
+description: "Connect Claude, Cursor, VS Code, or another MCP-compatible AI assistant to the Plytix documentation so it can search and cite the current docs."
 ---
 
-import { KeyRound, BookOpen } from 'lucide-react';
+import { BookOpenRegular, KeyRegular } from '@/components/icons';
 
-The Plytix documentation runs a Model Context Protocol (MCP) server: a read-only endpoint that lets an AI assistant search and read these docs directly. Connect it once, and your assistant answers from the published pages instead of guessing at endpoint names.
+The Plytix documentation runs a Model Context Protocol (MCP) server that lets an AI assistant search and read the public pages of these docs. Once it's connected, your assistant can look up endpoint names, parameters, and examples in the published pages instead of relying on what it already knows. Whether it uses the server for a given answer depends on your client and your prompt, so ask it to cite the page it used.
 
 This guide covers connecting a client, verifying the connection, and what to do if your client doesn't support MCP. The server is read-only and needs no authentication. If your client can't connect to an MCP server, use the [llms.txt files](#use-llmstxt-if-your-client-doesnt-support-mcp) instead.
 
@@ -20,7 +20,7 @@ Before you start, make sure you have the following:
 - An MCP-compatible client that supports remote servers over HTTP. Claude Code, Claude Desktop, Cursor, and VS Code all qualify.
 - The Documentation MCP endpoint: `https://<docs-base-url>/api/mcp`.
 
-You don't need a Plytix account, an API key, or a bearer token. The Documentation MCP serves the public documentation only. It has no access to your product data, and it can't write anything anywhere.
+You don't need a Plytix account, an API key, or a bearer token. The Documentation MCP searches and reads the public documentation only. Its tools can't access or change your Plytix account data. That applies to this server's tools: other servers or tools connected to your assistant keep their own capabilities.
 
 ## Add the server to your client
 
@@ -90,7 +90,7 @@ Pick your client below. In every case you're registering a single HTTP endpoint 
 
 1. **List the connected servers** in your client. In Claude Code, run `/mcp`. In Cursor and VS Code, open the MCP section of settings. You should see `plytix-docs` connected, exposing three tools.
 
-2. **Ask a question that needs the docs.** For example: "Using the Plytix docs, what's the endpoint for exchanging an API key for a bearer token?" A correct answer cites a docs page rather than a general description of how APIs usually work.
+2. **Ask a question that needs the docs.** For example: "Using the Plytix Documentation MCP, explain V3 product filtering and cite the relevant page." An answer that names a docs page, such as [Filtering and query syntax](/docs/reference/v3/filtering-query-syntax), shows the assistant used the server. An answer with no page cited may come from the model's own knowledge instead.
 
 3. **Check reachability directly** if the client reports an error. This request confirms the endpoint exists and responds over JSON-RPC:
 
@@ -101,11 +101,11 @@ Pick your client below. In every case you're registering a single HTTP endpoint 
      -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
    ```
 
-   A `404` means the URL is wrong. A JSON response that lists `search`, `list_pages`, and `get_page` means the server is up and the problem is in your client configuration. Opening the endpoint in a browser returns a short description of the server.
+   A `404` means the URL is wrong. A JSON response that lists `search`, `list_pages`, and `get_page` means the server is up and answering. If your client still can't connect, check its configuration first: the transport type, the URL, and the key names in the config file. Opening the endpoint in a browser returns a short description of the server, including the MCP protocol versions it supports.
 
 ## What your assistant can do
 
-The Documentation MCP exposes three tools. Your assistant chooses between them on its own, so you don't call them by name.
+The Documentation MCP exposes three tools. Your assistant decides when to call them, so you don't call them by name. Naming the Documentation MCP in your prompt and asking for the source page makes it more likely to use them, and lets you check the answer.
 
 | Tool | What it does |
 |---|---|
@@ -113,7 +113,7 @@ The Documentation MCP exposes three tools. Your assistant chooses between them o
 | `list_pages` | Lists every docs page with its URL |
 | `get_page` | Returns the full Markdown of one page, by URL |
 
-Together, those cover the questions that are slowest to answer by hand:
+Together, they help with questions that are slow to answer by hand, such as:
 
 - "Which Plytix endpoints support filtering, and what's the filter syntax?"
 - "Write a paginated export loop against the V3 products endpoint, following the pattern in the docs."
@@ -136,16 +136,16 @@ Check the problems below if you run into issues while connecting.
 
 <Accordions type="multiple">
   <Accordion title="Your client shows the server as failed or disconnected" value="server-failed">
-    Confirm the URL ends in `/api/mcp`, then open the docs site itself in a browser. The site and the MCP endpoint ship from the same deployment, so if one is down the other is too, and that tells you whether the problem is yours or ours. Registering the server once at the user level rather than per project means you only ever have one URL to get right.
+    Confirm the URL ends in `/api/mcp`, then open the endpoint itself in a browser. The docs site and the MCP endpoint can be up or down independently, so check the endpoint rather than the site. If it doesn't return its short description, the server is unavailable and the problem isn't in your client. If it responds but your client still fails, recheck the client configuration. Registering the server once at the user level rather than per project means you only have one URL to get right.
   </Accordion>
   <Accordion title="VS Code doesn't recognize the entry" value="vscode-format">
     VS Code's configuration format differs from Cursor's in two specific ways, and copying a Cursor snippet into `.vscode/mcp.json` trips both. The top-level key is `servers`, not `mcpServers`, and each entry needs an explicit `"type": "http"`. Fix those two and the **Start** action appears above the entry.
   </Accordion>
   <Accordion title="The assistant answers about Plytix without citing the docs" value="no-citation">
-    Most clients only reach for a tool when the request makes the need obvious, so a bare question gets answered from the model's own knowledge instead. Name the source in your prompt, as in "Using the Plytix docs MCP, …", and ask it to cite the page it used so you can tell the difference.
+    Most clients only reach for a tool when the request makes the need obvious, so a bare question gets answered from the model's own knowledge instead. Name the source in your prompt, as in "Using the Plytix Documentation MCP, …", and ask it to cite the page it used so you can tell the difference.
   </Accordion>
   <Accordion title="The assistant can read pages but can't create or update products" value="read-only">
-    That's working as intended. The Documentation MCP serves these published pages and nothing else: it has no access to your Plytix account and no ability to write anywhere.
+    That's expected. The Documentation MCP's tools search and read the published pages only. They have no access to your Plytix account, so they can't read or change your products.
   </Accordion>
 </Accordions>
 
@@ -154,10 +154,10 @@ Check the problems below if you run into issues while connecting.
 Now that your assistant can read the Plytix documentation, you can explore these related guides.
 
 <Cards>
-  <Card icon={<KeyRound />} title="Authentication" href="/docs/reference/v3/authentication">
+  <Card icon={<KeyRegular />} title="Authentication" href="/docs/reference/v3/authentication">
     Learn how to exchange API credentials for a bearer token when you call the API.
   </Card>
-  <Card icon={<BookOpen />} title="API Reference" href="/docs/reference/v3">
+  <Card icon={<BookOpenRegular />} title="API Reference" href="/docs/reference/v3">
     Browse the resources and endpoints your assistant will be reading about.
   </Card>
 </Cards>

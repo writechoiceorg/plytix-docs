@@ -1,33 +1,119 @@
 ---
 title: Reconstruct parent/variant hierarchies
-description: Learn how to build a parent and variant hierarchy with product families, then read its levels and structure back through the V3 API.
+description: Read existing products through the V3 API and rebuild their parent, variant, and sub-variant structure from parent_id and product_level.
 ---
 
-import { RotateCw, TriangleAlert } from 'lucide-react';
+import { ArrowClockwiseRegular, WarningRegular } from '@/components/icons';
 
-Build a parent and variant hierarchy, the way an ERP or marketplace needs it, using `parent_id` and `product_family_id`, and read its levels and structure back. Creating a product family, adding attributes to it, and assigning products into it all work through the V3 API with a bearer token. Inheritance between levels is an account-level feature that isn't enabled on every account, so ask your Plytix contact whether your account has it before you build against it.
+Rebuild the parent, variant, and sub-variant structure of products that already exist in Plytix, in the shape an ERP or marketplace expects. The V3 API doesn't return a hierarchy as a tree. Each product carries a `parent_id` that points at the product one level above it and a `product_level` that says where it sits, so you read the products through the product search and assemble the tree in your integration. Every request uses a bearer token, and searches return their records in `data` and page through `pagination.next_page`. Product families add the attribute levels that decide which values a variant can take from its parent; see [The Plytix data model](/docs/guides/data-model) for how they fit together. Inheritance between levels is an account-level feature that isn't enabled on every account, so ask your Plytix contact whether your account has it before you rely on inherited values. If you don't have a hierarchy yet, the last section shows how to create one to test against.
 
 ## Prerequisites
 
 Before you start, make sure you have the following:
 
 - A bearer token. See [Authentication](/docs/reference/v3/authentication), or the [Quickstart](/docs/guides/quickstart) for a first walkthrough.
-- An existing product family in your account. If you're not sure whether one exists, step 1 shows you how to check.
+- Products already linked as parents and variants. If you don't have any, [create a hierarchy to test against](#create-a-hierarchy-to-test-against) first.
 
-## Build and read the hierarchy
+## Rebuild the hierarchy from existing products
 
-Follow the steps below to find or create a family, add a parent and its variants, and read the structure back.
+Follow the steps below to read your products, group them by parent, and add the attribute levels from each family.
 
-1. **List the product families already in your account.**
+1. **Read every product with its hierarchy fields.**
 
    ```bash
-   curl "https://pim.plytix.com/api/v3/product-families" \
+   curl -G "https://pim.plytix.com/api/v3/products" \
+     -H "Authorization: Bearer <access_token>" \
+     --data-urlencode "_fields=id" \
+     --data-urlencode "_fields=sku" \
+     --data-urlencode "_fields=parent_id" \
+     --data-urlencode "_fields=product_family_id" \
+     --data-urlencode "_fields=product_level" \
+     --data-urlencode "_sort_by=id" \
+     --data-urlencode "_page_size=100"
+   ```
+
+   These five fields are what reconstruction needs. `parent_id` holds the ID of the product one level up, and `product_level` says where each product sits: `0` standalone, `1` parent, `2` variant, or `3` sub-variant. Add `label` or any attribute your output also needs.
+
+   Follow `pagination.next_page` until it's missing, `null`, or empty, and replace `http://` with `https://` in the link before you request it. [Export your full catalog](/docs/guides/exporting-your-full-catalog) covers the paging loop in detail, including why sorting by `id` matters.
+
+2. **Group the products by `parent_id`.**
+
+   Index the products by `id`, then attach each product that has a `parent_id` to the product it points at. Treat a product whose `parent_id` is missing or `null` as top level. A sub-variant's `parent_id` points at its variant, not at the top-level parent, so the same grouping produces the third level with no extra requests.
+
+   Don't rebuild the tree from `product_level` or `num_variations`. They tell you a product's position and how many variations it has, but neither lists which products those are. `parent_id` is the only field that connects a child to its parent.
+
+3. **Read a single parent's children when you only need one branch.**
+
+   ```bash
+   curl -G "https://pim.plytix.com/api/v3/products" \
+     -H "Authorization: Bearer <access_token>" \
+     --data-urlencode "parent_id=<parent_id>" \
+     --data-urlencode "_fields=id" \
+     --data-urlencode "_fields=sku" \
+     --data-urlencode "_fields=parent_id" \
+     --data-urlencode "_fields=product_family_id" \
+     --data-urlencode "_fields=product_level" \
+     --data-urlencode "_sort_by=id"
+   ```
+
+   Any query parameter other than `_fields`, `_page`, `_page_size`, and `_sort_by` filters on a product field, so `parent_id=<parent_id>` returns that parent's variants. For a variant's sub-variants, send the same request with the variant's ID. To filter by the parent's SKU instead, use `parent.sku=<sku>`. The results are paged like any other search, so follow `next_page` here too.
+
+4. **Read the attribute levels of each family.**
+
+   ```bash
+   curl "https://pim.plytix.com/api/v3/product-families/<family_id>/attributes" \
      -H "Authorization: Bearer <access_token>"
    ```
 
-   Each family includes `total_products`, `total_attributes`, and `total_models`, so you can confirm a family actually has data before building against it.
+   Each row links one attribute to the family. `attribute_id` identifies the attribute, and `level` says where it sits in the hierarchy: `parent_level` or `variant_level` for an attribute linked at that level, `no_level` for an attribute linked without inheritance, or `null` if it has no level. To read the levels together with the families, request `_fields=family_attributes.*` on `GET /api/v3/product-families`. Keep the levels with your output: you need them to interpret a variant's values, as the next section explains.
 
-   To create one instead, `POST` a name:
+5. **Assemble the output.**
+
+   Nest each product under its parent, keeping `id`, `sku`, `product_family_id`, and `product_level` on every node. For a parent with two variants, one of which has a sub-variant, the result looks like this:
+
+   ```json
+   {
+     "id": "<parent_id>",
+     "sku": "BAG-100",
+     "product_family_id": "<family_id>",
+     "product_level": 1,
+     "variants": [
+       {
+         "id": "<variant_id>",
+         "sku": "BAG-100-RED",
+         "product_family_id": "<family_id>",
+         "product_level": 2,
+         "sub_variants": [
+           { "id": "<sub_variant_id>", "sku": "BAG-100-RED-S", "product_family_id": "<family_id>", "product_level": 3 }
+         ]
+       },
+       {
+         "id": "<variant_id_2>",
+         "sku": "BAG-100-BLUE",
+         "product_family_id": "<family_id>",
+         "product_level": 2,
+         "sub_variants": []
+       }
+     ]
+   }
+   ```
+
+   This is the shape your integration produces, not an API response. Plytix returns the same products as a flat, paged list.
+
+## Read which values a variant overrides
+
+{/* FLAG (open):
+  Verified 2026-10-15 on the development account only, with one attribute linked at `parent_level` (FB-037). The spec describes the field only as "Overwritten attribute names". Confirm with Plytix when entries are added and whether they are ever removed. */}
+
+When a variant overrides a value it inherits, Plytix adds that attribute to the variant's `overwritten_attributes` array as `attributes.<label>`, for example `attributes.brand`. Use it to find the attributes a variant customized. In testing, the entry stayed in the array after the override was deleted, so the array records that an override happened, not that the variant currently holds a value.
+
+The array doesn't tell you where the rest of the variant's values come from. An attribute missing from it may be inherited, but it may also be linked at `no_level`, calculated by Plytix, or not set at all. For an attribute that isn't linked at `parent_level` or `variant_level`, the array stays empty even when a variant holds its own value. To work out where a value comes from, combine the attribute's `level` from step 4 with the parent's and the variant's values for that attribute.
+
+## Create a hierarchy to test against
+
+If your account has no parent and variant products yet, follow the steps below to create a family, a parent, and a variant. To use a family you already have, find it with `GET /api/v3/product-families`, where `total_products` shows which families already hold products, and skip to step 3.
+
+1. **Create a product family.**
 
    ```bash
    curl -X POST "https://pim.plytix.com/api/v3/product-families" \
@@ -36,9 +122,26 @@ Follow the steps below to find or create a family, add a parent and its variants
      -d '{"name": "Backpacks"}'
    ```
 
-   A family create also accepts `attributes`, `parent_attributes`, and `variant_attributes`, and the last two depend on inheritance being enabled on your account. Add attributes to it with `POST /api/v3/product-families/<family_id>/attributes`, sending `{"attribute_id": "<attribute_id>"}` for each one. A family's own `PATCH` accepts `name` only, because changing its attribute membership propagates across every product in the family.
+   You can also link attributes at creation: `attributes` links them at `no_level`. A family's own `PATCH` accepts `name` only, because changing which attributes belong to a family propagates across every product in it.
 
-2. **Create the parent product, assigned to that family.**
+2. **Link attributes to the family, choosing each one's level.**
+
+   ```bash
+   curl -X POST "https://pim.plytix.com/api/v3/product-families/<family_id>/attributes" \
+     -H "Authorization: Bearer <access_token>" \
+     -H "Content-Type: application/json" \
+     -d '{"attribute_id": "<attribute_id>", "level": "no_level"}'
+   ```
+
+   `level` takes `parent_level`, `variant_level`, or `no_level`. If you leave it out, the attribute is linked at `no_level`, but sending it on every link keeps your intent visible. `no_level` links the attribute without inheritance. The other two levels depend on automatic inheritance: on accounts without it, changing a link's level with `PATCH /api/v3/product-families/<family_id>/attributes/<attribute_id>`, or sending `parent_attributes` or `variant_attributes` when you create a family, returns `403`:
+
+   ```json
+   {"errors": [{"name": "Forbidden", "description": "Automatic inheritance is not available for this account"}]}
+   ```
+
+   This comes from an account-level setting, not from anything wrong with your request. Linking an attribute with `parent_level` or `variant_level` through this `POST` call succeeded in testing, so set the level when you link rather than changing it afterward.
+
+3. **Create the parent product in that family.**
 
    ```bash
    curl -X POST "https://pim.plytix.com/api/v3/products" \
@@ -47,9 +150,9 @@ Follow the steps below to find or create a family, add a parent and its variants
      -d '{"sku": "PARENT-001", "product_family_id": "<family_id>"}'
    ```
 
-   A successful create returns `201` with the product itself, not only its ID, leaving out any field you didn't set. Note the `product_level: 0` in that response: putting a product in a family doesn't make it a parent. It becomes one in step 3, when a variant points at it.
+   A successful create returns `201` with the new product in `data`, without expanded relations. Its `product_level` is `0`: putting a product in a family doesn't make it a parent. It becomes one in the next step, when a variant points at it.
 
-3. **Create a variant, referencing the parent.**
+4. **Create a variant that references the parent.**
 
    ```bash
    curl -X POST "https://pim.plytix.com/api/v3/products" \
@@ -58,45 +161,26 @@ Follow the steps below to find or create a family, add a parent and its variants
      -d '{"sku": "VARIANT-001", "parent_id": "<parent_id>"}'
    ```
 
-   A variant takes its family from its parent, so you can leave `product_family_id` out. If you do send it, it has to match the parent's: a different family is rejected with `422` and the generic message `"product data validation failed"`, which names no field, so it's worth recognizing.
+   Leave `product_family_id` out: the variant takes its family from the parent. If you send it, it must match the parent's family. A different family returns `422` with an error that names no field: `{"name": "ValidationError", "description": "product data validation failed"}`.
 
-4. **Read the parent back and confirm the hierarchy updated.**
+5. **Read the parent back to confirm the link.**
 
    ```bash
    curl "https://pim.plytix.com/api/v3/products/<parent_id>" \
      -H "Authorization: Bearer <access_token>"
    ```
 
-   Once a product has at least one variant, its `product_level` changes from `0` to `1`, and `num_variations` increments by one for each variant. The variant itself reads back at `product_level: 2`.
-
-5. **Read the family's structure for a full picture.**
-
-   ```bash
-   curl "https://pim.plytix.com/api/v3/product-family-models/<family_id>" \
-     -H "Authorization: Bearer <access_token>"
-   ```
-
-   A family model includes `parent_attribute_labels`, `variant_attribute_labels`, and `no_level_attribute_labels`, the arrays that define which attributes apply at each level of the hierarchy. These models are read-only.
-
-   Which level an attribute sits at is what drives inheritance, and you change it with `PATCH /api/v3/product-families/<family_id>/attributes/<attribute_id>`, sending a new `level`. On accounts without the inheritance feature this returns `403` with `"Automatic inheritance is not available for this account"`, which is an account-level setting rather than anything wrong with your request.
-
-## Read which values a variant overrides
-
-{/* FLAG (open):
-  This behavior is unverified. Inheritance is gated on the development account used for testing, so `overwritten_attributes` couldn't be tested, and the spec describes it only as "Overwritten attribute names". Confirm with Plytix before relying on it.
-*/}
-
-When inheritance is enabled and a variant overrides a value it would otherwise inherit, Plytix records that attribute's name in the variant's `overwritten_attributes` array. Read that field to see which values a specific variant customized and which it's still taking from its parent.
+   Once the product has a variant, its `product_level` is `1` and its `num_variations` counts each variant. The variant reads back at `product_level: 2`. To read the structure the way your integration will, follow [Rebuild the hierarchy from existing products](#rebuild-the-hierarchy-from-existing-products).
 
 ## Related articles
 
 Now that you know how to build and read a hierarchy, you can explore these related guides.
 
 <Cards>
-  <Card icon={<RotateCw />} title="Sync your ERP" href="/docs/guides/syncing-your-erp-with-plytix">
+  <Card icon={<ArrowClockwiseRegular />} title="Sync your ERP" href="/docs/guides/syncing-your-erp-with-plytix">
     Apply the same read/write pattern to keep hierarchy data in sync.
   </Card>
-  <Card icon={<TriangleAlert />} title="Safely remove categories, assets, or relationships" href="/docs/guides/safely-removing-categories-assets-or-relationships">
+  <Card icon={<WarningRegular />} title="Safely remove categories, assets, or relationships" href="/docs/guides/safely-removing-categories-assets-or-relationships">
     Unlink a category or relationship from a product without affecting its other data.
   </Card>
 </Cards>

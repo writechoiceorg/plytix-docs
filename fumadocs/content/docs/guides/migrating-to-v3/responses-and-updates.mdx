@@ -3,43 +3,163 @@ title: "Responses and updates"
 description: "Reference for V3 response conventions and the update and delete behaviors that break migrated code, including the empty 204 returned by PATCH."
 ---
 
-import { Table2, FilePen } from 'lucide-react';
+import { DocumentEditRegular, TableRegular } from '@/components/icons';
 
 V3 changed what a write gives back and what a write does. The status codes are the visible part; the behavioral differences underneath them are what actually break migrated code. This page covers both, and it's part of the reference set for [Migrating to V3](/docs/guides/migrating-to-v3).
 
 ## Response conventions
 
+The V1/V2 column follows the documented examples in the V1/V2 Postman collection, which vary by operation. The V3 column follows the current V3 OpenAPI specification.
+
 | Operation | V1/V2 | V3 |
 |---|---|---|
-| Search | `200` with `data` and `pagination` | `200` with `data` and `pagination` |
-| Get one | `200` with the record | `200` with the record, `data` as an object and no `pagination` key |
-| Create | `200` or `201` with the created entity | `201` with the full created entity |
+| Search | `200` with `data` as an array and `pagination` | `200` with `data` as an array and `pagination` |
+| Get one | `200` with `data` as an array holding one record | `200` with `data` as an object and no `pagination` key |
+| Create | `200` or `201` with `data` as an array holding the created record | `201` with `data` as an object holding the resource's creation representation |
 | Duplicate on create | `409` for assets and relationships; not documented for other resources | `409` |
-| Update (PATCH) | Returns the modified entity | `204` with no body |
+| Update (PATCH) | `200`. Most examples return the modified record in a `data` array, but not all: sorting root categories returns `{"data": [{}]}` | `204` with no body |
 | Delete | `204` for products, assets, categories, and relationships; `200` for families, attribute groups, variants, and V2 products | `204` with no body |
-| Error | Not documented in the V1 collection | `errors` array in the same envelope, each entry `{"name": "...", "description": "..."}`. See [Errors and Status Codes](/docs/reference/v3/errors-status-codes) |
+| Error | An `error` object with a `msg` string and, in most examples, an `errors` array of `{"field": "...", "msg": "..."}` entries | An `errors` array of `{"name": "...", "description": "..."}` entries, with `data` as an empty array. See [Errors and Status Codes](/docs/reference/v3/errors-status-codes) |
 
-## Behavioral differences
+## Response shapes
 
-Three differences matter more than the status codes, because each one lets code keep running while doing the wrong thing:
+V3 uses one envelope for every response, but `data` changes shape with the operation: a search returns an array, while a single-record GET and a create return an object. V1/V2 wraps single records in an array, so code that reads `data[0]` has to read `data` instead, even when the record inside looks the same.
 
-- **V3 returns nothing on an update.** V1's PATCH returned the modified entity; V3's returns `204` with an empty body, so any code that read values out of an update response needs a follow-up GET. Create is unchanged in this respect: it still returns the full entity.
-- **V3 PATCH replaces a map field you name.** Sending part of a product's `attributes` deletes the attributes you left out, with no error and no warning. Read the current map, merge, then send it back, or patch a single attribute through `PATCH /products/{identifier}/attributes/{name}` with a bare value. See [Working with Updates and Deletes](/docs/reference/v3/updates-and-deletes).
-- **V3 DELETE erases** the entity or field rather than setting it to null or a default, and removing a field can cause inheritance to resolve for it. Test on a disposable record first.
+A V3 search returns `data` as an array:
 
-<Callout type="warn" title="PATCH recently changed to 204">
-  Earlier V3 releases returned `200` with the full updated entity on PATCH. It now returns `204` with an empty body, so an integration written against the older behavior breaks on any code that parses an update response. POST is unaffected: it still returns `201` with the full created entity.
+```json
+{
+  "data": [
+    { "id": "6a38f614c3d65a5f868b1a06", "sku": "BAG-10157", "status": "Completed" }
+  ],
+  "errors": [],
+  "pagination": { "next_page": "<next_page_url>" }
+}
+```
+
+A V3 GET on one record returns `data` as an object (abridged):
+
+```json
+{
+  "data": {
+    "id": "6a38f614c3d65a5f868b1a06",
+    "sku": "BAG-10157",
+    "label": "Bag 10157",
+    "status": "Completed"
+  },
+  "errors": []
+}
+```
+
+The V1/V2 GET wraps the same record in an array (abridged):
+
+```json
+{
+  "data": [
+    { "id": "6a38f614c3d65a5f868b1a06", "sku": "BAG-10157", "label": "Bag 10157" }
+  ]
+}
+```
+
+A V3 create returns `201` with `data` as an object holding the resource's creation representation. For products, the specification defines it without relationship expansions: it carries IDs such as `parent_id` and `product_family_id`, but not expanded fields such as `categories`, `assets`, `thumbnail`, or `product_relationships`. If your code needs those after a create, read the record back.
+
+A V3 PATCH returns `204` with an empty body:
+
+```http
+HTTP/1.1 204 No Content
+```
+
+A failed V3 request returns an `errors` array. This one is a create sent without a SKU:
+
+```json
+{
+  "data": [],
+  "errors": [
+    { "name": "InputDTOValidationError", "description": "sku: Field required" }
+  ]
+}
+```
+
+## Updates return no body
+
+V3's PATCH returns `204` with an empty body, so don't parse JSON from it. The `204` confirms that the update succeeded. Add a follow-up GET only where your integration needs the updated record, for example to read a value that Plytix calculates.
+
+Code that reads create responses needs checking too. A create still returns a body, but `data` is now an object rather than an array, and for products it leaves out expanded relations.
+
+## How PATCH treats the attributes map
+
+A product PATCH is a partial update at the top level: fields you leave out, such as `label` or `status`, keep their current values. The `attributes` map is the exception. Naming `attributes` in a PATCH replaces the product's whole map with the one you send, so every attribute you leave out is deleted, with no error and no warning. Attributes that Plytix calculates, such as completeness scores, are kept.
+
+For example, a product has two attributes:
+
+```json
+{ "attributes": { "brand": "Acme", "care_instructions": "Hand wash" } }
+```
+
+This PATCH names only `brand`:
+
+```bash
+curl --request PATCH \
+  --url 'https://<v3-base-url>/api/v3/products/<identifier>' \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{"attributes": {"brand": "Acme Outdoor"}}'
+```
+
+After the `204`, a GET shows that `care_instructions` is gone:
+
+```json
+{ "attributes": { "brand": "Acme Outdoor" } }
+```
+
+### Update one attribute
+
+To change one attribute, send its new value to the attribute's own path. The body is the bare JSON value, not an object:
+
+```bash
+curl --request PATCH \
+  --url 'https://<v3-base-url>/api/v3/products/<identifier>/attributes/brand' \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '"Acme Outdoor"'
+```
+
+This returns `204` and leaves every other attribute untouched. Prefer it for routine syncs, such as price or stock updates, where each request changes one or two attributes.
+
+### Change several attributes at once
+
+To change many attributes in one request, read the current map, merge your changes into it, and send the whole map back. The V3 specification defines no conditional write, such as an `If-Match` header, so if another user or integration edits the product between your read and your write, your PATCH overwrites their change. Use this pattern only when nothing else writes to the same products at the same time.
+
+## Empty values, null, and deletion
+
+V3 has separate ways to clear data, and they aren't interchangeable:
+
+| What you send | What happens |
+|---|---|
+| `""` or `[]` in a POST or PATCH | On the attribute types we tested, no value is stored. A text attribute set to `""` or to only spaces, and a multiselect attribute set to `[]`, end up absent from the product, as if you had never set them |
+| `null` in a PATCH | Depends on the field. On a product, `parent_id: null` detaches a variant from its parent, `product_family_id: null` unassigns its family, and `thumbnail_id: null` clears its thumbnail. `gtin` doesn't accept `null` and returns a validation error |
+| DELETE on a record, such as `/products/{identifier}` | Deletes the record |
+| DELETE on an attribute, `/products/{identifier}/attributes/{name}` | Erases that attribute's value on the product, rather than setting it to `null` or a default |
+| DELETE on a link, such as `/products/{identifier}/categories/{id}` | Removes only that link. The product and the category both remain |
+
+<Callout type="warn" title="Erasing an override doesn't bring back the parent's value">
+  If a variant overrides a value it inherits from its parent, deleting that override leaves the variant with no value for the attribute. It doesn't make the variant show the parent's value again, and the attribute stays listed in the variant's `overwritten_attributes` array. Sending `null` to `PATCH /products/{identifier}/attributes/{name}` has the same result. We haven't found a way to make an overridden variant inherit again, so test on a disposable record first.
 </Callout>
+
+{/* FLAG (open):
+  Observed 2026-10-15 on the development account, with the attribute linked at `parent_level` (FB-021, FB-037). Plytix hasn't confirmed this is the intended behavior, or how to restore inheritance after an override. */}
+
+For the full V3 write rules, see [Update and delete records](/docs/reference/v3/updates-and-deletes).
 
 ## Related resources
 
 Now that you know what a V3 write returns and what it does, you can explore these related pages.
 
 <Cards>
-  <Card icon={<Table2 />} title="Endpoint mapping" href="/docs/guides/migrating-to-v3/endpoint-mapping">
+  <Card icon={<TableRegular />} title="Endpoint mapping" href="/docs/guides/migrating-to-v3/endpoint-mapping">
     Find the V3 equivalent of each V1/V2 endpoint, resource by resource.
   </Card>
-  <Card icon={<FilePen />} title="Update and delete records" href="/docs/reference/v3/updates-and-deletes">
+  <Card icon={<DocumentEditRegular />} title="Update and delete records" href="/docs/reference/v3/updates-and-deletes">
     Read the full V3 rules for partial updates, map fields, and deletions.
   </Card>
 </Cards>

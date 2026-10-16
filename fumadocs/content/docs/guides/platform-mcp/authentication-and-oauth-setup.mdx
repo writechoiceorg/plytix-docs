@@ -3,7 +3,7 @@ title: "Authentication and OAuth setup"
 description: "Learn how to authorize an AI assistant to act on your Plytix account, from creating the credential through verifying and revoking access."
 ---
 
-import { Plug, ShieldCheck } from 'lucide-react';
+import { PlugConnectedRegular, ShieldCheckmarkRegular } from '@/components/icons';
 
 {/* FLAG: Feature not yet available (open):
   The Plytix Platform MCP is a roadmap feature and is not yet available. No authorization flow, endpoint URL, or client registration process has been shared, so the steps below describe the shape of the task using Plytix's existing credential model. They are not a tested flow, and the details are unconfirmed.
@@ -115,10 +115,10 @@ Check the problems below if you run into issues while authorizing a client.
 Now that you know how to authorize an assistant, you can explore these related guides.
 
 <Cards>
-  <Card icon={<Plug />} title="Supported clients" href="/docs/guides/platform-mcp/supported-clients">
+  <Card icon={<PlugConnectedRegular />} title="Supported clients" href="/docs/guides/platform-mcp/supported-clients">
     Check what your client needs to connect.
   </Card>
-  <Card icon={<ShieldCheck />} title="Permissions and security considerations" href="/docs/guides/platform-mcp/permissions-and-security">
+  <Card icon={<ShieldCheckmarkRegular />} title="Permissions and security considerations" href="/docs/guides/platform-mcp/permissions-and-security">
     Learn what the agent's role does and doesn't allow.
   </Card>
 </Cards>

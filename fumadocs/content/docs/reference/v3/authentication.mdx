@@ -3,7 +3,7 @@ title: Authentication
 description: "Reference for exchanging your API key and password for a bearer token, using it in requests, and how long a token stays valid."
 ---
 
-import { Rocket, TriangleAlert } from 'lucide-react';
+import { RocketRegular, WarningRegular } from '@/components/icons';
 
 The Plytix API uses bearer token authentication. Rather than sending your API key and password with every call, you exchange them once for a short-lived access token, then include that token in the `Authorization` header of every subsequent request instead. Your account administrator issues the API key and password from the account's API tab, and the role assigned to that key determines what it can access. This page documents that token exchange and how to use the token you get back.
 
@@ -63,10 +63,10 @@ If the request fails, you'll get one of the following:
 ## Related resources
 
 <Cards>
-  <Card icon={<Rocket />} title="Get started with the API" href="/docs/guides/quickstart">
+  <Card icon={<RocketRegular />} title="Get started with the API" href="/docs/guides/quickstart">
     Walk through generating credentials and making your first request.
   </Card>
-  <Card icon={<TriangleAlert />} title="Status codes and error codes" href="/docs/reference/v3/errors-status-codes">
+  <Card icon={<WarningRegular />} title="Status codes and error codes" href="/docs/reference/v3/errors-status-codes">
     See the full set of status codes the API returns.
   </Card>
 </Cards>

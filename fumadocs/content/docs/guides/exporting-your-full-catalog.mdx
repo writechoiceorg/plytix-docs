@@ -1,11 +1,11 @@
 ---
 title: Export your full catalog
-description: Learn how to pull every product, with attributes and assets fully expanded, by paging through the V3 search endpoint with a bearer token.
+description: Learn how to export every product with its attributes, categories, and asset metadata by paging through the V3 product search, and resume a long run.
 ---
 
-import { Search, SatelliteDish } from 'lucide-react';
+import { ArrowSyncRegular, SearchRegular } from '@/components/icons';
 
-Pull your entire product catalog, with attributes and assets included, without a separate call per product or per image. This guide covers paging through a large result set and expanding related data inline, the pattern behind tools like catalog-production plugins, platform migrations, and backups. All requests use the V3 API with a bearer token. Access tokens expire after 15 minutes, so a long export can start returning `401` partway through. If that happens, request a new token and resume from the page you were on.
+Pull your entire product catalog, with attributes, categories, and asset metadata included, without a separate call per product or per asset. This guide covers two ways to page through a large result set, expanding related data inline, and keeping a long export resumable: the pattern behind tools like catalog-production plugins and platform migrations. Here, full catalog means every product your request selects, with the fields you name. It doesn't include other Plytix resources, such as attribute definitions or product families, or the asset files themselves, so on its own it isn't a complete, restorable backup. All requests use the V3 API with a bearer token. Access tokens expire after 15 minutes, so a long export can start returning `401` partway through. If that happens, request a new token and resume from the page you were on.
 
 ## Prerequisites
 
@@ -23,15 +23,21 @@ Follow the steps below to request the fields you need, walk the pages until you 
    ```bash
    curl -G "https://pim.plytix.com/api/v3/products" \
      -H "Authorization: Bearer <access_token>" \
+     --data-urlencode "_fields=id" \
      --data-urlencode "_fields=sku" \
      --data-urlencode "_fields=label" \
      --data-urlencode "_fields=attributes" \
      --data-urlencode "_fields=categories" \
      --data-urlencode "_fields=assets" \
+     --data-urlencode "_sort_by=id" \
      --data-urlencode "_page_size=100"
    ```
 
    `_fields` accepts repeated values. Requesting `categories` or `assets` returns them fully expanded, with no separate call needed.
+
+   Always set `_sort_by`. V3 has no default sort order, so without it the order of products across pages isn't defined. Sorting by `id` gives every product a fixed position. Including `id` in `_fields` lets you deduplicate your output, and switch to [keyset paging](#export-by-id-instead-of-page-number) if you need to.
+
+   The default page size is 25 and the maximum is 1000. A bigger page means fewer requests, but each response is larger, takes longer to transfer, and costs more to repeat if it fails, more so with `attributes` and `assets` expanded. The examples use 100; adjust from there.
 
    Don't add `_expand`. The V3 search endpoint rejects it with `400` and `"Field '_expand' does not exist in model 'Product'."` Expansion happens automatically for each `_fields` value you name.
 
@@ -42,29 +48,34 @@ Follow the steps below to request the fields you need, walk the pages until you 
    ```json
    {
      "data": [ /* ... */ ],
-     "pagination": { "next_page": "http://pim.plytix.com/api/v3/products?_fields=sku&_page=2" }
+     "pagination": {
+       "next_page": "http://pim.plytix.com/api/v3/products?_fields=id&_fields=sku&...&_sort_by=id&_page_size=100&_page=2"
+     }
    }
    ```
 
-   Request `pagination.next_page` directly. It's a complete URL, including every filter and field you sent on the first call. The default page size is 25; the maximum is 1000, so setting `_page_size` explicitly (as in step 1) cuts the number of requests for a large catalog substantially. Stop when a response has no `next_page` key: on the last page the key is absent, not `null`. The V3 search endpoint has no total count, so plan progress reporting around pages rather than a percentage. See [Pagination](/docs/reference/v3/pagination) for the full rules.
+   The link above is shortened. The real link repeats every filter, field, page size, and sort you sent on the first call, so request `pagination.next_page` as it is, after the scheme fix in the warning below. Continue while `next_page` holds a URL you can request, and stop when it's missing, `null`, or empty. Live responses leave the key out on the last page, and the `Pagination` schema also allows `null`, so check for both. The V3 search endpoint has no total count, so plan progress reporting around pages rather than a percentage. See [Pagination](/docs/reference/v3/pagination) for the full rules.
 
-   <Callout type="warn" title="Rewrite the link to https before you request it">
-     Plytix generates these links with the `http` scheme. That address `301`-redirects to `https`, and many HTTP clients drop the `Authorization` header across a scheme change, so the redirected request comes back `401 {"detail": "Unauthorized"}`. Swap `http://` for `https://` before requesting the URL, or configure your client to keep the auth header across redirects (`curl --location-trusted`).
+   Page numbers don't freeze the catalog. Each request runs the search again, so if a product is created, deleted, or changes its sort value while you're paging, the products after it shift by one position. One product can then be skipped or repeated at a page boundary. If the catalog is being edited during your export, use [keyset paging](#export-by-id-instead-of-page-number) instead.
+
+   <Callout type="warn" title="Rewrite http links to https before you request them">
+     Pagination links currently come back with the `http` scheme. That address `301`-redirects to `https`, and many HTTP clients drop the `Authorization` header across a scheme change, so the redirected request returns `401 {"detail": "Unauthorized"}`. Replace `http://` with `https://` before you request the link, and use it unchanged when it already starts with `https://`. This is a link-generation issue to be fixed, not a convention of the API. Don't work around it by letting your client forward the `Authorization` header across every redirect, which can send your token to a host you didn't intend.
 
      This bites hardest on a long export loop, where the first page succeeds and page two fails for no obvious reason.
    </Callout>
 
-3. **Read the expanded asset and category data directly from each product.**
+3. **Read categories and asset metadata directly from each product.**
 
    ```json
    {
+     "id": "6a38f614c3d65a5f868b1a06",
      "sku": "BAG-10157",
      "categories": [{ "id": "...", "name": "Backpacks", "path": ["Website Taxonomy", "Bags & Luggage", "Backpacks"] }],
-     "assets": [{ "id": "...", "content_type": "image/jpeg", "path": "..." }]
+     "assets": [{ "id": "...", "filename": "BAG-10157_10.jpg", "content_type": "image/jpeg", "file_size": 559164, "path": "public_files/pim/assets/..." }]
    }
    ```
 
-   Because `assets` returns the full asset object, including its file path, your export doesn't need a separate request per image.
+   Because `assets` returns each asset's metadata, such as its file name, type, size, and `path`, your export doesn't need a separate lookup per asset. It doesn't include the files themselves. `path` is where Plytix stores the file, not a download URL, so if you also need the files, plan that as a separate step.
 
 4. **Scope the export if you don't need the whole catalog.**
 
@@ -74,24 +85,122 @@ Follow the steps below to request the fields you need, walk the pages until you 
    curl -G "https://pim.plytix.com/api/v3/products" \
      -H "Authorization: Bearer <access_token>" \
      --data-urlencode "categories.name=Backpacks" \
-     --data-urlencode "_fields=sku"
+     --data-urlencode "_fields=id" \
+     --data-urlencode "_fields=sku" \
+     --data-urlencode "_sort_by=id"
    ```
 
-   See [Build a marketplace-specific product feed](/docs/guides/building-marketplace-specific-product-feeds) for more filtering patterns aimed at a specific audience or destination.
+   See [Filtering and query syntax](/docs/reference/v3/filtering-query-syntax) for the other filters you can combine with `_fields`.
+
+## Export by ID instead of page number
+
+Keyset paging reads the catalog in `id` order and asks each time for the products after the last ID you received. A product created or deleted during the export no longer shifts the pages after it, so nothing is skipped or repeated at a page boundary. Use it for large exports while the catalog is being edited.
+
+Follow the steps below to page through the catalog by ID.
+
+1. **Request the first page sorted by `id`.**
+
+   Send the request from step 1 of [Export the catalog page by page](#export-the-catalog-page-by-page) with `_page=1`. Keep `_sort_by=id` and `id` in `_fields`.
+
+2. **Request the products after the last ID you received.**
+
+   ```bash
+   curl -G "https://pim.plytix.com/api/v3/products" \
+     -H "Authorization: Bearer <access_token>" \
+     --data-urlencode "id[gt]=6a38f614c3d65a5f868b1a06" \
+     --data-urlencode "_fields=id" \
+     --data-urlencode "_fields=sku" \
+     --data-urlencode "_sort_by=id" \
+     --data-urlencode "_page=1" \
+     --data-urlencode "_page_size=100"
+   ```
+
+   Take the `id` of the last product on the page and send the same request with `id[gt]=<last_id>` added. Keep `_page=1`: the filter moves you forward, so don't follow `next_page`, which points to page 2 of the narrowed results.
+
+3. **Stop when `next_page` holds no URL.**
+
+   A response without a usable `next_page` link is the last page, so no products remain after it.
+
+Keyset paging keeps the traversal stable, but it doesn't take a snapshot of the catalog. A product edited after you've read it keeps the values you read, and a product deleted after you've read it stays in your export.
+
+## Keep a long export resumable
+
+A long export should survive a failed request or a stopped script without starting over. Save each page as it arrives, record where to continue, retry only the failures worth retrying, and pace requests under your rate limit. The Python script below does all four while following `next_page`, using the `requests` library:
+
+```python title="export_catalog.py"
+import json
+import os
+import time
+
+import requests
+
+BASE_URL = "https://pim.plytix.com/api/v3/products"
+FIELDS = ["id", "sku", "label", "attributes", "categories", "assets"]
+CHECKPOINT = "export.checkpoint"  # the next page URL to request
+OUTPUT = "products.jsonl"         # one product per line
+DELAY = 0.5                       # seconds between requests: 20 per 10 seconds
+MAX_ATTEMPTS = 5
+RETRY_STATUSES = {429, 500, 502, 503, 504}
+
+session = requests.Session()
+session.headers["Authorization"] = "Bearer <access_token>"
+
+
+def fetch(url):
+    for attempt in range(MAX_ATTEMPTS):
+        try:
+            response = session.get(url, timeout=60)
+        except requests.RequestException:
+            response = None  # timeout or connection error: retry
+        if response is not None:
+            if response.status_code == 200:
+                return response.json()
+            if response.status_code not in RETRY_STATUSES:
+                raise SystemExit(f"{response.status_code}: {response.text}")
+        time.sleep(2 ** (attempt + 1))  # back off: 2, 4, 8 seconds, and so on
+    raise SystemExit("Too many failed attempts. Rerun the script to resume.")
+
+
+if os.path.exists(CHECKPOINT):
+    with open(CHECKPOINT) as f:
+        url = f.read().strip()
+else:
+    params = [("_fields", name) for name in FIELDS]
+    params += [("_sort_by", "id"), ("_page_size", 100)]
+    url = requests.Request("GET", BASE_URL, params=params).prepare().url
+
+while url:
+    page = fetch(url)
+    with open(OUTPUT, "a") as out:
+        for product in page["data"]:
+            out.write(json.dumps(product) + "\n")
+    url = (page.get("pagination") or {}).get("next_page")
+    if url:
+        url = url.replace("http://", "https://", 1)
+        with open(CHECKPOINT, "w") as f:
+            f.write(url)
+        time.sleep(DELAY)
+    elif os.path.exists(CHECKPOINT):
+        os.remove(CHECKPOINT)  # the export is complete
+```
+
+The script handles each part of a long run this way:
+
+- **Incremental persistence:** each page is appended to `products.jsonl` before the next request, so a stopped run loses at most the page in progress.
+- **Checkpointing:** after each page, the script saves the next URL to `export.checkpoint` and resumes from it on the next run. If the run stops between writing a page and saving the checkpoint, the rerun writes that page again, so deduplicate by `id` when you load the file. Delete both files before you start a fresh export. For [keyset paging](#export-by-id-instead-of-page-number), save the last `id` instead of the URL.
+- **Bounded retries:** timeouts, `429`, and `5xx` responses are retried up to five times, with a longer wait each time. Any other error stops the script, because the request itself needs fixing. A `401` means your token expired: get a new one and rerun the script.
+- **Rate-limit pacing:** waiting half a second between requests stays within 20 requests per 10 seconds, the lowest standard limit in [Rate limits](/docs/reference/v3/rate-limits). Raise the pace only if your plan allows it.
 
 ## Troubleshooting
 
 Check the problems below if you run into issues while following this guide.
 
 <Accordions type="multiple">
-  <Accordion title={<>A field you asked for with <code>_fields</code> is missing, with no error</>} value="fields-silently-dropped">
-    Plytix drops some unrecognized field names rather than rejecting them, so a typo costs you the field and tells you nothing. Compare the name against one full, unfiltered product response, which is the authoritative list of what a product actually carries. Reading a single product once before you build the export list is the cheapest way to avoid this across a long run.
+  <Accordion title={<>A field you asked for with <code>_fields</code> is missing from the response</>} value="fields-silently-dropped">
+    If a field is missing from every product, check its name. Plytix rejects some unknown names with a `400` error but drops others with no error, so a typo can cost you the field silently. Check top-level names against the product schema in [Get a product](/docs/reference/v3/products/get_products_api_v3_products__identifier__get), and custom attribute names against your account's attribute definitions from [`GET /api/v3/product-attributes`](/docs/reference/v3/productattributes/search_product_attributes_api_v3_product_attributes_get). If the field is missing only on some products, the name is fine and those products have no value for it: an attribute with no value can be missing from a product's `attributes` map, and other unset fields can come back as `null`. A product's response shows only what that product holds, so don't use one as the list of fields that exist.
   </Accordion>
   <Accordion title={<><code>_fields=category_ids</code> returns 400 instead of the field</>} value="fields-ids-hidden">
     Any field ending in `_ids` is hidden from API responses, so this returns a `HiddenFieldError`. That's deliberate: Plytix doesn't expose the denormalized ID arrays behind its relationships. Ask for the expanded plural form instead, so `categories` rather than `category_ids`, and `assets` rather than `asset_ids`. The expanded form returns the full objects and includes the IDs you were after anyway.
-  </Accordion>
-  <Accordion title={<><code>_fields</code> doesn't narrow a single-product lookup</>} value="fields-single-product">
-    `_fields` only applies to the search endpoint. `GET /products/{id}` always returns the complete product whatever you pass, so a sparse-field read has to go through `GET /products` with a filter that matches the one product you want.
   </Accordion>
 </Accordions>
 
@@ -100,10 +209,10 @@ Check the problems below if you run into issues while following this guide.
 Now that you know how to export the catalog, you can explore these related guides.
 
 <Cards>
-  <Card icon={<Search />} title="Audit product data quality with filters" href="/docs/guides/auditing-product-data-quality-with-filters">
+  <Card icon={<SearchRegular />} title="Audit product data quality with filters" href="/docs/guides/auditing-product-data-quality-with-filters">
     Find products with missing images, empty fields, or incomplete data before an export.
   </Card>
-  <Card icon={<SatelliteDish />} title="Build a marketplace-specific product feed" href="/docs/guides/building-marketplace-specific-product-feeds">
-    Shape a scoped export for a specific channel instead of the whole catalog.
+  <Card icon={<ArrowSyncRegular />} title="Sync your ERP" href="/docs/guides/syncing-your-erp-with-plytix">
+    Keep your ERP and Plytix in sync after the first full read.
   </Card>
 </Cards>

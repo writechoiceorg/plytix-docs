@@ -3,7 +3,7 @@ title: "Update and delete records"
 description: "Reference for how V3 handles writes: which method to use, what each returns, how empty values are stored, and what DELETE actually removes."
 ---
 
-import { TriangleAlert, BookOpen } from 'lucide-react';
+import { BookOpenRegular, WarningRegular } from '@/components/icons';
 
 This page documents which method to use for each kind of change, what comes back in the response, how empty values are treated, and what DELETE removes.
 
@@ -132,10 +132,10 @@ Follow these practices when you write to the API:
 Now that you know how V3 handles writes, you can explore these related pages.
 
 <Cards>
-  <Card icon={<TriangleAlert />} title="Errors and Status Codes" href="/docs/reference/v3/errors-status-codes">
+  <Card icon={<WarningRegular />} title="Errors and Status Codes" href="/docs/reference/v3/errors-status-codes">
     Read the status codes and error shapes a failed write returns.
   </Card>
-  <Card icon={<BookOpen />} title="Safely remove categories, assets, or relationships" href="/docs/guides/safely-removing-categories-assets-or-relationships">
+  <Card icon={<BookOpenRegular />} title="Safely remove categories, assets, or relationships" href="/docs/guides/safely-removing-categories-assets-or-relationships">
     Apply these delete rules to a real cleanup task.
   </Card>
 </Cards>

@@ -3,7 +3,7 @@ title: "Available tools"
 description: "Reference for the Plytix resources an agent can reach through the Platform MCP, which ones support writes, and which are read-only."
 ---
 
-import { ListChecks, ShieldCheck } from 'lucide-react';
+import { ShieldCheckmarkRegular, TaskListLtrRegular } from '@/components/icons';
 
 {/* FLAG: Feature not yet available (open):
   The Plytix Platform MCP is a roadmap feature and is not yet available, and no tool list has been published. This page documents the PIM V3 API surface from `openapi_pimv3.json`, which is ground truth for what the platform can do, but the mapping from API operations to MCP tools is unconfirmed. Get answers to the following before publishing:
@@ -97,10 +97,10 @@ Reaching a resource also isn't the same as being allowed to change it. A role is
 Now that you know which resources an agent can reach, you can explore these related pages.
 
 <Cards>
-  <Card icon={<ListChecks />} title="Practical examples" href="/docs/guides/platform-mcp/practical-examples">
+  <Card icon={<TaskListLtrRegular />} title="Practical examples" href="/docs/guides/platform-mcp/practical-examples">
     See four illustrative agent workflows that use these resources.
   </Card>
-  <Card icon={<ShieldCheck />} title="Permissions and security considerations" href="/docs/guides/platform-mcp/permissions-and-security">
+  <Card icon={<ShieldCheckmarkRegular />} title="Permissions and security considerations" href="/docs/guides/platform-mcp/permissions-and-security">
     Learn what is expected to bound an agent's access to each resource.
   </Card>
 </Cards>
