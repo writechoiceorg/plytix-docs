@@ -3,7 +3,7 @@ title: Authentication
 description: "Reference for getting a bearer token and using it on V1/V2 requests, including how long a token stays valid and the errors you can get."
 ---
 
-import { RocketRegular, WarningRegular } from '@/components/icons';
+import { KeyRegular, RocketRegular } from '@/components/icons';
 
 The V1/V2 APIs use bearer token authentication. Rather than sending your API key and password with every call, you exchange them once for a short-lived access token, then send that token in the `Authorization` header of every request. Any administrator on your Plytix account can issue the API key and password from the **API** tab in the account's Admin section.
 
@@ -96,7 +96,7 @@ See [Errors and status codes](/docs/reference/legacy/errors-status-codes) for th
   <Card icon={<RocketRegular />} title="Get started with the API" href="/docs/guides/quickstart">
     Walk through generating credentials and making your first request.
   </Card>
-  <Card icon={<WarningRegular />} title="Errors and status codes" href="/docs/reference/legacy/errors-status-codes">
-    See the status codes and error format V1/V2 return.
+  <Card icon={<KeyRegular />} title="Authentication and base URLs" href="/docs/guides/migrating-to-v3/authentication-and-base-urls">
+    See how authentication and base URLs change when you move to V3.
   </Card>
 </Cards>

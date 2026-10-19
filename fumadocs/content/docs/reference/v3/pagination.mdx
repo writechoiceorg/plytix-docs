@@ -3,7 +3,7 @@ title: "Pagination"
 description: "Reference for how V3 pages search results, what the pagination block contains, and how to loop through a full result set safely."
 ---
 
-import { FilterRegular, LayerRegular } from '@/components/icons';
+import { ArrowClockwiseRegular, ArrowDownloadRegular } from '@/components/icons';
 
 Search endpoints return results in pages. This page documents the pagination block in the response, how to walk through a result set, and the request parameters that control page size and sort order.
 
@@ -151,17 +151,17 @@ Keep these points in mind when you page through a large result set:
 - **Don't assume a total.** The pagination block carries no count, so the only reliable way to know how many records matched is to page to the end and tally as you go. For a set you know is small, `_page_size=1000` gets you everything in one request.
 - **Watch the request rate.** Paging through a large result set is many requests in rapid succession. Rate limits vary by account and are carried in your access token's claims, so pace a long loop and back off on `429`. See [Rate limits](/docs/reference/v3/rate-limits).
 - **Ask for fewer fields.** `_fields` narrows each record to what you need, which makes a long paging run noticeably cheaper. See [Filtering and Query Syntax](/docs/reference/v3/filtering-query-syntax).
-- **Expect the set to shift under you.** A catalog that changes mid-run can move records between pages. For an export that has to be internally consistent, filter on a stable field such as a date range rather than paging an unfiltered set.
+- **Expect the set to shift under you.** Results can change during pagination, and a catalog that changes mid-run can move records between pages. Use a deterministic sort, such as `_sort_by=id`, and a reconciliation pass. A date filter alone doesn't guarantee a point-in-time snapshot.
 
 ## Related resources
 
 Now that you can page through results, you can explore these related pages.
 
 <Cards>
-  <Card icon={<FilterRegular />} title="Filtering and Query Syntax" href="/docs/reference/v3/filtering-query-syntax">
-    Narrow a result set before you page through it.
+  <Card icon={<ArrowClockwiseRegular />} title="Sync your ERP" href="/docs/guides/syncing-your-erp-with-plytix">
+    Keep a paged sync correct with a reconciliation pass.
   </Card>
-  <Card icon={<LayerRegular />} title="Bulk operations for large catalogs" href="/docs/guides/bulk-operations-for-large-catalogs">
+  <Card icon={<ArrowDownloadRegular />} title="Export your full catalog" href="/docs/guides/exporting-your-full-catalog">
     Apply paging and pacing to a full-catalog job.
   </Card>
 </Cards>

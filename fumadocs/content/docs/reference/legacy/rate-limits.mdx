@@ -3,7 +3,7 @@ title: Rate limits
 description: "Reference for how rate limits work on V1/V2, what happens when you exceed them, and where to find the limits for your plan."
 ---
 
-import { KeyRegular, WarningRegular } from '@/components/icons';
+import { GaugeRegular, KeyRegular } from '@/components/icons';
 
 Plytix enforces rate limits on the API so that no single account can degrade the platform for everyone else. This page covers how those limits work on V1/V2, what happens when you exceed them, and where to check the limits for your plan.
 
@@ -31,7 +31,7 @@ If you reach either limit, the API returns a `429 TOO MANY REQUESTS` status code
   <Card icon={<KeyRegular />} title="Authentication" href="/docs/reference/legacy/token-authentication">
     Get a bearer token, and see how long it stays valid.
   </Card>
-  <Card icon={<WarningRegular />} title="Errors and status codes" href="/docs/reference/legacy/errors-status-codes">
-    See the full set of status codes and error formats V1/V2 return.
+  <Card icon={<GaugeRegular />} title="Rate limits" href="/docs/reference/v3/rate-limits">
+    See how rate limits work in V3.
   </Card>
 </Cards>

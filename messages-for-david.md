@@ -1,6 +1,39 @@
 # Feedback status for David
 
-Updated 2026-10-15.
+Updated 2026-10-19.
+
+---
+
+Page: 19 October documentation actions (PM items)
+
+We acted on 18 of the 38 items. Each change was checked against our own API test results first. Where your Dev evidence went beyond what we had tested, we used your results and marked them as dated test findings, not guarantees.
+
+Solved:
+- PM-07, links to the withdrawn Bulk V1 guide: all 9 links on the 7 pages are removed. Pacing guidance now points to Rate limits, the two "Bulk operations" related cards were replaced, and the private draft stays unpublished.
+- PM-13, Quickstart page-size callout: it now reads "Increase the page size for production workloads", which matches the explanation around it.
+- PM-16, response codes and envelopes: we removed the claims that only `200` and `422` are declared and that every response has a `data`/`errors`/`pagination` envelope. The errors page now says response bodies depend on the operation, and that a `204 No Content` response has no body and must not be parsed as JSON. The same correction was applied to Quickstart, Responses and updates, and Export your full catalog, and `pagination` statements are now scoped to search responses.
+- PM-17, case-insensitive operator: all four uses of `icontains` now read `contains:ignorecase`. The examples are scoped to text attributes, with a note on keeping records with no value when you negate a filter (`[!exists]` in the same OR group) and a link to the filter migration page.
+- PM-19, `_include_unfiltered_entities`: removed from Filtering and query syntax. The replacement note says a filter doesn't narrow the related records expanded inside each match, and that no parameter for changing that has been verified.
+- PM-23, date filters and consistency: Pagination and Searching and pagination no longer suggest that a date filter gives a consistent run. They now recommend a deterministic sort and a reconciliation pass, and state that a date filter alone doesn't guarantee a point-in-time snapshot.
+- PM-24, ERP reconciliation: Sync your ERP has a new "Reconcile on a slower schedule" procedure. It reads every page with the synced fields and discards the pass if any page fails, compares values rather than only IDs, treats a missing product as a candidate to confirm with a direct `GET` (only a `404` confirms it's gone), and acts downstream only after that confirmation.
+- PM-25, inheritance workaround: the hierarchy guide and the data model page no longer recommend setting the level through the `POST` link after a `403`. Both now stop at the rejection and tell the reader to ask their Plytix contact about inheritance for their account.
+- PM-26, empty values and null: Responses and updates has a table of the tested results by attribute type. Text clears with `null`, `""`, or spaces only; MultiSelect with `null` or `[]`; Media gallery with `null` or `[]`, and the assets stay; Media rejects `""`, so it's cleared with `DELETE` on the attribute path. The page also states that cleared and never-set values both match `[!exists]` and `[length]=0`, and neither matches `[null]`. On Update and delete records, we corrected two claims that our own tests contradict: that `""` and `[]` are stored verbatim, and that DELETE lets an inherited value take over. Nothing promises an inheritance reset.
+- PM-28, rate-limit pacing in the exporter: it now paces requests for both windows (per 10 seconds and per hour), and the guide explains that every integration on the account shares the allowance. Request times are saved, so a rerun still counts the current hour. On a `429` it honors a valid `Retry-After` (seconds or HTTP-date) and otherwise backs off with jitter, within bounds. Any wait longer than 60 seconds saves state and stops with a "rerun in N seconds" message. The guide doesn't present `Retry-After` as guaranteed.
+- PM-29, feed deduplication: `build_feed.py` keeps the last saved copy of each product `id`, so the feed has one row per product. It also skips blank lines and writes the CSV through a temporary file, so a failed run leaves the previous feed in place.
+- PM-30, credential forwarding: the `--location-trusted` advice is gone from Migrating to V3. The exporter checks every `next_page` and saved URL before attaching the token: it must use HTTPS on the Plytix host and point to the product search, with no user name or unexpected port, and a same-host `http` link is upgraded to `https` explicitly. Redirects aren't followed.
+- PM-32, duplicate related cards: we removed every related card that repeated the page's automatic previous/next link, 24 cards on 23 pages, including Export your full catalog. A script check confirms that no related section repeats a destination.
+- PM-35, media and gallery payloads: Safely remove categories, assets, or relationships documents the tested formats (a bare asset ID for media, an array of IDs for a gallery, `{"id": ...}` objects rejected) and adds a gallery example. It also says that reads return expanded objects, that a gallery keeps the order you send and removes duplicates (that order isn't the product's `assets` order and doesn't choose the thumbnail), and that clearing or unlinking never deletes the asset. The migration pages now agree, and asset linking has moved from "Keep on V1" to "Move to V3".
+- PM-42, interruption-safe export: the exporter validates the full page (the `data` list, each product `id`, and the pagination shape) before writing anything. It saves each page as its own file through an atomic replace, records the page in the manifest only after its file is complete, reports a corrupt or missing manifest or page file instead of claiming the export finished, and builds the final file with duplicates removed. We tested the published script offline against a simulated API: 26 tests covering long and short `Retry-After` values, exhausting both windows, off-origin and redirected links, nine malformed pages, interruption at each write step, and duplicate IDs. No production calls were made.
+- PM-45, broken migration link: the legacy Filtering and search card now opens the Filter operators migration page. We fixed the same broken link on the legacy Pagination page, which now opens Searching and pagination.
+- PM-52, root PATCH vs `/attributes` merge: Responses and updates documents three routes, each with a before/after example. On the root `PATCH`, the map you send replaces the whole map; on `PATCH /attributes`, a partial map is merged; on the attribute's own path, only that attribute changes. The read-merge-write advice is replaced by a warning about overwriting concurrent edits, and the ERP troubleshooting entry and Update and delete records match.
+- PM-54, filter migration recipes: Filter operators maps `like` to `[contains:ignorecase]` (using your `ALPHA` test), `!like` to `[!contains:ignorecase]` combined with `[!exists]` in one OR group, and multiselect `in` to `[in]`/`[intersects]` (any value), with a new row for `[includes]` (all values). It states that `[!in]` and other negated filters skip records with no value, and warns that punctuation such as `A.B` and `A+B` acts as a pattern. A callout says these recipes preserve the tested results only and aren't a general Unicode rewrite (ÉCOLE).
+- Also fixed: the single-attribute PATCH example on Update and delete records sent a decimal as a bare number, which our tests show returns `422`. It now sends a string.
+
+Questions:
+- PM-54: what is the exact lowercase recipe you tested for ASCII `!in`, and which control IDs did it preserve? And what escape syntax makes `contains:ignorecase` match punctuation literally? Does plain `contains` behave the same way? We left both out rather than guess.
+- PM-28: does V3 return `Retry-After` on a `429`? The exporter handles both cases, but we'd like to document the actual header.
+- PM-26: which route did each `null` test use: the root PATCH, `/attributes`, or the attribute's own path?
+- PM-52: we haven't reproduced the `/attributes` merge ourselves. Could you confirm it on the release candidate?
 
 ---
 

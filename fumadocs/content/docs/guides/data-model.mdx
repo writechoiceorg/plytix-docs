@@ -94,11 +94,11 @@ A family's structure lives in its family attributes: one row per attribute linke
 You can build a family through the API. `POST /api/v3/product-families` creates one, `POST /api/v3/product-families/{product_family_id}/attributes` adds an attribute to it, and `PATCH` on the family renames it. Assigning a product into a family still works the way you'd expect, through `product_family_id`.
 
 <Callout type="warn" title="Inheritance levels depend on your account">
-  Creating a family and choosing its attributes both work through the API. Two calls return `403 Automatic inheritance is not available for this account` unless inheritance is available for your account: changing an existing link's `level` with `PATCH`, and sending `parent_attributes` or `variant_attributes` when you create a family. Linking an attribute with `"level": "parent_level"` through `POST /api/v3/product-families/{product_family_id}/attributes` worked in testing, and variants then inherited the value. A family's own `PATCH` accepts `name` only, because changing which attributes belong to a family propagates across every product in it.
+  Creating a family and choosing its attributes both work through the API. Two calls return `403 Automatic inheritance is not available for this account` unless inheritance is available for your account: changing an existing link's `level` with `PATCH`, and sending `parent_attributes` or `variant_attributes` when you create a family. If one of these calls returns `403`, ask your Plytix contact whether inheritance is available for your account. A family's own `PATCH` accepts `name` only, because changing which attributes belong to a family propagates across every product in it.
 </Callout>
 
 {/* FLAG (open):
-  The `POST` link at `parent_level` succeeded on an account where the other two calls return `403` (FB-036, 2026-10-15). Confirm with Plytix whether that route is meant to work without automatic inheritance. */}
+  The `POST` link at `parent_level` succeeded on an account where the other two calls return `403` (FB-036, 2026-10-15). Confirm with Plytix whether that route is meant to work without automatic inheritance. PM-25 (2026-10-19): Plytix asked us not to present that route as a workaround for the `403`, so the page no longer mentions it. */}
 
 ## Product Categories
 

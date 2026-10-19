@@ -3,7 +3,7 @@ title: "Filtering and query syntax"
 description: "Reference for V3's query syntax: filter operators, boolean grouping, functions, field selection, and filtering on attributes and related entities."
 ---
 
-import { ArrowSwapRegular, TextNumberListLtrRegular } from '@/components/icons';
+import { ArrowSwapRegular, SearchRegular } from '@/components/icons';
 
 In V3, you filter a search by adding query parameters to the URL. This page documents the operators, how to combine them, and how to filter on custom attributes and related entities.
 
@@ -13,7 +13,7 @@ Key points on this page:
 - `&` combines filters with AND. OR uses an indexed `_or[#]` prefix on each filter it joins.
 - Custom attributes are addressed as `attributes.<name>`.
 - `_fields` controls which fields come back, and it's repeated once per field. It works on searches only.
-- Case-insensitive matching is `icontains`.
+- Case-insensitive text matching is `contains:ignorecase`.
 
 ## How a filter is written
 
@@ -36,7 +36,7 @@ The rest of this page shows filters as bare query-string fragments. Attach them 
 A search with no filter parameters matches every record, returned one page at a time. See [Pagination](/docs/reference/v3/pagination) for how to walk the full set.
 
 <Callout type="info" title="Encode the brackets">
-  `[` and `]` are not safe in a URL. Most HTTP clients encode them for you, and the API returns them encoded in its `pagination.next_page` links, where `name[icontains]=a` comes back as `name%5Bicontains%5D=a`. If you build query strings by hand, encode them yourself. The curl examples here use `-G` with one `--data-urlencode` per filter so that curl handles it.
+  `[` and `]` are not safe in a URL. Most HTTP clients encode them for you, and the API returns them encoded in its `pagination.next_page` links, where `name[contains]=a` comes back as `name%5Bcontains%5D=a`. If you build query strings by hand, encode them yourself. The curl examples here use `-G` with one `--data-urlencode` per filter so that curl handles it.
 </Callout>
 
 ## Equality and comparison
@@ -83,10 +83,18 @@ The existence operators take an explicit `=true`.
 
 | Meaning | Syntax |
 |---|---|
-| Contains, ignoring case | `field[icontains]=value` |
+| Contains, ignoring case | `field[contains:ignorecase]=value` |
 | Contains, case-sensitive | `field[contains]=value` |
 | Arrays share at least one value | `field[intersects]=value` |
 | Arrays share no values | `field[!intersects]=value` |
+
+The text operators above were tested on text attributes. A negated text filter, such as `field[!contains:ignorecase]=value`, doesn't return records where the field has no value. To include those records, add `[!exists]` to the same OR group:
+
+```text
+_or[0]field[!contains:ignorecase]=value&_or[0]field[!exists]=true
+```
+
+[Filter operators](/docs/guides/migrating-to-v3/filter-operators) covers case and missing-field details when you migrate V1 filters.
 
 ## Functions
 
@@ -125,7 +133,7 @@ Custom attributes are addressed by name under `attributes`, and take the same op
 
 ```text
 attributes.brand=Plytix
-attributes.brand[icontains]=plyt
+attributes.brand[contains:ignorecase]=plyt
 attributes.main_image_link[!exists]=true
 ```
 
@@ -175,8 +183,8 @@ Requesting a related entity's fields expands that entity in the response. There 
   **An unknown value may fail either way.** Some unknown fields return a `400` naming the error, and others are dropped with no error and no key in the response. Check that every field you asked for came back rather than trusting the status code.
 </Callout>
 
-<Callout type="info" title="Unfiltered related records">
-  When a filter narrows a related entity and you still want the full set of related records back, `_include_unfiltered_entities=<subentity>` returns all of them rather than only the matching ones. Use one parameter per subentity. Spec only, not yet tested.
+<Callout type="info" title="Filters and expanded related records">
+  A filter on a related entity chooses which records match. It doesn't narrow the related records expanded inside each match, as described in [The Plytix data model](/docs/guides/data-model). No parameter for returning a different subset of related records has been verified.
 </Callout>
 
 ## Reserved and forbidden names
@@ -194,8 +202,8 @@ Values follow normal URL encoding. Spaces become `+` or `%20`, and `=`, `&`, `?`
 Now that you can filter a search, you can explore these related pages.
 
 <Cards>
-  <Card icon={<TextNumberListLtrRegular />} title="Pagination" href="/docs/reference/v3/pagination">
-    Page through a filtered result set and read the pagination block.
+  <Card icon={<SearchRegular />} title="Audit product data quality with filters" href="/docs/guides/auditing-product-data-quality-with-filters">
+    Use these filters to find incomplete products in your catalog.
   </Card>
   <Card icon={<ArrowSwapRegular />} title="Filter operators" href="/docs/guides/migrating-to-v3/filter-operators">
     Map V1's JSON filter objects to the syntax on this page.

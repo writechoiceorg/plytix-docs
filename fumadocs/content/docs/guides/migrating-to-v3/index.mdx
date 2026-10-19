@@ -32,13 +32,13 @@ Before you start, you need:
    | Linking products to categories, assets to categories, and attributes to groups | Dedicated link and unlink endpoints, rather than rewriting an array |
    | Adding and removing product relationships | V3's `DELETE /products/{product_id}/relationships/{relationship_id}` is a scoped unlink; V1 needs a separate `/unlink` call |
    | Creating variants | `parent_id` and `product_family_id` on the product itself |
+   | Connecting assets to a product | Media and media gallery attributes: a media attribute takes a bare asset ID and a gallery takes an array of IDs. `thumbnail_id` sets the main image |
 
    **Keep these on V1/V2.** They have no confirmed V3 equivalent today:
 
    | Operation | V1 endpoint | Status in V3 |
    |---|---|---|
    | Replacing the binary content of an existing asset | `PUT /api/v1/assets/{asset_id}/content` | No equivalent. V3 accepts `url` or `content` only when the asset is created; its update schema carries only `filename` and `alt_text` |
-   | Linking and unlinking assets on a product | `POST` and `DELETE /api/v1/products/{product_id}/assets` | No dedicated endpoint. Set a media or media gallery attribute to the asset ID with `PATCH /api/v3/products/{identifier}/attributes/{label}` and clear it with `DELETE` on the same path. `thumbnail_id` sets the main image |
    | Discovering the available filters for a resource | `GET /api/v1/filters/product`, `/filters/asset`, `/filters/relationships` | No equivalent. Build filters from `GET /api/v3/product-attributes` instead |
    | Resyncing variants against their parent | `POST /api/v1/products/{parent_product_id}/variants/resync` | No equivalent |
    | Reading a total result count | `total_count` on every V1 search response | No equivalent anywhere in V3. See step 6 |
@@ -149,7 +149,7 @@ Before you start, you need:
    Anything in your integration that reads a total has to be reworked to page to the end and tally: a progress bar, a "showing N of M" label, a pre-sized buffer, a sanity check that compares an expected count against a returned one. V3 also paginates by returning the next page's URL rather than a page number to increment, so the loop follows `next_page` until that key stops appearing.
 
    <Callout type="warn" title="Rewrite next_page to https before following it">
-     Every `next_page` and `previous_page` URL is generated with the `http` scheme and `301`s to `https`. HTTP clients that don't forward `Authorization` across a scheme-changing redirect will drop it and get a `401`. Rewrite the scheme before requesting the URL, or use `curl -L --location-trusted`.
+     Every `next_page` and `previous_page` URL is generated with the `http` scheme and `301`s to `https`. HTTP clients that don't forward `Authorization` across a scheme-changing redirect will drop it and get a `401`. Rewrite the scheme to `https` before requesting the URL. Don't let your HTTP client forward `Authorization` across redirects, because that sends your token to whatever host the redirect names.
    </Callout>
 
    Note also that these keys are omitted when they don't apply rather than set to `null`, so test for presence, not for `!== null`. See [Pagination](/docs/reference/v3/pagination).
@@ -210,7 +210,7 @@ Check the problems below if you run into issues while following this guide.
   </Accordion>
 
   <Accordion title="You can't find the V3 endpoint for replacing an asset's file or attaching an asset to a product" value="no-v3-asset-endpoint">
-    V3 has neither. Uploading a new asset works in V3 with `POST /api/v3/assets` and a `url` or `content`, but replacing the file of an existing asset stays on V1. Attaching an asset to a product goes through media and media gallery attributes in V3, and their value format isn't confirmed yet, so keep that on V1 for now, as step 1 explains.
+    V3 has no dedicated endpoint for either. Uploading a new asset works in V3 with `POST /api/v3/assets` and a `url` or `content`, but replacing the file of an existing asset stays on V1. Attaching an asset to a product goes through media and media gallery attributes in V3: a media attribute takes a bare asset ID and a gallery takes an array of IDs. See [Connect other assets to a product](/docs/guides/safely-removing-categories-assets-or-relationships#connect-other-assets-to-a-product).
   </Accordion>
 </Accordions>
 

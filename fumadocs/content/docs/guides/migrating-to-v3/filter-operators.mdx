@@ -14,28 +14,41 @@ V1 expresses a filter as an object with `field`, `operator`, and `value`. V3 put
 | Equals | `eq` | `field=value` or `field[eq]=value` |
 | Not equal | `!eq` | `field[!eq]=value` |
 | In a set | `in` | `field[in]=value1&field[in]=value2` |
-| Not in a set | `!in` | `field[!in]=value1&field[!in]=value2` |
+| Not in a set | `!in` | `field[!in]=value1&field[!in]=value2`. Add absence handling to keep records with no value. See [Missing, null, and empty values](#missing-null-and-empty-values) |
 | Greater than | `gt` | `field[gt]=value` |
 | Greater or equal | `gte` | `field[gte]=value` |
 | Less than | `lt` | `field[lt]=value` |
 | Less or equal | `lte` | `field[lte]=value` |
 | Between | Two comparisons | `field[gte]=<low>&field[lte]=<high>` |
-| Contains text | `like` | `field[contains]=value` (case-sensitive) or `field[contains:ignorecase]=value`. See [Text matching](#text-matching) |
-| Doesn't contain text | `!like` | `field[!contains]=value` or `field[!contains:ignorecase]=value`. See [Text matching](#text-matching) |
+| Contains text | `like` | `field[contains:ignorecase]=value`. See [Text matching](#text-matching) |
+| Doesn't contain text | `!like` | `_or[0]field[!contains:ignorecase]=value&_or[0]field[!exists]=true`. See [Text matching](#text-matching) |
 | Text in any of several fields | `text_search` | No confirmed direct equivalent. See [Text matching](#text-matching) |
 | Field exists | `exists` | `field[exists]=true`. See [Missing, null, and empty values](#missing-null-and-empty-values) |
 | Field does not exist | `!exists` | `field[!exists]=true`. See [Missing, null, and empty values](#missing-null-and-empty-values) |
 | Field is null | No documented operator | `field[null]` |
 | Field is not null | No documented operator | `field[!null]` |
 | Empty string or empty list | No confirmed direct equivalent | `field[length]=0` |
-| Arrays share a value | No confirmed direct equivalent. See [Multi-value fields](#multi-value-fields) | `field[intersects]=value`, negated as `field[!intersects]=value` |
+| Multiselect holds any of the values | `in`. See [Multi-value fields](#multi-value-fields) | `field[in]=value1&field[in]=value2` or `field[intersects]=value1&field[intersects]=value2` |
+| Multiselect holds all of the values | No V1 operator. See [Multi-value fields](#multi-value-fields) | `field[includes]=value1&field[includes]=value2` |
+| Arrays share no values | No confirmed direct equivalent | `field[!intersects]=value` |
 | Length comparison | No confirmed direct equivalent | `field[length][gt]=value`, and the other comparison operators |
 
 [Filtering and Query Syntax](/docs/reference/v3/filtering-query-syntax) covers each operator in full, along with the gotchas.
 
 ### Text matching
 
-V3 splits text matching by case: `[contains]` is case-sensitive and `[contains:ignorecase]` isn't, and `[!contains]` and `[!contains:ignorecase]` are the negated forms. The legacy documentation describes `like` as a contains check but doesn't say how it treats case, so neither V3 operator is a confirmed match for `like` or `!like`. Before you switch, run the V3 search both ways against records you know, and keep the operator that returns what `like` returns today.
+Map `like` to `[contains:ignorecase]`. V3 splits text matching by case: `[contains]` is case-sensitive and `[contains:ignorecase]` isn't. In a controlled test on a text attribute, a V1 `like` search for `ALPHA` returned both `AlphaBeta` and `alphabeta`. V3 `[contains:ignorecase]` returned the same records, and plain `[contains]` didn't.
+
+`!like` doesn't translate by negating alone. A V3 negated filter skips records where the field has no value, while the tested V1 `!like` kept them. To return the same records, combine the negated filter with `[!exists]` in one OR group:
+
+```text
+_or[0]field[!contains:ignorecase]=value&_or[0]field[!exists]=true
+```
+
+`[contains:ignorecase]` treats some punctuation as pattern syntax rather than literal text. In testing, values such as `A.B` and `A+B` matched as patterns, so a search for `A.B` can return records that don't contain that exact text. Check the results of any text filter whose value contains punctuation.
+
+{/* FLAG (open):
+  PM-54 (2026-10-19): Plytix says to escape literal punctuation for the tested pattern cases but didn't give the escape syntax. Ask David for the exact escaped form (and whether plain `[contains]` behaves the same) before documenting it. */}
 
 `text_search` matched text across several fields, passed as a list in `field`. V3 has no `text_search` operator. The nearest form is an OR group with one `contains` filter per field, such as `_or[0]sku[contains:ignorecase]=kettle&_or[0]label[contains:ignorecase]=kettle`. That form isn't a confirmed equivalent, so compare the results before you rely on it.
 
@@ -44,14 +57,23 @@ V3 splits text matching by case: `[contains]` is case-sensitive and `[contains:i
 A field can be absent, `null`, an empty string, or an empty list. The two versions describe these cases differently:
 
 - V1 documents only `exists` (the value is defined) and `!exists` (the value is undefined). It doesn't say how a `null`, an empty string, or an empty list is treated.
-- V3 separates them. `[exists]` and `[!exists]` test whether the field is defined, `[null]` and `[!null]` test for `null`, and `[length]=0` matches an empty string or an empty list.
-- V3's negated comparisons, such as `[!eq]` and `[!in]`, skip records where the field is `null` or undefined. To include those records, add an OR group, as shown in [Filtering and Query Syntax](/docs/reference/v3/filtering-query-syntax).
+- V3 has separate operators: `[exists]` and `[!exists]` test whether the field is defined, `[null]` and `[!null]` test for `null`, and `[length]=0` matches an empty string or an empty list. In practice they overlap. On the attribute types tested, an emptied value is stored as absent, so a cleared value and one that was never set both match `[!exists]=true` and `[length]=0`, and neither matches `[null]`.
+- V3's negated comparisons, such as `[!eq]`, `[!in]`, and `[!contains:ignorecase]`, skip records where the field is `null` or undefined. To include those records, add `[!exists]=true` to the same OR group, as in the `!like` example above.
 
-Because V1 doesn't define these cases, test any `exists`, `!exists`, or negated filter against records with empty values before you rely on the translation.
+Case handling for `!in` on text values also needs care. A lowercase-based rewrite that preserved the tested ASCII results didn't hold for an accented value such as `ÉCOLE`, so it isn't a general Unicode rewrite. Because V1 doesn't define these cases, compare the record IDs that both versions return for matching, other-case, non-matching, and empty records before you rely on any translation.
+
+{/* FLAG (open):
+  PM-54 (2026-10-19): Plytix refers to a tested lowercase recipe for ASCII `!in` but didn't share it. Ask David for the exact recipe and its control IDs before publishing a runnable example. */}
 
 ### Multi-value fields
 
-Matching one value against a set and matching values inside a list are different operations. `[in]` checks whether a single-value field, such as `status`, equals one of the values you send. `[intersects]` checks whether a list field, such as `categories.name`, shares at least one value with the values you send. V1 uses `in` for both kinds of field, and its documentation notes that multiselect and dropdown values are compared case-sensitively. V3 also accepts `includes` and `!includes`, which aren't documented yet. It isn't confirmed whether V3's `[in]` on a list field returns the same records as V1's `in`, so test multi-value filters before you switch.
+On a multiselect attribute, V3 has two kinds of match. `[in]` and `[intersects]` return records that hold any of the values you send, which is what V1's `in` does. `[includes]` returns records that hold all of them, which V1 has no operator for. Repeat the parameter once per value, as in `attributes.tags[includes]=red&attributes.tags[includes]=blue`. In testing, a comma-separated value in one parameter returned no records.
+
+On a single-value field, such as `status`, `[in]` checks whether the field equals one of the values you send. V1's documentation notes that multiselect and dropdown values are compared case-sensitively.
+
+<Callout type="warn" title="These recipes preserve tested results, not every case">
+  The mappings on this page reproduced the record sets of controlled tests on text and multiselect attributes. They aren't a universal rewrite: Unicode case handling, other attribute types, and future API releases can change the results. Compare the record IDs that both versions return before you switch.
+</Callout>
 
 ## Boolean grouping
 
@@ -130,8 +152,8 @@ Both return the same products: each is a draft or was created after January 1, 2
 Now that you can translate a filter, you can explore these related pages.
 
 <Cards>
-  <Card icon={<SearchRegular />} title="Searching and pagination" href="/docs/guides/migrating-to-v3/searching-and-pagination">
-    Put the translated filters into a V3 search and page through the results.
+  <Card icon={<SearchRegular />} title="Audit product data quality with filters" href="/docs/guides/auditing-product-data-quality-with-filters">
+    Put V3 filters to work finding incomplete products.
   </Card>
   <Card icon={<FilterRegular />} title="Filtering and query syntax" href="/docs/reference/v3/filtering-query-syntax">
     Read the full V3 filter reference, including encoding rules and gotchas.

@@ -3,7 +3,7 @@ title: "Endpoint mapping"
 description: "Reference for every V1/V2 endpoint and its V3 equivalent, resource by resource, including the dedicated link and unlink endpoints."
 ---
 
-import { BookOpenRegular, ProhibitedRegular } from '@/components/icons';
+import { BookOpenRegular, DocumentEditRegular } from '@/components/icons';
 
 This page maps the V1/V2 endpoints most integrations use to their V3 equivalents, one resource at a time, and ends with the link and unlink endpoints that replaced V1's array fields. The Notes column records where the payload, the scope of the operation, or the response shape changes, because a similar-looking path doesn't always have the same effect. "No V3 equivalent" means V3 can't do the operation, and "No dedicated endpoint" means V3 has no matching endpoint but may cover the operation through another workflow. [Not migrated and new in V3](/docs/guides/migrating-to-v3/not-migrated-and-new-in-v3) collects those in one place. It's part of the reference set for [Migrating to V3](/docs/guides/migrating-to-v3).
 
@@ -19,8 +19,8 @@ Every V1 endpoint in this table also has a V2 counterpart under `/api/v2`. V2 is
 | `PATCH /api/v1/products/{product_id}` | `PATCH /api/v3/products/{identifier}` | |
 | `DELETE /api/v1/products/{product_id}` | `DELETE /api/v3/products/{identifier}` | Deletes the product. To detach a variant from its parent without deleting it, see [Variants](#variants). |
 | `GET /api/v1/products/{product_id}/assets` | `GET /api/v3/products/{identifier}/assets` | Returns the product's assets as an array. To read assets along with other fields, use `GET /api/v3/products?sku=<sku>&_fields=assets` and filter to the one product. |
-| `POST /api/v1/products/{product_id}/assets` | `PATCH /api/v3/products/{identifier}/attributes/{label}` | No dedicated endpoint. Set a media or media gallery attribute to the asset ID: a media attribute takes the ID as a bare string, a media gallery attribute takes an array of IDs, and the other shape returns `422`. The asset then appears in the product's `assets`. For the main image, set `thumbnail_id` instead. |
-| `DELETE /api/v1/products/{product_id}/assets/{asset_id}` | `DELETE /api/v3/products/{identifier}/attributes/{label}` | Clears the media attribute's value, and the asset leaves the product's `assets` unless a thumbnail or another media attribute still uses it. |
+| `POST /api/v1/products/{product_id}/assets` | `PATCH /api/v3/products/{identifier}/attributes/{label}` | No dedicated endpoint. Set a media or media gallery attribute to the asset ID: a media attribute takes the ID as a bare string, a media gallery attribute takes an array of IDs, and the other shape returns `422`. Objects such as `{"id": "<asset_id>"}` are rejected too. The asset then appears in the product's `assets`, and reads return it as an expanded object. For the main image, set `thumbnail_id` instead. |
+| `DELETE /api/v1/products/{product_id}/assets/{asset_id}` | `DELETE /api/v3/products/{identifier}/attributes/{label}` | Clears the media attribute's value, and the asset leaves the product's `assets` unless a thumbnail or another media attribute still uses it. The asset itself isn't deleted. |
 | `GET /api/v1/products/{product_id}/categories` | `GET /api/v3/products/{identifier}/categories` | Returns the product's categories as an array. The filtered search shown for assets works here too. |
 | `POST /api/v1/products/{product_id}/categories` | `POST /api/v3/products/{identifier}/categories` | Body: `{"id": "<category_id>"}`, one category per call. |
 | `DELETE /api/v1/products/{product_id}/categories/{category_id}` | `DELETE /api/v3/products/{identifier}/categories/{id}` | Removes only that category link. |
@@ -190,8 +190,8 @@ V1 links through dedicated subpaths. V3 originally accepted `category_ids` and `
 Now that you have the mapping, you can explore these related pages.
 
 <Cards>
-  <Card icon={<ProhibitedRegular />} title="Not migrated and new in V3" href="/docs/guides/migrating-to-v3/not-migrated-and-new-in-v3">
-    See which V1 calls have no V3 counterpart and which resources are new.
+  <Card icon={<DocumentEditRegular />} title="Update and delete records" href="/docs/reference/v3/updates-and-deletes">
+    Check what each V3 write returns before you move your update and delete calls.
   </Card>
   <Card icon={<BookOpenRegular />} title="V3 API reference" href="/docs/reference/v3">
     Browse the V3 resources and their parameters in detail.

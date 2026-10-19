@@ -3,7 +3,7 @@ title: Safely remove categories, assets, or relationships
 description: Remove a category or a relationship link from a product, or change its thumbnail, through the V3 API while keeping the product's other links.
 ---
 
-import { ArrowClockwiseRegular, OrganizationRegular } from '@/components/icons';
+import { ArrowClockwiseRegular, DocumentEditRegular } from '@/components/icons';
 
 Remove one category from a product, or remove a product's link to one relationship type, without touching the product's other links. Each is a link between two entities, and Plytix V3 gives you a dedicated endpoint to add or remove it: `POST` to the collection to link, `DELETE` on the specific link to unlink. Removing a relationship link removes every related product the product has under that relationship type, so it isn't a way to remove a single related product. The relationship type and the products themselves stay. This guide covers categories and relationships, and explains how a product's thumbnail and other assets are set. All requests use the V3 API with a bearer token. A successful `PATCH` or `DELETE` returns `204` with an empty body, which confirms the change. Read the product back when you need to inspect the result.
 
@@ -114,11 +114,32 @@ A product's thumbnail is set through `thumbnail_id` on the product itself, not t
      -d '{"thumbnail_id": null}'
    ```
 
-   Both return `204`. Clearing the thumbnail changes only the product's reference to the asset. The asset itself stays in Plytix DAM; deleting it is a separate action, `DELETE /api/v3/assets/<asset_id>`, which removes it from your account. In testing, a product whose only asset was its thumbnail also showed an empty `assets` list once the thumbnail was cleared. Whether an asset that a media attribute still references stays in `assets` hasn't been confirmed.
+   Both return `204`. Clearing the thumbnail changes only the product's reference to the asset. The asset itself stays in Plytix DAM; deleting it is a separate action, `DELETE /api/v3/assets/<asset_id>`, which removes it from your account. In testing, a product whose only asset was its thumbnail also showed an empty `assets` list once the thumbnail was cleared. An asset that a media attribute still references stays in `assets` after you clear the thumbnail.
 
 ## Connect other assets to a product
 
-There's no link or unlink endpoint for assets: `POST /products/<product_id>/assets` returns `405`. The product schema describes other assets as managed through media and media gallery attributes, which hold assets as values in the product's `attributes` map. The value format these attributes accept in a `PATCH` hasn't been confirmed yet, so test it on a scratch product before you rely on it, or manage those assets in Plytix.
+There's no link or unlink endpoint for assets: `POST /products/<product_id>/assets` returns `405`. You connect other assets through media and media gallery attributes, which hold assets as values in the product's `attributes` map. Each takes asset IDs in its own shape:
+
+- A media attribute takes one bare asset ID, such as `"<asset_id>"`.
+- A media gallery attribute takes an array of asset IDs, such as `["<asset_id_1>", "<asset_id_2>"]`.
+- Objects such as `{"id": "<asset_id>"}` are rejected, and so is the other attribute's shape, an array on a media attribute or a bare string on a gallery.
+
+These formats were tested on the attribute's own path, in a `PATCH` of the whole `attributes` map, and when creating a product. This request sets a gallery:
+
+```bash
+curl -X PATCH "https://pim.plytix.com/api/v3/products/<product_id>/attributes/<gallery_label>" \
+  -H "Authorization: Bearer <access_token>" \
+  -H "Content-Type: application/json" \
+  -d '["<asset_id_1>", "<asset_id_2>"]'
+```
+
+Keep these behaviors in mind when you read the result back:
+
+- Reads return expanded asset objects, not the IDs you wrote, so compare them by each object's `id`.
+- A gallery keeps the order you send and drops duplicate IDs. That order belongs to the gallery: the product's `assets` list can come back in a different order.
+- Gallery order doesn't choose the thumbnail. Set the main image with `thumbnail_id`, as shown in [Change or clear a product's thumbnail](#change-or-clear-a-products-thumbnail).
+
+To disconnect assets, send `[]` to a gallery, or use `DELETE /products/<product_id>/attributes/<label>` on either attribute. A media attribute rejects `""`. Clearing or unlinking removes only the product's association: the asset stays in Plytix DAM, and deleting it is the separate `DELETE /api/v3/assets/<asset_id>`.
 
 ## Troubleshooting
 
@@ -147,13 +168,13 @@ Check the problems below if you run into issues while following this guide.
 
 ## Related articles
 
-Now that you know how to unlink data from a product, you can explore these related guides.
+Now that you know how to unlink data from a product, you can explore these related pages.
 
 <Cards>
   <Card icon={<ArrowClockwiseRegular />} title="Sync your ERP" href="/docs/guides/syncing-your-erp-with-plytix">
     The broader pattern for reading and writing product data safely.
   </Card>
-  <Card icon={<OrganizationRegular />} title="Reconstruct parent/variant hierarchies" href="/docs/guides/reconstructing-parent-variant-hierarchies">
-    Read how a parent product and its variants are structured in a product family.
+  <Card icon={<DocumentEditRegular />} title="Update and delete records" href="/docs/reference/v3/updates-and-deletes">
+    Read the full V3 rules for what DELETE and PATCH remove.
   </Card>
 </Cards>

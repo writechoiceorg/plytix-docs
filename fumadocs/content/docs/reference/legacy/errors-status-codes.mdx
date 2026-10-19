@@ -3,7 +3,7 @@ title: Errors and status codes
 description: "Reference for the HTTP status codes and error response format the V1/V2 APIs return, and how they differ from V3 responses."
 ---
 
-import { GaugeRegular, KeyRegular } from '@/components/icons';
+import { ArrowSwapRegular, WarningRegular } from '@/components/icons';
 
 This page documents the HTTP status codes and the response formats you encounter when you call the V1/V2 APIs. Successful responses and error responses use different shapes, so it helps to know both before you write error handling.
 
@@ -136,10 +136,10 @@ See the [V3 errors reference](/docs/reference/v3/errors-status-codes) for the fu
 ## Related resources
 
 <Cards>
-  <Card icon={<KeyRegular />} title="Authentication" href="/docs/reference/legacy/token-authentication">
-    Get a bearer token and handle the `401` that comes with an expired one.
+  <Card icon={<WarningRegular />} title="Errors and status codes" href="/docs/reference/v3/errors-status-codes">
+    Compare these codes with the status codes and error shapes in V3.
   </Card>
-  <Card icon={<GaugeRegular />} title="Rate limits" href="/docs/reference/legacy/rate-limits">
-    See what happens when you reach your plan's request limits and get a `429`.
+  <Card icon={<ArrowSwapRegular />} title="Migrating to V3" href="/docs/guides/migrating-to-v3">
+    Plan a move to V3, including how error handling changes.
   </Card>
 </Cards>

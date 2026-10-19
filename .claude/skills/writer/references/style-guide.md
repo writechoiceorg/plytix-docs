@@ -58,7 +58,7 @@ Plytix sounds like an experienced, friendly colleague: competent, relatable, and
 - **Specifics beat superlatives.** Concrete actions and outcomes build credibility. "Sync product titles and prices to Shopify automatically," not "Unlock unlimited potential with effortless automation."
 - **Answer first, then expand.** Lead with the concise answer, then add detail for readers who want it. "Yes. Go to Settings → Attributes → Add Attribute," not "It depends…" without ever answering.
 - **Don't say "no." Lead with what we can do.** Keep momentum. Be honest about limits, but make progress the headline. "You can do Y today using Z, and here's how. (X isn't supported yet.)" — not "No, we don't support X."
-  - Worked example specific to this project: v3 has no bulk endpoints. Don't write "The v3 API doesn't support bulk operations." Bridge to what the reader can do: "For large catalogs, send single requests in a paced loop. See [Bulk operations for large catalogs]." (Source: `config/api-testing.config.md`; see also `information-architecture.md`'s Notes.)
+  - Worked example specific to this project: v3 has no bulk endpoints. Don't write "The v3 API doesn't support bulk operations." Bridge to what the reader can do: "For large catalogs, send single requests in a paced loop. See [Rate limits]." (Updated 2026-10-19, PM-07: the Bulk operations guide is a private draft, so public pages don't link to it.) (Source: `config/api-testing.config.md`; see also `information-architecture.md`'s Notes.)
 
 ---
 

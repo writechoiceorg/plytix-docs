@@ -3,7 +3,7 @@ title: "Responses and updates"
 description: "Reference for V3 response conventions and the update and delete behaviors that break migrated code, including the empty 204 returned by PATCH."
 ---
 
-import { DocumentEditRegular, TableRegular } from '@/components/icons';
+import { DocumentEditRegular, WarningRegular } from '@/components/icons';
 
 V3 changed what a write gives back and what a write does. The status codes are the visible part; the behavioral differences underneath them are what actually break migrated code. This page covers both, and it's part of the reference set for [Migrating to V3](/docs/guides/migrating-to-v3).
 
@@ -23,7 +23,7 @@ The V1/V2 column follows the documented examples in the V1/V2 Postman collection
 
 ## Response shapes
 
-V3 uses one envelope for every response, but `data` changes shape with the operation: a search returns an array, while a single-record GET and a create return an object. V1/V2 wraps single records in an array, so code that reads `data[0]` has to read `data` instead, even when the record inside looks the same.
+Response bodies depend on the operation, and a `204` has no body to parse. Where a response carries `data`, its shape changes with the operation: a search returns an array, while a single-record GET and a create return an object. V1/V2 wraps single records in an array, so code that reads `data[0]` has to read `data` instead, even when the record inside looks the same.
 
 A V3 search returns `data` as an array:
 
@@ -88,15 +88,23 @@ Code that reads create responses needs checking too. A create still returns a bo
 
 ## How PATCH treats the attributes map
 
-A product PATCH is a partial update at the top level: fields you leave out, such as `label` or `status`, keep their current values. The `attributes` map is the exception. Naming `attributes` in a PATCH replaces the product's whole map with the one you send, so every attribute you leave out is deleted, with no error and no warning. Attributes that Plytix calculates, such as completeness scores, are kept.
+A product PATCH is a partial update at the top level: fields you leave out, such as `label` or `status`, keep their current values. What happens to the `attributes` map depends on the route you send it to:
 
-For example, a product has two attributes:
+| Route | Body | Attributes you leave out |
+|---|---|---|
+| `PATCH /api/v3/products/<identifier>` | `{"attributes": {...}}` | Removed. The map you send replaces the product's whole map. |
+| `PATCH /api/v3/products/<identifier>/attributes` | A partial map, `{...}` | Kept. The attributes you send are merged into the map. |
+| `PATCH /api/v3/products/<identifier>/attributes/<name>` | The bare value | Kept. Only the named attribute changes. |
+
+The examples below start from the same product, which has two attributes:
 
 ```json
 { "attributes": { "brand": "Acme", "care_instructions": "Hand wash" } }
 ```
 
-This PATCH names only `brand`:
+### Replace the whole map
+
+Naming `attributes` in a PATCH on the product replaces the product's whole map with the one you send, so every attribute you leave out is deleted, with no error and no warning. Attributes that Plytix calculates, such as completeness scores, are kept. This PATCH names only `brand`:
 
 ```bash
 curl --request PATCH \
@@ -112,6 +120,31 @@ After the `204`, a GET shows that `care_instructions` is gone:
 { "attributes": { "brand": "Acme Outdoor" } }
 ```
 
+### Merge a partial map
+
+To change several attributes and keep the rest, send only those attributes to the product's `attributes` path. The body is the partial map itself, not wrapped in `attributes`:
+
+```bash
+curl --request PATCH \
+  --url 'https://<v3-base-url>/api/v3/products/<identifier>/attributes' \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{"brand": "Acme Outdoor"}'
+```
+
+A GET afterward shows that `care_instructions` is still there:
+
+```json
+{ "attributes": { "brand": "Acme Outdoor", "care_instructions": "Hand wash" } }
+```
+
+Each value in the partial map takes the same format as on the attribute's own path, such as an array of option labels for a multiselect attribute.
+
+Don't change a few attributes by reading the whole map and sending it back to the product route. The V3 specification defines no conditional write, such as an `If-Match` header, so if another user or integration edits the product between your read and your write, your PATCH overwrites their change.
+
+{/* FLAG (open):
+  PM-52 (2026-10-19): the merge behavior of `PATCH /products/{identifier}/attributes` comes from Plytix's controlled Dev test (a partial map kept the omitted attribute; the same map on the root PATCH removed it). We haven't run this test ourselves. Retest both routes on the release candidate. */}
+
 ### Update one attribute
 
 To change one attribute, send its new value to the attribute's own path. The body is the bare JSON value, not an object:
@@ -126,18 +159,27 @@ curl --request PATCH \
 
 This returns `204` and leaves every other attribute untouched. Prefer it for routine syncs, such as price or stock updates, where each request changes one or two attributes.
 
-### Change several attributes at once
-
-To change many attributes in one request, read the current map, merge your changes into it, and send the whole map back. The V3 specification defines no conditional write, such as an `If-Match` header, so if another user or integration edits the product between your read and your write, your PATCH overwrites their change. Use this pattern only when nothing else writes to the same products at the same time.
-
 ## Empty values, null, and deletion
 
-V3 has separate ways to clear data, and they aren't interchangeable:
+Clearing an attribute works differently by attribute type, so use the forms below. They come from controlled tests on a development account in October 2026. Other attribute types haven't been tested, so test them on a disposable product first.
+
+| Attribute type | What clears the value | Tested result |
+|---|---|---|
+| Text | `null`, `""`, or a string of only spaces | The value is removed, and the attribute is absent from the product |
+| MultiSelect | `null` or `[]` | The value is removed, and the attribute is absent from the product |
+| Media gallery | `null` or `[]` | The gallery's association with its assets is cleared. The assets stay in Plytix DAM |
+| Media | `DELETE` on the attribute's path. Sending `""` is rejected | The value is removed. The asset stays in Plytix DAM |
+
+After you clear it, the attribute looks the same as one that was never set. Both match `[!exists]=true` and `[length]=0`, and neither matches `[null]`, so a filter can't tell a cleared value from a missing one.
+
+{/* FLAG (open):
+  PM-26 (2026-10-19): the `null` results for Text, MultiSelect and Media gallery, gallery `[]`, and the rejected media `""` come from Plytix's controlled Dev tests; Text `null` on the attribute path (FB-020) and Text `""` / MultiSelect `[]` (FB-015) match our own. Plytix didn't say which route each `null` case used. Retest the exact baselines and readbacks on the release candidate. */}
+
+Other fields and records are cleared in other ways, and they aren't interchangeable:
 
 | What you send | What happens |
 |---|---|
-| `""` or `[]` in a POST or PATCH | On the attribute types we tested, no value is stored. A text attribute set to `""` or to only spaces, and a multiselect attribute set to `[]`, end up absent from the product, as if you had never set them |
-| `null` in a PATCH | Depends on the field. On a product, `parent_id: null` detaches a variant from its parent, `product_family_id: null` unassigns its family, and `thumbnail_id: null` clears its thumbnail. `gtin` doesn't accept `null` and returns a validation error |
+| `null` on a top-level product field in a PATCH | Depends on the field. On a product, `parent_id: null` detaches a variant from its parent, `product_family_id: null` unassigns its family, and `thumbnail_id: null` clears its thumbnail. `gtin` doesn't accept `null` and returns a validation error |
 | DELETE on a record, such as `/products/{identifier}` | Deletes the record |
 | DELETE on an attribute, `/products/{identifier}/attributes/{name}` | Erases that attribute's value on the product, rather than setting it to `null` or a default |
 | DELETE on a link, such as `/products/{identifier}/categories/{id}` | Removes only that link. The product and the category both remain |
@@ -156,8 +198,8 @@ For the full V3 write rules, see [Update and delete records](/docs/reference/v3/
 Now that you know what a V3 write returns and what it does, you can explore these related pages.
 
 <Cards>
-  <Card icon={<TableRegular />} title="Endpoint mapping" href="/docs/guides/migrating-to-v3/endpoint-mapping">
-    Find the V3 equivalent of each V1/V2 endpoint, resource by resource.
+  <Card icon={<WarningRegular />} title="Safely remove categories, assets, or relationships" href="/docs/guides/safely-removing-categories-assets-or-relationships">
+    Apply these write and delete rules to a real cleanup task.
   </Card>
   <Card icon={<DocumentEditRegular />} title="Update and delete records" href="/docs/reference/v3/updates-and-deletes">
     Read the full V3 rules for partial updates, map fields, and deletions.

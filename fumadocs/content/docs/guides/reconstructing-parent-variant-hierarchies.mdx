@@ -3,7 +3,7 @@ title: Reconstruct parent/variant hierarchies
 description: Read existing products through the V3 API and rebuild their parent, variant, and sub-variant structure from parent_id and product_level.
 ---
 
-import { ArrowClockwiseRegular, WarningRegular } from '@/components/icons';
+import { ArrowClockwiseRegular, OrganizationRegular } from '@/components/icons';
 
 Rebuild the parent, variant, and sub-variant structure of products that already exist in Plytix, in the shape an ERP or marketplace expects. The V3 API doesn't return a hierarchy as a tree. Each product carries a `parent_id` that points at the product one level above it and a `product_level` that says where it sits, so you read the products through the product search and assemble the tree in your integration. Every request uses a bearer token, and searches return their records in `data` and page through `pagination.next_page`. Product families add the attribute levels that decide which values a variant can take from its parent; see [The Plytix data model](/docs/guides/data-model) for how they fit together. Inheritance between levels is an account-level feature that isn't enabled on every account, so ask your Plytix contact whether your account has it before you rely on inherited values. If you don't have a hierarchy yet, the last section shows how to create one to test against.
 
@@ -139,7 +139,7 @@ If your account has no parent and variant products yet, follow the steps below t
    {"errors": [{"name": "Forbidden", "description": "Automatic inheritance is not available for this account"}]}
    ```
 
-   This comes from an account-level setting, not from anything wrong with your request. Linking an attribute with `parent_level` or `variant_level` through this `POST` call succeeded in testing, so set the level when you link rather than changing it afterward.
+   This comes from an account-level setting, not from anything wrong with your request. If you get this `403`, stop and ask your Plytix contact whether inheritance is available for your account. Don't set the level through another route.
 
 3. **Create the parent product in that family.**
 
@@ -180,7 +180,7 @@ Now that you know how to build and read a hierarchy, you can explore these relat
   <Card icon={<ArrowClockwiseRegular />} title="Sync your ERP" href="/docs/guides/syncing-your-erp-with-plytix">
     Apply the same read/write pattern to keep hierarchy data in sync.
   </Card>
-  <Card icon={<WarningRegular />} title="Safely remove categories, assets, or relationships" href="/docs/guides/safely-removing-categories-assets-or-relationships">
-    Unlink a category or relationship from a product without affecting its other data.
+  <Card icon={<OrganizationRegular />} title="The Plytix data model" href="/docs/guides/data-model">
+    See how product levels, families, and inheritance fit together.
   </Card>
 </Cards>

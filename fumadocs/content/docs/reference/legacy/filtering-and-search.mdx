@@ -3,7 +3,7 @@ title: Filtering and search
 description: Reference for the search request body in V1/V2, including filters, operators, returned attributes, and relationship filters.
 ---
 
-import { ArrowSwapRegular, TextNumberListLtrRegular } from '@/components/icons';
+import { ArrowSwapRegular, FilterRegular } from '@/components/icons';
 
 Search endpoints in V1/V2 take their filters in a JSON request body, not in the query string. This page documents that body: how to write filter conditions, which operators exist, how to choose the attributes that come back, and how to filter products by their relationships.
 
@@ -89,7 +89,7 @@ The operators below are common to all search endpoints. Not every operator is al
 A unary operator takes no `value`. A binary operator needs one, and `in` and `!in` need a list.
 
 {/* FLAG (open):
-  The V1 Postman collection names the contains operator `like`. The [Migration reference](/docs/guides/migrating-to-v3/migration-reference) lists it as `contains`, and also lists `null` and `!null`, which the collection doesn't document. Confirm the operator names against the live API before publishing, and align the Migration reference with the result.
+  The V1 Postman collection names the contains operator `like`. The [Filter operators](/docs/guides/migrating-to-v3/filter-operators) migration page lists it as `contains`, and also lists `null` and `!null`, which the collection doesn't document. Confirm the operator names against the live API before publishing, and align the Migration reference with the result.
 */}
 
 ## Find available filters
@@ -190,10 +190,10 @@ When a request includes a `relationships.` column in `attributes`, each product 
 ## Related resources
 
 <Cards>
-  <Card icon={<TextNumberListLtrRegular />} title="Pagination" href="/docs/reference/legacy/pagination">
-    Set the page, page size, and sort order of a search, and read the counts it returns.
+  <Card icon={<FilterRegular />} title="Filtering and query syntax" href="/docs/reference/v3/filtering-query-syntax">
+    See the V3 filter syntax that replaces V1 filter objects.
   </Card>
-  <Card icon={<ArrowSwapRegular />} title="Migration reference" href="/docs/guides/migrating-to-v3/migration-reference">
-    Compare V1 filter operators with their V3 query-string equivalents.
+  <Card icon={<ArrowSwapRegular />} title="Filter operators" href="/docs/guides/migrating-to-v3/filter-operators">
+    Map V1 filter operators to their V3 query-string equivalents.
   </Card>
 </Cards>

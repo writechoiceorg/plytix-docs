@@ -3,7 +3,7 @@ title: Export your full catalog
 description: Learn how to export every product with its attributes, categories, and asset metadata by paging through the V3 product search, and resume a long run.
 ---
 
-import { ArrowSyncRegular, SearchRegular } from '@/components/icons';
+import { RadarRegular, TextNumberListLtrRegular } from '@/components/icons';
 
 Pull your entire product catalog, with attributes, categories, and asset metadata included, without a separate call per product or per asset. This guide covers two ways to page through a large result set, expanding related data inline, and keeping a long export resumable: the pattern behind tools like catalog-production plugins and platform migrations. Here, full catalog means every product your request selects, with the fields you name. It doesn't include other Plytix resources, such as attribute definitions or product families, or the asset files themselves, so on its own it isn't a complete, restorable backup. All requests use the V3 API with a bearer token. Access tokens expire after 15 minutes, so a long export can start returning `401` partway through. If that happens, request a new token and resume from the page you were on.
 
@@ -43,7 +43,7 @@ Follow the steps below to request the fields you need, walk the pages until you 
 
 2. **Follow the `next_page` link until it stops appearing.**
 
-   Every response includes a `pagination` object:
+   Every search response includes a `pagination` object:
 
    ```json
    {
@@ -125,71 +125,220 @@ Keyset paging keeps the traversal stable, but it doesn't take a snapshot of the 
 
 ## Keep a long export resumable
 
-A long export should survive a failed request or a stopped script without starting over. Save each page as it arrives, record where to continue, retry only the failures worth retrying, and pace requests under your rate limit. The Python script below does all four while following `next_page`, using the `requests` library:
+A long export should survive a failed request or a stopped script without starting over. Check each page before you save it, save it so an interruption can't leave a half-written file, record where to continue, retry only the failures worth retrying, and pace requests under both rate-limit windows. The Python script below does all of this while following `next_page`, using the `requests` library:
 
 ```python title="export_catalog.py"
 import json
 import os
+import random
 import time
+from email.utils import parsedate_to_datetime
+from urllib.parse import urlsplit
 
 import requests
 
 BASE_URL = "https://pim.plytix.com/api/v3/products"
 FIELDS = ["id", "sku", "label", "attributes", "categories", "assets"]
-CHECKPOINT = "export.checkpoint"  # the next page URL to request
-OUTPUT = "products.jsonl"         # one product per line
-DELAY = 0.5                       # seconds between requests: 20 per 10 seconds
+FILTERS = []                # extra query parameters, such as ("categories.name", "Backpacks")
+STATE_DIR = "export"        # one file per page, plus the manifest
+OUTPUT = "products.jsonl"   # the finished export, one product per line
+# This export's share of your account's limits, as (requests, seconds).
+# Every integration on the account draws from the same allowance.
+LIMITS = [(20, 10), (2000, 3600)]
+MAX_WAIT = 60               # longest pause in seconds; a longer one stops the run for later
 MAX_ATTEMPTS = 5
-RETRY_STATUSES = {429, 500, 502, 503, 504}
+
+MANIFEST = os.path.join(STATE_DIR, "manifest.json")
+ALLOWED = urlsplit(BASE_URL)
 
 session = requests.Session()
 session.headers["Authorization"] = "Bearer <access_token>"
 
 
-def fetch(url):
+class Stop(Exception):
+    """Stop the run. Rerunning the script resumes from the manifest."""
+
+
+def checked_url(url):
+    """Return the URL with https, or stop if it isn't the products search on the Plytix host."""
+    parts = urlsplit(url)
+    if parts.scheme == "http":
+        parts = parts._replace(scheme="https")  # pagination links currently use http
+    if (parts.scheme != "https" or parts.hostname != ALLOWED.hostname
+            or parts.port not in (None, 443) or parts.username or parts.password
+            or parts.path != ALLOWED.path or parts.fragment):
+        raise Stop(f"Refusing to send the token to an unexpected URL: {url}")
+    return parts.geturl()
+
+
+def write_atomic(path, lines):
+    """Write the lines to a temporary file, then swap it into place in one step."""
+    temp = path + ".tmp"
+    with open(temp, "w", encoding="utf-8") as f:
+        f.writelines(lines)
+        f.flush()
+        os.fsync(f.fileno())
+    os.replace(temp, path)
+
+
+def page_path(number):
+    return os.path.join(STATE_DIR, f"page-{number:06d}.jsonl")
+
+
+def save_state(state):
+    write_atomic(MANIFEST, [json.dumps(state)])
+
+
+def load_state():
+    if not os.path.exists(MANIFEST):
+        params = [("_fields", name) for name in FIELDS] + FILTERS
+        params += [("_sort_by", "id"), ("_page_size", 100)]
+        first = requests.Request("GET", BASE_URL, params=params).prepare().url
+        return {"pages": 0, "next_url": checked_url(first), "sent": []}
+    try:
+        with open(MANIFEST, encoding="utf-8") as f:
+            state = json.load(f)
+        valid = (isinstance(state.get("pages"), int) and state["pages"] >= 0
+                 and isinstance(state.get("next_url"), (str, type(None)))
+                 and isinstance(state.get("sent"), list))
+    except (OSError, ValueError, AttributeError):
+        valid = False
+    if not valid:
+        raise Stop(f"{MANIFEST} is unreadable. Delete {STATE_DIR} to start a fresh export.")
+    for number in range(1, state["pages"] + 1):
+        if not os.path.exists(page_path(number)):
+            raise Stop(f"{page_path(number)} is missing. Delete {STATE_DIR} to start a fresh export.")
+    if state["next_url"]:
+        state["next_url"] = checked_url(state["next_url"])
+    return state
+
+
+def pace(state):
+    """Wait until every window in LIMITS has room for one more request."""
+    now = time.time()
+    longest = max(seconds for _, seconds in LIMITS)
+    state["sent"] = [t for t in state["sent"] if now - t < longest]
+    wait = 0
+    for limit, seconds in LIMITS:
+        recent = [t for t in state["sent"] if now - t < seconds]
+        if len(recent) >= limit:
+            wait = max(wait, recent[-limit] + seconds - now)
+    if wait > MAX_WAIT:
+        raise Stop(f"Rate limit reached. Rerun the script in {wait:.0f} seconds.")
+    time.sleep(wait)
+    state["sent"].append(time.time())
+
+
+def retry_after(response):
+    """Return the Retry-After delay in seconds, or None if it's missing or invalid."""
+    value = response.headers.get("Retry-After", "").strip()
+    if value.isdigit():
+        return int(value)
+    try:
+        return max(0.0, parsedate_to_datetime(value).timestamp() - time.time())
+    except (TypeError, ValueError, IndexError, OverflowError):
+        return None
+
+
+def fetch(url, state):
     for attempt in range(MAX_ATTEMPTS):
+        pace(state)
+        wait = None
         try:
-            response = session.get(url, timeout=60)
+            response = session.get(url, timeout=60, allow_redirects=False)
         except requests.RequestException:
             response = None  # timeout or connection error: retry
         if response is not None:
             if response.status_code == 200:
-                return response.json()
-            if response.status_code not in RETRY_STATUSES:
-                raise SystemExit(f"{response.status_code}: {response.text}")
-        time.sleep(2 ** (attempt + 1))  # back off: 2, 4, 8 seconds, and so on
-    raise SystemExit("Too many failed attempts. Rerun the script to resume.")
+                try:
+                    return response.json()
+                except ValueError:
+                    raise Stop("The response isn't valid JSON. Rerun the script to retry the page.")
+            if response.status_code == 401:
+                raise Stop("401: the token expired. Get a new token and rerun the script.")
+            if response.status_code == 429:
+                wait = retry_after(response)
+            elif response.status_code not in (500, 502, 503, 504):
+                raise Stop(f"{response.status_code}: {response.text[:500]}")
+        if wait is None:
+            wait = random.uniform(0, min(MAX_WAIT, 2 ** (attempt + 1)))  # backoff with jitter
+        if wait > MAX_WAIT:
+            raise Stop(f"Asked to wait {wait:.0f} seconds. Rerun the script after that.")
+        time.sleep(wait)
+    raise Stop("Too many failed attempts. Rerun the script to resume.")
 
 
-if os.path.exists(CHECKPOINT):
-    with open(CHECKPOINT) as f:
-        url = f.read().strip()
-else:
-    params = [("_fields", name) for name in FIELDS]
-    params += [("_sort_by", "id"), ("_page_size", 100)]
-    url = requests.Request("GET", BASE_URL, params=params).prepare().url
+def read_page(page):
+    """Return the page's products and next URL, or stop if the page has an unexpected shape."""
+    if not isinstance(page, dict) or not isinstance(page.get("data"), list):
+        raise Stop("The response has no data list. Rerun the script to retry the page.")
+    for product in page["data"]:
+        if not isinstance(product, dict) or not isinstance(product.get("id"), str) or not product["id"]:
+            raise Stop("A product in the response has no id. Rerun the script to retry the page.")
+    pagination = page.get("pagination")
+    if pagination is None:
+        pagination = {}
+    if not isinstance(pagination, dict) or not isinstance(pagination.get("next_page"), (str, type(None))):
+        raise Stop("The response has an invalid pagination block. Rerun the script to retry the page.")
+    next_url = pagination.get("next_page")
+    if not next_url:
+        return page["data"], None  # the last page
+    return page["data"], checked_url(next_url)
 
-while url:
-    page = fetch(url)
-    with open(OUTPUT, "a") as out:
-        for product in page["data"]:
-            out.write(json.dumps(product) + "\n")
-    url = (page.get("pagination") or {}).get("next_page")
-    if url:
-        url = url.replace("http://", "https://", 1)
-        with open(CHECKPOINT, "w") as f:
-            f.write(url)
-        time.sleep(DELAY)
-    elif os.path.exists(CHECKPOINT):
-        os.remove(CHECKPOINT)  # the export is complete
+
+def write_output(state):
+    """Merge the page files into OUTPUT, keeping the last saved copy of each product."""
+    last_seen = {}
+    for number in range(1, state["pages"] + 1):
+        with open(page_path(number), encoding="utf-8") as f:
+            for line_number, line in enumerate(f):
+                last_seen[json.loads(line)["id"]] = (number, line_number)
+
+    def latest_lines():
+        for number in range(1, state["pages"] + 1):
+            with open(page_path(number), encoding="utf-8") as f:
+                for line_number, line in enumerate(f):
+                    if last_seen[json.loads(line)["id"]] == (number, line_number):
+                        yield line
+
+    write_atomic(OUTPUT, latest_lines())
+    print(f"Exported {len(last_seen)} products from {state['pages']} pages to {OUTPUT}.")
+
+
+def main():
+    os.makedirs(STATE_DIR, exist_ok=True)
+    try:
+        state = load_state()
+    except Stop as stop:
+        raise SystemExit(str(stop))
+    try:
+        while state["next_url"]:
+            products, next_url = read_page(fetch(state["next_url"], state))
+            number = state["pages"] + 1
+            write_atomic(page_path(number), [json.dumps(p, ensure_ascii=False) + "\n" for p in products])
+            state.update(pages=number, next_url=next_url)
+            save_state(state)  # record the page only after its file is complete
+    except Stop as stop:
+        save_state(state)
+        raise SystemExit(str(stop))
+    try:
+        write_output(state)
+    except (OSError, ValueError, KeyError) as error:
+        raise SystemExit(f"Couldn't merge the page files ({error}). Delete {STATE_DIR} to start a fresh export.")
+
+
+if __name__ == "__main__":
+    main()
 ```
 
 The script handles each part of a long run this way:
 
-- **Incremental persistence:** each page is appended to `products.jsonl` before the next request, so a stopped run loses at most the page in progress.
-- **Checkpointing:** after each page, the script saves the next URL to `export.checkpoint` and resumes from it on the next run. If the run stops between writing a page and saving the checkpoint, the rerun writes that page again, so deduplicate by `id` when you load the file. Delete both files before you start a fresh export. For [keyset paging](#export-by-id-instead-of-page-number), save the last `id` instead of the URL.
-- **Bounded retries:** timeouts, `429`, and `5xx` responses are retried up to five times, with a longer wait each time. Any other error stops the script, because the request itself needs fixing. A `401` means your token expired: get a new one and rerun the script.
-- **Rate-limit pacing:** waiting half a second between requests stays within 20 requests per 10 seconds, the lowest standard limit in [Rate limits](/docs/reference/v3/rate-limits). Raise the pace only if your plan allows it.
+- **Credential safety:** before it sends the token, the script checks that every URL it requests, including each `next_page` link and the URL saved in the manifest, uses HTTPS on the Plytix host and points to the product search. It rewrites a same-host `http` link to `https`, refuses any other host, port, path, or user name, and doesn't follow redirects, so the token is never sent anywhere else.
+- **Page validation:** a page is saved only after its `data` list, each product's `id`, and its `pagination` block have the expected shape. A malformed page stops the run without writing anything, and the next run requests that page again.
+- **Interruption-safe saving:** each page goes to its own file under `export/`, and `export/manifest.json` records the page only after that file is complete. Every file is written to a temporary file first and then swapped into place, so an interruption leaves the previous version or the new one, never half a line. The next run continues from the manifest. A missing or unreadable manifest or page file stops the run with a message rather than reporting a finished export.
+- **Deduplicated output:** after the last page is saved, the script merges the page files into `products.jsonl` and keeps the last saved copy of each product `id`. A product can be saved twice when the catalog changes during the run or a page is requested again after an interruption. Delete `export/` and `products.jsonl` before you start a fresh export. For [keyset paging](#export-by-id-instead-of-page-number), save the last `id` instead of the URL.
+- **Pacing for both windows:** `LIMITS` holds the requests allowed per 10 seconds and per hour, set here to the lowest standard pair in [Rate limits](/docs/reference/v3/rate-limits). Every integration on your account shares that allowance, so set `LIMITS` to the part this export may use. The manifest keeps the times of recent requests, so the next run still counts the requests made in the last hour. When the next request would have to wait longer than `MAX_WAIT`, the script saves its place, stops, and tells you when to rerun it.
+- **Bounded retries:** timeouts, `429`, and `5xx` responses are retried up to five times. A `429` with a valid `Retry-After` header waits as long as the header says. Without one, the script waits a random time that grows with each attempt, up to `MAX_WAIT`. A `Retry-After` longer than `MAX_WAIT` stops the run so you can rerun it later. Whether V3 sends `Retry-After` hasn't been confirmed, so the script works with or without it. Any other error stops the script, because the request itself needs fixing. A `401` means your token expired: get a new one and rerun the script.
 
 ## Troubleshooting
 
@@ -206,13 +355,13 @@ Check the problems below if you run into issues while following this guide.
 
 ## Related articles
 
-Now that you know how to export the catalog, you can explore these related guides.
+Now that you know how to export the catalog, you can explore these related pages.
 
 <Cards>
-  <Card icon={<SearchRegular />} title="Audit product data quality with filters" href="/docs/guides/auditing-product-data-quality-with-filters">
-    Find products with missing images, empty fields, or incomplete data before an export.
+  <Card icon={<RadarRegular />} title="Build a marketplace-specific product feed" href="/docs/guides/building-marketplace-specific-product-feeds">
+    Turn the exported file into a feed for a specific marketplace.
   </Card>
-  <Card icon={<ArrowSyncRegular />} title="Sync your ERP" href="/docs/guides/syncing-your-erp-with-plytix">
-    Keep your ERP and Plytix in sync after the first full read.
+  <Card icon={<TextNumberListLtrRegular />} title="Pagination" href="/docs/reference/v3/pagination">
+    See how the pagination block works and how to page through results safely.
   </Card>
 </Cards>

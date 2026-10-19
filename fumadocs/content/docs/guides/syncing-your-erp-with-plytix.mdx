@@ -3,7 +3,7 @@ title: Sync your ERP
 description: Read product data from Plytix, detect what changed, and push stock, price, and status updates back so your ERP and Plytix stay in sync.
 ---
 
-import { ArrowDownloadRegular, LayerRegular } from '@/components/icons';
+import { DocumentEditRegular, GaugeRegular } from '@/components/icons';
 
 Keep product data consistent between your ERP and Plytix with a recurring sync: an initial import that reads the whole catalog once, then scheduled runs that read only what changed in Plytix and write your ERP's changes back. This guide covers both directions, how archives and deletions travel, and how to recover when a run fails partway. All requests use the V3 API at `https://pim.plytix.com/api/v3`. Searches return `data` as an array with a `pagination` object, single-product reads and creates return `data` as one object, and a successful `PATCH` returns `204` with no body. Read [Update and delete records](/docs/reference/v3/updates-and-deletes) before you write, because a `PATCH` that names the `attributes` map replaces the whole map.
 
@@ -86,7 +86,7 @@ Follow the steps below on each scheduled run to read the products that changed s
      --data-urlencode "_page_size=100"
    ```
 
-   `modified` is the last-modification timestamp, so this returns edits as well as new products. Filtering on `created` instead returns only products added in the window. Read every page. Each page runs the query again, so a product edited while you're paging moves out of the window and can shift the pages after it. See [Searching and pagination](/docs/guides/migrating-to-v3/searching-and-pagination) for that risk, and the reconciliation in [Propagate archives and deletions](#propagate-archives-and-deletions) for the safety net.
+   `modified` is the last-modification timestamp, so this returns edits as well as new products. Filtering on `created` instead returns only products added in the window. Read every page. Each page runs the query again, so a product edited while you're paging moves out of the window and can shift the pages after it. See [Searching and pagination](/docs/guides/migrating-to-v3/searching-and-pagination) for that risk, and [Reconcile on a slower schedule](#reconcile-on-a-slower-schedule) for the safety net.
 
    {/* FLAG (open):
      Retested 2026-10-15 on the development account (FB-027): `modified[gte]` and `modified[lt]` combine in one request, full UTC timestamps, fractional seconds, and offsets are all accepted, `modified` advances after a single-attribute `PATCH` and after archiving, and archived products stay in the results with `status: Archived`. An invalid date returns `200` with an empty list instead of an error, so validate timestamps before sending. Still open: whether any call lists products deleted since a given time.
@@ -158,14 +158,23 @@ Follow the steps below to write ERP-owned fields back to Plytix and create the p
 Polling `modified` can't find deleted products, because a deleted product no longer appears in any search. Handle each case explicitly:
 
 - **Archived in Plytix:** the pull returns the product with `status` set to `Archived`. Decide whether your ERP deactivates it or ignores it.
-- **Deleted in Plytix:** on a slower schedule, such as nightly, read every product's `id` with `_fields=id` and compare the list with the products in your ERP. A product your ERP holds that Plytix no longer returns was deleted in Plytix. This full pass also catches any change a scheduled run skipped.
+- **Deleted in Plytix:** a deleted product drops out of every search, so the scheduled pull never sees it. Find it with the reconciliation pass in [Reconcile on a slower schedule](#reconcile-on-a-slower-schedule).
 - **Removed from your ERP:** either archive the product in Plytix with `PATCH /api/v3/products/<product_id>` and `{"status": "Archived"}`, which keeps its data, or delete it with `DELETE /api/v3/products/<product_id>`, which removes it.
+
+### Reconcile on a slower schedule
+
+A scheduled pull can miss a change, and it never shows a deletion. On a slower schedule, such as nightly, run a full pass that compares values as well as IDs. Follow the steps below to run it safely.
+
+1. **Read the full catalog.** Run the product search with no `modified` filter, requesting `id` plus every field your ERP syncs, the same `_fields` as step 3 of [Run the initial import](#run-the-initial-import). Add `_sort_by=id` so the order is deterministic. Read every page. If any page fails, discard the pass and run it again later, rather than comparing a partial list.
+2. **Compare values, not only IDs.** For each product that both systems hold, compare the synced values with your ERP's copy. A difference is a change that a scheduled run missed. Apply it the same way a scheduled run would.
+3. **Treat a missing product as a candidate, not a deletion.** A product your ERP holds that the pass didn't return isn't proven deleted. It may sit outside the pass's scope, for example because of a filter in your search or the permissions of your API credentials, or the catalog may have shifted while you paged. Request it directly with `GET /api/v3/products/<product_id>`. Only a `404` confirms that it's gone. Any other error leaves it as a candidate for the next pass.
+4. **Act only on confirmed deletions.** Deactivate or delete the product in your ERP only after step 3 confirms it.
 
 ## Recover from failed runs
 
 Design each run so you can repeat it safely. Plan for these failures:
 
-- **Rate limits:** your access token carries your account's limits, as described in [Bulk operations for large catalogs](/docs/guides/bulk-operations-for-large-catalogs). Pace requests under them. If a request returns `429`, wait before retrying and slow the whole run down. The limits haven't been observed being enforced in testing, so the `429` response hasn't been captured yet.
+- **Rate limits:** your access token carries your account's limits, as described in [Rate limits](/docs/reference/v3/rate-limits). Pace requests under them. If a request returns `429`, wait before retrying and slow the whole run down. The limits haven't been observed being enforced in testing, so the `429` response hasn't been captured yet.
 - **Transient failures:** retry timeouts and `5xx` responses a few times, with an increasing delay between attempts. Don't retry `4xx` responses such as `422` unchanged, because the request itself needs fixing.
 - **Retried writes:** a single-attribute `PATCH` is safe to repeat, because sending the same value twice leaves the same result. A `POST` isn't. Handle a `409` as described in step 3 of [Push ERP changes to Plytix](#push-erp-changes-to-plytix).
 - **Partial runs:** because the checkpoint advances only after the whole window succeeds, a failed run is retried in full on the next schedule. Log the products that failed, so you can find the ones that fail on every run.
@@ -185,23 +194,23 @@ Check the problems below if you run into issues while following this guide.
   <Accordion title="The same products come back on every run" value="same-products-every-run">
     If each pull returns the products your previous run wrote to Plytix, your own writes are updating their `modified` timestamp. Compare values before you write, as described in [Decide who owns each field](#decide-who-owns-each-field), so an unchanged value is never sent.
   </Accordion>
-  <Accordion title="Sending an empty string or empty list doesn't clear a field" value="empty-value-stored">
-    Sending an empty string or an empty list stores that empty value instead of clearing the field. See [Update and delete records](/docs/reference/v3/updates-and-deletes) for what each write returns and what `DELETE` removes.
+  <Accordion title="An empty value you sent doesn't appear on the product" value="empty-value-stored">
+    On the attribute types tested, sending `""`, `[]`, or `null` clears the value, so the attribute is absent from the product afterward rather than stored as empty. A media attribute rejects `""`; clear it with `DELETE` on the attribute's path instead. See [Responses and updates](/docs/guides/migrating-to-v3/responses-and-updates#empty-values-null-and-deletion) for the tested cases by attribute type.
   </Accordion>
   <Accordion title="Attributes you didn't touch disappear after a sync run" value="attributes-disappear">
-    A `PATCH` that names `attributes` replaces the whole map, so every attribute missing from your payload is removed. Address each attribute at its own path instead, as shown in step 2 of [Push ERP changes to Plytix](#push-erp-changes-to-plytix). `PATCH /products/<product_id>/attributes/<name>` changes only the attribute you name.
+    A `PATCH` on the product that names `attributes` replaces the whole map, so every attribute missing from your payload is removed. Send the changed attributes as a partial map to `PATCH /products/<product_id>/attributes`, which merges them, or address each attribute at its own path, as shown in step 2 of [Push ERP changes to Plytix](#push-erp-changes-to-plytix). `PATCH /products/<product_id>/attributes/<name>` changes only the attribute you name.
   </Accordion>
 </Accordions>
 
 ## Related articles
 
-Now that you know how to keep your ERP and Plytix in sync, you can explore these related guides.
+Now that you know how to keep your ERP and Plytix in sync, you can explore these related pages.
 
 <Cards>
-  <Card icon={<ArrowDownloadRegular />} title="Export your full catalog" href="/docs/guides/exporting-your-full-catalog">
-    Pull every product, with attributes and assets, in one paginated pass.
+  <Card icon={<DocumentEditRegular />} title="Update and delete records" href="/docs/reference/v3/updates-and-deletes">
+    Check how V3 writes treat the attributes map, empty values, and deletes.
   </Card>
-  <Card icon={<LayerRegular />} title="Bulk operations for large catalogs" href="/docs/guides/bulk-operations-for-large-catalogs">
-    Pace these single-item calls against your rate limit when the catalog is large.
+  <Card icon={<GaugeRegular />} title="Rate limits" href="/docs/reference/v3/rate-limits">
+    How the API rate limits work, so you can pace these single-item calls on a large catalog.
   </Card>
 </Cards>

@@ -3,7 +3,7 @@ title: "Searching and pagination"
 description: "Reference for converting a V1 search POST body into a V3 GET query, and for paging through a V3 result set that returns no record counts."
 ---
 
-import { FilterRegular, TextNumberListLtrRegular } from '@/components/icons';
+import { ArrowDownloadRegular, TextNumberListLtrRegular } from '@/components/icons';
 
 A V1 search is a POST with a JSON body. A V3 search is a GET with query parameters. This page maps the two request shapes onto each other and covers what changes once the results come back, including the two pagination behaviors that break migrated paging loops. It's part of the reference set for [Migrating to V3](/docs/guides/migrating-to-v3).
 
@@ -39,7 +39,7 @@ The V1/V2 defaults and the 100 limit are documented on product search (V1 and V2
 
 V3 returns page URLs rather than a page number to increment, so a paging loop follows `next_page` instead of counting pages. Live responses leave the key out when it doesn't apply, and the `Pagination` schema also allows `null`, so a client written as `if (pagination.next_page !== null)` is wrong. Continue the loop only while `next_page` holds a URL you can request, which covers an absent key and a null one.
 
-Paging doesn't freeze the result set. Each request runs the query again, so records added, deleted, or re-sorted while you're paging can come back twice or not at all. For a run that has to be consistent, filter on a stable field such as a date range. [Export your full catalog](/docs/guides/exporting-your-full-catalog) walks through the full pattern.
+Paging doesn't freeze the result set. Each request runs the query again, so records added, deleted, or re-sorted while you're paging can come back twice or not at all. A date filter alone doesn't make the run consistent. Sort on a deterministic field and reconcile at the end. [Export your full catalog](/docs/guides/exporting-your-full-catalog) walks through the full pattern.
 
 <Callout type="warn" title="No counts in V3">
   V1 returned `total_count` on every search. V3 has no equivalent: the pagination block carries no counts, and there is no parameter that adds one. Requesting `_total_count` or `_filtered_count` returns `400` with `InvalidFieldError: Field '_total_count' does not exist.`, confirmed on products and assets.
@@ -101,8 +101,8 @@ This result set fits on one page, so `pagination` is empty. When more records ma
 Now that you can convert a search and page through its results, you can explore these related pages.
 
 <Cards>
-  <Card icon={<FilterRegular />} title="Filter operators" href="/docs/guides/migrating-to-v3/filter-operators">
-    Map each V1 filter object to its V3 bracket syntax.
+  <Card icon={<ArrowDownloadRegular />} title="Export your full catalog" href="/docs/guides/exporting-your-full-catalog">
+    Apply V3 paging to a full-catalog export that you can resume.
   </Card>
   <Card icon={<TextNumberListLtrRegular />} title="Pagination" href="/docs/reference/v3/pagination">
     Read the V3 pagination block and its parameters in full.
