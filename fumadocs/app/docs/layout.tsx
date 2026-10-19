@@ -2,6 +2,7 @@ import { source } from '@/lib/source';
 import { DocsLayout } from 'fumadocs-ui/layouts/notebook';
 import { baseOptions } from '@/lib/layout.shared';
 import { SidebarBanner } from '@/components/reference-version-switcher';
+import { SidebarAutoScroll } from '@/components/sidebar-auto-scroll';
 
 export default function Layout({ children }: LayoutProps<'/docs'>) {
   const { nav, ...base } = baseOptions();
@@ -48,6 +49,7 @@ export default function Layout({ children }: LayoutProps<'/docs'>) {
       }}
       {...base}
     >
+      <SidebarAutoScroll />
       {children}
     </DocsLayout>
   );
