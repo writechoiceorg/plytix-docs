@@ -223,17 +223,26 @@ html > body[data-scroll-locked] {
 /* ---------- Sidebar ---------- */
 
 @media (min-width: 768px) {
+  /* No position override: Fumadocs keeps #nd-sidebar absolute with a fixed
+     height, which is what makes its item list scroll. */
   #nd-sidebar {
-    position: relative;
     isolation: isolate;
   }
   #nd-sidebar::before {
     content: '';
     position: absolute;
-    inset: 1.5rem 1rem 0 1rem;
+    /* #nd-sidebar spans the full width and right-aligns its column, so start
+       from the column's edge plus the navbar's 24px inset (aligned with the
+       logo and tabs at any viewport width). */
+    inset: 1.5rem 1rem 0 calc(100% - var(--fd-sidebar-width) + 1.5rem);
     z-index: -1;
     background: var(--plytix-sidebar-glow);
     pointer-events: none;
+  }
+  /* Keep the items (and the version switcher) inside the panel. */
+  #nd-sidebar .overscroll-contain,
+  #nd-sidebar .p-4.pb-2 {
+    padding-inline-start: 1.75rem;
   }
 }
 
