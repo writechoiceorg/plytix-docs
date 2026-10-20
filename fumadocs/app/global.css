@@ -33,6 +33,10 @@
   --plytix-link: #7a52ff;
   --plytix-subtle: #77708c;
 
+  /* Header Login / Book a demo, and the footer (Knowledge Base colors). */
+  --plytix-header-action: #595369;
+  --plytix-footer-bg: #201a32;
+
   /* Cards, code blocks, playground. */
   --plytix-surface-fill: linear-gradient(rgb(255 255 255 / 0.1), rgb(255 255 255 / 0.05));
   --plytix-surface-border: #ffffff;
@@ -79,6 +83,10 @@
   --plytix-toggle-thumb: #201a32;
   --plytix-link: #bda8ff;
   --plytix-subtle: #b9b3cc;
+
+  /* The page is already ink in dark mode, so the footer goes a step darker. */
+  --plytix-header-action: #f4f3f8;
+  --plytix-footer-bg: #161424;
 
   --plytix-surface-fill: linear-gradient(rgb(255 255 255 / 0.1), rgb(255 255 255 / 0.05));
   --plytix-surface-border: rgb(255 255 255 / 0.15);
@@ -179,6 +187,12 @@ html > body[data-scroll-locked] {
   border-color: var(--plytix-header-border);
 }
 
+/* The footer sits below the docs grid, so the sticky sidebar (z-20) scrolls up
+   with the end of the grid when it comes into view. Keep it under the header. */
+#nd-subnav {
+  z-index: 30;
+}
+
 #nd-subnav [data-header-tabs] {
   border-color: var(--plytix-header-border);
   height: 3rem;
@@ -216,8 +230,39 @@ html > body[data-scroll-locked] {
   }
 }
 
+/* Login / Book a demo sit at the right end of the tabs row, as in the Knowledge
+   Base. Fumadocs has no slot in that row, so they're rendered with the navbar
+   links in the top row and positioned onto the tabs row from here; their
+   wrapper drops out of the top row's flex layout so it leaves no gap there. */
+@media (min-width: 1024px) {
+  #nd-subnav [data-header-body] div:has(> [data-header-actions]) {
+    display: contents;
+  }
+  #nd-subnav [data-header-actions] {
+    position: absolute;
+    top: 3.5rem;
+    right: 1.5rem;
+    height: calc(3rem - 1px);
+  }
+}
+
 [data-search-full] {
   border-radius: 9999px !important;
+}
+
+/* ---------- Footer ---------- */
+
+/* Fluid spacing and type scale copied from the Knowledge Base, so the footer
+   lines up with knowledge.plytix.com at every width. */
+.plytix-footer {
+  --footer-space-1: clamp(0.25rem, calc(0.0037 * (100vw - 22.5rem) + 0.25rem), 0.5rem);
+  --footer-space-2: clamp(0.38rem, calc(0.00548 * (100vw - 22.5rem) + 0.38rem), 0.75rem);
+  --footer-space-3: clamp(0.56rem, calc(0.00844 * (100vw - 22.5rem) + 0.56rem), 1.13rem);
+  --footer-space-4: clamp(0.84rem, calc(0.01259 * (100vw - 22.5rem) + 0.84rem), 1.69rem);
+  --footer-space-5: clamp(1.27rem, calc(0.01867 * (100vw - 22.5rem) + 1.27rem), 2.53rem);
+  --footer-space-6: clamp(1.9rem, calc(0.02815 * (100vw - 22.5rem) + 1.9rem), 3.8rem);
+  --footer-heading-size: clamp(1.4rem, 3.5vw, 1.8rem);
+  --footer-text-s: clamp(0.85rem, calc(0.00074 * (100vw - 22.5rem) + 0.85rem), 0.9rem);
 }
 
 /* ---------- Sidebar ---------- */
