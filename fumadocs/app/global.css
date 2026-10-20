@@ -37,6 +37,9 @@
   --plytix-header-action: #595369;
   --plytix-footer-bg: #201a32;
 
+  /* Sidebar panel shadow: the Knowledge Base's .shadow-box-light-lg. */
+  --plytix-sidebar-shadow: 0 10px 15px rgb(236 235 239 / 0.8);
+
   /* Cards, code blocks, playground. */
   --plytix-surface-fill: linear-gradient(rgb(255 255 255 / 0.1), rgb(255 255 255 / 0.05));
   --plytix-surface-border: #ffffff;
@@ -51,12 +54,6 @@
   --callout-error-icon: #d33e36;
   --callout-info-bg: #d6f2ff;
   --callout-info-icon: #47c6ff;
-
-  /* Decorative sidebar panel: lilac + cyan glows fading in from the top. */
-  --plytix-sidebar-glow:
-    radial-gradient(120% 45% at 30% 100%, rgb(189 168 255 / 0.75), transparent 70%),
-    radial-gradient(110% 40% at 60% 62%, rgb(71 198 255 / 0.28), transparent 70%),
-    linear-gradient(#f8f8f8 10%, transparent 40%);
 }
 
 .dark {
@@ -88,6 +85,11 @@
   --plytix-header-action: #f4f3f8;
   --plytix-footer-bg: #161424;
 
+  /* The Knowledge Base's .shadow-box-dark-lg, its shadow for dark surfaces. */
+  --plytix-sidebar-shadow:
+    0 10px 15px -3px rgb(89 83 105 / 0.8),
+    0 4px 6px -4px rgb(89 83 105 / 0.8);
+
   --plytix-surface-fill: linear-gradient(rgb(255 255 255 / 0.1), rgb(255 255 255 / 0.05));
   --plytix-surface-border: rgb(255 255 255 / 0.15);
   --plytix-surface-shadow: 0 0 20px rgb(0 0 0 / 0.25);
@@ -100,11 +102,6 @@
   --callout-error-icon: #ef6d66;
   --callout-info-bg: rgb(214 242 255 / 0.2);
   --callout-info-icon: #47c6ff;
-
-  --plytix-sidebar-glow:
-    radial-gradient(120% 45% at 30% 100%, rgb(189 168 255 / 0.55), transparent 70%),
-    radial-gradient(110% 40% at 40% 62%, rgb(71 198 255 / 0.22), transparent 70%),
-    linear-gradient(#201a32 10%, transparent 40%);
 }
 
 /* The neutral preset re-tints the dark sidebar; keep our tokens instead. */
@@ -200,6 +197,14 @@ html > body[data-scroll-locked] {
   gap: 0.5rem;
 }
 
+/* The tabs row above is 3rem (Fumadocs assumes 2.5rem), so tell the layout the
+   header is 6.5rem tall; otherwise the sticky sidebar and TOC tuck 8px under it. */
+@media (min-width: 1024px) {
+  #nd-notebook-layout:has(#nd-subnav [data-header-tabs]) {
+    --fd-header-height: 6.5rem;
+  }
+}
+
 /* Guides / API Reference tabs: the active tab is a filled block. */
 #nd-subnav [data-header-tabs] > a {
   padding: 0 1.25rem;
@@ -273,15 +278,18 @@ html > body[data-scroll-locked] {
   #nd-sidebar {
     isolation: isolate;
   }
+  /* Decorative panel: the design's cyan + lilac blurred glows (same art in both
+     themes, the page background shows through), stretched to the panel. */
   #nd-sidebar::before {
     content: '';
     position: absolute;
-    /* #nd-sidebar spans the full width and right-aligns its column, so start
-       from the column's edge plus the navbar's 24px inset (aligned with the
-       logo and tabs at any viewport width). */
-    inset: 1.5rem 1rem 0 calc(100% - var(--fd-sidebar-width) + 1.5rem);
+    /* #nd-sidebar spans from the screen's left edge to the end of its column,
+       so the panel runs from the screen edge out to the sidebar's 6px
+       scrollbar on the right. 8px below the header, as in the design. */
+    inset: 0.5rem 0.375rem 0 0;
     z-index: -1;
-    background: var(--plytix-sidebar-glow);
+    background: url('/sidebar-glow.svg') 0 0 / 100% 100% no-repeat;
+    box-shadow: var(--plytix-sidebar-shadow);
     pointer-events: none;
   }
   /* Keep the items (and the version switcher) inside the panel. */
