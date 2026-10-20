@@ -290,6 +290,9 @@ html > body[data-scroll-locked] {
     z-index: -1;
     background: url('/sidebar-glow.svg') 0 0 / 100% 100% no-repeat;
     box-shadow: var(--plytix-sidebar-shadow);
+    /* Keep the shadow on the sides only: below the panel it would spill onto
+       the footer once the page is scrolled to the end. */
+    clip-path: inset(-2rem -2rem 0 -2rem);
     pointer-events: none;
   }
   /* Keep the items (and the version switcher) inside the panel. */
