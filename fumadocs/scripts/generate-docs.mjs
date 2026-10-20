@@ -150,7 +150,7 @@ let referenceMeta;
 try {
   referenceMeta = JSON.parse(await readFile(referenceMetaPath, 'utf-8'));
 } catch {
-  referenceMeta = { title: 'API Reference', root: true, pages: [] };
+  referenceMeta = { title: 'V3 (Current)', icon: 'Sparkles', pages: [] };
 }
 const cutIndex = referenceMeta.pages.findIndex(
   (p) => p === '---[Webhook]Endpoints---' || p === '---Endpoints---' || p === 'endpoints',

@@ -1,7 +1,6 @@
 {
   "title": "Legacy (V1/V2)",
-  "root": true,
-  "icon": "Code",
+  "icon": "Archive",
   "pages": [
     "---[BookOpen]Overview---",
     "api-v1-v2-reference",

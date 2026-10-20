@@ -1,7 +1,6 @@
 {
   "title": "V3 (Current)",
-  "root": true,
-  "icon": "Code",
+  "icon": "Sparkles",
   "pages": [
     "---[BookOpen]Overview---",
     "index",
