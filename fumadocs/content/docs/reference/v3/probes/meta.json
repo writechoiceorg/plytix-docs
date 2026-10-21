@@ -1,8 +1,0 @@
-{
-  "title": "Probes",
-  "pages": [
-    "check-api-liveness",
-    "check-api-readiness"
-  ],
-  "icon": "Activity"
-}
