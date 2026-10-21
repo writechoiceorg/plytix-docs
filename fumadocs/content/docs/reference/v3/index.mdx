@@ -3,7 +3,7 @@ title: API reference overview
 description: "Learn how the V3 API reference is organized, which resources it covers, and where to start with authentication, filtering, and paging."
 ---
 
-import { BookOpenRegular, BoxRegular, DocumentArrowLeftRegular, DocumentTextRegular, EditRegular, FilterRegular, FlowchartRegular, FolderListRegular, GaugeRegular, ImageRegular, KeyRegular, LayerRegular, LinkRegular, ListRegular, LiveRegular, OrganizationRegular, PeopleRegular, PlugConnectedRegular, ShareRegular, TagMultipleRegular, TagRegular, TaskListLtrRegular, TextBulletListTreeRegular, TextNumberListLtrRegular, WarningRegular } from '@/components/icons';
+import { BoxRegular, EditRegular, FilterRegular, FolderListRegular, GaugeRegular, ImageRegular, KeyRegular, LayerRegular, LinkRegular, ListRegular, OrganizationRegular, PeopleRegular, ShareRegular, TagMultipleRegular, TagRegular, TextBulletListTreeRegular, TextNumberListLtrRegular, WarningRegular } from '@/components/icons';
 
 <Callout type="warn" title="API V3 is in beta">
 API V3 is in beta, so endpoints, fields, and behavior can change before its stable release. The V1/V2 APIs remain available as the legacy API: see the [V1/V2 (Legacy) reference](/reference/v1-v2/api-v1-v2-reference).
@@ -52,9 +52,6 @@ The API is organized by resource. Each one below is fully documented in the API 
   <Card icon={<LayerRegular />} title="Product Families" href="/reference/v3/product-families/search-product-families">
     Create, update, delete, and search the product families that group variants under shared attributes.
   </Card>
-  <Card icon={<FlowchartRegular />} title="Product Family Models" href="/reference/v3/product-family-models/search-product-family-models">
-    Read the attribute structure a product family's variants share.
-  </Card>
   <Card icon={<TagRegular />} title="Product Attributes" href="/reference/v3/product-attributes/search-product-attributes">
     Create and manage the custom attributes that describe your products.
   </Card>
@@ -81,23 +78,5 @@ The API is organized by resource. Each one below is fully documented in the API 
   </Card>
   <Card icon={<ListRegular />} title="Asset Lists" href="/reference/v3/asset-lists/search-asset-lists">
     Group assets into lists for reuse across products.
-  </Card>
-  <Card icon={<LiveRegular />} title="Channels" href="/reference/v3/channels/search-channels">
-    Manage the channels you use to syndicate product data to marketplaces and other platforms.
-  </Card>
-  <Card icon={<PlugConnectedRegular />} title="Connections" href="/reference/v3/connections/search-connections">
-    Manage the FTP/SFTP and Dropbox connections used to feed product data into Plytix.
-  </Card>
-  <Card icon={<BookOpenRegular />} title="eCatalogs" href="/reference/v3/ecatalogs/search-ecatalogs">
-    Create and manage shareable digital catalogs of your products.
-  </Card>
-  <Card icon={<DocumentTextRegular />} title="PDF Catalogs" href="/reference/v3/pdf-catalogs/search-pdf-catalogs">
-    Generate PDF catalogs from your product data.
-  </Card>
-  <Card icon={<DocumentArrowLeftRegular />} title="Import Profiles" href="/reference/v3/import-profiles/search-import-profiles">
-    Manage the saved column-matching settings used to import product data.
-  </Card>
-  <Card icon={<TaskListLtrRegular />} title="PIM Product Lists" href="/reference/v3/pim-product-lists/search-pim-product-lists">
-    Group products into smart or static lists.
   </Card>
 </Cards>

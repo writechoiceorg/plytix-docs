@@ -48,7 +48,7 @@ Paging doesn't freeze the result set. Each request runs the query again, so reco
 </Callout>
 
 <Callout type="warn" title="Rewrite next_page links to https">
-  Pagination links currently come back as `http://` URLs that `301` to `https`. Clients that don't forward `Authorization` across a scheme-changing redirect drop it and get a `401`. Rewrite the scheme to `https` before you follow the link. This is a link-generation issue rather than a convention of the API, so don't build your integration around the `http` form.
+  Pagination links currently come back as `http://` URLs that `301` to `https`. Clients that don't forward `Authorization` across a scheme-changing redirect drop it and get a `401`. Rewrite the scheme to `https`, and check that the host and path match your original search before you attach your token. See [Fix the scheme before following the link](/reference/v3/pagination#fix-the-scheme-before-following-the-link). This is a link-generation issue rather than a convention of the API, so don't build your integration around the `http` form.
 </Callout>
 
 ## Convert a product search

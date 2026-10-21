@@ -1,5 +1,11 @@
 {
   "GET /api/v3/products": {
+    "parameters": {
+      "filters": {
+        "status[eq]": "Completed",
+        "label[contains:ignorecase]": "daypack"
+      }
+    },
     "responses": {
       "200": {
         "data": [
@@ -74,7 +80,7 @@
       }
     },
     "responses": {
-      "200": {
+      "201": {
         "data": {
           "id": "6ac506727d3e19b4c23a1f20",
           "account_id": "69085c1e2b4a7f13d90c5e21",
@@ -150,6 +156,11 @@
     }
   },
   "GET /api/v3/product-relationships": {
+    "parameters": {
+      "filters": {
+        "product_id[eq]": "69b285837d3e19b4c23a1ec4"
+      }
+    },
     "responses": {
       "200": {
         "data": [
@@ -176,6 +187,11 @@
     }
   },
   "GET /api/v3/related-products": {
+    "parameters": {
+      "filters": {
+        "product_id[eq]": "69b285837d3e19b4c23a1ec4"
+      }
+    },
     "responses": {
       "200": {
         "data": [
@@ -192,6 +208,12 @@
     }
   },
   "GET /api/v3/assets": {
+    "parameters": {
+      "filters": {
+        "file_type[eq]": "IMAGES",
+        "filename[contains:ignorecase]": "daypack"
+      }
+    },
     "responses": {
       "200": {
         "data": [
@@ -246,7 +268,7 @@
       "alt_text": "Ridgeline 2-person tent in Forest Green, pitched with both doors open"
     },
     "responses": {
-      "200": {
+      "201": {
         "data": {
           "id": "6ac506727d3e19b4c23a1ead",
           "assigned": false,
@@ -303,6 +325,11 @@
     }
   },
   "GET /api/v3/product-categories": {
+    "parameters": {
+      "filters": {
+        "name[contains:ignorecase]": "bags"
+      }
+    },
     "responses": {
       "200": {
         "data": [
@@ -347,7 +374,7 @@
       "parent_id": "6981ca7e7d3e19b4c23a1c57"
     },
     "responses": {
-      "200": {
+      "201": {
         "data": {
           "id": "6ac506727d3e19b4c23a1c9c",
           "name": "Hydration Packs",
@@ -392,6 +419,11 @@
     }
   },
   "GET /api/v3/asset-categories": {
+    "parameters": {
+      "filters": {
+        "name[contains:ignorecase]": "photography"
+      }
+    },
     "responses": {
       "200": {
         "data": [
@@ -436,7 +468,7 @@
       "parent_id": "6981cbd57d3e19b4c23a1cb3"
     },
     "responses": {
-      "200": {
+      "201": {
         "data": {
           "id": "6ac506727d3e19b4c23a1ce1",
           "name": "Lifestyle Shots",
@@ -481,6 +513,11 @@
     }
   },
   "GET /api/v3/asset-lists": {
+    "parameters": {
+      "filters": {
+        "type[eq]": "Smart"
+      }
+    },
     "responses": {
       "200": {
         "data": [
@@ -534,7 +571,7 @@
       ]
     },
     "responses": {
-      "200": {
+      "201": {
         "data": {
           "id": "6ac506727d3e19b4c23a1e68",
           "account_id": "69085c1e2b4a7f13d90c5e21",
@@ -609,6 +646,11 @@
     }
   },
   "GET /api/v3/relationships": {
+    "parameters": {
+      "filters": {
+        "label[eq]": "frequently_bought_together"
+      }
+    },
     "responses": {
       "200": {
         "data": [
@@ -641,7 +683,7 @@
       "name": "Compatible Accessories"
     },
     "responses": {
-      "200": {
+      "201": {
         "data": {
           "id": "6ac506727d3e19b4c23a1df5",
           "account_id": "69085c1e2b4a7f13d90c5e21",
@@ -677,6 +719,11 @@
     }
   },
   "GET /api/v3/product-families": {
+    "parameters": {
+      "filters": {
+        "name[contains:ignorecase]": "backpacks"
+      }
+    },
     "responses": {
       "200": {
         "data": [
@@ -721,7 +768,7 @@
       ]
     },
     "responses": {
-      "200": {
+      "201": {
         "data": {
           "id": "6ac506727d3e19b4c23a1db0",
           "name": "Sleeping Bags",
@@ -778,7 +825,7 @@
   },
   "POST /api/v3/product-families/{product_family_id}/attributes": {
     "responses": {
-      "200": {
+      "201": {
         "data": {
           "account_id": "69085c1e2b4a7f13d90c5e21",
           "product_family_id": "6984b7bd7d3e19b4c23a1d99",
@@ -803,6 +850,12 @@
     }
   },
   "GET /api/v3/family-attributes": {
+    "parameters": {
+      "filters": {
+        "account_id[eq]": "69085c1e2b4a7f13d90c5e21",
+        "product_family_id[eq]": "6984b7bd7d3e19b4c23a1d99"
+      }
+    },
     "responses": {
       "200": {
         "data": [
@@ -824,54 +877,12 @@
       }
     }
   },
-  "GET /api/v3/product-family-models": {
-    "responses": {
-      "200": {
-        "data": [
-          {
-            "id": "6984b7bd7d3e19b4c23a1dc7",
-            "product_family_id": "6984b7bd7d3e19b4c23a1d99",
-            "variant_attribute_labels": [
-              "attributes.color"
-            ],
-            "parent_attribute_labels": [
-              "attributes.material",
-              "attributes.capacity_liters"
-            ],
-            "no_level_attribute_labels": [
-              "attributes.short_description",
-              "attributes.price_usd"
-            ]
-          }
-        ],
-        "errors": [],
-        "pagination": {}
-      }
-    }
-  },
-  "GET /api/v3/product-family-models/{identifier}": {
-    "responses": {
-      "200": {
-        "data": {
-          "id": "6984b7bd7d3e19b4c23a1dc7",
-          "product_family_id": "6984b7bd7d3e19b4c23a1d99",
-          "variant_attribute_labels": [
-            "attributes.color"
-          ],
-          "parent_attribute_labels": [
-            "attributes.material",
-            "attributes.capacity_liters"
-          ],
-          "no_level_attribute_labels": [
-            "attributes.short_description",
-            "attributes.price_usd"
-          ]
-        },
-        "errors": []
-      }
-    }
-  },
   "GET /api/v3/product-attributes": {
+    "parameters": {
+      "filters": {
+        "type[eq]": "TextAttribute"
+      }
+    },
     "responses": {
       "200": {
         "data": [
@@ -915,7 +926,7 @@
       "character_limit": 500
     },
     "responses": {
-      "200": {
+      "201": {
         "data": {
           "id": "6ac506727d3e19b4c23a1d82",
           "name": "Care Instructions",
@@ -965,6 +976,11 @@
     }
   },
   "GET /api/v3/product-attribute-groups": {
+    "parameters": {
+      "filters": {
+        "name[eq]": "Marketing Copy"
+      }
+    },
     "responses": {
       "200": {
         "data": [
@@ -1004,7 +1020,7 @@
       "name": "Sustainability"
     },
     "responses": {
-      "200": {
+      "201": {
         "data": {
           "id": "6ac506727d3e19b4c23a1d0f",
           "name": "Sustainability",
@@ -1035,1327 +1051,38 @@
       }
     }
   },
-  "GET /api/v3/pim-product-lists": {
-    "responses": {
-      "200": {
-        "data": [
-          {
-            "id": "6985aa2a7d3e19b4c23a1e0c",
-            "account_id": "69085c1e2b4a7f13d90c5e21",
-            "name": "Fall 2026 Launch",
-            "type": "Static",
-            "query": [
-              [
-                {
-                  "operator": "in",
-                  "field": "static_lists",
-                  "value": [
-                    "6985aa2a7d3e19b4c23a1e0c"
-                  ],
-                  "field_type": "PimProductAttribute.ObjectIdAttribute"
-                }
-              ]
-            ],
-            "created": "2026-02-06T08:45:30.936000+00:00",
-            "modified": "2026-02-06T08:45:30.948000+00:00"
-          },
-          {
-            "id": "6985aa2a7d3e19b4c23a1e23",
-            "account_id": "69085c1e2b4a7f13d90c5e21",
-            "name": "Ready for Wholesale",
-            "type": "Smart",
-            "query": [
-              [
-                {
-                  "operator": "eq",
-                  "field": "status",
-                  "value": "Completed",
-                  "field_type": null
-                },
-                {
-                  "operator": "gte",
-                  "field": "attributes.website_ready",
-                  "value": 100,
-                  "field_type": null
-                }
-              ]
-            ],
-            "created": "2026-02-06T08:45:30.997000+00:00",
-            "modified": "2026-02-06T08:45:30.605000+00:00"
-          }
-        ],
-        "errors": [],
-        "pagination": {}
-      }
-    }
-  },
-  "POST /api/v3/pim-product-lists": {
+  "POST /api/v3/products/{identifier}/categories": {
     "request": {
-      "name": "Tents Missing GTIN",
-      "type": "Smart",
-      "query": [
-        [
-          {
-            "operator": "eq",
-            "field": "categories",
-            "value": "6981ca7e7d3e19b4c23a1c85"
-          },
-          {
-            "operator": "!exists",
-            "field": "gtin",
-            "value": true
-          }
-        ]
-      ]
+      "id": "6981ca7e7d3e19b4c23a1c57"
     },
     "responses": {
-      "200": {
+      "201": {
         "data": {
-          "id": "6ac506727d3e19b4c23a1e3a",
-          "account_id": "69085c1e2b4a7f13d90c5e21",
-          "name": "Tents Missing GTIN",
-          "query": [
-            [
-              {
-                "operator": "eq",
-                "field": "categories",
-                "value": "6981ca7e7d3e19b4c23a1c85",
-                "field_type": null
-              },
-              {
-                "operator": "!exists",
-                "field": "gtin",
-                "value": true,
-                "field_type": null
-              }
-            ]
-          ],
-          "created": "2026-10-06T14:32:18.221838+00:00",
-          "modified": "2026-10-06T14:32:18.233651+00:00",
-          "type": "Smart"
+          "id": "6981ca7e7d3e19b4c23a1c57"
         },
         "errors": []
       }
     }
   },
-  "GET /api/v3/pim-product-lists/{identifier}": {
-    "responses": {
-      "200": {
-        "data": {
-          "id": "6985aa2a7d3e19b4c23a1e23",
-          "account_id": "69085c1e2b4a7f13d90c5e21",
-          "name": "Ready for Wholesale",
-          "type": "Smart",
-          "query": [
-            [
-              {
-                "operator": "eq",
-                "field": "status",
-                "value": "Completed",
-                "field_type": null
-              },
-              {
-                "operator": "gte",
-                "field": "attributes.website_ready",
-                "value": 100,
-                "field_type": null
-              }
-            ]
-          ],
-          "created": "2026-02-06T08:45:30.997000+00:00",
-          "modified": "2026-02-06T08:45:30.605000+00:00"
-        },
-        "errors": []
-      }
-    }
-  },
-  "PATCH /api/v3/pim-product-lists/{identifier}": {
+  "POST /api/v3/assets/{identifier}/categories": {
     "request": {
-      "name": "Ready for Wholesale and Retail",
-      "query": [
-        [
-          {
-            "operator": "in",
-            "field": "status",
-            "value": [
-              "Completed",
-              "Draft"
-            ]
-          }
-        ]
-      ]
+      "id": "6981cbd57d3e19b4c23a1cb3"
     }
   },
-  "GET /api/v3/channels": {
-    "responses": {
-      "200": {
-        "data": [
-          {
-            "id": "69ce55a07d3e19b4c23a1f37",
-            "name": "Wholesale Partner Feed",
-            "format": "CSV",
-            "active": true,
-            "product_list_id": "6985aa2a7d3e19b4c23a1e23"
-          },
-          {
-            "id": "69ce55a07d3e19b4c23a20be",
-            "name": "Retail Marketplace Export",
-            "format": "XML",
-            "active": false,
-            "product_list_id": "6985aa2a7d3e19b4c23a1e0c"
-          }
-        ],
-        "errors": [],
-        "pagination": {}
-      }
-    }
-  },
-  "POST /api/v3/channels": {
+  "POST /api/v3/assets/{identifier}/static_lists": {
     "request": {
-      "name": "Outdoor Retailer Feed - CSV",
-      "format": "CSV",
-      "product_list_id": "6985aa2a7d3e19b4c23a1e0c",
-      "active": true,
-      "output_filename": "northpeak_retailer_feed",
-      "output_filename_with_timestamp": true,
-      "build_reference_date_timezone": "UTC",
-      "rebuild_periodically": true,
-      "rebuild_feed_frequency": "DAILY",
-      "rebuild_feed_hod": 4,
-      "rebuild_feed_moh": 30,
-      "rebuild_feed_timezone": "UTC",
-      "columns": [
-        {
-          "id": "sku",
-          "label": "SKU",
-          "output_label": "item_number"
-        },
-        {
-          "id": "label",
-          "label": "Label",
-          "output_label": "product_name"
-        }
-      ],
-      "childs_first": false,
-      "column_separator": ",",
-      "text_delimiter": "\""
-    },
-    "responses": {
-      "200": {
-        "data": {
-          "id": "6ac506727d3e19b4c23a1f4e",
-          "account_id": "69085c1e2b4a7f13d90c5e21",
-          "name": "Outdoor Retailer Feed - CSV",
-          "format": "CSV",
-          "product_list_id": "6985aa2a7d3e19b4c23a1e0c",
-          "active": true,
-          "output_filename": "northpeak_retailer_feed",
-          "output_filename_with_timestamp": true,
-          "build_reference_date": "2026-10-06T14:32:18+00:00",
-          "build_reference_date_timezone": "UTC",
-          "connections": [],
-          "webhook": null,
-          "rebuild_periodically": true,
-          "rebuild_feed_frequency": "DAILY",
-          "rebuild_feed_dom": null,
-          "rebuild_feed_dow": null,
-          "rebuild_feed_hod": 4,
-          "rebuild_feed_moh": 30,
-          "rebuild_feed_timezone": "UTC",
-          "rebuild_feed_next_build": "2026-10-07T04:30:00+00:00",
-          "columns": [
-            {
-              "fill_values": "ALL",
-              "fill_values_vl3": [
-                "PARENTS",
-                "VARIANTS",
-                "SUBVARIANTS"
-              ],
-              "format": {},
-              "formula_txt": null,
-              "id": "sku",
-              "internal_name": null,
-              "label": "SKU",
-              "output_label": "item_number",
-              "source_type": "PIM",
-              "transformations": null,
-              "type": null
-            },
-            {
-              "fill_values": "ALL",
-              "fill_values_vl3": [
-                "PARENTS",
-                "VARIANTS",
-                "SUBVARIANTS"
-              ],
-              "format": {},
-              "formula_txt": null,
-              "id": "label",
-              "internal_name": null,
-              "label": "Label",
-              "output_label": "product_name",
-              "source_type": "PIM",
-              "transformations": null,
-              "type": null
-            }
-          ],
-          "childs_first": false,
-          "column_separator": ",",
-          "text_delimiter": "\"",
-          "xml_output_attributes": [],
-          "xml_nodes": [],
-          "product_nodes": [],
-          "shopify": null,
-          "wayfair": null,
-          "running": false,
-          "file_path": null,
-          "last_run_error": false,
-          "last_run_start_at": null,
-          "last_run_queue_at": null,
-          "last_run_ends_at": null,
-          "last_run_by_user": null,
-          "process_products": "CREATED_OR_MODIFIED",
-          "on_demand_process_products": "CREATED_OR_MODIFIED",
-          "attribute_sorting": null,
-          "parent_include_criteria": "ONLY_PARENT_IN_LIST",
-          "on_demand_parent_include_criteria": "ONLY_PARENT_IN_LIST",
-          "changes_required": false,
-          "already_processed_through_integrations": true,
-          "processed_user_audit": null,
-          "store_title": null,
-          "store_link": null,
-          "store_description": null,
-          "modified": "2026-10-06T14:32:18.842871+00:00"
-        },
-        "errors": []
-      }
+      "id": "6985ab427d3e19b4c23a1e5c"
     }
   },
-  "GET /api/v3/channels/{identifier}": {
-    "responses": {
-      "200": {
-        "data": {
-          "id": "69ce55a07d3e19b4c23a1f37",
-          "account_id": "69085c1e2b4a7f13d90c5e21",
-          "name": "Wholesale Partner Feed",
-          "format": "CSV",
-          "product_list_id": "6985aa2a7d3e19b4c23a1e23",
-          "active": true,
-          "output_filename": "northpeak_wholesale_feed",
-          "output_filename_with_timestamp": true,
-          "build_reference_date": "2026-04-02T11:40:16+00:00",
-          "build_reference_date_timezone": "UTC",
-          "connections": [],
-          "webhook": null,
-          "rebuild_periodically": true,
-          "rebuild_feed_frequency": "DAILY",
-          "rebuild_feed_dom": null,
-          "rebuild_feed_dow": null,
-          "rebuild_feed_hod": 3,
-          "rebuild_feed_moh": 0,
-          "rebuild_feed_timezone": "UTC",
-          "rebuild_feed_next_build": "2026-10-22T03:00:00+00:00",
-          "columns": [
-            {
-              "fill_values": "ALL",
-              "fill_values_vl3": [
-                "PARENTS",
-                "VARIANTS",
-                "SUBVARIANTS"
-              ],
-              "format": {},
-              "formula_txt": null,
-              "id": "sku",
-              "internal_name": null,
-              "label": "SKU",
-              "output_label": "item_number",
-              "source_type": "PIM",
-              "transformations": null,
-              "type": null
-            },
-            {
-              "fill_values": "ALL",
-              "fill_values_vl3": [
-                "PARENTS",
-                "VARIANTS",
-                "SUBVARIANTS"
-              ],
-              "format": {},
-              "formula_txt": null,
-              "id": "gtin",
-              "internal_name": null,
-              "label": "GTIN",
-              "output_label": "upc",
-              "source_type": "PIM",
-              "transformations": null,
-              "type": null
-            }
-          ],
-          "childs_first": false,
-          "column_separator": ",",
-          "text_delimiter": "\"",
-          "xml_output_attributes": [],
-          "xml_nodes": [],
-          "product_nodes": [],
-          "shopify": null,
-          "wayfair": null,
-          "running": false,
-          "file_path": null,
-          "last_run_error": false,
-          "last_run_start_at": null,
-          "last_run_queue_at": null,
-          "last_run_ends_at": null,
-          "last_run_by_user": null,
-          "process_products": "CREATED_OR_MODIFIED",
-          "on_demand_process_products": "CREATED_OR_MODIFIED",
-          "attribute_sorting": null,
-          "parent_include_criteria": "ONLY_PARENT_IN_LIST",
-          "on_demand_parent_include_criteria": "ONLY_PARENT_IN_LIST",
-          "changes_required": false,
-          "already_processed_through_integrations": true,
-          "processed_user_audit": null,
-          "store_title": null,
-          "store_link": null,
-          "store_description": null,
-          "created": "2026-04-02T11:40:16.840000+00:00",
-          "modified": "2026-09-30T07:15:42.968287+00:00"
-        },
-        "errors": []
-      }
-    }
-  },
-  "PATCH /api/v3/channels/{identifier}": {
+  "POST /api/v3/product-attributes/{identifier}/groups": {
     "request": {
-      "name": "Wholesale Partner Feed - Fall 2026",
-      "process_products": "ALL",
-      "parent_include_criteria": "ALL_PARENT_IN_VARIANTS",
-      "store_title": "NorthPeak Outfitters Wholesale",
-      "store_link": "https://wholesale.northpeak-outfitters.com",
-      "store_description": "Daily product feed for authorized NorthPeak wholesale partners."
+      "id": "69830b317d3e19b4c23a20a7"
     }
   },
-  "GET /api/v3/connections": {
-    "responses": {
-      "200": {
-        "data": [
-          {
-            "id": "69cd521a7d3e19b4c23a1f65",
-            "account_id": "69085c1e2b4a7f13d90c5e21",
-            "name": "Warehouse SFTP",
-            "type": "sftp",
-            "last_processed": "2026-10-20T03:00:41.118000+00:00",
-            "last_result_operation": true,
-            "source": null,
-            "url": "sftp.northpeak-outfitters.com",
-            "port": 22,
-            "user": "plytix_sync",
-            "use_tls": false,
-            "created": "2026-04-01T17:12:58.229000+00:00",
-            "modified": "2026-04-01T17:12:58.598351+00:00"
-          }
-        ],
-        "errors": [],
-        "pagination": {}
-      }
-    }
-  },
-  "POST /api/v3/connections": {
+  "PATCH /api/v3/product-attribute-groups/{identifier}": {
     "request": {
-      "name": "Retailer FTP Drop",
-      "type": "ftp",
-      "url": "ftp.northpeak-outfitters.com",
-      "port": 21,
-      "user": "feeds_upload",
-      "password": "replace-with-ftp-password",
-      "use_tls": true
-    },
-    "responses": {
-      "200": {
-        "data": {
-          "id": "6ac506727d3e19b4c23a1f7c",
-          "account_id": "69085c1e2b4a7f13d90c5e21",
-          "name": "Retailer FTP Drop",
-          "type": "ftp",
-          "last_processed": null,
-          "last_result_operation": null,
-          "source": null,
-          "url": "ftp.northpeak-outfitters.com",
-          "port": 21,
-          "user": "feeds_upload",
-          "use_tls": true,
-          "modified": "2026-10-06T14:32:18.560161+00:00"
-        },
-        "errors": []
-      }
-    }
-  },
-  "GET /api/v3/connections/{identifier}": {
-    "responses": {
-      "200": {
-        "data": {
-          "id": "69cd521a7d3e19b4c23a1f65",
-          "account_id": "69085c1e2b4a7f13d90c5e21",
-          "name": "Warehouse SFTP",
-          "type": "sftp",
-          "last_processed": "2026-10-20T03:00:41.118000+00:00",
-          "last_result_operation": true,
-          "source": null,
-          "url": "sftp.northpeak-outfitters.com",
-          "port": 22,
-          "user": "plytix_sync",
-          "use_tls": false,
-          "created": "2026-04-01T17:12:58.229000+00:00",
-          "modified": "2026-04-01T17:12:58.598351+00:00"
-        },
-        "errors": []
-      }
-    }
-  },
-  "PATCH /api/v3/connections/{identifier}": {
-    "request": {
-      "name": "Warehouse SFTP (Denver DC)",
-      "url": "sftp-den.northpeak-outfitters.com",
-      "port": 2222,
-      "user": "plytix_sync",
-      "password": "replace-with-new-sftp-password"
-    }
-  },
-  "GET /api/v3/import-profiles": {
-    "responses": {
-      "200": {
-        "data": [
-          {
-            "id": "69cd56237d3e19b4c23a1f93",
-            "account_id": "69085c1e2b4a7f13d90c5e21",
-            "name": "ERP Nightly Price Update",
-            "settings": {
-              "import_action": "UPDATE",
-              "import_assets_action": "SKIP",
-              "import_decimal_separator": ".",
-              "new_products_status": "Draft",
-              "charset": "UTF-8",
-              "column_separator": ",",
-              "text_delimiter": "\"",
-              "create_static_list": false,
-              "family_options": {
-                "out_of_the_family_attributes": "SKIP",
-                "overwritten_attributes": "SKIP"
-              },
-              "column_matches": [
-                {
-                  "attr_label": "sku",
-                  "column_label": "Item Number",
-                  "empty_values": "SKIP",
-                  "new_values": "CREATE",
-                  "formatters": [],
-                  "relationship": null
-                },
-                {
-                  "attr_label": "price_usd",
-                  "column_label": "MSRP",
-                  "empty_values": "SKIP",
-                  "new_values": "CREATE",
-                  "formatters": [],
-                  "relationship": null
-                }
-              ]
-            },
-            "created": "2026-04-01T17:30:11.466000+00:00",
-            "modified": "2026-04-01T17:30:11.466000+00:00"
-          }
-        ],
-        "errors": [],
-        "pagination": {}
-      }
-    }
-  },
-  "POST /api/v3/import-profiles": {
-    "request": {
-      "name": "Supplier Catalog Onboarding",
-      "settings": {
-        "import_action": "ALL",
-        "import_assets_action": "ALL",
-        "import_decimal_separator": ".",
-        "new_products_status": "Draft",
-        "charset": "UTF-8",
-        "column_separator": ";",
-        "text_delimiter": "\"",
-        "create_static_list": true,
-        "family_options": {
-          "out_of_the_family_attributes": "UPDATE",
-          "overwritten_attributes": "OVERWRITE"
-        },
-        "column_matches": [
-          {
-            "attr_label": "sku",
-            "column_label": "Supplier SKU",
-            "empty_values": "SKIP",
-            "new_values": "CREATE"
-          },
-          {
-            "attr_label": "short_description",
-            "column_label": "Description",
-            "empty_values": "SKIP",
-            "new_values": "CREATE"
-          }
-        ]
-      }
-    },
-    "responses": {
-      "200": {
-        "data": {
-          "id": "6ac506727d3e19b4c23a1faa",
-          "name": "Supplier Catalog Onboarding",
-          "settings": {
-            "import_action": "ALL",
-            "import_assets_action": "ALL",
-            "import_decimal_separator": ".",
-            "new_products_status": "Draft",
-            "charset": "UTF-8",
-            "column_separator": ";",
-            "text_delimiter": "\"",
-            "create_static_list": true,
-            "family_options": {
-              "out_of_the_family_attributes": "UPDATE",
-              "overwritten_attributes": "OVERWRITE"
-            },
-            "column_matches": [
-              {
-                "attr_label": "sku",
-                "column_label": "Supplier SKU",
-                "empty_values": "SKIP",
-                "new_values": "CREATE",
-                "formatters": [],
-                "relationship": null
-              },
-              {
-                "attr_label": "short_description",
-                "column_label": "Description",
-                "empty_values": "SKIP",
-                "new_values": "CREATE",
-                "formatters": [],
-                "relationship": null
-              }
-            ]
-          },
-          "modified": "2026-10-06T14:32:18.314395+00:00"
-        },
-        "errors": []
-      }
-    }
-  },
-  "GET /api/v3/import-profiles/{identifier}": {
-    "responses": {
-      "200": {
-        "data": {
-          "id": "69cd56237d3e19b4c23a1f93",
-          "account_id": "69085c1e2b4a7f13d90c5e21",
-          "name": "ERP Nightly Price Update",
-          "settings": {
-            "import_action": "UPDATE",
-            "import_assets_action": "SKIP",
-            "import_decimal_separator": ".",
-            "new_products_status": "Draft",
-            "charset": "UTF-8",
-            "column_separator": ",",
-            "text_delimiter": "\"",
-            "create_static_list": false,
-            "family_options": {
-              "out_of_the_family_attributes": "SKIP",
-              "overwritten_attributes": "SKIP"
-            },
-            "column_matches": [
-              {
-                "attr_label": "sku",
-                "column_label": "Item Number",
-                "empty_values": "SKIP",
-                "new_values": "CREATE",
-                "formatters": [],
-                "relationship": null
-              },
-              {
-                "attr_label": "price_usd",
-                "column_label": "MSRP",
-                "empty_values": "SKIP",
-                "new_values": "CREATE",
-                "formatters": [],
-                "relationship": null
-              }
-            ]
-          },
-          "created": "2026-04-01T17:30:11.466000+00:00",
-          "modified": "2026-04-01T17:30:11.466000+00:00"
-        },
-        "errors": []
-      }
-    }
-  },
-  "PATCH /api/v3/import-profiles/{identifier}": {
-    "request": {
-      "name": "ERP Nightly Price and Stock Update",
-      "settings": {
-        "import_action": "UPDATE",
-        "new_products_status": "Draft"
-      }
-    }
-  },
-  "GET /api/v3/ecatalogs": {
-    "responses": {
-      "200": {
-        "data": [
-          {
-            "id": "6a0c50e57d3e19b4c23a1fc1",
-            "account_id": "69085c1e2b4a7f13d90c5e21",
-            "name": "NorthPeak Dealer Portal",
-            "product_list_id": "6985aa2a7d3e19b4c23a1e0c",
-            "asset_list_id": "6985aa2a7d3e19b4c23a1e51",
-            "is_public": false,
-            "created": "2026-05-19T12:00:37.113000+00:00",
-            "modified": "2026-09-15T10:22:04.113000+00:00"
-          }
-        ],
-        "errors": [],
-        "pagination": {}
-      }
-    }
-  },
-  "POST /api/v3/ecatalogs": {
-    "request": {
-      "name": "Spring 2027 Preview",
-      "product_list_id": "6985aa2a7d3e19b4c23a1e23",
-      "asset_list_id": "6985aa2a7d3e19b4c23a1e51",
-      "output_attributes": [
-        {
-          "id": "6a0c50e57d3e19b4c23a201d",
-          "label": "label",
-          "type": "TextAttribute",
-          "source_type": "PIM",
-          "labels": [
-            "label"
-          ],
-          "formula": "{{ label }}",
-          "formatter": {},
-          "output_label": "Product Name"
-        },
-        {
-          "id": "6a0c50e57d3e19b4c23a2034",
-          "label": "attributes.price_usd",
-          "type": "DecimalAttribute",
-          "source_type": "PIM",
-          "labels": [
-            "attributes.price_usd"
-          ],
-          "formula": "{{ attributes.price_usd }}",
-          "formatter": {
-            "DECIMAL_FORMAT": [
-              {
-                "PRECISION": [
-                  "{{ formula_result }}",
-                  2
-                ]
-              },
-              "."
-            ]
-          },
-          "output_label": "MSRP (USD)"
-        }
-      ],
-      "settings": {
-        "header": {
-          "active": true,
-          "title": "Spring 2027 Preview",
-          "subtitle": "New packs and shelters for next season"
-        }
-      },
-      "password_required": true,
-      "password": "replace-with-portal-password",
-      "data_sheet_active": true,
-      "notification_list": [
-        {
-          "email": "dealer-support@northpeak-outfitters.com",
-          "datasheet_downloads": true,
-          "pdf_downloads": false,
-          "quotes": false
-        }
-      ],
-      "notification_active": true
-    },
-    "responses": {
-      "200": {
-        "data": {
-          "id": "6ac506727d3e19b4c23a1fd8",
-          "account_id": "69085c1e2b4a7f13d90c5e21",
-          "name": "Spring 2027 Preview",
-          "logo": null,
-          "product_list_id": "6985aa2a7d3e19b4c23a1e23",
-          "asset_list_id": "6985aa2a7d3e19b4c23a1e51",
-          "output_attributes": [
-            {
-              "id": "6a0c50e57d3e19b4c23a201d",
-              "label": "label",
-              "type": "TextAttribute",
-              "source_type": "PIM",
-              "labels": [
-                "label"
-              ],
-              "formula": "{{ label }}",
-              "formatter": {},
-              "output_label": "Product Name",
-              "formula_txt": null,
-              "internal_name": null
-            },
-            {
-              "id": "6a0c50e57d3e19b4c23a2034",
-              "label": "attributes.price_usd",
-              "type": "DecimalAttribute",
-              "source_type": "PIM",
-              "labels": [
-                "attributes.price_usd"
-              ],
-              "formula": "{{ attributes.price_usd }}",
-              "formatter": {
-                "DECIMAL_FORMAT": [
-                  {
-                    "PRECISION": [
-                      "{{ formula_result }}",
-                      2
-                    ]
-                  },
-                  "."
-                ]
-              },
-              "output_label": "MSRP (USD)",
-              "formula_txt": null,
-              "internal_name": null
-            }
-          ],
-          "assets": [],
-          "settings": {
-            "header": {
-              "active": true,
-              "logo_uuid": null,
-              "title": "Spring 2027 Preview",
-              "subtitle": "New packs and shelters for next season",
-              "background_image_uuid": null,
-              "share_button": false,
-              "share_description": null,
-              "share_image_uuid": null
-            }
-          },
-          "is_public": false,
-          "password_required": true,
-          "data_sheet_active": true,
-          "pds_active": false,
-          "pdf_active": false,
-          "quote_active": false,
-          "specification_sheet_active": false,
-          "price_list_active": false,
-          "pds_template_id": null,
-          "price_list_id": null,
-          "specification_sheet_id": null,
-          "pdf_catalog_id": null,
-          "exportable_attributes": [],
-          "notification_list": [
-            {
-              "email": "dealer-support@northpeak-outfitters.com",
-              "datasheet_downloads": true,
-              "pdf_downloads": false,
-              "quotes": false
-            }
-          ],
-          "quote_request_output_attributes": [],
-          "notification_active": true,
-          "created": "2026-10-06T14:32:18.000000+00:00",
-          "modified": "2026-10-06T14:32:18.000000+00:00"
-        },
-        "errors": []
-      }
-    }
-  },
-  "GET /api/v3/ecatalogs/{identifier}": {
-    "responses": {
-      "200": {
-        "data": {
-          "id": "6a0c50e57d3e19b4c23a1fc1",
-          "account_id": "69085c1e2b4a7f13d90c5e21",
-          "name": "NorthPeak Dealer Portal",
-          "logo": "public_files/pim/e_catalogs/6a0c50e57d3e19b4c23a1fc1/catalog_logo/northpeak-logo.png",
-          "product_list_id": "6985aa2a7d3e19b4c23a1e0c",
-          "asset_list_id": "6985aa2a7d3e19b4c23a1e51",
-          "output_attributes": [
-            {
-              "id": "6a0c50e57d3e19b4c23a201d",
-              "label": "label",
-              "type": "TextAttribute",
-              "source_type": "PIM",
-              "labels": [
-                "label"
-              ],
-              "formula": "{{ label }}",
-              "formatter": {},
-              "output_label": "Product Name",
-              "formula_txt": null,
-              "internal_name": null
-            },
-            {
-              "id": "6a0c50e57d3e19b4c23a2034",
-              "label": "attributes.price_usd",
-              "type": "DecimalAttribute",
-              "source_type": "PIM",
-              "labels": [
-                "attributes.price_usd"
-              ],
-              "formula": "{{ attributes.price_usd }}",
-              "formatter": {
-                "DECIMAL_FORMAT": [
-                  {
-                    "PRECISION": [
-                      "{{ formula_result }}",
-                      2
-                    ]
-                  },
-                  "."
-                ]
-              },
-              "output_label": "MSRP (USD)",
-              "formula_txt": null,
-              "internal_name": null
-            },
-            {
-              "id": "6a0c50e57d3e19b4c23a204b",
-              "label": "attributes.material",
-              "type": "MultiSelectAttribute",
-              "source_type": "PIM",
-              "labels": [
-                "attributes.material"
-              ],
-              "formula": "{{ attributes.material }}",
-              "formatter": {
-                "JOIN": [
-                  "{{ formula_result }}",
-                  ", "
-                ]
-              },
-              "output_label": "Material",
-              "formula_txt": null,
-              "internal_name": null
-            }
-          ],
-          "assets": [
-            {
-              "uuid": "53858ee830d8b9006aa4f50028e28100",
-              "path": "public_files/pim/e_catalogs/6a0c50e57d3e19b4c23a1fc1/assets/53858ee830d8b9006aa4f50028e28100/northpeak-logo.png"
-            }
-          ],
-          "settings": {
-            "general": {
-              "font": "Noto Sans",
-              "title_color": "#1F2A24",
-              "text_color": "#1F2A24",
-              "link_color": "#2F6B4F",
-              "theme_manually": true,
-              "picker_mode": "HEX",
-              "theme_color": {
-                "hue": "152",
-                "saturation": "39",
-                "luminosity": "30"
-              },
-              "brand_color": {
-                "hue": "28",
-                "saturation": "85",
-                "luminosity": "52"
-              }
-            },
-            "header": {
-              "active": true,
-              "logo_uuid": "53858ee830d8b9006aa4f50028e28100",
-              "title": "NorthPeak Dealer Portal",
-              "subtitle": "Current-season packs, tents and accessories",
-              "background_image_uuid": "68d13c045077f6001407ee0005e48640",
-              "share_button": true,
-              "share_description": null,
-              "share_image_uuid": null
-            },
-            "product_search": {
-              "active": true,
-              "text": "Search products",
-              "attributes": [
-                "attributes.short_description"
-              ]
-            }
-          },
-          "is_public": false,
-          "password_required": true,
-          "data_sheet_active": true,
-          "pds_active": false,
-          "pdf_active": false,
-          "quote_active": false,
-          "specification_sheet_active": false,
-          "price_list_active": false,
-          "pds_template_id": null,
-          "price_list_id": null,
-          "specification_sheet_id": null,
-          "pdf_catalog_id": null,
-          "exportable_attributes": [
-            "6a0c50e57d3e19b4c23a201d",
-            "6a0c50e57d3e19b4c23a2034"
-          ],
-          "notification_list": [
-            {
-              "email": "dealer-support@northpeak-outfitters.com",
-              "datasheet_downloads": true,
-              "pdf_downloads": false,
-              "quotes": false
-            }
-          ],
-          "quote_request_output_attributes": [],
-          "notification_active": true,
-          "created": "2026-05-19T12:00:37.113000+00:00",
-          "modified": "2026-09-15T10:22:04.113000+00:00"
-        },
-        "errors": []
-      }
-    }
-  },
-  "PATCH /api/v3/ecatalogs/{identifier}": {
-    "request": {
-      "name": "NorthPeak Dealer Portal - Fall 2026",
-      "quote_active": true,
-      "notification_active": true,
-      "notification_list": [
-        {
-          "email": "dealer-support@northpeak-outfitters.com",
-          "datasheet_downloads": true,
-          "pdf_downloads": true,
-          "quotes": true
-        }
-      ]
-    }
-  },
-  "GET /api/v3/pdf-catalogs": {
-    "responses": {
-      "200": {
-        "data": [
-          {
-            "id": "6a0d6d847d3e19b4c23a1fef",
-            "account_id": "69085c1e2b4a7f13d90c5e21",
-            "name": "Fall 2026 Line Sheet",
-            "logo": null,
-            "output_attributes": [
-              {
-                "id": "6a0c50e57d3e19b4c23a201d",
-                "label": "label",
-                "type": "TextAttribute",
-                "source_type": "PIM",
-                "labels": [
-                  "label"
-                ],
-                "formula": "{{ label }}",
-                "formatter": {},
-                "output_label": "Product Name",
-                "formula_txt": null,
-                "internal_name": null
-              },
-              {
-                "id": "6a0c50e57d3e19b4c23a2034",
-                "label": "attributes.price_usd",
-                "type": "DecimalAttribute",
-                "source_type": "PIM",
-                "labels": [
-                  "attributes.price_usd"
-                ],
-                "formula": "{{ attributes.price_usd }}",
-                "formatter": {
-                  "DECIMAL_FORMAT": [
-                    {
-                      "PRECISION": [
-                        "{{ formula_result }}",
-                        2
-                      ]
-                    },
-                    "."
-                  ]
-                },
-                "output_label": "MSRP (USD)",
-                "formula_txt": null,
-                "internal_name": null
-              }
-            ],
-            "assets": [],
-            "pages": [
-              {
-                "id": "08c2bfae7fe6d1601952960075de0e40",
-                "page_type": "STATIC",
-                "name": "Cover",
-                "thumb": null,
-                "settings": null,
-                "frame": null,
-                "background_image": null,
-                "background_color": "#1F2A24",
-                "width": null,
-                "height": null
-              },
-              {
-                "id": "2527a67e2a1077805a6c11807658a400",
-                "page_type": "PRODUCTS",
-                "name": "Product Pages",
-                "thumb": null,
-                "settings": null,
-                "frame": null,
-                "background_image": null,
-                "background_color": "#FFFFFF",
-                "width": null,
-                "height": null
-              }
-            ],
-            "settings": {
-              "page_size": "US_LETTER",
-              "orientation": "PORTRAIT"
-            },
-            "created": "2026-05-20T08:15:00.502000+00:00",
-            "modified": "2026-08-28T09:47:13.205000+00:00"
-          }
-        ],
-        "errors": [],
-        "pagination": {}
-      }
-    }
-  },
-  "POST /api/v3/pdf-catalogs": {
-    "request": {
-      "name": "Spring 2027 Line Sheet",
-      "output_attributes": [
-        {
-          "id": "6a0c50e57d3e19b4c23a201d",
-          "label": "label",
-          "type": "TextAttribute",
-          "source_type": "PIM",
-          "labels": [
-            "label"
-          ],
-          "formula": "{{ label }}",
-          "formatter": {},
-          "output_label": "Product Name"
-        },
-        {
-          "id": "6a0c50e57d3e19b4c23a2034",
-          "label": "attributes.price_usd",
-          "type": "DecimalAttribute",
-          "source_type": "PIM",
-          "labels": [
-            "attributes.price_usd"
-          ],
-          "formula": "{{ attributes.price_usd }}",
-          "formatter": {
-            "DECIMAL_FORMAT": [
-              {
-                "PRECISION": [
-                  "{{ formula_result }}",
-                  2
-                ]
-              },
-              "."
-            ]
-          },
-          "output_label": "MSRP (USD)"
-        }
-      ],
-      "pages": [
-        {
-          "id": "08c2bfae7fe6d1601952960075de0e40",
-          "page_type": "STATIC",
-          "name": "Cover",
-          "background_color": "#1F2A24"
-        },
-        {
-          "id": "2527a67e2a1077805a6c11807658a400",
-          "page_type": "PRODUCTS",
-          "name": "Product Pages"
-        }
-      ],
-      "settings": {
-        "page_size": "US_LETTER",
-        "orientation": "PORTRAIT"
-      }
-    },
-    "responses": {
-      "200": {
-        "data": {
-          "id": "6ac506727d3e19b4c23a2006",
-          "account_id": "69085c1e2b4a7f13d90c5e21",
-          "name": "Spring 2027 Line Sheet",
-          "logo": null,
-          "output_attributes": [
-            {
-              "id": "6a0c50e57d3e19b4c23a201d",
-              "label": "label",
-              "type": "TextAttribute",
-              "source_type": "PIM",
-              "labels": [
-                "label"
-              ],
-              "formula": "{{ label }}",
-              "formatter": {},
-              "output_label": "Product Name",
-              "formula_txt": null,
-              "internal_name": null
-            },
-            {
-              "id": "6a0c50e57d3e19b4c23a2034",
-              "label": "attributes.price_usd",
-              "type": "DecimalAttribute",
-              "source_type": "PIM",
-              "labels": [
-                "attributes.price_usd"
-              ],
-              "formula": "{{ attributes.price_usd }}",
-              "formatter": {
-                "DECIMAL_FORMAT": [
-                  {
-                    "PRECISION": [
-                      "{{ formula_result }}",
-                      2
-                    ]
-                  },
-                  "."
-                ]
-              },
-              "output_label": "MSRP (USD)",
-              "formula_txt": null,
-              "internal_name": null
-            }
-          ],
-          "assets": [],
-          "pages": [
-            {
-              "id": "08c2bfae7fe6d1601952960075de0e40",
-              "page_type": "STATIC",
-              "name": "Cover",
-              "thumb": null,
-              "settings": null,
-              "frame": null,
-              "background_image": null,
-              "background_color": "#1F2A24",
-              "width": null,
-              "height": null
-            },
-            {
-              "id": "2527a67e2a1077805a6c11807658a400",
-              "page_type": "PRODUCTS",
-              "name": "Product Pages",
-              "thumb": null,
-              "settings": null,
-              "frame": null,
-              "background_image": null,
-              "background_color": null,
-              "width": null,
-              "height": null
-            }
-          ],
-          "settings": {
-            "page_size": "US_LETTER",
-            "orientation": "PORTRAIT"
-          },
-          "created": "2026-10-06T14:32:18.502000+00:00",
-          "modified": "2026-10-06T14:32:18.502000+00:00"
-        },
-        "errors": []
-      }
-    }
-  },
-  "GET /api/v3/pdf-catalogs/{identifier}": {
-    "responses": {
-      "200": {
-        "data": {
-          "id": "6a0d6d847d3e19b4c23a1fef",
-          "account_id": "69085c1e2b4a7f13d90c5e21",
-          "name": "Fall 2026 Line Sheet",
-          "logo": null,
-          "output_attributes": [
-            {
-              "id": "6a0c50e57d3e19b4c23a201d",
-              "label": "label",
-              "type": "TextAttribute",
-              "source_type": "PIM",
-              "labels": [
-                "label"
-              ],
-              "formula": "{{ label }}",
-              "formatter": {},
-              "output_label": "Product Name",
-              "formula_txt": null,
-              "internal_name": null
-            },
-            {
-              "id": "6a0c50e57d3e19b4c23a2034",
-              "label": "attributes.price_usd",
-              "type": "DecimalAttribute",
-              "source_type": "PIM",
-              "labels": [
-                "attributes.price_usd"
-              ],
-              "formula": "{{ attributes.price_usd }}",
-              "formatter": {
-                "DECIMAL_FORMAT": [
-                  {
-                    "PRECISION": [
-                      "{{ formula_result }}",
-                      2
-                    ]
-                  },
-                  "."
-                ]
-              },
-              "output_label": "MSRP (USD)",
-              "formula_txt": null,
-              "internal_name": null
-            }
-          ],
-          "assets": [],
-          "pages": [
-            {
-              "id": "08c2bfae7fe6d1601952960075de0e40",
-              "page_type": "STATIC",
-              "name": "Cover",
-              "thumb": null,
-              "settings": null,
-              "frame": null,
-              "background_image": null,
-              "background_color": "#1F2A24",
-              "width": null,
-              "height": null
-            },
-            {
-              "id": "2527a67e2a1077805a6c11807658a400",
-              "page_type": "PRODUCTS",
-              "name": "Product Pages",
-              "thumb": null,
-              "settings": null,
-              "frame": null,
-              "background_image": null,
-              "background_color": "#FFFFFF",
-              "width": null,
-              "height": null
-            }
-          ],
-          "settings": {
-            "page_size": "US_LETTER",
-            "orientation": "PORTRAIT"
-          },
-          "created": "2026-05-20T08:15:00.502000+00:00",
-          "modified": "2026-08-28T09:47:13.205000+00:00"
-        },
-        "errors": []
-      }
-    }
-  },
-  "PATCH /api/v3/pdf-catalogs/{identifier}": {
-    "request": {
-      "name": "Fall 2026 Line Sheet - Dealer Edition",
-      "settings": {
-        "page_size": "A4",
-        "orientation": "LANDSCAPE"
-      }
+      "name": "Marketing Copy",
+      "order": 2
     }
   }
 }

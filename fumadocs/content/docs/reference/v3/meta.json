@@ -23,15 +23,6 @@
     "product-families",
     "family-attributes",
     "product-attributes",
-    "product-attribute-groups",
-    "pim-product-lists",
-    "channels",
-    "connections",
-    "ecatalogs",
-    "import-profiles",
-    "pdf-catalogs",
-    "product-family-models",
-    "probes",
-    "metrics"
+    "product-attribute-groups"
   ]
 }

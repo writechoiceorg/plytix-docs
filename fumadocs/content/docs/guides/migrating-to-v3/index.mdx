@@ -149,7 +149,7 @@ Before you start, you need:
    Anything in your integration that reads a total has to be reworked to page to the end and tally: a progress bar, a "showing N of M" label, a pre-sized buffer, a sanity check that compares an expected count against a returned one. V3 also paginates by returning the next page's URL rather than a page number to increment, so the loop follows `next_page` until that key stops appearing.
 
    <Callout type="warn" title="Rewrite next_page to https before following it">
-     Every `next_page` and `previous_page` URL is generated with the `http` scheme and `301`s to `https`. HTTP clients that don't forward `Authorization` across a scheme-changing redirect will drop it and get a `401`. Rewrite the scheme to `https` before requesting the URL. Don't let your HTTP client forward `Authorization` across redirects, because that sends your token to whatever host the redirect names.
+     Every `next_page` and `previous_page` URL is generated with the `http` scheme and `301`s to `https`. HTTP clients that don't forward `Authorization` across a scheme-changing redirect will drop it and get a `401`. Rewrite the scheme to `https`, then check that the host and path match the search you started before you attach your token. Don't let your HTTP client forward `Authorization` across redirects, because that sends your token to whatever host the redirect names. See [Fix the scheme before following the link](/reference/v3/pagination#fix-the-scheme-before-following-the-link).
    </Callout>
 
    Note also that these keys are omitted when they don't apply rather than set to `null`, so test for presence, not for `!== null`. See [Pagination](/reference/v3/pagination).
@@ -171,7 +171,7 @@ Before you start, you need:
 
    Two V3 behaviors catch migrated code out:
 
-   - **PATCH replaces the `attributes` map rather than merging into it.** Sending only the attributes that changed deletes every attribute you left out, with no error and no warning. See the [before-and-after example](/docs/guides/migrating-to-v3/responses-and-updates#how-patch-treats-the-attributes-map). To change one attribute, send its bare JSON value to `PATCH /products/{identifier}/attributes/{name}`. To change several, read the current map, merge, and send it back. V3 has no conditional write, so a change someone else makes between your read and your write is overwritten.
+   - **PATCH replaces the `attributes` map rather than merging into it.** Sending only the attributes that changed deletes every attribute you left out, with no error and no warning. See the [before-and-after example](/docs/guides/migrating-to-v3/responses-and-updates#how-patch-treats-the-attributes-map). To change one attribute, send its bare JSON value to `PATCH /products/{identifier}/attributes/{name}`. To change several, send a partial map to `PATCH /products/{identifier}/attributes`, which merges it into the existing map.
    - **DELETE erases** the entity or the field it's applied to. It doesn't set the value to null or reset it to a default. Deleting a variant's override leaves the variant empty instead of showing the parent's value again. Confirm on a test record that a delete does what your V1 code assumed.
 
    See [Update and delete records](/reference/v3/updates-and-deletes).
@@ -194,7 +194,7 @@ Check the problems below if you run into issues while following this guide.
   </Accordion>
 
   <Accordion title="Attributes you didn't touch disappeared after an update" value="attributes-disappeared">
-    PATCH replaced the whole `attributes` map with what you sent. Restore the missing values, then patch one attribute at a time through `PATCH /products/{identifier}/attributes/{name}`. Use read-merge-write only where nothing else edits the same products at the same time, because it overwrites changes made between your read and your write.
+    PATCH replaced the whole `attributes` map with what you sent. Restore the missing values, then send future changes to `PATCH /products/{identifier}/attributes` (a partial map that's merged in) or to `PATCH /products/{identifier}/attributes/{name}` (one attribute). Don't send a partial map to the product itself.
   </Accordion>
 
   <Accordion title={<>A link request returns <code>404</code> or <code>405</code></>} value="link-request-404-405">

@@ -128,7 +128,7 @@ Follow the steps below to write ERP-owned fields back to Plytix and create the p
    */}
 
    <Callout type="error" title="Don't send a partial attributes map to the product itself">
-     `PATCH /products/<product_id>` with `{"attributes": {"price": 34.99}}` replaces the entire `attributes` map. In testing, every attribute missing from the payload was removed; see the before-and-after example in [Responses and updates](/docs/guides/migrating-to-v3/responses-and-updates#how-patch-treats-the-attributes-map). Top-level fields such as `label` and `status` are merged, so you can send them on their own. To change several attributes in one request, you have to read the current map, merge your changes, and send the whole map back. V3 has no conditional write, so a change another user makes between your read and your write is overwritten. In a sync loop, use the single-attribute path instead.
+     `PATCH /products/<product_id>` with `{"attributes": {"price": 34.99}}` replaces the entire `attributes` map. In testing, every attribute missing from the payload was removed; see the before-and-after example in [Responses and updates](/docs/guides/migrating-to-v3/responses-and-updates#how-patch-treats-the-attributes-map). Top-level fields such as `label` and `status` are merged, so you can send them on their own. To change several attributes in one request, send a partial map to `PATCH /products/<product_id>/attributes`, which merges it into the existing map. To change one, use the single-attribute path.
    </Callout>
 
 3. **Create the products Plytix doesn't have yet.**
@@ -147,7 +147,7 @@ Follow the steps below to write ERP-owned fields back to Plytix and create the p
    | Fields | Result |
    |---|---|
    | `label`, `gtin`, `status`, `attributes`, `thumbnail_id`, `product_family_id`, `parent_id` | Accepted in the same request. |
-   | `category_ids`, `static_list_ids`, `channel_ids`, `ecatalog_ids`, `product_data_sheet_ids` | Rejected with `422` and `"Extra inputs are not permitted"`, on create and on `PATCH` alike. |
+   | `category_ids` and the other `*_ids` link arrays | Rejected with `422` and `"Extra inputs are not permitted"`, on create and on `PATCH` alike. |
 
    Categories are attached afterwards with `POST /products/<product_id>/categories`, sending `{"id": "<category_id>"}`. See [Unlink categories, assets, or relationships](/docs/guides/safely-removing-categories-assets-or-relationships) for the full link and unlink pattern.
 

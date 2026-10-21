@@ -34,7 +34,7 @@ Follow the steps below to read your products, group them by parent, and add the 
 
    These five fields are what reconstruction needs. `parent_id` holds the ID of the product one level up, and `product_level` says where each product sits: `0` standalone, `1` parent, `2` variant, or `3` sub-variant. Add `label` or any attribute your output also needs.
 
-   Follow `pagination.next_page` until it's missing, `null`, or empty, and replace `http://` with `https://` in the link before you request it. [Export your full catalog](/docs/guides/exporting-your-full-catalog) covers the paging loop in detail, including why sorting by `id` matters.
+   Follow `pagination.next_page` until it's missing, `null`, or empty, replace `http://` with `https://` in the link, and check that its host and path match your search before you request it. [Export your full catalog](/docs/guides/exporting-your-full-catalog) covers the paging loop in detail, including why sorting by `id` matters.
 
 2. **Group the products by `parent_id`.**
 

@@ -100,6 +100,8 @@ Requesting that URL as given returns a `301` redirect to the `https` address. Ma
 
 Rewrite the scheme to `https` before you request the URL.
 
+Before you attach your token, also check that the link points where you expect: the same host as your V3 base URL, the default `https` port, no user name or password in the URL, and the same collection path you searched, such as `/api/v3/products`. Stop if any of these differ, and apply the same check to a `next_page` you saved to resume later. Don't let your HTTP client forward `Authorization` across redirects. Options such as curl's `--location-trusted` send your token to whatever host the redirect names.
+
 ## Request parameters
 
 Use these three parameters to control paging and sort order:

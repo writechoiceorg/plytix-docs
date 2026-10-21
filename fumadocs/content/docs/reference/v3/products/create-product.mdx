@@ -5,6 +5,7 @@ _openapi:
   preload:
     - ./openapi.json
   method: POST
+  path: "/api/v3/products"
   webhook: false
   toc: []
   structuredData:
@@ -14,13 +15,13 @@ _openapi:
           Create a single product.
 
 
-          The response returns the full created product, including its generated
-          `id`, not the ID on its own.
+          The response returns the created product, including its generated
+          `id`, as an object in `data`.
 
 
-          To create a variant, include `parent_id` and `product_family_id` so
-          the new product joins an existing product family hierarchy. See
-          [Rebuild parent and variant
+          To create a variant, include `parent_id`. Leave `product_family_id`
+          out: the variant takes its family from the parent, and a different
+          family returns `422`. See [Rebuild parent and variant
           products](/docs/guides/reconstructing-parent-variant-hierarchies).
 
 

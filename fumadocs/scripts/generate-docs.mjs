@@ -56,15 +56,6 @@ const TAG_ICONS = {
   familyattributes: "ListTree",
   productattributes: "Tags",
   productattributegroups: "Group",
-  pimproductlists: "ListChecks",
-  channels: "Share2",
-  connections: "Plug",
-  ecatalogs: "BookOpen",
-  importprofiles: "Upload",
-  pdfcatalogs: "FileText",
-  productfamilymodels: "Boxes",
-  probes: "Activity",
-  unknown: "BarChart3"
 };
 
 // URL folder for each tag: the spec's tags are flattened (see merge-openapi.mjs),
@@ -79,11 +70,6 @@ const TAG_FOLDERS = {
   familyattributes: 'family-attributes',
   productattributes: 'product-attributes',
   productattributegroups: 'product-attribute-groups',
-  pimproductlists: 'pim-product-lists',
-  importprofiles: 'import-profiles',
-  pdfcatalogs: 'pdf-catalogs',
-  productfamilymodels: 'product-family-models',
-  unknown: 'metrics',
 };
 
 const TAG_LABELS = {
@@ -96,18 +82,9 @@ const TAG_LABELS = {
   productfamilies: 'Product Families',
   productattributes: 'Product Attributes',
   productattributegroups: 'Product Attribute Groups',
-  pimproductlists: 'PIM Product Lists',
-  channels: 'Channels',
-  connections: 'Connections',
-  ecatalogs: 'eCatalogs',
-  importprofiles: 'Import Profiles',
-  pdfcatalogs: 'PDF Catalogs',
-  productfamilymodels: 'Product Family Models',
   familyattributes: 'Family Attributes',
   productrelationships: 'Product Relationships',
   relatedproducts: 'Related Products',
-  unknown: 'Metrics',
-  probes: 'Probes',
 };
 
 await generateFiles({
@@ -127,6 +104,10 @@ await generateFiles({
         /(<Comp\b[^\n]*?)\s*\/>/g,
         '$1 preloaded={props.preloaded} />',
       );
+      // Record the operation's path next to its method, so code that only has
+      // the page (its metadata, the llms/MCP Markdown export) can find the operation.
+      const operation = file.content.match(/operations=\{\[\{"path":("[^"]+")/);
+      if (operation) file.content = file.content.replace(/^( {2}method: .+)$/m, `$1\n  path: ${operation[1]}`);
     }
   },
 });

@@ -6,6 +6,10 @@
     "get-asset",
     "update-asset",
     "delete-asset",
+    "add-asset-to-list",
+    "link-asset-category",
+    "remove-asset-from-list",
+    "unlink-asset-category",
     "get-asset-field",
     "update-asset-field",
     "delete-asset-field"

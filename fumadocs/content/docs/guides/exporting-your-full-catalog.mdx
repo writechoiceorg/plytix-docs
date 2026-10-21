@@ -161,11 +161,15 @@ class Stop(Exception):
 
 def checked_url(url):
     """Return the URL with https, or stop if it isn't the products search on the Plytix host."""
-    parts = urlsplit(url)
+    try:
+        parts = urlsplit(url)
+        port = parts.port  # raises ValueError for a malformed port
+    except ValueError:
+        raise Stop(f"Refusing to send the token to a malformed URL: {url}")
     if parts.scheme == "http":
         parts = parts._replace(scheme="https")  # pagination links currently use http
     if (parts.scheme != "https" or parts.hostname != ALLOWED.hostname
-            or parts.port not in (None, 443) or parts.username or parts.password
+            or port not in (None, 443) or parts.username or parts.password
             or parts.path != ALLOWED.path or parts.fragment):
         raise Stop(f"Refusing to send the token to an unexpected URL: {url}")
     return parts.geturl()

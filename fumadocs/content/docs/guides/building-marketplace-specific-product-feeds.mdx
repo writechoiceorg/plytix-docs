@@ -51,7 +51,7 @@ Follow the steps below to map the fields, read the products in scope, and turn t
 
 3. **Read every page and save the products.**
 
-   Follow `pagination.next_page` while it holds a usable URL, and rewrite `http://` to `https://` before you request it. The script in [Keep a long export resumable](/docs/guides/exporting-your-full-catalog#keep-a-long-export-resumable) does this and saves each product as a line in `products.jsonl`. Add your audience filter to its `FILTERS` list, for example `("attributes.market", "UK")`, and set `FIELDS` to the fields you mapped.
+   Follow `pagination.next_page` while it holds a usable URL, rewrite `http://` to `https://`, and check that its host and path match your search before you request it. The script in [Keep a long export resumable](/docs/guides/exporting-your-full-catalog#keep-a-long-export-resumable) does this and saves each product as a line in `products.jsonl`. Add your audience filter to its `FILTERS` list, for example `("attributes.market", "UK")`, and set `FIELDS` to the fields you mapped.
 
 4. **Transform each product into a feed row, and skip the ones that can't be listed.**
 

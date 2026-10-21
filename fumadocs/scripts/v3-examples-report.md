@@ -2,6 +2,8 @@
 
 `v3-examples.json` replaces the sampler's placeholders (`"string"`, `"stringst"`, `user@example.com`) with synthetic data from one made-up catalog, "NorthPeak Outfitters" (packs, tents and accessories). It is applied by `openapi-examples.mjs`. All cross-references are consistent: account `69085c1e2b4a7f13d90c5e21`, family `Backpacks & Bags`, parent product `BAG-20314` with variant `BAG-20314-SLT`, and so on. IDs are lowercase 24-hex and time-prefixed to match their 2026 `created` dates. Every GTIN-13 has a valid check digit. Timestamps use the live format (`2026-10-06T14:32:18.412000+00:00`). Hosts are `*.northpeak-outfitters.com` only. No real account data is reused: the fixture SKU `BAG-10157` is deliberately not used.
 
+**Update, 2026-10-21:** the site now builds from the latest spec (`openapi_pimv3_20261002 (Latest spec).json`), with internal resources excluded. Create responses moved from `200` to `201`. The entries for excluded resources were dropped. New entries cover the five link and update request bodies the latest spec added. Each search endpoint now gets its own `filters` example (under `parameters`), naming fields that resource has, in place of the spec's product-only example. The coverage table and validator result below predate this update; re-run the validator before relying on them.
+
 ## Coverage
 
 | What | Spec count | Covered |

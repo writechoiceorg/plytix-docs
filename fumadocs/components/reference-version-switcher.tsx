@@ -42,7 +42,7 @@ export function ReferenceVersionSwitcher() {
         <span className="text-sm font-medium">{selected.title}</span>
         <ChevronUpDownRegular className="shrink-0 ms-auto size-4 text-fd-muted-foreground" />
       </PopoverTrigger>
-      <PopoverContent className="flex flex-col gap-1 w-(--anchor-width) p-1">
+      <PopoverContent aria-label="API version" className="flex flex-col gap-1 w-(--anchor-width) p-1">
         {VERSIONS.map((version) => (
           <Link
             key={version.url}

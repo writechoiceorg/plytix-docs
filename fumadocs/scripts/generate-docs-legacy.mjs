@@ -87,6 +87,10 @@ await generateFiles({
         /(<Comp\b[^\n]*?)\s*\/>/g,
         '$1 preloaded={props.preloaded} />',
       );
+      // Record the operation's path next to its method, so code that only has
+      // the page (its metadata, the llms/MCP Markdown export) can find the operation.
+      const operation = file.content.match(/operations=\{\[\{"path":("[^"]+")/);
+      if (operation) file.content = file.content.replace(/^( {2}method: .+)$/m, `$1\n  path: ${operation[1]}`);
     }
   },
 });

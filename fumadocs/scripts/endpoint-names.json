@@ -599,6 +599,46 @@
     "GET /is_alive": {
       "slug": "check-api-liveness",
       "title": "Check API liveness"
+    },
+    "POST /api/v3/products/{identifier}/categories": {
+      "slug": "link-product-category",
+      "title": "Link a category to a product"
+    },
+    "DELETE /api/v3/products/{identifier}/categories/{id}": {
+      "slug": "unlink-product-category",
+      "title": "Unlink a category from a product"
+    },
+    "POST /api/v3/assets/{identifier}/categories": {
+      "slug": "link-asset-category",
+      "title": "Link a category to an asset"
+    },
+    "DELETE /api/v3/assets/{identifier}/categories/{id}": {
+      "slug": "unlink-asset-category",
+      "title": "Unlink a category from an asset"
+    },
+    "POST /api/v3/assets/{identifier}/static_lists": {
+      "slug": "add-asset-to-list",
+      "title": "Add an asset to an asset list"
+    },
+    "DELETE /api/v3/assets/{identifier}/static_lists/{id}": {
+      "slug": "remove-asset-from-list",
+      "title": "Remove an asset from an asset list"
+    },
+    "POST /api/v3/product-attributes/{identifier}/groups": {
+      "slug": "add-product-attribute-to-group",
+      "title": "Add a product attribute to a group"
+    },
+    "DELETE /api/v3/product-attributes/{identifier}/groups/{id}": {
+      "slug": "remove-product-attribute-from-group",
+      "title": "Remove a product attribute from a group"
+    },
+    "PATCH /api/v3/product-attribute-groups/{identifier}": {
+      "slug": "update-product-attribute-group",
+      "title": "Update a product attribute group"
+    },
+    "PATCH /api/v3/product-attribute-groups/{identifier}/{path}": {
+      "slug": "update-product-attribute-group-field",
+      "title": "Update a product attribute group field"
     }
   },
   "v1-v2": {

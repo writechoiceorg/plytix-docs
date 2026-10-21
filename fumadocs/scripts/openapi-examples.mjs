@@ -32,12 +32,20 @@ export function applyExamples(spec, examples) {
   spec.servers = SERVERS;
   const unmatched = [];
 
-  for (const [key, { request, responses = {} }] of Object.entries(examples)) {
+  for (const [key, { request, parameters = {}, responses = {} }] of Object.entries(examples)) {
     const [method, ...rest] = key.split(' ');
     const op = spec.paths?.[rest.join(' ')]?.[method.toLowerCase()];
     if (!op) {
       unmatched.push(key);
       continue;
+    }
+
+    // Query parameter examples, such as a `filters` object that names fields
+    // this resource actually has (the spec reuses one product example everywhere).
+    for (const [name, value] of Object.entries(parameters)) {
+      const param = op.parameters?.find((p) => p.name === name);
+      if (param) param.example = value;
+      else unmatched.push(`${key} (parameter ${name})`);
     }
 
     const requestMedia = op.requestBody?.content?.['application/json'];

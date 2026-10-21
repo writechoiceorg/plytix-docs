@@ -5,6 +5,7 @@ _openapi:
   preload:
     - ./openapi-v1v2.json
   method: POST
+  path: "/api/v1/products/search"
   webhook: false
   toc: []
   structuredData:
@@ -93,10 +94,11 @@ _openapi:
           | quantity | quantity | number |
 
 
-          ```
+          Requesting the attributes `["categories", "label", "attributes.color",
+          "relationships.gift_basket"]` returns products shaped like this:
 
-          Attributes: ["categories", "label", "attributes.color",
-          "relationships.gift_basket"]
+
+          ```json
 
           {
                "id": "5d8200527313382d939838c4",
@@ -117,10 +119,10 @@ _openapi:
                      }
                    ]
                  }
-               ],
+               ]
              }
+          ```
 
-           ```
 
           # Relationship filters
 
