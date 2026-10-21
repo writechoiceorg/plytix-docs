@@ -2,7 +2,7 @@
 
 Running log of open questions and conflicts found while applying Plytix feedback to the docs. Maintained by the `feedback-corrector` skill: one section per page, updated in place.
 
-**Last updated:** 2026-10-19
+**Last updated:** 2026-10-21
 
 ## Summary
 
@@ -26,6 +26,7 @@ Running log of open questions and conflicts found while applying Plytix feedback
 | [Not migrated and new in V3](fumadocs/content/docs/guides/migrating-to-v3/not-migrated-and-new-in-v3.mdx) | 2 | 0 | 2026-10-14 |
 | [Migrating to V3](fumadocs/content/docs/guides/migrating-to-v3/index.mdx) | 0 (tracked under FB-001, FB-002, FB-010, FB-016, FB-018, FB-019, FB-020, FB-042) | 0 | 2026-10-14 |
 | [19 October action list (PM items)](#19-october-2026-documentation-actions-pm-items) | 4 | 0 | 2026-10-19 |
+| [19 October marketing and design feedback](#19-october-2026-marketing-and-design-feedback) | 6 | 0 | 2026-10-21 |
 
 ---
 
@@ -625,3 +626,54 @@ Also fixed: `reference/v3/updates-and-deletes.mdx` sent a decimal attribute as a
   - `merge-openapi.mjs` still reads the superseded `openapi_pimv3.json`, and it only carries `description`, `summary`, and `operationId`, so request-body examples added to `openapi.json` would be lost on the next refresh.
 - Library-generated behavior (PM-40, PM-41, PM-56, PM-57, PM-58, PM-59, and the playground and snippet parts of PM-50 and PM-51): the multipart `file` field is already declared `format: binary` in `openapi-v1v2.json`, so the file control and the JavaScript and Python snippets come from fumadocs-openapi.
 - `npm run build` currently fails on `@import '@fluentui/react-icons/headless/styles.css'` in `fumadocs/app/global.css` (Tailwind can't resolve the package export). This predates this run.
+
+---
+
+## 19 October 2026 marketing and design feedback
+
+**Source:** "Plytix - WriteChoice documentation actions _ 19 October 2026 - Marketing-Design Feedback.csv" (16 items, numbered 1-19; items 3, 4, and 11 aren't in the file). This run spans the site, so it's logged here. The reply to David is in `messages-for-david.md` under "19 October marketing and design feedback".
+
+### Run history
+
+| Date | Feedback from | Applied | Skipped | Flagged |
+|---|---|---|---|---|
+| 2026-10-21 | Plytix marketing/design list | 14 (1, 5, 6, 7, 8, 9, 10, 12, 13, 14, 15, 16, 18, 19) | 2 (2 and 17, held back by WriteChoice for now) | 6 new (FB-048 to FB-053) |
+
+### Applied
+
+| # | Change | Where |
+|---|---|---|
+| 1 | Endpoint pages moved from operationId slugs to `/reference/v3/<resource>/<action>` and `/reference/v1-v2/<resource>/<action>` (for example, `/reference/v3/products/get-product`). Concept pages moved to `/reference/v3/...` and `/reference/v1-v2/...`. 243 permanent redirects cover every old `/docs/reference/...` URL, plus `/docs/guides/overview`. | `fumadocs/scripts/endpoint-names.json` (one entry per operation, keyed by `METHOD /path`), `generate-docs*.mjs`, `lib/source.ts` (`url`), `app/(docs)/reference/`, `proxy.ts`, `redirects.json`, `next.config.mjs` |
+| 5 | Homepage, Guides intro, and site metadata describe Plytix as a product content platform (Plytix PIM, Plytix DAM, Plytix Feed Management), kept separate from what the API covers | `app/(home)/page.tsx`, `guides/what-is-the-plytix-api.mdx`, `app/layout.tsx` |
+| 6 | Header links: Plytix.com, Login, Book a demo (pill button), matching knowledge.plytix.com | `lib/layout.shared.tsx` |
+| 7 | Footer copied from the knowledge base (Platform, Company, Resources, legal, social), without its "API documentation" link | `components/site-footer.tsx` |
+| 8 | Guides grouped as Get started, Integration guides, How-to guides, AI assistants, Upgrade from V1/V2, with the titles Plytix listed | `guides/meta.json`, page frontmatter, card and link text across 31 files |
+| 9 | "Overview" replaced by "What is the Plytix API?" (purpose, audience, coverage, where to start, versions). Reviewed with the `reviewer` skill: Approve with changes (Related-articles section; wording pending FB-049) | `guides/what-is-the-plytix-api.mdx` |
+| 10 | Migration pages listed flat under "Upgrade from V1/V2", "Migration overview" first, so no item is both a page and a dropdown | `guides/meta.json` (`"...migrating-to-v3"`) |
+| 12 | 238 endpoint titles in plain language ("Get a product", "Get a product field", "List a family's attributes"); "subpath" removed from guide prose and V3 descriptions | `openapi.json` and `openapi-v1v2.json` `summary`, `endpoint-mapping.mdx`, `migrating-to-v3/index.mdx` |
+| 13 | V3 code samples use `https://pim.plytix.com` (`servers`); realistic synthetic examples for all 29 V3 request bodies and 53 responses; 26 invalid JSON blocks in V1/V2 descriptions repaired (PM-62) | `scripts/v3-examples.json`, `scripts/openapi-examples.mjs`, `openapi-v1v2.json` |
+| 14 | Reference "Overview" groups renamed "Core concepts" | `reference/v3/meta.json`, `reference/v1-v2/meta.json` |
+| 15 | V1/V2 concept titles carry the version ("V1/V2 authentication", ...), each with a callout linking the V3 equivalent | `reference/v1-v2/*.mdx` |
+| 16 | V3 "Filtering and query syntax" renamed "Filtering and search" (slug `filtering-and-search`, redirected); index card labels match page titles | `reference/v3/filtering-and-search.mdx`, `reference/v3/index.mdx` |
+| 18 | Reproduced: below 1280px the sticky "On this page" bar covered the heading a reader jumped to, and on desktop the sidebar and TOC sat 8px under the header. Fixed by reporting the real header height and tying heading scroll margins to the sticky offsets; checked at 1440, 1280, 1100, 800, and 420px | `app/global.css` |
+| 19 | "V3 (Beta)" and "V1/V2 (Legacy)" in the switcher, sidebar roots, and cards; beta callout on the V3 overview | `reference-version-switcher.tsx`, `meta.json`, `reference/v3/index.mdx` |
+
+Not changed under item 13: the `http://` `next_page` values in the Quickstart and Export your full catalog. They show what the API returns today, and both pages explain the scheme rewrite next to them (quirk #92).
+
+### Flags
+
+| ID | Status | Feedback | What our sources say | Source | Question for Plytix | Raised | Resolution |
+|---|---|---|---|---|---|---|---|
+| FB-048 | Open | Item 1: "Propose a short, consistent and stable URL pattern ... then apply the agreed pattern before launch." | Applied as a proposal: `/reference/<version>/<resource>/<action>`, slugs held in `endpoint-names.json` so they don't move when titles change. The kickoff raised URL control as Jessie's SEO concern. | `kick_off_03___plytix.md:496-508` | Does the `/reference/v3/products/get-product` pattern work for Jessie's SEO plans, or do you want another root? | 2026-10-21 | |
+| FB-049 | Open | Item 5: "Use multi-technology platform wording." | The Content Guidelines give official product names but no tagline. We used "a product content platform" with Plytix PIM, Plytix DAM, and Plytix Feed Management. | `Plytix Content Guidelines 2026.pdf` sections 1 and 3 | Is "product content platform" the wording you want, or is there an approved platform line? | 2026-10-21 | |
+| FB-050 | Open | Items 6-7: "Could you confirm if the header/footer can be replicated?" | Yes. Both are live in the build, copied from knowledge.plytix.com on 2026-10-21. We left out the footer's "API documentation", "Our Branding Guidelines", and "Cookie preferences" items (the last two have no link target on the knowledge base). | knowledge.plytix.com | Should "Our Branding Guidelines" and "Cookie preferences" be added, and where do they link? | 2026-10-21 | |
+| FB-051 | Open | Item 8 structure | "Get notified about changes" (`getting-notified-webhooks-and-automations.mdx`) isn't in your proposed structure and isn't in the nav. | `guides/meta.json` | Should it go under How-to guides, or stay unpublished? | 2026-10-21 | |
+| FB-052 | Open | Item 13 examples | Writing examples surfaced spec gaps: Create endpoints declare only `200` but return `201`; attributes and families declare `_id` but return `id`; decimals must be sent as strings but a price came back as a number; the `GET /product-relationships` shape conflicts between the spec and two retests; PDF catalog and eCatalog examples come from the schema alone (creation is gated on our account). | `fumadocs/scripts/v3-examples-report.md`, `config/api-testing.config.md` | Can the spec be corrected for `201` and `id`, and can you confirm the decimal round trip and the product-relationships response shape? | 2026-10-21 | |
+| FB-053 | Open | Item 12 (found while renaming) | "Get a product field" says the `categories`, `assets`, and `static_lists` fields return an empty array; "Endpoint mapping" says a 2026-10-15 retest found `/assets` and `/categories` work again. | `openapi.json` description; `endpoint-mapping.mdx:34` | None. WriteChoice will retest with `endpoint-tester` and align both pages. | 2026-10-21 | |
+
+### Not applied in this run
+
+- Items 2 (meta titles and descriptions) and 17 (version switcher alternative): held back by WriteChoice for now.
+- `merge-openapi.mjs` still reads the superseded `openapi_pimv3.json`. It now also applies `servers` and `v3-examples.json`, but it rebuilds component schemas from the source, so hand edits to schema descriptions (for example, the V1/V2 capitalization fixes) are lost on a refresh. Don't run `merge:api` until that's fixed; use `node scripts/openapi-examples.mjs` to re-apply examples.
+- The `npm run build` failure noted on 2026-10-19 is fixed: the Fluent icons stylesheet is now imported from `app/layout.tsx`. `npm run lint` fails before linting because `typescript-eslint` doesn't support TypeScript 7.
+- V3 code samples don't send an `Authorization` header, because `openapi.json` declares no security scheme. Adding one depends on the V3 authentication model (FB-002).

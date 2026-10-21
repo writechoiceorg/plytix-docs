@@ -29,7 +29,7 @@ Key points on this page:
 
 The Platform MCP is expected to sit on top of the PIM V3 API, so the resources below are the surface an agent would work with. This mapping is not yet confirmed.
 
-Each group follows the same shape in V3. A search operation returns a filtered, paged collection. A get operation returns one record by identifier. Create, update, and delete operate on single records. There are no bulk write operations in V3, which is why a large batch runs as many single calls and needs pacing. See [Rate limits](/docs/reference/v3/rate-limits).
+Each group follows the same shape in V3. A search operation returns a filtered, paged collection. A get operation returns one record by identifier. Create, update, and delete operate on single records. There are no bulk write operations in V3, which is why a large batch runs as many single calls and needs pacing. See [Rate limits](/reference/v3/rate-limits).
 
 ## Product data
 
@@ -79,9 +79,9 @@ These groups exist in the V3 spec. Their MCP behavior is not yet confirmed.
 Search operations are what an agent calls most, because nearly every request starts with finding the right records. Two behaviors show up as wrong answers rather than errors:
 
 - **Results are paged.** An agent that stops at the first page reports a count lower than the truth.
-- **Filters support more than equality.** Plytix supports OR logic and completeness filters, which is what makes questions like "which products are missing a description or an image" answerable in one pass. See [Audit product data quality with filters](/docs/guides/auditing-product-data-quality-with-filters).
+- **Filters support more than equality.** Plytix supports OR logic and completeness filters, which is what makes questions like "which products are missing a description or an image" answerable in one pass. See [Audit product data quality](/docs/guides/auditing-product-data-quality-with-filters).
 
-For the full parameter list on any of these operations, see the [V3 API reference](/docs/reference/v3).
+For the full parameter list on any of these operations, see the [V3 API reference](/reference/v3).
 
 ## What has no tool
 

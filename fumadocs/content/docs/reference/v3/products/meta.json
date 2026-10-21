@@ -1,0 +1,15 @@
+{
+  "title": "Products",
+  "pages": [
+    "search-products",
+    "create-product",
+    "get-product",
+    "update-product",
+    "delete-product",
+    "get-product-field",
+    "add-product-field",
+    "update-product-field",
+    "delete-product-field"
+  ],
+  "icon": "Package"
+}

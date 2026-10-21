@@ -13,7 +13,7 @@ const cards = [
     description:
       'Generate an API key, exchange it for a bearer token, and make your first authenticated request against API V3.',
     bullets: ['Create an API key in your dashboard', 'Exchange it for a bearer token'],
-    href: '/docs/guides/overview',
+    href: '/docs/guides/what-is-the-plytix-api',
     linkLabel: 'Check the guides',
   },
   {
@@ -22,7 +22,7 @@ const cards = [
     description:
       'Explore the resources the API exposes, with parameters, request bodies, and example responses for every endpoint.',
     bullets: ['Products, assets, and categories', 'Authentication and status codes'],
-    href: '/docs/reference/v3',
+    href: '/reference/v3',
     linkLabel: 'Browse the reference',
   },
   {
@@ -54,14 +54,15 @@ export default function HomePage() {
           Build on the Plytix API
         </h1>
         <p className="text-white/90 text-lg sm:text-[20px] leading-[1.4] max-w-[820px] mx-auto mb-10">
-          Connect your ERP, storefront, or internal tools to Plytix, so you can manage
-          products, assets, and other PIM data programmatically.
+          Plytix is a product content platform, with Plytix PIM, Plytix DAM, and Plytix Feed
+          Management working together. Use the API to connect your ERP, storefront, or internal
+          tools and manage your products, assets, and catalog structure programmatically.
         </p>
         <Link
           href="/docs/guides/quickstart"
           className="inline-flex items-center rounded-full bg-[#7A52FF] px-6 py-3 text-lg text-white no-underline transition-colors hover:bg-[#6a40f5]"
         >
-          Get Started
+          Get started
         </Link>
       </section>
 

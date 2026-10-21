@@ -1,6 +1,6 @@
 import { llms, loader } from 'fumadocs-core/source';
 import { fluentIconsPlugin } from './fluent-icons-plugin';
-import { docsContentRoute, docsImageRoute, docsRoute } from './shared';
+import { docsRoute, getPageUrl } from './shared';
 import { defineDocs } from 'fumadocs-mdx/macro';
 import { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
 import { openapi } from './openapi';
@@ -22,6 +22,7 @@ const docs = defineDocs({
 // See https://fumadocs.dev/docs/headless/source-api for more info
 export const source = loader({
   baseUrl: docsRoute,
+  url: (slugs) => getPageUrl(slugs),
   source: docs.toFumadocsSource(),
   plugins: [fluentIconsPlugin(), openapi.loaderPlugin()],
 });

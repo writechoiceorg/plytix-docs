@@ -1,0 +1,14 @@
+{
+  "title": "eCatalogs",
+  "pages": [
+    "search-ecatalogs",
+    "create-ecatalog",
+    "get-ecatalog",
+    "update-ecatalog",
+    "delete-ecatalog",
+    "get-ecatalog-field",
+    "update-ecatalog-field",
+    "delete-ecatalog-field"
+  ],
+  "icon": "BookOpen"
+}

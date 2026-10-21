@@ -1,0 +1,14 @@
+{
+  "title": "Channels",
+  "pages": [
+    "search-channels",
+    "create-channel",
+    "get-channel",
+    "update-channel",
+    "delete-channel",
+    "get-channel-field",
+    "update-channel-field",
+    "delete-channel-field"
+  ],
+  "icon": "Share2"
+}

@@ -1,19 +1,19 @@
 ---
-title: Build a marketplace-specific product feed
+title: Build a marketplace feed
 description: Learn how to read a filtered product set from the V3 API and turn it into a marketplace feed file that your own integration builds and delivers.
 ---
 
 import { ArrowDownloadRegular, FilterRegular } from '@/components/icons';
 
-Produce a feed for one marketplace or retailer, for example a UK-only product file, by reading a filtered product set from Plytix and shaping it in your own integration. This guide covers mapping the marketplace's fields to Plytix fields, requesting and paging through the products in scope, transforming them into feed rows, and delivering the file on your schedule. Your integration builds and delivers the feed: this guide doesn't create or configure a Plytix channel. If you'd rather have Plytix build and publish the feed, set up a channel in Plytix instead, as described in [Creating a channel](https://help.plytix.com/en/creating-a-channel) and [Managing channels](https://help.plytix.com/en/managing-channels) in the Help Center. All requests use the V3 API at `https://pim.plytix.com/api/v3`. See [Filtering and Query Syntax](/docs/reference/v3/filtering-query-syntax) for the filter rules and [Pagination](/docs/reference/v3/pagination) for paging.
+Produce a feed for one marketplace or retailer, for example a UK-only product file, by reading a filtered product set from Plytix and shaping it in your own integration. This guide covers mapping the marketplace's fields to Plytix fields, requesting and paging through the products in scope, transforming them into feed rows, and delivering the file on your schedule. Your integration builds and delivers the feed: this guide doesn't create or configure a Plytix channel. If you'd rather have Plytix build and publish the feed, set up a channel in Plytix instead, as described in [Creating a channel](https://help.plytix.com/en/creating-a-channel) and [Managing channels](https://help.plytix.com/en/managing-channels) in the Help Center. All requests use the V3 API at `https://pim.plytix.com/api/v3`. See [Filtering and Query Syntax](/reference/v3/filtering-and-search) for the filter rules and [Pagination](/reference/v3/pagination) for paging.
 
 ## Prerequisites
 
 Before you start, make sure you have the following:
 
-- API access to your Plytix account. How you get a token depends on the API version: V1/V2 exchange your API Key and password for a bearer token, as described in [Authentication](/docs/reference/legacy/token-authentication). V3 is moving to a new token-based authentication model whose details aren't published yet; see [Authentication and base URLs](/docs/guides/migrating-to-v3/authentication-and-base-urls). The examples below send the token as `Authorization: Bearer <access_token>`.
+- API access to your Plytix account. How you get a token depends on the API version: V1/V2 exchange your API Key and password for a bearer token, as described in [Authentication](/reference/v1-v2/token-authentication). V3 is moving to a new token-based authentication model whose details aren't published yet; see [Authentication and base URLs](/docs/guides/migrating-to-v3/authentication-and-base-urls). The examples below send the token as `Authorization: Bearer <access_token>`.
 - The marketplace's feed specification: the fields it requires, their formats, and the file type it accepts.
-- The attribute or category that defines which products belong in the feed. See [Filtering and Query Syntax](/docs/reference/v3/filtering-query-syntax).
+- The attribute or category that defines which products belong in the feed. See [Filtering and Query Syntax](/reference/v3/filtering-and-search).
 
 ## Generate the feed from product data
 
@@ -108,13 +108,13 @@ Follow the steps below to map the fields, read the products in scope, and turn t
    print(f"Wrote {len(rows)} rows to {FEED} and skipped {len(skipped)} products.")
    ```
 
-   The script keeps the last saved copy of each product `id`, so a product that a resumed export saved twice still gets one row. It records every product it skips, with the fields it was missing, so you can fix them in Plytix. It writes both files under temporary names and replaces `uk_feed.csv` and `skipped.jsonl` only once they're complete, so a failed run leaves the previous feed in place. [Audit product data quality with filters](/docs/guides/auditing-product-data-quality-with-filters) shows how to find those products before you build the feed.
+   The script keeps the last saved copy of each product `id`, so a product that a resumed export saved twice still gets one row. It records every product it skips, with the fields it was missing, so you can fix them in Plytix. It writes both files under temporary names and replaces `uk_feed.csv` and `skipped.jsonl` only once they're complete, so a failed run leaves the previous feed in place. [Audit product data quality](/docs/guides/auditing-product-data-quality-with-filters) shows how to find those products before you build the feed.
 
    If the marketplace needs image links, plan for them separately. The `assets` field returns each asset's metadata, including a `path` where Plytix stores the file, but `path` isn't a download URL.
 
 5. **Deliver the file and refresh it on your schedule.**
 
-   Upload or host the file the way the marketplace's specification requires. To keep the feed current, run steps 2 to 4 again on a schedule. Rebuilding the whole file each time is the simplest approach. To read only what changed, filter on `modified` as described in [Sync your ERP](/docs/guides/syncing-your-erp-with-plytix), and still rebuild in full from time to time, because a deleted product doesn't appear in a search.
+   Upload or host the file the way the marketplace's specification requires. To keep the feed current, run steps 2 to 4 again on a schedule. Rebuilding the whole file each time is the simplest approach. To read only what changed, filter on `modified` as described in [Sync your ERP with Plytix](/docs/guides/syncing-your-erp-with-plytix), and still rebuild in full from time to time, because a deleted product doesn't appear in a search.
 
 ## Related articles
 
@@ -124,7 +124,7 @@ Now that you know how to build a marketplace feed from product data, you can exp
   <Card icon={<ArrowDownloadRegular />} title="Export your full catalog" href="/docs/guides/exporting-your-full-catalog">
     Page through every product with the fields your feed needs.
   </Card>
-  <Card icon={<FilterRegular />} title="Filtering and query syntax" href="/docs/reference/v3/filtering-query-syntax">
+  <Card icon={<FilterRegular />} title="Filtering and search" href="/reference/v3/filtering-and-search">
     Choose the products and fields that go into each feed.
   </Card>
 </Cards>

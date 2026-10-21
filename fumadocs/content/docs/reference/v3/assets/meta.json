@@ -1,0 +1,14 @@
+{
+  "title": "Assets",
+  "pages": [
+    "search-assets",
+    "create-asset",
+    "get-asset",
+    "update-asset",
+    "delete-asset",
+    "get-asset-field",
+    "update-asset-field",
+    "delete-asset-field"
+  ],
+  "icon": "Image"
+}

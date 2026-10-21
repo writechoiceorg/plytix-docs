@@ -1,0 +1,14 @@
+{
+  "title": "Relationships",
+  "pages": [
+    "search-relationships",
+    "create-relationship",
+    "get-relationship",
+    "update-relationship",
+    "delete-relationship",
+    "get-relationship-field",
+    "update-relationship-field",
+    "delete-relationship-field"
+  ],
+  "icon": "Link2"
+}

@@ -2,7 +2,6 @@
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
 @import 'fumadocs-openapi/css/preset.css';
-@import '@fluentui/react-icons/headless/styles.css';
 
 /*
  * Plytix design system (materials/visual-design/*.svg).
@@ -218,6 +217,36 @@ html > body[data-scroll-locked] {
 
 [data-search-full] {
   border-radius: 9999px !important;
+}
+
+/*
+ * The tabs row above is 3rem, not Fumadocs' 2.5rem, so the header is 104px on
+ * desktop. Fumadocs derives every sticky offset (sidebar, TOC, TOC popover)
+ * from --fd-header-height, so report the real height or they tuck under it.
+ */
+@media (min-width: 1024px) {
+  #nd-notebook-layout {
+    --fd-header-height: calc(3.5rem + 3rem) !important;
+  }
+}
+
+/*
+ * The site footer sits below the docs layout, so near the bottom of a page the
+ * sticky sidebar (z-20) scrolls up past the header. Keep the header on top.
+ */
+@media (min-width: 768px) {
+  #nd-subnav {
+    z-index: 30;
+  }
+}
+
+/*
+ * Jumping to a heading must land below everything sticky: the header and,
+ * below xl, the "On this page" bar (--fd-docs-row-3 covers both). Fumadocs'
+ * fixed scroll-m-28 left headings hidden behind that bar.
+ */
+#nd-page [id] {
+  scroll-margin-top: calc(var(--fd-docs-row-3) + 1rem);
 }
 
 /* ---------- Sidebar ---------- */

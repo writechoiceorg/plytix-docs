@@ -14,47 +14,41 @@
 |---|---|---|---|
 | Plytix API Documentation | `fumadocs/content/docs/index.mdx` | Landing | Written |
 
-### Guides → Get Started
+### Guides → Get started
 
-Source: `plytix-outline-canvas.md`, "📘 Guides → 🚀 Get Started" (updated 2026-09-29: "Choosing Between v1/v2 and v3" replaced by "Migrating to v3" and its child "Migration Reference", per the outline).
+> **Restructured 2026-10-21** (Plytix marketing/design feedback, items 8-10): Guides are grouped as Get started, Integration guides, How-to guides, AI assistants, and Upgrade from V1/V2, with the titles Plytix listed. "Overview" was replaced by "What is the Plytix API?" (`/docs/guides/overview` redirects). File names and URLs of the other guides are unchanged.
 
 | Page title | File path | Page type | Status |
 |---|---|---|---|
-| Overview | `fumadocs/content/docs/guides/overview.mdx` | Concept | Written |
-| Quickstart | `fumadocs/content/docs/guides/quickstart.mdx` | Tutorial | Written |
-| The Plytix Data Model | `fumadocs/content/docs/guides/data-model.mdx` | Concept | Written |
-| Migrating to v3 | `fumadocs/content/docs/guides/migrating-to-v3/index.mdx` | How-to Guide | Draft, blocked on flags |
-| ↳ Authentication and base URLs | `fumadocs/content/docs/guides/migrating-to-v3/authentication-and-base-urls.mdx` | Reference | Draft, blocked on flags |
-| ↳ Searching and pagination | `fumadocs/content/docs/guides/migrating-to-v3/searching-and-pagination.mdx` | Reference | Draft, blocked on flags |
-| ↳ Filter operators | `fumadocs/content/docs/guides/migrating-to-v3/filter-operators.mdx` | Reference | Draft, blocked on flags |
-| ↳ Responses and updates | `fumadocs/content/docs/guides/migrating-to-v3/responses-and-updates.mdx` | Reference | Draft, blocked on flags |
-| ↳ Endpoint mapping | `fumadocs/content/docs/guides/migrating-to-v3/endpoint-mapping.mdx` | Reference | Draft, blocked on flags |
-| ↳ Not migrated and new in v3 | `fumadocs/content/docs/guides/migrating-to-v3/not-migrated-and-new-in-v3.mdx` | Reference | Draft, blocked on flags |
+| What is the Plytix API? | `fumadocs/content/docs/guides/what-is-the-plytix-api.mdx` | Concept | Written |
+| Quickstart: make your first request | `fumadocs/content/docs/guides/quickstart.mdx` | Tutorial | Written |
+| Plytix data model | `fumadocs/content/docs/guides/data-model.mdx` | Concept | Written |
 
-### Guides → Integration Guides
-
-Source: `plytix-outline-canvas.md`, "📘 Guides → 🔗 Integration Guides".
+### Guides → Integration guides
 
 | Page title | File path | Page type | Status |
 |---|---|---|---|
 | Sync your ERP with Plytix | `fumadocs/content/docs/guides/syncing-your-erp-with-plytix.mdx` | How-to Guide | Written |
 | Export your full catalog | `fumadocs/content/docs/guides/exporting-your-full-catalog.mdx` | How-to Guide | Written |
-| Audit product data quality with filters | `fumadocs/content/docs/guides/auditing-product-data-quality-with-filters.mdx` | How-to Guide | Written |
-| Build a marketplace-specific product feed | `fumadocs/content/docs/guides/building-marketplace-specific-product-feeds.mdx` | How-to Guide | Written |
-| Safely remove categories, assets, or relationships | `fumadocs/content/docs/guides/safely-removing-categories-assets-or-relationships.mdx` | How-to Guide | Written |
-| Reconstruct parent/variant hierarchies | `fumadocs/content/docs/guides/reconstructing-parent-variant-hierarchies.mdx` | How-to Guide | Written |
-| Bulk Operations for Large Catalogs | `fumadocs/content/docs/guides/bulk-operations-for-large-catalogs.mdx` | How-to Guide | Written |
-| Getting notified: webhooks and Automations | `fumadocs/content/docs/guides/getting-notified-webhooks-and-automations.mdx` | Concept | Written |
+| Build a marketplace feed | `fumadocs/content/docs/guides/building-marketplace-specific-product-feeds.mdx` | How-to Guide | Written |
 
-> "Building Channel-Specific Product Feeds" was renamed to "Build a marketplace-specific product feed" (`building-marketplace-specific-product-feeds.mdx`) when the guides moved to Fumadocs.
+### Guides → How-to guides
 
-### Guides → Plytix MCPs
+| Page title | File path | Page type | Status |
+|---|---|---|---|
+| Audit product data quality | `fumadocs/content/docs/guides/auditing-product-data-quality-with-filters.mdx` | How-to Guide | Written |
+| Unlink categories, assets, or relationships | `fumadocs/content/docs/guides/safely-removing-categories-assets-or-relationships.mdx` | How-to Guide | Written |
+| Rebuild parent and variant products | `fumadocs/content/docs/guides/reconstructing-parent-variant-hierarchies.mdx` | How-to Guide | Written |
+
+> Not in the navigation: "Get notified about changes" (`guides/getting-notified-webhooks-and-automations.mdx`, Concept) isn't in Plytix's proposed structure; placement is a question for Plytix. "Bulk operations for large catalogs" is a private draft in `internal-drafts/guides/` (PM-07).
+
+### Guides → AI assistants
 
 Source: `plytix-outline-canvas.md`, "📘 Guides → 🤖 Plytix MCPs". The Platform MCP pages are placeholders for a roadmap feature (see `glossary.md`'s MCP Server entry, `[PENDING]`); don't write them until Plytix confirms the feature is live. "Supported clients," "Practical examples," and "Permissions and security considerations" were drafted ahead of that confirmation on request (2026-09-29). All three carry unresolved FLAG callouts and are not publishable until the product team answers them: transport, OAuth, and endpoint URL on the first; unconfirmed tool names and untested prompts on the second; the entire OAuth scope list, whether MCP access resolves through Plytix's existing role model, and whether MCP actions reach the Process Log on the third. "Available tools" (also drafted 2026-09-29) documents the v3 resource surface from `openapi_pimv3.json` rather than a tool list, because no tool names exist; it needs tool names, tool granularity, first-release scope, and filter/pagination parity confirmed before publishing. "Authentication and OAuth setup" (also drafted 2026-09-29) carries a blocking `[CONFLICT]`: the outline assumes OAuth, but the confirmed v3 flow is the non-OAuth key/password exchange at `auth.plytix.com/auth/api/get-token`. Which of the two the MCP uses decides the page's authorization step and its title; resolve that before writing step 4 in detail. The parent `index.mdx` (Concept, also drafted 2026-09-29) is the least gated of the six: its explanatory content comes from `glossary.md`, `kick_off_2.md`, and the confirmed v3 surface, and only the sign-in and write rows of its comparison table are `[PENDING]`. All six pages in this section are now drafted; none are publishable until the open questions are answered. The permissions page draws its role model from the help center scrape (`system-roles.md`, `team-roles/permissions.md`, `attribute-level-permissions.md`, `api.md`), which the trust order ranks below verified API findings. The Documentation MCP is a different server and is already implemented in this repo (`fumadocs/app/api/mcp/route.ts`), so its page was written from that code plus `fumadocs/README.md`; it is not gated on the roadmap feature.
 
 | Page title | File path | Page type | Status |
 |---|---|---|---|
-| Documentation MCP | `fumadocs/content/docs/guides/documentation-mcp.mdx` | How-to Guide | Written |
+| Connect an AI assistant to the Plytix docs | `fumadocs/content/docs/guides/documentation-mcp.mdx` | How-to Guide | Written |
 | Plytix Platform MCP | `fumadocs/content/docs/guides/platform-mcp/index.mdx` | Concept | Draft, blocked on flags |
 | ↳ Authentication and OAuth setup | `fumadocs/content/docs/guides/platform-mcp/authentication-and-oauth-setup.mdx` | How-to Guide | Draft, blocked on flags |
 | ↳ Supported clients | `fumadocs/content/docs/guides/platform-mcp/supported-clients.mdx` | Reference | Draft, blocked on flags |
@@ -64,13 +58,29 @@ Source: `plytix-outline-canvas.md`, "📘 Guides → 🤖 Plytix MCPs". The Plat
 
 > Child pages (↳) live in a subfolder whose `index.mdx` is the parent page and whose `meta.json` sets the child order.
 
+### Guides → Upgrade from V1/V2
+
+Listed flat in the sidebar with `"...migrating-to-v3"`, overview first.
+
+| Page title | File path | Page type | Status |
+|---|---|---|---|
+| Migration overview | `fumadocs/content/docs/guides/migrating-to-v3/index.mdx` | How-to Guide | Draft, blocked on flags |
+| Authentication and base URLs | `fumadocs/content/docs/guides/migrating-to-v3/authentication-and-base-urls.mdx` | Reference | Draft, blocked on flags |
+| Search and pagination | `fumadocs/content/docs/guides/migrating-to-v3/searching-and-pagination.mdx` | Reference | Draft, blocked on flags |
+| Filter operators | `fumadocs/content/docs/guides/migrating-to-v3/filter-operators.mdx` | Reference | Draft, blocked on flags |
+| Responses and updates | `fumadocs/content/docs/guides/migrating-to-v3/responses-and-updates.mdx` | Reference | Draft, blocked on flags |
+| Endpoint mapping | `fumadocs/content/docs/guides/migrating-to-v3/endpoint-mapping.mdx` | Reference | Draft, blocked on flags |
+| What's new and not migrated | `fumadocs/content/docs/guides/migrating-to-v3/not-migrated-and-new-in-v3.mdx` | Reference | Draft, blocked on flags |
+
 ### API Reference
+
+> **Updated 2026-10-21:** the reference is served at `/reference/**` (not `/docs/reference/**`), the legacy folder is `reference/v1-v2/`, version labels are "V3 (Beta)" and "V1/V2 (Legacy)", and both "Overview" groups are now "Core concepts". Old URLs redirect via `fumadocs/redirects.json`.
 
 | Page title | File path | Page type | Status |
 |---|---|---|---|
 | API Reference | `fumadocs/content/docs/reference/index.mdx` | Landing | Written |
 
-### API Reference → v3 (Current) → Overview
+### API Reference → V3 (Beta) → Core concepts
 
 | Page title | File path | Page type | Status |
 |---|---|---|---|
@@ -78,7 +88,7 @@ Source: `plytix-outline-canvas.md`, "📘 Guides → 🤖 Plytix MCPs". The Plat
 | Authentication | `fumadocs/content/docs/reference/v3/authentication.mdx` | Reference | Written |
 | Errors and Status Codes | `fumadocs/content/docs/reference/v3/errors-status-codes.mdx` | Reference | Written |
 | Rate Limits | `fumadocs/content/docs/reference/v3/rate-limits.mdx` | Reference | Written |
-| Filtering and Query Syntax Reference | `fumadocs/content/docs/reference/v3/filtering-query-syntax.mdx` | Reference | Draft, blocked on flags |
+| Filtering and search | `fumadocs/content/docs/reference/v3/filtering-and-search.mdx` | Reference | Draft, blocked on flags |
 | Pagination Reference | `fumadocs/content/docs/reference/v3/pagination.mdx` | Reference | Draft, blocked on flags |
 | Working with Updates and Deletes | `fumadocs/content/docs/reference/v3/updates-and-deletes.mdx` | Reference | Draft, blocked on flags |
 
@@ -92,30 +102,30 @@ Source: `plytix-outline-canvas.md`, "📘 Guides → 🤖 Plytix MCPs". The Plat
 > - **Previously "Spec only", now confirmed working:** `_or[#]`/`_and[#]` grouping, `[null]`/`[!null]`, `[length]` **and** `[len]` (both spellings), `[intersects]`, `_fields=*`, and `_sort_by=-<field>` for descending. Still unconfirmed: `days_passed`, `_include_unfiltered_entities`. **Confirmed not working:** the `_![bool][#]` NOT-grouping form from `API V3.md` returns `400`.
 > - **Product writes changed shape.** Every `*_ids` field (`category_ids`, `static_list_ids`, `channel_ids`, `ecatalog_ids`, `product_data_sheet_ids`) is now rejected on `POST`/`PATCH /products` with `422 "Extra inputs are not permitted"`, despite still being declared in the spec. Categories are linked with `POST /products/{id}/categories` (body `{"id": "..."}`) and unlinked with `DELETE /products/{id}/categories/{category_id}`, which is safe and scoped. There is no equivalent for assets, so non-thumbnail assets can't be attached or detached via the API at all. See `config/api-testing.config.md` quirks #93-#96.
 
-### API Reference → v3 (Current) → Endpoints
+### API Reference → V3 (Beta) → Endpoints
 
-Generated from `fumadocs/openapi.json` by `fumadocs-openapi`, one folder per resource under `fumadocs/content/docs/reference/v3/` (for example, `products/`, `assets/`, `productcategories/`). Page type: Reference (generated). Don't hand-write or hand-edit these pages. Regenerate them from the spec.
+Generated from `fumadocs/openapi.json` by `fumadocs-openapi`, one folder per resource under `fumadocs/content/docs/reference/v3/` (for example, `products/`, `assets/`, `product-categories/`). File names and titles come from `fumadocs/scripts/endpoint-names.json` (for example, `products/get-product.mdx`, "Get a product"). Page type: Reference (generated). Don't hand-write or hand-edit these pages. Regenerate them from the spec.
 
-### API Reference → Legacy (v1/v2)
+### API Reference → V1/V2 (Legacy)
 
 | Page title | File path | Page type | Status |
 |---|---|---|---|
-| API v1/v2 Reference | `fumadocs/content/docs/reference/legacy/api-v1-v2-reference.mdx` | Landing | Written |
-| Authentication | `fumadocs/content/docs/reference/legacy/token-authentication.mdx` | Reference | Draft, blocked on flags |
-| Errors and Status Codes | `fumadocs/content/docs/reference/legacy/errors-status-codes.mdx` | Reference | Draft, blocked on flags |
-| Rate Limits | `fumadocs/content/docs/reference/legacy/rate-limits.mdx` | Reference | Draft, blocked on flags |
-| Filtering and Search | `fumadocs/content/docs/reference/legacy/filtering-and-search.mdx` | Reference | Draft, blocked on flags |
-| Pagination | `fumadocs/content/docs/reference/legacy/pagination.mdx` | Reference | Draft, blocked on flags |
+| V1/V2 API reference overview | `fumadocs/content/docs/reference/v1-v2/api-v1-v2-reference.mdx` | Landing | Written |
+| V1/V2 authentication | `fumadocs/content/docs/reference/v1-v2/token-authentication.mdx` | Reference | Draft, blocked on flags |
+| V1/V2 errors and status codes | `fumadocs/content/docs/reference/v1-v2/errors-status-codes.mdx` | Reference | Draft, blocked on flags |
+| V1/V2 rate limits | `fumadocs/content/docs/reference/v1-v2/rate-limits.mdx` | Reference | Draft, blocked on flags |
+| V1/V2 filtering and search | `fumadocs/content/docs/reference/v1-v2/filtering-and-search.mdx` | Reference | Draft, blocked on flags |
+| V1/V2 pagination | `fumadocs/content/docs/reference/v1-v2/pagination.mdx` | Reference | Draft, blocked on flags |
 
 > **Drafted 2026-10-08:** the five pages above mirror v3's Overview group. They are the "Core concepts" cards on the legacy landing page. The authentication page is `token-authentication.mdx`, not `authentication.mdx`, because the generated `authentication/` endpoint folder already owns that slug. Only the auth exchange and basic `POST /api/v1/products/search` were tested live; the rest comes from the v1 Postman collection, so each page carries FLAG callouts. Open conflicts: attribute cap 20 vs 50; `like` vs `contains`/`null` operator names (and `migration-reference.mdx` should be aligned once resolved); valid `qty_operator` values; which pagination fields every response carries; whether v1 rate limits match v3's. No "Updates and Deletes" page: v1/v2 sources only give per-endpoint status codes.
 
-Endpoint pages are generated from `fumadocs/openapi-v1v2.json`, one folder per resource under `fumadocs/content/docs/reference/legacy/`. Same rule: regenerate, don't hand-edit.
+Endpoint pages are generated from `fumadocs/openapi-v1v2.json`, one folder per resource under `fumadocs/content/docs/reference/v1-v2/`. Same rule: regenerate, don't hand-edit.
 
 ---
 
 ## Naming Conventions
 
-**URL structure:** `/docs/[section]/[page-name]`, derived from the file path under `fumadocs/content/docs/` (for example, `/docs/guides/quickstart`, `/docs/reference/v3/pagination`)
+**URL structure:** guides are `/docs/guides/[page-name]`; the API reference is `/reference/[version]/[page-name]` and `/reference/[version]/[resource]/[action]` (for example, `/docs/guides/quickstart`, `/reference/v3/pagination`, `/reference/v3/products/get-product`, `/reference/v1-v2/products/create-product`). Updated 2026-10-21, pending Plytix sign-off on the pattern.
 **Folder structure:** mirrors the URL structure. Each folder has a `meta.json` that sets sidebar title, order, and groups.
 
 ---

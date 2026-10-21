@@ -1,9 +1,13 @@
 ---
-title: Authentication
+title: V1/V2 authentication
 description: "Reference for getting a bearer token and using it on V1/V2 requests, including how long a token stays valid and the errors you can get."
 ---
 
 import { KeyRegular, RocketRegular } from '@/components/icons';
+
+<Callout type="info" title="V1/V2 (Legacy)">
+This page covers the V1/V2 APIs. For V3 (Beta), see [V3 Authentication](/reference/v3/authentication).
+</Callout>
 
 The V1/V2 APIs use bearer token authentication. Rather than sending your API key and password with every call, you exchange them once for a short-lived access token, then send that token in the `Authorization` header of every request. Any administrator on your Plytix account can issue the API key and password from the **API** tab in the account's Admin section.
 
@@ -88,7 +92,7 @@ A `401` from the token request looks like this:
   The API key and password you issue work only against the authentication service for the environment that issued them. If a valid-looking key returns `401`, check that you're calling the right host.
 </Callout>
 
-See [Errors and status codes](/docs/reference/legacy/errors-status-codes) for the error format used across V1/V2.
+See [Errors and status codes](/reference/v1-v2/errors-status-codes) for the error format used across V1/V2.
 
 ## Related resources
 

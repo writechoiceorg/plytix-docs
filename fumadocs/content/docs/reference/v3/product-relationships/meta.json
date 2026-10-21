@@ -1,0 +1,16 @@
+{
+  "title": "Product Relationships",
+  "pages": [
+    "search-product-relationships",
+    "list-product-relationships",
+    "add-related-products",
+    "get-product-relationship",
+    "add-related-products-to-relationship",
+    "update-product-relationship",
+    "remove-product-relationship",
+    "get-product-relationship-field",
+    "update-product-relationship-field",
+    "delete-product-relationship-field"
+  ],
+  "icon": "Link"
+}

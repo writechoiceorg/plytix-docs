@@ -1,9 +1,13 @@
 ---
-title: Filtering and search
+title: V1/V2 filtering and search
 description: Reference for the search request body in V1/V2, including filters, operators, returned attributes, and relationship filters.
 ---
 
 import { ArrowSwapRegular, FilterRegular } from '@/components/icons';
+
+<Callout type="info" title="V1/V2 (Legacy)">
+This page covers the V1/V2 APIs. For V3 (Beta), see [V3 Filtering and search](/reference/v3/filtering-and-search).
+</Callout>
 
 Search endpoints in V1/V2 take their filters in a JSON request body, not in the query string. This page documents that body: how to write filter conditions, which operators exist, how to choose the attributes that come back, and how to filter products by their relationships.
 
@@ -27,7 +31,7 @@ A search body has three parts, and all of them are optional:
 |---|---|---|
 | `filters` | array of arrays | The conditions a record must meet. Omit to match everything. |
 | `attributes` | array of strings | The fields to return in each record. |
-| `pagination` | object | The page, page size, and sort order. See [Pagination](/docs/reference/legacy/pagination). |
+| `pagination` | object | The page, page size, and sort order. See [Pagination](/reference/v1-v2/pagination). |
 
 Product search also accepts `relationship_filters`, covered in [Filter on relationships](#filter-on-relationships).
 
@@ -190,7 +194,7 @@ When a request includes a `relationships.` column in `attributes`, each product 
 ## Related resources
 
 <Cards>
-  <Card icon={<FilterRegular />} title="Filtering and query syntax" href="/docs/reference/v3/filtering-query-syntax">
+  <Card icon={<FilterRegular />} title="Filtering and search" href="/reference/v3/filtering-and-search">
     See the V3 filter syntax that replaces V1 filter objects.
   </Card>
   <Card icon={<ArrowSwapRegular />} title="Filter operators" href="/docs/guides/migrating-to-v3/filter-operators">

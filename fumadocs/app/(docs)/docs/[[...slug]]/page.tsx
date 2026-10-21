@@ -1,67 +1,27 @@
 import { source } from '@/lib/source';
-import {
-  DocsBody,
-  DocsPage,
-  DocsTitle,
-  ViewOptionsPopover,
-} from 'fumadocs-ui/layouts/notebook/page';
-import { MarkdownCopyButton } from '@/components/page-actions';
 import { notFound } from 'next/navigation';
-import { getMDXComponents } from '@/components/mdx';
 import type { Metadata } from 'next';
-import { createRelativeLink } from 'fumadocs-ui/mdx';
-import { getPageImageUrl, getPageMarkdownUrl, gitConfig } from '@/lib/shared';
-import { openapi } from '@/lib/openapi';
+import { DocsPageView, getDocsPageMetadata } from '@/components/docs-page-view';
+import { isReferenceSlugs } from '@/lib/shared';
+
+// The API reference lives in the same content tree but is served under
+// /reference (see app/(docs)/reference), so /docs/reference/** is not a page.
+function getSlugs(slug: string[] | undefined) {
+  const slugs = slug ?? [];
+  if (isReferenceSlugs(slugs)) notFound();
+  return slugs;
+}
 
 export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
   const params = await props.params;
-  const page = source.getPage(params.slug);
-  if (!page) notFound();
-
-  const MDX = page.data.body;
-  const markdownUrl = getPageMarkdownUrl(page).url;
-  const openapiProps = page.data._openapi
-    ? await openapi.preloadOpenAPIPage(page)
-    : undefined;
-
-  return (
-    <DocsPage toc={page.data.toc} full={page.data.full}>
-      <DocsTitle>{page.data.title}</DocsTitle>
-      <div className="flex flex-row gap-2 items-center pb-4">
-        <MarkdownCopyButton markdownUrl={markdownUrl} />
-        <ViewOptionsPopover
-          className="plytix-pill-button"
-          markdownUrl={markdownUrl}
-          githubUrl={`https://github.com/${gitConfig.user}/${gitConfig.repo}/blob/${gitConfig.branch}/content/docs/${page.path}`}
-        />
-      </div>
-      <DocsBody>
-        <MDX
-          components={getMDXComponents({
-            // this allows you to link to other pages with relative file paths
-            a: createRelativeLink(source, page),
-          })}
-          {...openapiProps}
-        />
-      </DocsBody>
-    </DocsPage>
-  );
+  return <DocsPageView slugs={getSlugs(params.slug)} />;
 }
 
 export async function generateStaticParams() {
-  return source.generateParams();
+  return source.generateParams().filter((params) => !isReferenceSlugs(params.slug));
 }
 
 export async function generateMetadata(props: PageProps<'/docs/[[...slug]]'>): Promise<Metadata> {
   const params = await props.params;
-  const page = source.getPage(params.slug);
-  if (!page) notFound();
-
-  return {
-    title: page.data.title,
-    description: page.data.description,
-    openGraph: {
-      images: getPageImageUrl(page).url,
-    },
-  };
+  return getDocsPageMetadata(getSlugs(params.slug));
 }

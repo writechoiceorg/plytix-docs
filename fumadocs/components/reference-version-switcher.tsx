@@ -9,29 +9,29 @@ import { cn } from '@/lib/cn';
 
 const VERSIONS = [
   {
-    title: 'V3 (Current)',
+    title: 'V3 (Beta)',
     icon: SparkleRegular,
-    url: '/docs/reference/v3',
-    prefix: '/docs/reference/v3',
+    url: '/reference/v3',
+    prefix: '/reference/v3',
   },
   {
-    title: 'Legacy (V1/V2)',
+    title: 'V1/V2 (Legacy)',
     icon: ArchiveRegular,
-    url: '/docs/reference/legacy/api-v1-v2-reference',
-    prefix: '/docs/reference/legacy',
+    url: '/reference/v1-v2/api-v1-v2-reference',
+    prefix: '/reference/v1-v2',
   },
 ];
 
 /**
  * Version switcher for the API Reference section. Root folders hide their
- * siblings in the sidebar (that's what makes v3 vs legacy show only their
+ * siblings in the sidebar (that's what makes V3 vs V1/V2 show only their
  * own pages), so this banner is what lets readers jump between them.
  */
 export function ReferenceVersionSwitcher() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
-  if (!pathname.startsWith('/docs/reference')) return null;
+  if (!pathname.startsWith('/reference')) return null;
 
   const selected = VERSIONS.find((version) => pathname.startsWith(version.prefix)) ?? VERSIONS[0];
 
@@ -73,7 +73,7 @@ export function ReferenceVersionSwitcher() {
  */
 export function SidebarBanner({ className, children, ...props }: ComponentProps<'div'>) {
   const pathname = usePathname();
-  const isReference = pathname.startsWith('/docs/reference');
+  const isReference = pathname.startsWith('/reference');
 
   return (
     <div

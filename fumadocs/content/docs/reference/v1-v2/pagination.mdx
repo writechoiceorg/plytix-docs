@@ -1,9 +1,13 @@
 ---
-title: Pagination
+title: V1/V2 pagination
 description: "Reference for how V1/V2 page search results, which pagination fields you send and get back, and the limits that apply to a search."
 ---
 
 import { ArrowSwapRegular, TextNumberListLtrRegular } from '@/components/icons';
+
+<Callout type="info" title="V1/V2 (Legacy)">
+This page covers the V1/V2 APIs. For V3 (Beta), see [V3 Pagination](/reference/v3/pagination).
+</Callout>
 
 Search endpoints return results in pages. This page documents the `pagination` object you send in a search body, the `pagination` object you get back, and the limits on page size and sorting.
 
@@ -92,7 +96,7 @@ The following limits apply to product search. V2 product search documents the sa
 | Default page | The first page, with `25` records, when you send no `pagination`. |
 | Sorting large result sets | If `order` is set and the search matches more than 10000 products (or assets, on asset search), the API returns `428`. |
 
-To avoid the `428`, narrow the search with filters until it matches 10000 products or fewer, or leave `order` empty. See [Filtering and search](/docs/reference/legacy/filtering-and-search) for how to narrow a search.
+To avoid the `428`, narrow the search with filters until it matches 10000 products or fewer, or leave `order` empty. See [Filtering and search](/reference/v1-v2/filtering-and-search) for how to narrow a search.
 
 {/* FLAG (open):
   These limits come from the product search endpoint description only. The collection doesn't say whether asset, category, family, or relationship searches share the same page size ceiling. Confirm before telling readers the limits apply to every search.
@@ -109,15 +113,15 @@ V3 pages through results with a link, not a page number, and it has no record co
 | Counts | `count` and `total_count` | None |
 | Moving to the next page | Increment `page` | Follow `next_page` |
 
-See [Pagination](/docs/reference/v3/pagination) in the V3 reference for the full V3 behavior.
+See [Pagination](/reference/v3/pagination) in the V3 reference for the full V3 behavior.
 
 ## Related resources
 
 <Cards>
-  <Card icon={<TextNumberListLtrRegular />} title="Pagination" href="/docs/reference/v3/pagination">
+  <Card icon={<TextNumberListLtrRegular />} title="Pagination" href="/reference/v3/pagination">
     See how V3 pages results with next_page links and no counts.
   </Card>
-  <Card icon={<ArrowSwapRegular />} title="Searching and pagination" href="/docs/guides/migrating-to-v3/searching-and-pagination">
+  <Card icon={<ArrowSwapRegular />} title="Search and pagination" href="/docs/guides/migrating-to-v3/searching-and-pagination">
     Compare V1 pagination with V3, side by side.
   </Card>
 </Cards>

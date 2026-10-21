@@ -1,11 +1,11 @@
 ---
-title: "Searching and pagination"
+title: "Search and pagination"
 description: "Reference for converting a V1 search POST body into a V3 GET query, and for paging through a V3 result set that returns no record counts."
 ---
 
 import { ArrowDownloadRegular, TextNumberListLtrRegular } from '@/components/icons';
 
-A V1 search is a POST with a JSON body. A V3 search is a GET with query parameters. This page maps the two request shapes onto each other and covers what changes once the results come back, including the two pagination behaviors that break migrated paging loops. It's part of the reference set for [Migrating to V3](/docs/guides/migrating-to-v3).
+A V1 search is a POST with a JSON body. A V3 search is a GET with query parameters. This page maps the two request shapes onto each other and covers what changes once the results come back, including the two pagination behaviors that break migrated paging loops. It's part of the reference set for [Migration overview](/docs/guides/migrating-to-v3).
 
 ## Request shape
 
@@ -44,7 +44,7 @@ Paging doesn't freeze the result set. Each request runs the query again, so reco
 <Callout type="warn" title="No counts in V3">
   V1 returned `total_count` on every search. V3 has no equivalent: the pagination block carries no counts, and there is no parameter that adds one. Requesting `_total_count` or `_filtered_count` returns `400` with `InvalidFieldError: Field '_total_count' does not exist.`, confirmed on products and assets.
 
-  Anything in your integration that reads a total (a progress bar, a "showing N of M" label, a pre-sized buffer) has to page to the end and tally. See [Pagination](/docs/reference/v3/pagination).
+  Anything in your integration that reads a total (a progress bar, a "showing N of M" label, a pre-sized buffer) has to page to the end and tally. See [Pagination](/reference/v3/pagination).
 </Callout>
 
 <Callout type="warn" title="Rewrite next_page links to https">
@@ -94,7 +94,7 @@ The response wraps the records in `data` and the links in `pagination`:
 }
 ```
 
-This result set fits on one page, so `pagination` is empty. When more records match, it carries a `next_page` URL to follow. [Pagination](/docs/reference/v3/pagination) has the full loop.
+This result set fits on one page, so `pagination` is empty. When more records match, it carries a `next_page` URL to follow. [Pagination](/reference/v3/pagination) has the full loop.
 
 ## Related resources
 
@@ -104,7 +104,7 @@ Now that you can convert a search and page through its results, you can explore 
   <Card icon={<ArrowDownloadRegular />} title="Export your full catalog" href="/docs/guides/exporting-your-full-catalog">
     Apply V3 paging to a full-catalog export that you can resume.
   </Card>
-  <Card icon={<TextNumberListLtrRegular />} title="Pagination" href="/docs/reference/v3/pagination">
+  <Card icon={<TextNumberListLtrRegular />} title="Pagination" href="/reference/v3/pagination">
     Read the V3 pagination block and its parameters in full.
   </Card>
 </Cards>

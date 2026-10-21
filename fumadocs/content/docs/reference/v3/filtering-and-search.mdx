@@ -1,5 +1,5 @@
 ---
-title: "Filtering and query syntax"
+title: "Filtering and search"
 description: "Reference for V3's query syntax: filter operators, boolean grouping, functions, field selection, and filtering on attributes and related entities."
 ---
 
@@ -33,7 +33,7 @@ status=Draft
 
 The rest of this page shows filters as bare query-string fragments. Attach them to a search endpoint the same way, one `--data-urlencode` per filter, which is the same as joining them with `&` in the URL.
 
-A search with no filter parameters matches every record, returned one page at a time. See [Pagination](/docs/reference/v3/pagination) for how to walk the full set.
+A search with no filter parameters matches every record, returned one page at a time. See [Pagination](/reference/v3/pagination) for how to walk the full set.
 
 <Callout type="info" title="Encode the brackets">
   `[` and `]` are not safe in a URL. Most HTTP clients encode them for you, and the API returns them encoded in its `pagination.next_page` links, where `name[contains]=a` comes back as `name%5Bcontains%5D=a`. If you build query strings by hand, encode them yourself. The curl examples here use `-G` with one `--data-urlencode` per filter so that curl handles it.
@@ -184,7 +184,7 @@ Requesting a related entity's fields expands that entity in the response. There 
 </Callout>
 
 <Callout type="info" title="Filters and expanded related records">
-  A filter on a related entity chooses which records match. It doesn't narrow the related records expanded inside each match, as described in [The Plytix data model](/docs/guides/data-model). No parameter for returning a different subset of related records has been verified.
+  A filter on a related entity chooses which records match. It doesn't narrow the related records expanded inside each match, as described in [Plytix data model](/docs/guides/data-model). No parameter for returning a different subset of related records has been verified.
 </Callout>
 
 ## Reserved and forbidden names
@@ -202,7 +202,7 @@ Values follow normal URL encoding. Spaces become `+` or `%20`, and `=`, `&`, `?`
 Now that you can filter a search, you can explore these related pages.
 
 <Cards>
-  <Card icon={<SearchRegular />} title="Audit product data quality with filters" href="/docs/guides/auditing-product-data-quality-with-filters">
+  <Card icon={<SearchRegular />} title="Audit product data quality" href="/docs/guides/auditing-product-data-quality-with-filters">
     Use these filters to find incomplete products in your catalog.
   </Card>
   <Card icon={<ArrowSwapRegular />} title="Filter operators" href="/docs/guides/migrating-to-v3/filter-operators">

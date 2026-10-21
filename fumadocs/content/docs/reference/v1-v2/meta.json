@@ -1,9 +1,9 @@
 {
-  "title": "Legacy (V1/V2)",
+  "title": "V1/V2 (Legacy)",
   "root": true,
   "icon": "Code",
   "pages": [
-    "---[BookOpen]Overview---",
+    "---[BookOpen]Core concepts---",
     "api-v1-v2-reference",
     "token-authentication",
     "errors-status-codes",

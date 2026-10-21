@@ -49,7 +49,7 @@ Find the products that are missing the attributes you care about, without writin
 
 4. **Ask for the fix as a separate step.** Don't combine the audit and the correction in one prompt. Get the list, check it, then ask for changes.
 
-For the same audit as code, see [Audit product data quality with filters](/docs/guides/auditing-product-data-quality-with-filters).
+For the same audit as code, see [Audit product data quality](/docs/guides/auditing-product-data-quality-with-filters).
 
 ## Curate a batch of products before importing them
 
@@ -76,7 +76,7 @@ Plytix stakeholders described curating data before importing it as a motivation 
 4. **Confirm the count.** Ask how many products it created and compare that number against your source. Then spot-check a few in Plytix.
 
 <Callout type="info" title="Pace matters">
-  In the V3 API, rate limits vary by account and are carried in your access token's claims. An assistant creating products one at a time can reach that limit on a large batch, which shows up as failures partway through. For large batches, run the job as code with paced requests instead. See [Rate limits](/docs/reference/v3/rate-limits).
+  In the V3 API, rate limits vary by account and are carried in your access token's claims. An assistant creating products one at a time can reach that limit on a large batch, which shows up as failures partway through. For large batches, run the job as code with paced requests instead. See [Rate limits](/reference/v3/rate-limits).
 </Callout>
 
 ## Export a slice of the catalog
@@ -104,7 +104,7 @@ Pull a filtered set of products into a format you can hand to someone else, such
   Channels (Shopify, BigCommerce, and feed exports) are configured in the Plytix interface. Whether channels can also be managed through the API is not yet confirmed. An agent can assemble the product set and check it before you send it.
 </Callout>
 
-For a fuller treatment, see [Export your full catalog](/docs/guides/exporting-your-full-catalog) and [Build a marketplace-specific product feed](/docs/guides/building-marketplace-specific-product-feeds).
+For a fuller treatment, see [Export your full catalog](/docs/guides/exporting-your-full-catalog) and [Build a marketplace feed](/docs/guides/building-marketplace-specific-product-feeds).
 
 ## Clean up categories
 
@@ -128,7 +128,7 @@ Removing a category in Plytix can affect more than the one product in front of y
 
 4. **Verify in Plytix.** Confirm the count changed by exactly what you expected, and that the excluded products kept their category.
 
-See [Safely remove categories, assets, or relationships](/docs/guides/safely-removing-categories-assets-or-relationships) for the rules behind this workflow, including which links can and can't be removed through the API.
+See [Unlink categories, assets, or relationships](/docs/guides/safely-removing-categories-assets-or-relationships) for the rules behind this workflow, including which links can and can't be removed through the API.
 
 ## Troubleshooting
 
@@ -139,7 +139,7 @@ Check the problems below if a workflow doesn't go the way you expected.
     Numbers that look plausible but don't match anything in your account usually mean the assistant answered from its own knowledge instead of reaching for a tool. A client can skip calling a tool when the request doesn't make the need obvious, so name the source in your prompt, as in "Using Plytix, …", and ask it to cite the SKUs it retrieved. Naming the source in every catalog prompt helps prevent this.
   </Accordion>
   <Accordion title="A batch of writes stops partway through" value="batch-stops-partway">
-    Ask which items the assistant completed before you retry anything, then retry only the remainder. Re-running the whole batch is what creates duplicates, and the agent has the list you need to avoid that. For large batches, run the job as code with paced requests rather than through an agent. See [Rate limits](/docs/reference/v3/rate-limits).
+    Ask which items the assistant completed before you retry anything, then retry only the remainder. Re-running the whole batch is what creates duplicates, and the agent has the list you need to avoid that. For large batches, run the job as code with paced requests rather than through an agent. See [Rate limits](/reference/v3/rate-limits).
   </Accordion>
   <Accordion title="Results are short and the totals don't match what Plytix shows" value="results-short-paging">
     An agent can stop at the first page of results and report that as the whole answer. Ask it to page through everything and compare the total again. Including the expected count in your prompt when you already know it gives the assistant something to check itself against.

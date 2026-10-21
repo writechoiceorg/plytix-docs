@@ -5,7 +5,7 @@ description: "Reference for mapping V1 filter objects to V3 bracket syntax, incl
 
 import { FilterRegular, SearchRegular } from '@/components/icons';
 
-V1 expresses a filter as an object with `field`, `operator`, and `value`. V3 puts the operator in brackets after the field name, and equality needs no operator at all. Equality and numeric comparisons map directly. Text matching, missing or empty values, and multi-value fields need more care, because the two versions don't always treat them the same way. This page maps each operator, notes where results can differ, and covers boolean grouping and custom attributes. It's part of the reference set for [Migrating to V3](/docs/guides/migrating-to-v3).
+V1 expresses a filter as an object with `field`, `operator`, and `value`. V3 puts the operator in brackets after the field name, and equality needs no operator at all. Equality and numeric comparisons map directly. Text matching, missing or empty values, and multi-value fields need more care, because the two versions don't always treat them the same way. This page maps each operator, notes where results can differ, and covers boolean grouping and custom attributes. It's part of the reference set for [Migration overview](/docs/guides/migrating-to-v3).
 
 ## Operators
 
@@ -33,7 +33,7 @@ V1 expresses a filter as an object with `field`, `operator`, and `value`. V3 put
 | Arrays share no values | No confirmed direct equivalent | `field[!intersects]=value` |
 | Length comparison | No confirmed direct equivalent | `field[length][gt]=value`, and the other comparison operators |
 
-[Filtering and Query Syntax](/docs/reference/v3/filtering-query-syntax) covers each operator in full, along with the gotchas.
+[Filtering and Query Syntax](/reference/v3/filtering-and-search) covers each operator in full, along with the gotchas.
 
 ### Text matching
 
@@ -102,7 +102,7 @@ Custom attributes are addressed directly in V3 rather than through a field-name 
 
 ## Convert a filter
 
-The pairs below show the same filter in both versions, using only equality and numeric comparisons, which map directly. Encode the brackets when you send the V3 form, as described in [Filtering and Query Syntax](/docs/reference/v3/filtering-query-syntax).
+The pairs below show the same filter in both versions, using only equality and numeric comparisons, which map directly. Encode the brackets when you send the V3 form, as described in [Filtering and Query Syntax](/reference/v3/filtering-and-search).
 
 ### A custom attribute
 
@@ -152,10 +152,10 @@ Both return the same products: each is a draft or was created after January 1, 2
 Now that you can translate a filter, you can explore these related pages.
 
 <Cards>
-  <Card icon={<SearchRegular />} title="Audit product data quality with filters" href="/docs/guides/auditing-product-data-quality-with-filters">
+  <Card icon={<SearchRegular />} title="Audit product data quality" href="/docs/guides/auditing-product-data-quality-with-filters">
     Put V3 filters to work finding incomplete products.
   </Card>
-  <Card icon={<FilterRegular />} title="Filtering and query syntax" href="/docs/reference/v3/filtering-query-syntax">
+  <Card icon={<FilterRegular />} title="Filtering and search" href="/reference/v3/filtering-and-search">
     Read the full V3 filter reference, including encoding rules and gotchas.
   </Card>
 </Cards>

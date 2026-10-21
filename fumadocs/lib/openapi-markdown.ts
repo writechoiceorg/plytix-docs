@@ -1,6 +1,6 @@
 // Markdown rendering of OpenAPI operation pages, for llms.txt / MCP `get_page`.
 //
-// Generated endpoint pages (content/docs/reference/{v3,legacy}) have no
+// Generated endpoint pages (content/docs/reference/{v3,v1-v2}) have no
 // Markdown body: their content is drawn at request time by <OpenAPIPage />,
 // so `getText('processed')` only yields an empty string. This renders the
 // same operation (parameters, request body, responses) straight from the spec.

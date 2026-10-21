@@ -3,12 +3,39 @@ import path from 'node:path';
 import { generateFiles } from 'fumadocs-openapi';
 import { createOpenAPI } from 'fumadocs-openapi/server';
 
+// OneDrive briefly locks freshly-written folders while it syncs them, which
+// makes an immediately-following rename() fail with EPERM on Windows. Retry
+// with backoff instead of failing the whole generation run.
+async function renameWithRetry(from, to, attempts = 8, delayMs = 300) {
+  for (let i = 0; i < attempts; i++) {
+    try {
+      await rename(from, to);
+      return;
+    } catch (err) {
+      if (err.code !== 'EPERM' && err.code !== 'EBUSY') throw err;
+      if (i === attempts - 1) throw err;
+      await new Promise((r) => setTimeout(r, delayMs));
+    }
+  }
+}
+
 const openapi = createOpenAPI({
   input: ['./openapi.json'],
 });
 
 // Read alongside createOpenAPI purely to derive nav ordering (see comparePages).
 const spec = JSON.parse(await readFile('./openapi.json', 'utf-8'));
+
+// Page filenames (and so URLs) come from scripts/endpoint-names.json, keyed by
+// "METHOD /path", so they stay short and stable if the spec's operationIds or
+// summaries change. Titles come from each operation's `summary`.
+const ENDPOINT_NAMES = JSON.parse(await readFile('./scripts/endpoint-names.json', 'utf-8')).v3;
+const pageName = (output) => {
+  const key = `${output.item.method.toUpperCase()} ${output.item.path}`;
+  const entry = ENDPOINT_NAMES[key];
+  if (!entry) throw new Error(`No entry for ${key} in scripts/endpoint-names.json`);
+  return entry.slug;
+};
 
 const referenceDir = './content/docs/reference/v3';
 const stagingDir = path.join(referenceDir, 'endpoints');
@@ -40,6 +67,25 @@ const TAG_ICONS = {
   unknown: "BarChart3"
 };
 
+// URL folder for each tag: the spec's tags are flattened (see merge-openapi.mjs),
+// so spell them out in kebab case for readable URLs.
+const TAG_FOLDERS = {
+  productcategories: 'product-categories',
+  assetcategories: 'asset-categories',
+  assetlists: 'asset-lists',
+  productrelationships: 'product-relationships',
+  relatedproducts: 'related-products',
+  productfamilies: 'product-families',
+  familyattributes: 'family-attributes',
+  productattributes: 'product-attributes',
+  productattributegroups: 'product-attribute-groups',
+  pimproductlists: 'pim-product-lists',
+  importprofiles: 'import-profiles',
+  pdfcatalogs: 'pdf-catalogs',
+  productfamilymodels: 'product-family-models',
+  unknown: 'metrics',
+};
+
 const TAG_LABELS = {
   products: 'Products',
   assets: 'Assets',
@@ -69,6 +115,7 @@ await generateFiles({
   output: stagingDir,
   per: 'operation',
   groupBy: 'tag',
+  name: pageName,
   meta: true,
   includeDescription: true,
   beforeWrite(files) {
@@ -96,7 +143,8 @@ for (const [routePath, pathItem] of Object.entries(spec.paths)) {
   const isDrillIn = routePath.endsWith('/{path}') ? 1 : 0;
   for (const [method, op] of Object.entries(pathItem)) {
     if (!(method in VERB_ORDER) || !op.operationId) continue;
-    pageSortKey.set(op.operationId, [isDrillIn, segments.length, VERB_ORDER[method]]);
+    const entry = ENDPOINT_NAMES[`${method.toUpperCase()} ${routePath}`];
+    if (entry) pageSortKey.set(entry.slug, [isDrillIn, segments.length, VERB_ORDER[method]]);
   }
 }
 
@@ -126,10 +174,11 @@ const orderedTags = [
 const tagFolders = [];
 
 for (const tag of orderedTags) {
+  const folder = TAG_FOLDERS[tag] ?? tag;
   const from = path.join(stagingDir, tag);
-  const to = path.join(referenceDir, tag);
+  const to = path.join(referenceDir, folder);
   await rm(to, { recursive: true, force: true });
-  await rename(from, to);
+  await renameWithRetry(from, to);
 
   const tagMetaPath = path.join(to, 'meta.json');
   const tagMeta = JSON.parse(await readFile(tagMetaPath, 'utf-8'));
@@ -138,7 +187,7 @@ for (const tag of orderedTags) {
   tagMeta.pages = [...tagMeta.pages].sort(comparePages);
   await writeFile(tagMetaPath, JSON.stringify(tagMeta, null, 2) + '\n');
 
-  tagFolders.push(tag);
+  tagFolders.push(folder);
 }
 await rm(stagingDir, { recursive: true, force: true });
 

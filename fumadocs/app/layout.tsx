@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { RootProvider } from 'fumadocs-ui/provider/next';
+// Imported from JS: Tailwind's CSS @import can't resolve this package's exports map.
+import '@fluentui/react-icons/headless/styles.css';
 import './global.css';
 import { Figtree } from 'next/font/google';
 import Script from 'next/script';
@@ -14,7 +16,8 @@ const umamiWebsiteId = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID;
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://docs.plytix.com'),
   title: 'Plytix Docs',
-  description: 'Developer documentation for the Plytix PIM API and onboarding materials.',
+  description:
+    'Developer docs for the Plytix API. Connect your systems to Plytix, the product content platform, and manage products, assets, and catalog data in code.',
   icons: {
     icon: '/favicon.svg',
   },

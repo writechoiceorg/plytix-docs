@@ -1,0 +1,14 @@
+{
+  "title": "Asset Lists",
+  "pages": [
+    "search-asset-lists",
+    "create-asset-list",
+    "get-asset-list",
+    "update-asset-list",
+    "delete-asset-list",
+    "get-asset-list-field",
+    "update-asset-list-field",
+    "delete-asset-list-field"
+  ],
+  "icon": "List"
+}

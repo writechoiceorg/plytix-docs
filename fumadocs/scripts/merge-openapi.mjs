@@ -11,7 +11,9 @@
 //   - summary      (the page title)
 //   - operationId  (the page filename, e.g. search_products.mdx)
 // Everything else — parameters, request/response schemas, new endpoints — comes
-// fresh from the root spec. Top-level `tags` order is preserved too, since that
+// fresh from the root spec. The base URL (`servers`) and request/response
+// examples are applied last from scripts/v3-examples.json (see
+// openapi-examples.mjs), since the FastAPI export has neither. Top-level `tags` order is preserved too, since that
 // drives nav ordering; tags new to this refresh are appended.
 //
 // Why a merge step exists at all: the root spec is a raw FastAPI export whose
@@ -20,6 +22,7 @@
 // "v3" group. This normalizes tags to one hyphen-free resource name.
 
 import { readFile, writeFile } from 'node:fs/promises';
+import { applyExamples, loadExamples } from './openapi-examples.mjs';
 
 const SOURCE = '../openapi_pimv3.json';
 const TARGET = './openapi.json';
@@ -111,6 +114,8 @@ const ordered = previousOrder.filter((t) => seenTags.includes(t));
 const added = seenTags.filter((t) => !previousOrder.includes(t));
 spec.tags = [...ordered, ...added].map((name) => ({ name }));
 
+const unmatchedExamples = applyExamples(spec, await loadExamples());
+
 await writeFile(TARGET, JSON.stringify(spec, null, 2) + '\n');
 
 const operationCount = Object.values(spec.paths).reduce(
@@ -137,6 +142,11 @@ for (const [routePath, pathItem] of Object.entries(current.paths ?? {})) {
 if (lostDescriptions.length) {
   console.warn(
     `WARNING: gone from the source spec, hand-written description LOST: ${lostDescriptions.join('; ')}`,
+  );
+}
+if (unmatchedExamples.length) {
+  console.warn(
+    `WARNING: scripts/v3-examples.json entries with no matching operation (examples dropped): ${unmatchedExamples.join('; ')}`,
   );
 }
 if (upstreamChanges.length) {

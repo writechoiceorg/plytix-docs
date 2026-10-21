@@ -1,5 +1,5 @@
 ---
-title: "The Plytix data model"
+title: "Plytix data model"
 description: "Learn how products, attributes, product families, categories, assets, and relationships fit together, and which parts the API can change."
 ---
 
@@ -106,7 +106,7 @@ Categories are a tree. Each category has a `parent_id`, a `path` array holding t
 
 A product can belong to more than one category. Its `categories` field returns the full category objects, each with its `id`, `name`, and `path`, so you don't need a second call to turn an ID into a name.
 
-Adding and removing categories happens through dedicated endpoints: `POST /api/v3/products/{id}/categories` links one, and `DELETE /api/v3/products/{id}/categories/{category_id}` unlinks it. See [Safely remove categories, assets, or relationships](/docs/guides/safely-removing-categories-assets-or-relationships).
+Adding and removing categories happens through dedicated endpoints: `POST /api/v3/products/{id}/categories` links one, and `DELETE /api/v3/products/{id}/categories/{category_id}` unlinks it. See [Unlink categories, assets, or relationships](/docs/guides/safely-removing-categories-assets-or-relationships).
 
 Assets have their own separate tree, `/api/v3/asset-categories`. Product categories and asset categories don't share nodes.
 
@@ -164,10 +164,10 @@ Two more details about reads:
 Now that you know how the entities fit together, you can explore these related guides.
 
 <Cards>
-  <Card icon={<OrganizationRegular />} title="Reconstruct parent/variant hierarchies" href="/docs/guides/reconstructing-parent-variant-hierarchies">
+  <Card icon={<OrganizationRegular />} title="Rebuild parent and variant products" href="/docs/guides/reconstructing-parent-variant-hierarchies">
     See product levels, families, and inheritance working in real requests.
   </Card>
-  <Card icon={<FilterRegular />} title="Audit product data quality with filters" href="/docs/guides/auditing-product-data-quality-with-filters">
+  <Card icon={<FilterRegular />} title="Audit product data quality" href="/docs/guides/auditing-product-data-quality-with-filters">
     Query system fields and the attributes map to find incomplete products.
   </Card>
 </Cards>

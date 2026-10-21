@@ -11,7 +11,7 @@ Pull your entire product catalog, with attributes, categories, and asset metadat
 
 Before you start, make sure you have the following:
 
-- A bearer token. See [Authentication](/docs/reference/v3/authentication), or the [Quickstart](/docs/guides/quickstart) for a first walkthrough.
+- A bearer token. See [Authentication](/reference/v3/authentication), or the [Quickstart](/docs/guides/quickstart) for a first walkthrough.
 - An idea of which fields you actually need. Requesting only those fields keeps each page smaller and the export faster.
 
 ## Export the catalog page by page
@@ -54,7 +54,7 @@ Follow the steps below to request the fields you need, walk the pages until you 
    }
    ```
 
-   The link above is shortened. The real link repeats every filter, field, page size, and sort you sent on the first call, so request `pagination.next_page` as it is, after the scheme fix in the warning below. Continue while `next_page` holds a URL you can request, and stop when it's missing, `null`, or empty. Live responses leave the key out on the last page, and the `Pagination` schema also allows `null`, so check for both. The V3 search endpoint has no total count, so plan progress reporting around pages rather than a percentage. See [Pagination](/docs/reference/v3/pagination) for the full rules.
+   The link above is shortened. The real link repeats every filter, field, page size, and sort you sent on the first call, so request `pagination.next_page` as it is, after the scheme fix in the warning below. Continue while `next_page` holds a URL you can request, and stop when it's missing, `null`, or empty. Live responses leave the key out on the last page, and the `Pagination` schema also allows `null`, so check for both. The V3 search endpoint has no total count, so plan progress reporting around pages rather than a percentage. See [Pagination](/reference/v3/pagination) for the full rules.
 
    Page numbers don't freeze the catalog. Each request runs the search again, so if a product is created, deleted, or changes its sort value while you're paging, the products after it shift by one position. One product can then be skipped or repeated at a page boundary. If the catalog is being edited during your export, use [keyset paging](#export-by-id-instead-of-page-number) instead.
 
@@ -90,7 +90,7 @@ Follow the steps below to request the fields you need, walk the pages until you 
      --data-urlencode "_sort_by=id"
    ```
 
-   See [Filtering and query syntax](/docs/reference/v3/filtering-query-syntax) for the other filters you can combine with `_fields`.
+   See [Filtering and search](/reference/v3/filtering-and-search) for the other filters you can combine with `_fields`.
 
 ## Export by ID instead of page number
 
@@ -337,7 +337,7 @@ The script handles each part of a long run this way:
 - **Page validation:** a page is saved only after its `data` list, each product's `id`, and its `pagination` block have the expected shape. A malformed page stops the run without writing anything, and the next run requests that page again.
 - **Interruption-safe saving:** each page goes to its own file under `export/`, and `export/manifest.json` records the page only after that file is complete. Every file is written to a temporary file first and then swapped into place, so an interruption leaves the previous version or the new one, never half a line. The next run continues from the manifest. A missing or unreadable manifest or page file stops the run with a message rather than reporting a finished export.
 - **Deduplicated output:** after the last page is saved, the script merges the page files into `products.jsonl` and keeps the last saved copy of each product `id`. A product can be saved twice when the catalog changes during the run or a page is requested again after an interruption. Delete `export/` and `products.jsonl` before you start a fresh export. For [keyset paging](#export-by-id-instead-of-page-number), save the last `id` instead of the URL.
-- **Pacing for both windows:** `LIMITS` holds the requests allowed per 10 seconds and per hour, set here to the lowest standard pair in [Rate limits](/docs/reference/v3/rate-limits). Every integration on your account shares that allowance, so set `LIMITS` to the part this export may use. The manifest keeps the times of recent requests, so the next run still counts the requests made in the last hour. When the next request would have to wait longer than `MAX_WAIT`, the script saves its place, stops, and tells you when to rerun it.
+- **Pacing for both windows:** `LIMITS` holds the requests allowed per 10 seconds and per hour, set here to the lowest standard pair in [Rate limits](/reference/v3/rate-limits). Every integration on your account shares that allowance, so set `LIMITS` to the part this export may use. The manifest keeps the times of recent requests, so the next run still counts the requests made in the last hour. When the next request would have to wait longer than `MAX_WAIT`, the script saves its place, stops, and tells you when to rerun it.
 - **Bounded retries:** timeouts, `429`, and `5xx` responses are retried up to five times. A `429` with a valid `Retry-After` header waits as long as the header says. Without one, the script waits a random time that grows with each attempt, up to `MAX_WAIT`. A `Retry-After` longer than `MAX_WAIT` stops the run so you can rerun it later. Whether V3 sends `Retry-After` hasn't been confirmed, so the script works with or without it. Any other error stops the script, because the request itself needs fixing. A `401` means your token expired: get a new one and rerun the script.
 
 ## Troubleshooting
@@ -346,7 +346,7 @@ Check the problems below if you run into issues while following this guide.
 
 <Accordions type="multiple">
   <Accordion title={<>A field you asked for with <code>_fields</code> is missing from the response</>} value="fields-silently-dropped">
-    If a field is missing from every product, check its name. Plytix rejects some unknown names with a `400` error but drops others with no error, so a typo can cost you the field silently. Check top-level names against the product schema in [Get a product](/docs/reference/v3/products/get_products_api_v3_products__identifier__get), and custom attribute names against your account's attribute definitions from [`GET /api/v3/product-attributes`](/docs/reference/v3/productattributes/search_product_attributes_api_v3_product_attributes_get). If the field is missing only on some products, the name is fine and those products have no value for it: an attribute with no value can be missing from a product's `attributes` map, and other unset fields can come back as `null`. A product's response shows only what that product holds, so don't use one as the list of fields that exist.
+    If a field is missing from every product, check its name. Plytix rejects some unknown names with a `400` error but drops others with no error, so a typo can cost you the field silently. Check top-level names against the product schema in [Get a product](/reference/v3/products/get-product), and custom attribute names against your account's attribute definitions from [`GET /api/v3/product-attributes`](/reference/v3/product-attributes/search-product-attributes). If the field is missing only on some products, the name is fine and those products have no value for it: an attribute with no value can be missing from a product's `attributes` map, and other unset fields can come back as `null`. A product's response shows only what that product holds, so don't use one as the list of fields that exist.
   </Accordion>
   <Accordion title={<><code>_fields=category_ids</code> returns 400 instead of the field</>} value="fields-ids-hidden">
     Any field ending in `_ids` is hidden from API responses, so this returns a `HiddenFieldError`. That's deliberate: Plytix doesn't expose the denormalized ID arrays behind its relationships. Ask for the expanded plural form instead, so `categories` rather than `category_ids`, and `assets` rather than `asset_ids`. The expanded form returns the full objects and includes the IDs you were after anyway.
@@ -358,10 +358,10 @@ Check the problems below if you run into issues while following this guide.
 Now that you know how to export the catalog, you can explore these related pages.
 
 <Cards>
-  <Card icon={<RadarRegular />} title="Build a marketplace-specific product feed" href="/docs/guides/building-marketplace-specific-product-feeds">
+  <Card icon={<RadarRegular />} title="Build a marketplace feed" href="/docs/guides/building-marketplace-specific-product-feeds">
     Turn the exported file into a feed for a specific marketplace.
   </Card>
-  <Card icon={<TextNumberListLtrRegular />} title="Pagination" href="/docs/reference/v3/pagination">
+  <Card icon={<TextNumberListLtrRegular />} title="Pagination" href="/reference/v3/pagination">
     See how the pagination block works and how to page through results safely.
   </Card>
 </Cards>

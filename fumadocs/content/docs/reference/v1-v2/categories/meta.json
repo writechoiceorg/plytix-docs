@@ -1,0 +1,16 @@
+{
+  "title": "Categories",
+  "pages": [
+    "create-asset-category",
+    "search-asset-categories",
+    "create-asset-subcategory",
+    "update-asset-category",
+    "delete-asset-category",
+    "create-product-category",
+    "search-product-categories",
+    "create-product-subcategory",
+    "update-product-category",
+    "delete-product-category"
+  ],
+  "icon": "FolderTree"
+}

@@ -1,0 +1,14 @@
+{
+  "title": "PDF Catalogs",
+  "pages": [
+    "search-pdf-catalogs",
+    "create-pdf-catalog",
+    "get-pdf-catalog",
+    "update-pdf-catalog",
+    "delete-pdf-catalog",
+    "get-pdf-catalog-field",
+    "update-pdf-catalog-field",
+    "delete-pdf-catalog-field"
+  ],
+  "icon": "FileText"
+}

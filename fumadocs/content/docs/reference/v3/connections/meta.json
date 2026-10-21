@@ -1,0 +1,14 @@
+{
+  "title": "Connections",
+  "pages": [
+    "search-connections",
+    "create-connection",
+    "get-connection",
+    "update-connection",
+    "delete-connection",
+    "get-connection-field",
+    "update-connection-field",
+    "delete-connection-field"
+  ],
+  "icon": "Plug"
+}

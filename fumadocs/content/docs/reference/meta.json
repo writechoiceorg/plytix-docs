@@ -2,5 +2,5 @@
   "title": "API Reference",
   "root": true,
   "icon": "Code",
-  "pages": ["index", "v3", "legacy"]
+  "pages": ["index", "v3", "v1-v2"]
 }

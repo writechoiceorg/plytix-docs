@@ -3,20 +3,22 @@
   "icon": "BookOpen",
   "root": true,
   "pages": [
-    "---[Rocket]Get Started---",
-    "overview",
+    "---[Rocket]Get started---",
+    "what-is-the-plytix-api",
     "quickstart",
     "data-model",
-    "migrating-to-v3",
-    "---[Workflow]Integration Guides---",
+    "---[Workflow]Integration guides---",
     "syncing-your-erp-with-plytix",
     "exporting-your-full-catalog",
-    "auditing-product-data-quality-with-filters",
     "building-marketplace-specific-product-feeds",
+    "---[Wrench]How-to guides---",
+    "auditing-product-data-quality-with-filters",
     "safely-removing-categories-assets-or-relationships",
     "reconstructing-parent-variant-hierarchies",
-    "---[Bot]Plytix MCPs---",
+    "---[Bot]AI assistants---",
     "documentation-mcp",
-    "platform-mcp"
+    "platform-mcp",
+    "---[ArrowRightLeft]Upgrade from V1/V2---",
+    "...migrating-to-v3"
   ]
 }
