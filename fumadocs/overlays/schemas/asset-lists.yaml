@@ -1,0 +1,115 @@
+# Schema edits for the asset-lists endpoints (Phase 3, 2026-10-20).
+# Sources: spec 2026-10-02 (required fields, if/then on Static, FilterOperator enum),
+# Q#34 (Static query auto-generated), Q#79 (OR groups / AND conditions, PATCH
+# replaces the query; tested on Smart lists only, LIST-23), Create Smart Asset
+# List.bru and Update and Delete Asset List.bru (operators eq, like, !exists, in
+# confirmed live; field_type null).
+# FilterModel, FilterOperator and ProductRelationshipAggregationFilterModel are
+# only reachable from asset lists in the public spec, so they're filed here.
+# Whether relationship conditions apply to asset lists is unknown (LIST-21).
+overlay: 1.0.0
+info:
+  title: asset-lists schemas
+  version: 1.0.0
+actions:
+  # --- create body ---------------------------------------------------------------
+  - target: $.components.schemas.AssetListCreateInputDto
+    update:
+      description: Body for creating an asset list. `name` and `type` are required. Send `query` only for a `Smart` list. Fields not listed here return `422`.
+  - target: $.components.schemas.AssetListCreateInputDto.properties.name
+    update:
+      description: List name. It must be unique among your asset lists. A name that's already in use returns `409`.
+      examples:
+        - Front Shots
+  - target: $.components.schemas.AssetListCreateInputDto.properties.type
+    update:
+      description: '`Smart` for a list whose members are the assets that match its `query`. `Static` for a list whose membership is stored on each asset.'
+  - target: $.components.schemas.AssetListCreateInputDto.properties.query
+    update:
+      description: Conditions for a `Smart` list, as a list of groups. Each group is a list of conditions. An asset is in the list when it matches every condition in at least one group. Leave it out for a `Static` list.
+  - target: $.components.schemas.AssetListCreateInputDto.properties.query.anyOf[0]
+    update:
+      title: Query
+  - target: $.components.schemas.AssetListCreateInputDto.properties.query.anyOf[1]
+    update:
+      title: No query (Static list)
+
+  # --- update body ---------------------------------------------------------------
+  - target: $.components.schemas.AssetListUpdateInputDto
+    update:
+      description: Fields to change, `name`, `query`, or both. A list's `type` can't be changed, and fields not listed here return `422`.
+  - target: $.components.schemas.AssetListUpdateInputDto.properties.name
+    update:
+      description: New list name.
+      examples:
+        - Lifestyle Photos
+  - target: $.components.schemas.AssetListUpdateInputDto.properties.query
+    update:
+      description: New conditions for a `Smart` list. They replace the whole current query, so include every group and condition you want to keep. Don't send it for a `Static` list.
+
+  # --- read models (search, get, create response) -------------------------------------
+  - target: $.components.schemas.AssetListOutputDto.properties.type
+    update:
+      description: '`Smart`: members are the assets that match `query`. `Static`: membership is stored on each asset. On a search, `_fields` doesn''t accept `type`.'
+  - target: $.components.schemas.AssetListOutputDto.properties.type.anyOf[0]
+    update:
+      title: List type
+  - target: $.components.schemas.AssetListOutputDto.properties.type.anyOf[1]
+    update:
+      title: None
+  - target: $.components.schemas.AssetListOutputDto.properties.query
+    update:
+      description: The list's conditions, as a list of groups. An asset is in the list when it matches every condition in at least one group. For a `Static` list, Plytix generates a query that points at the list's own ID.
+  - target: $.components.schemas.AssetListOutputDto.properties.query.anyOf[0]
+    update:
+      title: Query
+  - target: $.components.schemas.AssetListOutputDto.properties.query.anyOf[1]
+    update:
+      title: None
+  - target: $.components.schemas.AssetListCreateOutputDto.properties.type
+    update:
+      description: '`Smart`: members are the assets that match `query`. `Static`: membership is stored on each asset.'
+  - target: $.components.schemas.AssetListCreateOutputDto.properties.type.anyOf[0]
+    update:
+      title: List type
+  - target: $.components.schemas.AssetListCreateOutputDto.properties.type.anyOf[1]
+    update:
+      title: None
+  - target: $.components.schemas.AssetListCreateOutputDto.properties.query
+    update:
+      description: The list's conditions, as a list of groups. Each condition comes back with a `field_type` key. For a `Static` list, Plytix generates a query that points at the list's own ID.
+  - target: $.components.schemas.AssetListCreateOutputDto.properties.query.anyOf[0]
+    update:
+      title: Query
+  - target: $.components.schemas.AssetListCreateOutputDto.properties.query.anyOf[1]
+    update:
+      title: None
+
+  # --- shared condition models -----------------------------------------------------
+  - target: $.components.schemas.AssetListType
+    update:
+      description: '`Smart`: members are the assets that match the list''s `query`. `Static`: membership is stored on each asset, and Plytix generates the `query`.'
+  - target: $.components.schemas.FilterModel
+    update:
+      title: Field condition
+      description: 'One condition on an asset field, such as `{"field": "extension", "operator": "eq", "value": "jpg"}`.'
+  - target: $.components.schemas.FilterModel.properties.field
+    update:
+      description: The asset field to test, such as `filename`, `extension`, or `alt_text`.
+      examples:
+        - extension
+  - target: $.components.schemas.FilterModel.properties.value
+    update:
+      description: The value to compare with. With `!exists`, send `true`.
+      examples:
+        - jpg
+  - target: $.components.schemas.FilterModel.properties.field_type
+    update:
+      description: Type of the field. Optional in requests. Responses include it, set to `null` on asset fields.
+  - target: $.components.schemas.FilterOperator
+    update:
+      description: How a condition compares `field` with `value`. These operators apply only inside a list's `query`, and they differ from the search filter operators. For example, `like` works here but not as a search filter. `eq`, `like`, `in`, and `!exists` have been confirmed.
+  - target: $.components.schemas.ProductRelationshipAggregationFilterModel
+    update:
+      title: Relationship condition
+      description: A condition on product relationships. For asset fields, use a field condition.

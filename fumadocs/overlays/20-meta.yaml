@@ -1,0 +1,46 @@
+# Spec-level metadata: security, nav order of the endpoint groups.
+# Generated 2026-10-20 by scripts/api/migrate-legacy.mjs; edit freely from here on.
+overlay: 1.0.0
+info:
+  title: Spec-level metadata
+  version: 1.0.0
+actions:
+  - target: $
+    description: Bearer auth (verified live; see /docs/reference/v3/authentication) and the nav order of the endpoint groups.
+    update:
+      security:
+        - bearerAuth: []
+      tags:
+        - name: products
+        - name: assets
+        - name: productcategories
+        - name: assetcategories
+        - name: assetlists
+        - name: relationships
+        - name: productrelationships
+        - name: relatedproducts
+        - name: productfamilies
+        - name: familyattributes
+        - name: productattributes
+        - name: productattributegroups
+      components:
+        schemas:
+          # The PIM host answers 401 with this body, not the OperationResponse
+          # envelope the spec declares (quirk #2, OAS-5). Used by 10-shared.yaml.
+          UnauthorizedResponse:
+            type: object
+            title: UnauthorizedResponse
+            description: Body of a `401` response.
+            required:
+              - detail
+            properties:
+              detail:
+                type: string
+                description: Always `Unauthorized`.
+                examples:
+                  - Unauthorized
+        securitySchemes:
+          bearerAuth:
+            type: http
+            scheme: bearer
+            description: "Exchange your API key and password for a short-lived access token, then send it as `Authorization: Bearer <token>`. See [Authentication](/docs/reference/v3/authentication)."

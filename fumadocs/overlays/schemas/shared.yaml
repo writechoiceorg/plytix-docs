@@ -1,0 +1,26 @@
+# Schemas used across resources whose upstream docstrings are written for
+# Plytix's developers. Replaced with reader-facing text (same facts).
+overlay: 1.0.0
+info:
+  title: shared schemas
+  version: 1.0.0
+actions:
+  - target: $.components.schemas.OperationResponse
+    description: spec docstring ("Failure -> errors is set, data is an empty list"), Q#18
+    update:
+      description: The response envelope. On success, `data` holds the result (a list for searches). On failure, `errors` lists what went wrong and `data` is an empty list.
+
+  - target: $.components.schemas.ProductChannelLinkOutputDto
+    description: spec docstring (id only)
+    update:
+      description: A channel the product is linked to. It holds the channel's `id` only.
+
+  - target: $.components.schemas.ProductECatalogLinkOutputDto
+    description: spec docstring (id only); glossary says Brand Portal, never eCatalog
+    update:
+      description: A Brand Portal the product is linked to. It holds the Brand Portal's `id` only.
+
+  - target: $.components.schemas.ProductDataSheetLinkOutputDto
+    description: spec docstring (id only, UUID)
+    update:
+      description: A product data sheet the product is linked to. It holds the data sheet's `id`, a UUID string.

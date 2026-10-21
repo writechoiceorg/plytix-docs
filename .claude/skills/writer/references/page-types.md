@@ -165,7 +165,7 @@ and include a link.
 
 **Goal:** Provide definitive, structured, scannable facts. Answer "what exactly."
 
-> Endpoint reference pages are auto-generated from the OpenAPI specs by `fumadocs-openapi` (they carry `_openapi` frontmatter). Don't hand-write or hand-edit them; this template is for hand-written reference pages such as pagination, filtering, or error codes.
+> Endpoint reference pages are auto-generated from the OpenAPI specs by `fumadocs-openapi` (they carry `_openapi` frontmatter). Don't hand-write or hand-edit them; this template is for hand-written reference pages such as pagination, filtering, or error codes. To change what an endpoint page says (descriptions, parameters, examples), edit the OpenAPI overlays as described in `overlay-authoring.md`.
 
 ### Frontmatter
 

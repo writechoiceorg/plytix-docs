@@ -1,0 +1,96 @@
+# Schema edits for the product-families endpoints (create and update bodies).
+# The migrated 2026-10-20 description of ProductFamilyUpdateInputDto (internal
+# implementation notes from the upstream docstring) is replaced with reader-facing
+# text; its substance (name only, attribute changes propagate) is kept.
+# Sources: spec 2026-10-02 constraints, Q#60, Q#72, Q#73, status-gating #4,
+# Create Product Family.bru (2026-09-15/22), GEN-1.
+overlay: 1.0.0
+info:
+  title: product-families schemas
+  version: 1.0.0
+actions:
+  # --- create body ---------------------------------------------------------------
+  - target: $.components.schemas.ProductFamilyCreateInputDto
+    description: Spec (additionalProperties false), Q#72
+    update:
+      description: Body for creating a product family. Only `name` is required. In `attributes`, `parent_attributes`, and `variant_attributes`, refer to every attribute in the same form, either IDs or objects with the attribute's `label` and, optionally, its `id`.
+
+  - target: $.components.schemas.ProductFamilyCreateInputDto.properties.name
+    description: Spec maxLength 300; 409 on duplicate (Create Product Family.bru, GEN-1)
+    update:
+      description: Name of the product family, 1 to 300 characters. It must be unique in your account. A name that already exists returns `409`.
+      examples:
+        - Bags
+
+  - target: $.components.schemas.ProductFamilyCreateInputDto.properties.attributes
+    description: Q#73 (always no_level), Create Product Family.bru "201 - Full Parameters"
+    update:
+      description: Attributes to link to the family at `no_level`, so their values don't pass down from parents to variants.
+      examples:
+        - - id: 6a1f0c2e9b3d4a5f8c7e1e04
+            label: material
+
+  - target: $.components.schemas.ProductFamilyCreateInputDto.properties.parent_attributes
+    description: Q#73, status-gating #4 (403 without automatic inheritance)
+    update:
+      description: Attributes to link at `parent_level`, so a parent's value passes down to its variants and sub-variants. On some accounts this field returns `403` with "Automatic inheritance is not available for this account", and nothing is created.
+
+  - target: $.components.schemas.ProductFamilyCreateInputDto.properties.variant_attributes
+    description: Q#73, status-gating #4 (403 without automatic inheritance)
+    update:
+      description: Attributes to link at `variant_level`, so a variant's value passes down to its sub-variants. On some accounts this field returns `403` with "Automatic inheritance is not available for this account", and nothing is created.
+
+  # Branch titles for the three attribute arrays (anyOf renders as tabs).
+  - target: $.components.schemas.ProductFamilyCreateInputDto.properties.attributes.anyOf[0]
+    update:
+      title: Attribute IDs
+  - target: $.components.schemas.ProductFamilyCreateInputDto.properties.attributes.anyOf[1]
+    update:
+      title: Attribute references
+  - target: $.components.schemas.ProductFamilyCreateInputDto.properties.parent_attributes.anyOf[0]
+    update:
+      title: Attribute IDs
+  - target: $.components.schemas.ProductFamilyCreateInputDto.properties.parent_attributes.anyOf[1]
+    update:
+      title: Attribute references
+  - target: $.components.schemas.ProductFamilyCreateInputDto.properties.variant_attributes.anyOf[0]
+    update:
+      title: Attribute IDs
+  - target: $.components.schemas.ProductFamilyCreateInputDto.properties.variant_attributes.anyOf[1]
+    update:
+      title: Attribute references
+
+  # --- attribute reference (used only by the create body) ---------------------------
+  - target: $.components.schemas.AttributeRefInputDto
+    description: Spec (label required, id optional), Create Product Family.bru "201 - Full Parameters" ({id, label} form)
+    update:
+      description: One attribute, referred to by an object with the attribute's `label` and, optionally, its `id`.
+  - target: $.components.schemas.AttributeRefInputDto.properties.label
+    update:
+      description: The attribute's `label`, its snake_case name.
+      examples:
+        - material
+  - target: $.components.schemas.AttributeRefInputDto.properties.id
+    update:
+      description: The attribute's ID.
+      examples:
+        - 6a1f0c2e9b3d4a5f8c7e1e04
+
+  # --- output: family_attributes (FAM-23: the _fields projection is untested) ---------
+  - target: $.components.schemas.ProductFamilyOutputDto.properties.family_attributes
+    description: Spec only ("_fields=family_attributes.*"), never tested (FAM-23); review M2
+    update:
+      description: Attribute links of the family, when requested. Requesting them with `_fields` isn't confirmed yet. To get a family's attributes, use [List a product family's attributes](/docs/reference/v3/familyattributes/list-family-attributes).
+
+  # --- update body ---------------------------------------------------------------
+  - target: $.components.schemas.ProductFamilyUpdateInputDto
+    description: Replaces the migrated upstream docstring. Q#60, spec (name only, additionalProperties false)
+    update:
+      description: Fields to change. `name` is the only field you can change. Attribute fields return `422`, because changing which attributes belong to a family affects every product in it. Link and unlink attributes through the family attribute endpoints instead.
+
+  - target: $.components.schemas.ProductFamilyUpdateInputDto.properties.name
+    description: Spec maxLength 300
+    update:
+      description: New name of the product family, 1 to 300 characters.
+      examples:
+        - Bags and Backpacks

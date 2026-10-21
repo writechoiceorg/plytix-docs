@@ -1,0 +1,18 @@
+# Lint rules for the merged V3 spec (fumadocs/openapi.json), run by
+# `npm run api:build` before the file is written. Errors block the build.
+extends:
+  - recommended
+
+rules:
+  # The production V3 base URL isn't confirmed yet (config/api-testing.config.md
+  # quirk #103, open question #35), so the spec deliberately has no `servers`.
+  # Turn this back on once 20-meta.yaml declares one.
+  no-empty-servers: off
+  # Upstream summaries/descriptions are filled in by the overlays over time;
+  # api:coverage tracks that, so lint doesn't need to.
+  operation-description: off
+  operation-4xx-response: error
+  operation-operationId-unique: error
+  path-parameters-defined: error
+  no-unresolved-refs: error
+  security-defined: error

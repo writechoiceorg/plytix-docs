@@ -1,0 +1,343 @@
+# Operation edits for the product-categories endpoints.
+# Pilot (Phase 1): DELETE /api/v3/product-categories/{identifier}.
+# What deleting does to subcategories and assigned products isn't verified yet
+# (CAT-1, CAT-2 in overlays/QUESTIONS.md), so the description doesn't claim it.
+overlay: 1.0.0
+info:
+  title: product-categories operations
+  version: 1.0.0
+actions:
+  - target: $.paths['/api/v3/product-categories/{identifier}'].delete
+    description: Q#20, "Update and Delete Product Category.bru" 204 + follow-up GET 404 (2026-09-15)
+    update:
+      summary: Delete a product category
+      operationId: delete-product-category
+      description: |-
+        Deletes a product category. A successful delete returns `204` with an empty body, and a later request for the same ID returns `404`.
+
+        If you only want to take a product out of a category, unlink the product instead. The category and its other products stay as they are. See [Safely remove categories, assets, or relationships](/docs/guides/safely-removing-categories-assets-or-relationships#remove-a-category-from-a-product).
+
+  - target: $.paths['/api/v3/product-categories/{identifier}'].delete.parameters[?(@.name=='identifier' && @.in=='path')]
+    description: config "ID prefixes"; category name as identifier returned 422 (03-Product-Categories/README.md)
+    update:
+      description: ID of the product category to delete, a 24-character hexadecimal string such as `6a1f0c2e9b3d4a5f8c7e1c01`.
+
+  - target: $.paths['/api/v3/product-categories/{identifier}'].delete.responses['204']
+    description: Q#20
+    update:
+      description: Deleted. The response has no body.
+
+  # --- Phase 3 (2026-10-20): the other seven operations ---------------------------
+  # Sources: bruno-collection/03-Product-Categories/ (2026-09-07 to 2026-09-22),
+  # Q#11, Q#15, Q#20, Q#25a, Q#84, Q#91, Q#92, Q#99, Q#100, Q#116, Q#117, GEN-1.
+  # PATCH success is 204 since Q#84 (2026-10-01); the Bruno PATCH captures (200 +
+  # body) predate it. Field PATCH/DELETE are spec-only (VERIFY.md, CAT-23).
+
+  # --- GET /api/v3/product-categories ---------------------------------------------
+  - target: $.paths['/api/v3/product-categories'].get
+    description: List Product Categories.bru (2026-09-07/21/22), Q#11, Q#91, Q#92, Q#99, Q#100 (categories.name filters on products)
+    update:
+      summary: Search product categories
+      operationId: search-product-categories
+      description: |-
+        Returns the product categories in your account, one page at a time. With no filters, it returns every category at every level of the tree in one flat list.
+
+        Each category carries its place in the tree:
+
+        - `parent_id`: the ID of the category above it. In search results, a top-level category has no `parent_id` key.
+        - `path`: the names from the top of the tree down to this category, for example `["Bags", "Backpacks"]`.
+        - `n_children`: how many categories sit directly below it.
+
+        Names can repeat in different branches, so check `path` to pick the right one.
+
+        To find the products filed under a category, search products instead, with a filter such as `categories.name=Backpacks`. See [Search products](/docs/reference/v3/products/search-products).
+
+        Results come back 25 per page by default. Follow `pagination.next_page` to get the next page, and change its `http://` to `https://` first.
+
+        Related pages:
+
+        - [Filtering and query syntax](/docs/reference/v3/filtering-query-syntax)
+        - [Pagination](/docs/reference/v3/pagination)
+        - [The Plytix data model](/docs/guides/data-model#product-categories)
+
+  - target: $.paths['/api/v3/product-categories'].get.parameters[?(@.name=='_fields' && @.in=='query')]
+    description: List Product Categories.bru "200 - Full Parameters" (2026-09-22)
+    update:
+      description: Fields to return for each category. Repeat the parameter once per field, for example `_fields=id&_fields=name&_fields=path`. Leave it out to get every field.
+
+  - target: $.paths['/api/v3/product-categories'].get.responses['200'].content['application/json']
+    description: List Product Categories.bru "200 - Success (Paginated)" (2026-09-21) and "200 - Full Parameters" (2026-09-22), sanitized, account_id omitted; next_page scheme kept as http:// per Q#92/FB-012; icontains filter dropped (Q#99)
+    update:
+      examples:
+        firstPage:
+          summary: First page of several
+          description: '`GET /api/v3/product-categories?_page_size=3`. The top-level category has no `parent_id` key.'
+          value:
+            x-example-file: product-categories/search-200-first-page.json
+        selectedFields:
+          summary: Select and sort fields
+          description: '`GET /api/v3/product-categories?_fields=id&_fields=name&_fields=slug&_page_size=2&_sort_by=name`'
+          value:
+            data:
+              - id: 6a1f0c2e9b3d4a5f8c7e1c04
+                name: Accessories
+                slug: accessories
+              - id: 6a1f0c2e9b3d4a5f8c7e1c02
+                name: Backpacks
+                slug: backpacks
+            errors: []
+            pagination:
+              next_page: http://<api-host>/api/v3/product-categories?_fields=id&_fields=name&_fields=slug&_page=2&_page_size=2&_sort_by=name
+
+  # --- POST /api/v3/product-categories --------------------------------------------
+  - target: $.paths['/api/v3/product-categories'].post
+    description: Create Product Category.bru (2026-09-07), Q#25a (duplicate rejected; status now 409 per GEN-1 answer, body not captured), Q#117, spec additionalProperties false
+    update:
+      summary: Create a product category
+      operationId: create-product-category
+      description: |-
+        Creates one product category and returns it, including its new `id`. Only `name` is required, and the body accepts only `name` and `parent_id`.
+
+        Without `parent_id`, the category is created at the top of the tree. To create a subcategory, set `parent_id` to the ID of an existing category. The new category's `path` then lists every name above it, and the parent's `n_children` goes up by one.
+
+        Plytix generates the `slug` from the name, for example `backpacks` for "Backpacks".
+
+        A successful create returns `201`. The response holds fewer fields than [Get a product category](/docs/reference/v3/productcategories/get-product-category): it leaves out `created` and `modified`, and on a top-level category, `parent_id`.
+
+        Re-creating a category that already exists, with the same `name` and `parent_id`, returns `409`.
+
+        Creating a category doesn't file any products under it. To add a product to a category, use [Link a record to a product](/docs/reference/v3/products/link-product-field). See [The Plytix data model](/docs/guides/data-model#product-categories).
+
+  - target: $.paths['/api/v3/product-categories'].post.requestBody.content['application/json']
+    description: Create Product Category.bru requests (2026-09-07)
+    update:
+      examples:
+        topLevel:
+          summary: Top-level category
+          value:
+            name: Bags
+        subcategory:
+          summary: Subcategory
+          value:
+            name: Backpacks
+            parent_id: 6a1f0c2e9b3d4a5f8c7e1c01
+
+  - target: $.paths['/api/v3/product-categories'].post.responses['201']
+    description: Create Product Category.bru "201 - Success (Root Category)" and "(Child Category)" (2026-09-07), sanitized
+    update:
+      description: Created. `data` holds the new category.
+      content:
+        application/json:
+          examples:
+            topLevel:
+              summary: Top-level category
+              value:
+                data:
+                  id: 6a1f0c2e9b3d4a5f8c7e1c01
+                  name: Bags
+                  path:
+                    - Bags
+                  slug: bags
+                  order: 1
+                  n_children: 0
+                errors: []
+            subcategory:
+              summary: Subcategory
+              description: The parent's name comes first in `path`.
+              value:
+                data:
+                  id: 6a1f0c2e9b3d4a5f8c7e1c02
+                  name: Backpacks
+                  parent_id: 6a1f0c2e9b3d4a5f8c7e1c01
+                  path:
+                    - Bags
+                    - Backpacks
+                  slug: backpacks
+                  order: 1
+                  n_children: 0
+                errors: []
+
+  - target: $.paths['/api/v3/product-categories'].post.responses['409']
+    description: Q#25a (2026-09-07, then 422), GEN-1 Plytix answer ("Unified conflict responses, now they are 409"); no 409 body captured yet (VERIFY.md)
+    update:
+      description: A category with this `name` and `parent_id` already exists. Nothing was created.
+
+  - target: $.paths['/api/v3/product-categories'].post.responses['422'].content['application/json']
+    description: Create Product Category.bru "422 - Missing Name" (2026-09-07)
+    update:
+      examples:
+        missingName:
+          summary: Missing name
+          value:
+            data: []
+            errors:
+              - name: InputDTOValidationError
+                description: 'name: Field required'
+
+  # --- GET /api/v3/product-categories/{identifier} --------------------------------
+  - target: $.paths['/api/v3/product-categories/{identifier}'].get
+    description: Get Product Category by ID.bru (2026-09-07/21), Update and Delete Product Category.bru 404 (2026-09-15)
+    update:
+      summary: Get a product category
+      operationId: get-product-category
+      description: |-
+        Returns one product category by its ID, including its place in the tree (`parent_id`, `path`, `n_children`) and its timestamps. An ID that matches no category returns `404`.
+
+        `data` holds the category object itself, not a list. A top-level category returns `parent_id` as `null`.
+
+        To read only one field, such as the parent category, use [Get a product category field](/docs/reference/v3/productcategories/get-product-category-field).
+
+  - target: $.paths['/api/v3/product-categories/{identifier}'].get.parameters[?(@.name=='identifier' && @.in=='path')]
+    description: config "ID prefixes"; name as identifier returned 422 (Get Product Category by ID.bru, 2026-09-07)
+    update:
+      description: ID of the product category, a 24-character hexadecimal string such as `6a1f0c2e9b3d4a5f8c7e1c01`. Search by `name` to find a category's ID. Names can repeat in different branches, so check `path` to pick the right one.
+
+  - target: $.paths['/api/v3/product-categories/{identifier}'].get.parameters[?(@.name=='_fields' && @.in=='query')]
+    description: Category field names from Get Product Category by ID.bru (2026-09-07 field list); _fields on GET by ID per FB-004 (2026-10-15, products)
+    update:
+      description: Fields to return, for example `_fields=name&_fields=path`. Repeat the parameter once per field. Leave it out to get every field.
+
+  - target: $.paths['/api/v3/product-categories/{identifier}'].get.responses['200'].content['application/json']
+    description: Get Product Category by ID.bru "200 - Success" (2026-09-21), sanitized, account_id omitted
+    update:
+      examples:
+        topLevel:
+          summary: Top-level category
+          value:
+            data:
+              id: 6a1f0c2e9b3d4a5f8c7e1c01
+              name: Bags
+              parent_id: null
+              path:
+                - Bags
+              slug: bags
+              order: 1
+              n_children: 2
+              created: '2026-06-22T08:44:08.293000'
+              modified: '2026-06-22T08:44:08.293000'
+            errors: []
+
+  - target: $.paths['/api/v3/product-categories/{identifier}'].get.responses['404'].content['application/json']
+    description: Update and Delete Product Category.bru "404 - Not Found After Delete" (2026-09-15)
+    update:
+      examples:
+        notFound:
+          summary: No category with this ID
+          value:
+            data: []
+            errors:
+              - name: NotFoundError
+                description: Document with id 6a1f0c2e9b3d4a5f8c7e1c99 not found
+
+  # --- PATCH /api/v3/product-categories/{identifier} ------------------------------
+  - target: $.paths['/api/v3/product-categories/{identifier}'].patch
+    description: Q#84 (204 on PATCH /product-categories/{id}, 2026-10-01), Update and Delete Product Category.bru rename + re-parent (2026-09-15/22, path and slug updated), spec additionalProperties false
+    update:
+      summary: Update a product category
+      operationId: update-product-category
+      description: |-
+        Renames a product category, moves it under another parent, or both. Send only the fields you want to change: `name`, `parent_id`, or both. A successful update returns `204` with an empty body. To see the result, read the category back.
+
+        Renaming a category also changes its `slug` and the last name in its `path`. Moving it with `parent_id` changes its `path` to the new chain of names.
+
+        The body accepts only `name` and `parent_id`. To change which products are filed under the category, link and unlink them on the product instead. See [Safely remove categories, assets, or relationships](/docs/guides/safely-removing-categories-assets-or-relationships#remove-a-category-from-a-product) and [Update and delete records](/docs/reference/v3/updates-and-deletes).
+
+  - target: $.paths['/api/v3/product-categories/{identifier}'].patch.parameters[?(@.name=='identifier' && @.in=='path')]
+    description: config "ID prefixes"
+    update:
+      description: ID of the product category to update, a 24-character hexadecimal string such as `6a1f0c2e9b3d4a5f8c7e1c02`.
+
+  - target: $.paths['/api/v3/product-categories/{identifier}'].patch.requestBody.content['application/json']
+    description: Update and Delete Product Category.bru requests (2026-09-15 rename, 2026-09-22 rename + re-parent)
+    update:
+      examples:
+        rename:
+          summary: Rename
+          value:
+            name: Travel Backpacks
+        renameAndMove:
+          summary: Rename and move under another parent
+          value:
+            name: Travel Backpacks
+            parent_id: 6a1f0c2e9b3d4a5f8c7e1c04
+
+  - target: $.paths['/api/v3/product-categories/{identifier}'].patch.responses['204']
+    description: Q#84
+    update:
+      description: Updated. The response has no body. Read the category to see the new values.
+
+  # --- GET /api/v3/product-categories/{identifier}/{path} -------------------------
+  - target: $.paths['/api/v3/product-categories/{identifier}/{path}'].get
+    description: Get Product Category by ID.bru docs (2026-09-07; field list from the 400, parent subpath 200), Q#15, Q#20 (subpath 404 "Resource not found")
+    update:
+      summary: Get a product category field
+      operationId: get-product-category-field
+      description: |-
+        Returns the value of one field of a product category, without the rest of the record. Set `path` to the field, for example `name` or `path`.
+
+        On a subcategory, `parent` returns the parent category as a full object, so you don't need a second request.
+
+        A field the category doesn't have returns `400`, and the message lists the fields you can ask for. A category ID that doesn't exist returns `404`.
+
+  - target: $.paths['/api/v3/product-categories/{identifier}/{path}'].get.parameters[?(@.name=='path' && @.in=='path')]
+    description: Get Product Category by ID.bru (field list, parent subpath)
+    update:
+      description: 'The field to read: `id`, `name`, `parent_id`, `path`, `slug`, `order`, `n_children`, `created`, `modified`, or `parent`.'
+
+  - target: $.paths['/api/v3/product-categories/{identifier}/{path}'].get.responses['400'].content['application/json']
+    description: Get Product Category by ID.bru subpath discovery 400 (2026-09-07), verbatim list; data key added to match the envelope (Q#15)
+    update:
+      examples:
+        unknownField:
+          summary: Field the category doesn't have
+          value:
+            data: []
+            errors:
+              - name: ValueError
+                description: "Field 'color' not found. Available fields: ['id','account_id','name','parent_id','path','slug','order','n_children','created','modified']"
+
+  - target: $.paths['/api/v3/product-categories/{identifier}/{path}'].get.parameters[?(@.name=='_fields' && @.in=='query')]
+    description: Category field names (Get Product Category by ID.bru field list)
+    update:
+      description: Fields to return when the field holds an object, such as `parent`, for example `_fields=name&_fields=path`. Repeat the parameter once per field.
+
+  - target: $.paths['/api/v3/product-categories/{identifier}/{path}'].get.responses['404']
+    description: Q#20 (subpath GET after delete, 2026-09-07); unknown field is 400 here
+    update:
+      description: No product category has this ID.
+      content:
+        application/json:
+          examples:
+            notFound:
+              summary: Category doesn't exist
+              value:
+                data: []
+                errors:
+                  - name: NotFoundError
+                    description: Resource not found
+
+  # --- PATCH /api/v3/product-categories/{identifier}/{path} (spec only) -----------
+  - target: $.paths['/api/v3/product-categories/{identifier}/{path}'].patch
+    description: Spec only; no live capture (VERIFY.md, CAT-23). No request body declared (proposed OAS-10 fix in the Phase 3 report).
+    update:
+      summary: Update a product category field
+      operationId: update-product-category-field
+      description: To rename a category or move it under another parent, use [Update a product category](/docs/reference/v3/productcategories/update-product-category), which documents the request body.
+
+  - target: $.paths['/api/v3/product-categories/{identifier}/{path}'].patch.parameters[?(@.name=='path' && @.in=='path')]
+    description: Patchable fields from ProductCategoryUpdateInputDto (spec)
+    update:
+      description: Name of a category field, for example `name`.
+
+  # --- DELETE /api/v3/product-categories/{identifier}/{path} (spec only) ----------
+  - target: $.paths['/api/v3/product-categories/{identifier}/{path}'].delete
+    description: Spec only; no live capture (VERIFY.md, CAT-23)
+    update:
+      summary: Delete a product category field
+      operationId: delete-product-category-field
+      description: To delete a category, use [Delete a product category](/docs/reference/v3/productcategories/delete-product-category). To take a product out of a category, unlink the category on the product. See [Safely remove categories, assets, or relationships](/docs/guides/safely-removing-categories-assets-or-relationships#remove-a-category-from-a-product).
+
+  - target: $.paths['/api/v3/product-categories/{identifier}/{path}'].delete.parameters[?(@.name=='path' && @.in=='path')]
+    description: Category fields (spec)
+    update:
+      description: Name of a category field, for example `name`.

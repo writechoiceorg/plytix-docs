@@ -1,0 +1,40 @@
+{
+  "data": [
+    {
+      "id": "6a1f0c2e9b3d4a5f8c7e1c01",
+      "name": "Bags",
+      "path": ["Bags"],
+      "slug": "bags",
+      "order": 1,
+      "n_children": 2,
+      "created": "2026-06-22T08:44:08.293000",
+      "modified": "2026-06-22T08:44:08.293000"
+    },
+    {
+      "id": "6a1f0c2e9b3d4a5f8c7e1c02",
+      "name": "Backpacks",
+      "parent_id": "6a1f0c2e9b3d4a5f8c7e1c01",
+      "path": ["Bags", "Backpacks"],
+      "slug": "backpacks",
+      "order": 1,
+      "n_children": 0,
+      "created": "2026-06-22T08:44:08.293000",
+      "modified": "2026-06-22T08:44:08.293000"
+    },
+    {
+      "id": "6a1f0c2e9b3d4a5f8c7e1c03",
+      "name": "Totes",
+      "parent_id": "6a1f0c2e9b3d4a5f8c7e1c01",
+      "path": ["Bags", "Totes"],
+      "slug": "totes",
+      "order": 2,
+      "n_children": 0,
+      "created": "2026-06-22T08:44:08.293000",
+      "modified": "2026-06-22T08:44:08.293000"
+    }
+  ],
+  "errors": [],
+  "pagination": {
+    "next_page": "http://<api-host>/api/v3/product-categories?_page_size=3&_page=2"
+  }
+}

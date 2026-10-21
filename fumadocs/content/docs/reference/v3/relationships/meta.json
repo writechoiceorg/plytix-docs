@@ -1,14 +1,14 @@
 {
   "title": "Relationships",
-  "icon": "Link2",
   "pages": [
-    "search_relationships_api_v3_relationships_get",
-    "create_relationships_api_v3_relationships_post",
-    "get_relationships_api_v3_relationships__identifier__get",
-    "update_relationships_api_v3_relationships__identifier__patch",
-    "delete_relationships_api_v3_relationships__identifier__delete",
-    "get_relationships_subpath_api_v3_relationships__identifier___path__get",
-    "update_relationships_subpath_api_v3_relationships__identifier___path__patch",
-    "delete_relationships_subpath_api_v3_relationships__identifier___path__delete"
-  ]
+    "search-relationships",
+    "create-relationship",
+    "get-relationship",
+    "update-relationship",
+    "delete-relationship",
+    "get-relationship-field",
+    "update-relationship-field",
+    "delete-relationship-field"
+  ],
+  "icon": "Link2"
 }

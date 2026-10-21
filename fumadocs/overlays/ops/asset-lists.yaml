@@ -1,0 +1,330 @@
+# Operation edits for the asset-lists endpoints (Phase 3, 2026-10-20).
+#
+# Sources: bruno-collection/11-Asset-Lists/ (2026-09-08 to 2026-09-22), quirks
+# Q#20, Q#34, Q#35, Q#36, Q#38a, Q#77, Q#79, Q#84, Q#91, Q#92, Q#116, Q#117,
+# GEN-1 (duplicates now 409), spec 2026-10-02 (AssetListCreateInputDto if/then:
+# a Static list takes no query). PATCH captures in Bruno (200 + body) predate
+# Q#84/Q#116; PATCH 204 on asset lists is from Q#116's general retest (VERIFY.md).
+# How assets join a static list is not documented here: the dedicated
+# /assets/{identifier}/static_lists routes are `pending` (LIST-20).
+overlay: 1.0.0
+info:
+  title: asset-lists operations
+  version: 1.0.0
+actions:
+  # --- GET /api/v3/asset-lists ------------------------------------------------------
+  - target: $.paths['/api/v3/asset-lists'].get
+    description: List Asset Lists.bru (2026-09-22), Q#77, Q#91, Q#92
+    update:
+      summary: Search asset lists
+      operationId: search-asset-lists
+      description: |-
+        Returns the asset lists in your account, one page at a time. An asset list is a saved selection of assets. Each list has a `type`:
+
+        - `Smart`: the list stores a `query`, and its members are the assets that match it.
+        - `Static`: membership is stored on each asset. Plytix generates the list's `query`, which points at the list's own ID.
+
+        The records describe the lists, not the assets in them.
+
+        `_fields` doesn't accept `type` here and returns `400`. To see a list's type, use [Get an asset list](/docs/reference/v3/assetlists/get-asset-list).
+
+        Results come back 25 per page by default. Follow `pagination.next_page` to get the next page, and change its `http://` to `https://` first.
+
+        Related pages:
+
+        - [Filtering and query syntax](/docs/reference/v3/filtering-query-syntax)
+        - [Pagination](/docs/reference/v3/pagination)
+
+  - target: $.paths['/api/v3/asset-lists'].get.parameters[?(@.name=='_fields' && @.in=='query')]
+    description: Q#77 (2026-09-22, valid _fields list from the 400; revision_id accepted but absent), List Asset Lists.bru
+    update:
+      description: |-
+        Fields to return for each list. Repeat the parameter once per field, for example `_fields=id&_fields=name`. Leave it out to get every field.
+
+        Accepted fields include `id`, `name`, `query`, `created`, and `modified`. `type` isn't accepted on this operation and returns `400`.
+
+  - target: $.paths['/api/v3/asset-lists'].get.responses['200'].content['application/json']
+    description: List Asset Lists.bru "200 - Full Parameters" (2026-09-22), sanitized, account_id omitted, icontains filter dropped (Q#99); Smart query shape from Create Smart Asset List.bru
+    update:
+      examples:
+        firstPage:
+          summary: First page of several
+          description: '`GET /api/v3/asset-lists?_fields=id&_fields=name&_fields=query&_fields=created&_fields=modified&_page_size=3&_sort_by=name`. The first and third lists are static: their `query` points at the list''s own ID.'
+          value:
+            x-example-file: asset-lists/search-200-first-page.json
+
+  - target: $.paths['/api/v3/asset-lists'].get.responses['400'].content['application/json']
+    description: Q#77 (2026-09-22), verbatim message; data key added to match the envelope
+    update:
+      examples:
+        typeInFields:
+          summary: Requesting type in _fields
+          value:
+            data: []
+            errors:
+              - name: ValueError
+                description: 'Unknown field(s) in _fields: type. Valid fields: _created_at, _id, account_id, created, created_user_audit, id, modified, modified_user_audit, name, query, revision_id'
+
+  # --- POST /api/v3/asset-lists -----------------------------------------------------
+  - target: $.paths['/api/v3/asset-lists'].post
+    description: Create Smart Asset List.bru (2026-09-08/22), Q#34, Q#35, Q#36, Q#38a + GEN-1 (409), Q#79, Q#117, spec if/then (Static takes no query)
+    update:
+      summary: Create an asset list
+      operationId: create-asset-list
+      description: |-
+        Creates one asset list and returns it, including its new `id`. `name` and `type` are required.
+
+        - For a `Smart` list, send a `query`. The list's members are the assets that match it.
+        - For a `Static` list, leave `query` out. Membership is stored on each asset. Plytix generates the list's `query`, which points at the list's own ID.
+
+        A `query` is a list of groups, and each group is a list of conditions. An asset is in the list when it matches every condition in at least one group. Each condition names a `field`, an `operator`, and a `value`, for example `{"field": "extension", "operator": "eq", "value": "jpg"}`.
+
+        The operators in a `query` aren't the same as the search filter operators. For example, `like` works in a `query` but not as a search filter. `FilterOperator` in the request body lists the operators the spec allows. `eq`, `like`, `in`, and `!exists` have been confirmed.
+
+        A successful create returns `201` with the new list. Each condition comes back with a `field_type` key added. A body without `name` or `type` returns `422`, with one entry in `errors` for each missing field. A list name that's already in use returns `409`.
+
+  - target: $.paths['/api/v3/asset-lists'].post.requestBody.content['application/json']
+    description: Create Smart Asset List.bru requests (2026-09-08 single condition, 2026-09-22 multi-group); Static body per Q#34 and spec if/then
+    update:
+      examples:
+        smart:
+          summary: Smart list, one condition
+          value:
+            name: JPG Images
+            type: Smart
+            query:
+              - - field: extension
+                  operator: eq
+                  value: jpg
+        smartGroups:
+          summary: Smart list, two groups
+          description: 'Two groups: `filename` `like` `front` and `extension` `eq` `jpg`, or `filename` `eq` `bag-10157-front.jpg`.'
+          value:
+            name: Front Shots
+            type: Smart
+            query:
+              - - field: filename
+                  operator: like
+                  value: front
+                - field: extension
+                  operator: eq
+                  value: jpg
+              - - field: filename
+                  operator: eq
+                  value: bag-10157-front.jpg
+        static:
+          summary: Static list
+          value:
+            name: Press Kit
+            type: Static
+
+  - target: $.paths['/api/v3/asset-lists'].post.responses['201']
+    description: Create Smart Asset List.bru "201 - Full Parameters (Multi-Group Query)" (2026-09-22), sanitized, account_id omitted
+    update:
+      description: Created. `data` holds the new list.
+      content:
+        application/json:
+          examples:
+            smartGroups:
+              summary: Smart list, two groups
+              value:
+                x-example-file: asset-lists/create-201-smart.json
+
+  - target: $.paths['/api/v3/asset-lists'].post.responses['409']
+    description: Q#38a (2026-09-08, then 422 "A List with same name already exists"), GEN-1 Plytix answer (now 409); no 409 body captured (VERIFY.md)
+    update:
+      description: An asset list with this `name` already exists in your account. Nothing was created.
+
+  - target: $.paths['/api/v3/asset-lists'].post.responses['422'].content['application/json']
+    description: Create Smart Asset List.bru "422 - Missing Required Fields (name, type)" (2026-09-08), Q#36
+    update:
+      examples:
+        missingFields:
+          summary: Missing name and type
+          value:
+            data: []
+            errors:
+              - name: InputDTOValidationError
+                description: 'name: Field required'
+              - name: InputDTOValidationError
+                description: 'type: Field required'
+
+  # --- GET /api/v3/asset-lists/{identifier} -----------------------------------------
+  - target: $.paths['/api/v3/asset-lists/{identifier}'].get
+    description: Get Asset List by ID.bru (2026-09-08/21), Update and Delete Asset List.bru 404 (2026-09-15), Q#34
+    update:
+      summary: Get an asset list
+      operationId: get-asset-list
+      description: |-
+        Returns one asset list by its ID, including its `type` and `query`. An ID that matches no list returns `404`.
+
+        For a `Static` list, `query` is generated by Plytix and points at the list's own ID. The response doesn't include the assets in the list.
+
+  - target: $.paths['/api/v3/asset-lists/{identifier}'].get.parameters[?(@.name=='identifier' && @.in=='path')]
+    description: config "ID prefixes"
+    update:
+      description: ID of the asset list, a 24-character hexadecimal string such as `6a1f0c2e9b3d4a5f8c7e1301`.
+
+  - target: $.paths['/api/v3/asset-lists/{identifier}'].get.parameters[?(@.name=='_fields' && @.in=='query')]
+    description: Asset list field names (Get Asset List by ID.bru field list, 2026-09-08)
+    update:
+      description: Fields to return, for example `_fields=name&_fields=type`. Repeat the parameter once per field. Leave it out to get every field.
+
+  - target: $.paths['/api/v3/asset-lists/{identifier}'].get.responses['200'].content['application/json']
+    description: Get Asset List by ID.bru "200 - Success (Static List)" (2026-09-21), sanitized, account_id omitted
+    update:
+      examples:
+        static:
+          summary: Static list
+          value:
+            data:
+              id: 6a1f0c2e9b3d4a5f8c7e1301
+              name: Brand Logos
+              type: Static
+              query:
+                - - operator: in
+                    field: static_lists
+                    value:
+                      - 6a1f0c2e9b3d4a5f8c7e1301
+                    field_type: null
+              created: '2026-06-22T08:45:06.848000'
+              modified: '2026-06-22T08:45:06.866000'
+            errors: []
+
+  - target: $.paths['/api/v3/asset-lists/{identifier}'].get.responses['404'].content['application/json']
+    description: Update and Delete Asset List.bru "404 - Not Found After Delete" (2026-09-15)
+    update:
+      examples:
+        notFound:
+          summary: No list with this ID
+          value:
+            data: []
+            errors:
+              - name: NotFoundError
+                description: Document with id 6a1f0c2e9b3d4a5f8c7e1399 not found
+
+  # --- PATCH /api/v3/asset-lists/{identifier} ---------------------------------------
+  - target: $.paths['/api/v3/asset-lists/{identifier}'].patch
+    description: Update and Delete Asset List.bru (rename keeps query, 2026-09-15; query SET-replace, 2026-09-22), Q#79, Q#116 (PATCH 204), spec AssetListUpdateInputDto (name, query; additionalProperties false)
+    update:
+      summary: Update an asset list
+      operationId: update-asset-list
+      description: |-
+        Renames an asset list, replaces a `Smart` list's `query`, or both. A successful update returns `204` with an empty body. To see the result, read the list back.
+
+        Send `query` only for a `Smart` list. A `query` you send replaces the list's whole query. It isn't merged with the old one, so include every group and condition you want to keep. Renaming a list without sending `query` leaves the query as it is.
+
+        The body accepts only `name` and `query`. You can't change a list's `type`. See [Update and delete records](/docs/reference/v3/updates-and-deletes).
+
+  - target: $.paths['/api/v3/asset-lists/{identifier}'].patch.parameters[?(@.name=='identifier' && @.in=='path')]
+    description: config "ID prefixes"
+    update:
+      description: ID of the asset list to update, a 24-character hexadecimal string such as `6a1f0c2e9b3d4a5f8c7e1302`.
+
+  - target: $.paths['/api/v3/asset-lists/{identifier}'].patch.requestBody.content['application/json']
+    description: Update and Delete Asset List.bru requests (2026-09-15 rename, 2026-09-22 rename + query replace with !exists)
+    update:
+      examples:
+        rename:
+          summary: Rename
+          value:
+            name: Lifestyle Photos
+        replaceQuery:
+          summary: Rename and replace the query
+          description: The new query replaces the old one. This list now holds the assets that have no `alt_text`.
+          value:
+            name: Missing Alt Text
+            query:
+              - - field: alt_text
+                  operator: '!exists'
+                  value: true
+
+  - target: $.paths['/api/v3/asset-lists/{identifier}'].patch.responses['204']
+    description: Q#84, Q#116
+    update:
+      description: Updated. The response has no body. Read the list to see the new values.
+
+  # --- DELETE /api/v3/asset-lists/{identifier} --------------------------------------
+  - target: $.paths['/api/v3/asset-lists/{identifier}'].delete
+    description: Update and Delete Asset List.bru DELETE 204 + GET 404 (2026-09-15), Q#35; effect on assets and Brand Portals unknown (LIST-22)
+    update:
+      summary: Delete an asset list
+      operationId: delete-asset-list
+      description: |-
+        Deletes an asset list. A successful delete returns `204` with an empty body, and a later request for the same ID returns `404`.
+
+        See [Update and delete records](/docs/reference/v3/updates-and-deletes).
+
+  - target: $.paths['/api/v3/asset-lists/{identifier}'].delete.parameters[?(@.name=='identifier' && @.in=='path')]
+    description: config "ID prefixes"
+    update:
+      description: ID of the asset list to delete, a 24-character hexadecimal string such as `6a1f0c2e9b3d4a5f8c7e1302`.
+
+  - target: $.paths['/api/v3/asset-lists/{identifier}'].delete.responses['204']
+    description: Update and Delete Asset List.bru (2026-09-15)
+    update:
+      description: Deleted. The response has no body.
+
+  # --- GET /api/v3/asset-lists/{identifier}/{path} ----------------------------------
+  - target: $.paths['/api/v3/asset-lists/{identifier}/{path}'].get
+    description: Get Asset List by ID.bru subpath discovery field list (2026-09-08), Q#15 (unknown field 400); no 200 capture
+    update:
+      summary: Get an asset list field
+      operationId: get-asset-list-field
+      description: |-
+        Returns the value of one field of an asset list, without the rest of the record. Set `path` to the field, for example `query`.
+
+        A field the list doesn't have returns `400`, and the message lists the fields you can ask for.
+
+  - target: $.paths['/api/v3/asset-lists/{identifier}/{path}'].get.parameters[?(@.name=='path' && @.in=='path')]
+    description: Get Asset List by ID.bru field list (2026-09-08)
+    update:
+      description: 'The field to read: `id`, `name`, `type`, `query`, `created`, or `modified`.'
+
+  - target: $.paths['/api/v3/asset-lists/{identifier}/{path}'].get.parameters[?(@.name=='_fields' && @.in=='query')]
+    description: Asset list field names (Get Asset List by ID.bru field list)
+    update:
+      description: Fields to return when the field holds an object. Repeat the parameter once per field, for example `_fields=name&_fields=type`.
+
+  - target: $.paths['/api/v3/asset-lists/{identifier}/{path}'].get.responses['400'].content['application/json']
+    description: Get Asset List by ID.bru subpath discovery field list (2026-09-08), message format from Q#15 / Get Product Category by ID.bru; data key added to match the envelope
+    update:
+      examples:
+        unknownField:
+          summary: Field the list doesn't have
+          value:
+            data: []
+            errors:
+              - name: ValueError
+                description: "Field 'color' not found. Available fields: ['id','account_id','name','query','created','modified','modified_user_audit','created_user_audit','type']"
+
+  - target: $.paths['/api/v3/asset-lists/{identifier}/{path}'].get.responses['404']
+    description: Generic; no asset-list subpath 404 body captured
+    update:
+      description: No asset list has this ID.
+
+  # --- PATCH /api/v3/asset-lists/{identifier}/{path} (spec only) --------------------
+  - target: $.paths['/api/v3/asset-lists/{identifier}/{path}'].patch
+    description: Spec only; no live capture on asset lists (VERIFY.md, LIST-23). No request body declared (proposed OAS-10 fix in the Phase 3 report).
+    update:
+      summary: Update an asset list field
+      operationId: update-asset-list-field
+      description: To rename a list or replace its query, use [Update an asset list](/docs/reference/v3/assetlists/update-asset-list), which documents the request body.
+
+  - target: $.paths['/api/v3/asset-lists/{identifier}/{path}'].patch.parameters[?(@.name=='path' && @.in=='path')]
+    description: Patchable fields from AssetListUpdateInputDto (spec)
+    update:
+      description: Name of an asset list field, for example `name`.
+
+  # --- DELETE /api/v3/asset-lists/{identifier}/{path} (spec only) -------------------
+  - target: $.paths['/api/v3/asset-lists/{identifier}/{path}'].delete
+    description: Spec only; no live capture (VERIFY.md, LIST-23)
+    update:
+      summary: Delete an asset list field
+      operationId: delete-asset-list-field
+      description: To delete a list, use [Delete an asset list](/docs/reference/v3/assetlists/delete-asset-list).
+
+  - target: $.paths['/api/v3/asset-lists/{identifier}/{path}'].delete.parameters[?(@.name=='path' && @.in=='path')]
+    description: Asset list fields (spec)
+    update:
+      description: Name of an asset list field, for example `name`.

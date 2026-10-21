@@ -1,0 +1,13 @@
+{
+  "data": {
+    "id": "6a1f0c2e9b3d4a5f8c7e1e04",
+    "name": "Material",
+    "label": "material",
+    "description": "Main material of the product",
+    "created": "2026-09-22T21:58:36.615000+00:00",
+    "modified": "2026-09-22T21:58:36.615000+00:00",
+    "type": "TextAttribute",
+    "character_limit": 250
+  },
+  "errors": []
+}

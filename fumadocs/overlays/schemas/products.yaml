@@ -1,0 +1,69 @@
+# Schema edits for the products endpoints (Phase 1 pilot: create and update bodies).
+# Sources: spec 2026-10-02 constraints, Q#30, Q#46, Q#82, Q#97, Q#98, Q#118, FB-022, FB-032, glossary.
+overlay: 1.0.0
+info:
+  title: products schemas
+  version: 1.0.0
+actions:
+  # --- create body ---------------------------------------------------------------
+  - target: $.components.schemas.ProductCreateDto
+    update:
+      description: Body for creating a product. Only `sku` is required, and fields not listed here return `422`.
+  - target: $.components.schemas.ProductCreateDto.properties.sku
+    update:
+      description: Your identifier for the product, up to 100 characters. It must be unique in your account. A SKU that already exists returns `409`.
+      examples:
+        - BAG-10157
+  - target: $.components.schemas.ProductCreateDto.properties.label
+    update:
+      description: Product name shown in Plytix.
+      examples:
+        - Canvas Backpack
+  - target: $.components.schemas.ProductCreateDto.properties.gtin
+    update:
+      description: Global Trade Item Number (barcode), 8 to 14 characters.
+      examples:
+        - '4006381333931'
+  - target: $.components.schemas.ProductCreateDto.properties.status
+    update:
+      description: Workflow status of the product. Leave it out to create the product without a status.
+  - target: $.components.schemas.ProductCreateDto.properties.attributes
+    update:
+      description: Custom attribute values, keyed by each attribute's `label` (its snake_case name, not the display name).
+      examples:
+        - material: Canvas
+  - target: $.components.schemas.ProductCreateDto.properties.thumbnail_id
+    update:
+      description: ID of an existing asset to show as the product's thumbnail.
+  - target: $.components.schemas.ProductCreateDto.properties.parent_id
+    update:
+      description: ID of the parent product. Setting it creates the product as a variant of that parent, in the parent's product family.
+  - target: $.components.schemas.ProductCreateDto.properties.product_family_id
+    update:
+      description: ID of the product family to assign. For a variant, leave it out to use the parent's family. A different family than the parent's returns `422`.
+
+  # --- update body ---------------------------------------------------------------
+  - target: $.components.schemas.ProductUpdateInputDto
+    update:
+      description: Fields to change. Send only the fields you want to change. `sku` can't be changed, and fields not listed here return `422`.
+  - target: $.components.schemas.ProductUpdateInputDto.properties.label
+    update:
+      description: Product name shown in Plytix.
+  - target: $.components.schemas.ProductUpdateInputDto.properties.gtin
+    update:
+      description: Global Trade Item Number (barcode), 8 to 14 characters, with a valid check digit. It can't be set to `null`.
+  - target: $.components.schemas.ProductUpdateInputDto.properties.status
+    update:
+      description: Workflow status of the product.
+  - target: $.components.schemas.ProductUpdateInputDto.properties.attributes
+    update:
+      description: Custom attribute values, keyed by attribute `label`. This map replaces the product's current custom attribute values, so include every value you want to keep. Values for completeness and formula attributes are ignored.
+  - target: $.components.schemas.ProductUpdateInputDto.properties.thumbnail_id
+    update:
+      description: ID of an existing asset to show as the product's thumbnail. `null` removes the thumbnail.
+  - target: $.components.schemas.ProductUpdateInputDto.properties.parent_id
+    update:
+      description: ID of a new parent product. `null` detaches the product from its parent, so it goes back to `product_level` `0` and keeps its product family. Don't send `product_family_id` in the same request; sending both returns `422`.
+  - target: $.components.schemas.ProductUpdateInputDto.properties.product_family_id
+    update:
+      description: ID of the product family to assign. `null` removes the product from its current family.

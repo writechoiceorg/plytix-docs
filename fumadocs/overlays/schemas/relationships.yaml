@@ -1,0 +1,38 @@
+# Schema edits for the relationships endpoints (relationship types).
+# The migrated 2026-10-20 description of RelationshipUpdateInputDto (internal
+# implementation notes from the upstream docstring) is replaced with reader-facing
+# text; its substance (name only, label derived, status not settable) is kept.
+# Sources: spec 2026-10-02, Q#60, Create Relationship.bru and
+# Update and Delete Relationship.bru (2026-09-15), GEN-1.
+overlay: 1.0.0
+info:
+  title: relationships schemas
+  version: 1.0.0
+actions:
+  - target: $.components.schemas.RelationshipCreateInputDto
+    description: Spec (additionalProperties false), Create Relationship.bru
+    update:
+      description: Body for creating a relationship type. `name` is the only field. Plytix derives `label` from it and sets `status` to `ACTIVE`.
+
+  - target: $.components.schemas.RelationshipCreateInputDto.properties.name
+    description: 409 on duplicate (Create Relationship.bru, GEN-1); label derivation from the same capture
+    update:
+      description: Name of the relationship type. It must be unique in your account. A name that already exists returns `409`. The `label` is derived from it in snake_case.
+      examples:
+        - Spare Parts
+
+  - target: $.components.schemas.RelationshipUpdateInputDto
+    description: Replaces the migrated upstream docstring. Q#60, Update and Delete Relationship.bru (label unchanged after rename)
+    update:
+      description: Fields to change. `name` is the only field you can change. Renaming a relationship type doesn't change its `label`.
+
+  - target: $.components.schemas.RelationshipUpdateInputDto.properties.name
+    update:
+      description: New name of the relationship type.
+      examples:
+        - Replacement Parts
+
+  - target: $.components.schemas.RelationshipStatus
+    description: Spec enum; ACTIVE on create (Create Relationship.bru); a deleted type returns 404 (REL-21 asks whether DELETED is ever visible)
+    update:
+      description: Status of the relationship type, set by Plytix. A new relationship type is `ACTIVE`. A deleted type returns `404`.

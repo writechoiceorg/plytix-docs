@@ -1,0 +1,125 @@
+# V3 OpenAPI spec pipeline: upstream spec + overlays -> fumadocs/openapi.json.
+# See fumadocs/overlays/README.md.
+name: V3 API spec
+
+on:
+  pull_request:
+    paths:
+      - 'fumadocs/upstream/**'
+      - 'fumadocs/overlays/**'
+      - 'fumadocs/scripts/api/**'
+      - 'fumadocs/scripts/generate-docs.mjs'
+      - 'fumadocs/openapi.json'
+      - 'fumadocs/redocly.yaml'
+      - 'fumadocs/content/docs/reference/v3/**'
+      - '.github/workflows/api-spec.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'fumadocs/upstream/**'
+      - 'fumadocs/overlays/**'
+      - 'fumadocs/scripts/api/**'
+      - 'fumadocs/openapi.json'
+  workflow_dispatch:
+    inputs:
+      spec_url:
+        description: 'URL of a new Plytix V3 spec. Leave empty to just re-run the checks.'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+defaults:
+  run:
+    working-directory: fumadocs
+
+jobs:
+  # Manual intake: download a new spec and open a PR with the rebuilt docs.
+  # Once Plytix publishes the spec at a stable URL (overlays/QUESTIONS.md, OAS-3),
+  # add a `schedule:` trigger that runs this job with that URL.
+  # PRs opened with the default GITHUB_TOKEN don't trigger other workflows, so
+  # the `check` job won't start on that PR by itself: push any commit to it (or
+  # swap in a bot PAT here) to run the checks.
+  intake:
+    if: github.event_name == 'workflow_dispatch' && inputs.spec_url != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: fumadocs/package-lock.json
+      - run: npm ci
+      - name: Download and take in the new spec
+        env:
+          SPEC_URL: ${{ inputs.spec_url }}
+        run: |
+          curl -fsSL "$SPEC_URL" -o "$RUNNER_TEMP/openapi-v3.json"
+          npm run api:intake -- "$RUNNER_TEMP/openapi-v3.json" --channel "$SPEC_URL"
+      - name: Rebuild (drift is reported in the PR, not here)
+        id: build
+        continue-on-error: true
+        run: npm run api:build
+      - name: Open a PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BUILD_OUTCOME: ${{ steps.build.outcome }}
+        run: |
+          branch="spec/$(date -u +%Y-%m-%d)-${GITHUB_RUN_ID}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add -A upstream openapi.json redirects.v3.json overlays/baseline.lock.json content/docs/reference/v3
+          git commit -m "Take in new upstream V3 spec"
+          git push -u origin "$branch"
+          {
+            echo "New upstream V3 spec from \`${{ inputs.spec_url }}\`."
+            echo
+            echo "Build: **${BUILD_OUTCOME}**. If it failed, fix the drift below before merging."
+            echo
+            cat reports/api-drift.md
+          } > "$RUNNER_TEMP/body.md"
+          gh pr create --title "Upstream V3 spec $(date -u +%Y-%m-%d)" --body-file "$RUNNER_TEMP/body.md"
+
+  check:
+    if: github.event_name != 'workflow_dispatch' || inputs.spec_url == ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: fumadocs/package-lock.json
+      - run: npm ci
+      - name: Pipeline tests
+        run: npm run api:test
+      - name: Build from upstream + overlays and compare with what's committed
+        run: npm run api:check
+      - name: Cross-check overlays with openapi-format
+        run: npm run api:crosscheck
+      - name: Post the drift report on the PR
+        if: always() && github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -f reports/api-drift.md ]; then
+            gh pr comment "${{ github.event.pull_request.number }}" --body-file reports/api-drift.md --edit-last \
+              || gh pr comment "${{ github.event.pull_request.number }}" --body-file reports/api-drift.md
+          fi
+      - name: Lint
+        # typescript-eslint doesn't support TypeScript 7 yet, so ESLint crashes on
+        # load. Make this blocking again once that's resolved.
+        continue-on-error: true
+        run: npm run lint
+      - name: Site build
+        run: npm run build
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: api-reports
+          path: fumadocs/reports/
+          if-no-files-found: ignore

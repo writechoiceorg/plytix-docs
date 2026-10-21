@@ -1,0 +1,18 @@
+{
+  "data": [
+    {
+      "id": "6a1f0c2e9b3d4a5f8c7e1a01",
+      "sku": "BAG-10157",
+      "status": "Draft"
+    },
+    {
+      "id": "6a1f0c2e9b3d4a5f8c7e1a02",
+      "sku": "BAG-10158",
+      "status": "Draft"
+    }
+  ],
+  "errors": [],
+  "pagination": {
+    "next_page": "http://<api-host>/api/v3/products?_fields=sku&_fields=status&_page_size=2&_page=2"
+  }
+}

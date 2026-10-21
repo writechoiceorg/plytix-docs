@@ -1,0 +1,129 @@
+# Shared snippets: applied by wildcard to every public operation that has the
+# parameter or response. A per-operation file (ops/*.yaml) overrides these for
+# one operation when its behavior differs.
+#
+# Sources: config/api-testing.config.md quirks (Q#), feedback-flags.md (FB-),
+# and Plytix answers in "Questions for the Plytix Dev Team.md". Keep each claim
+# true for every operation it applies to; product-only behavior goes in
+# ops/products.yaml.
+overlay: 1.0.0
+info:
+  title: Shared parameter and response snippets
+  version: 1.0.0
+actions:
+  # --- query parameters ------------------------------------------------------
+  - target: $.paths.*.*.parameters[?(@.name=='_fields' && @.in=='query')]
+    description: Q#10, Q#100, PROD-3
+    update:
+      description: |-
+        Fields to return. Repeat the parameter once per field, for example `_fields=id&_fields=created`. Leave it out to get every field.
+
+        Naming a related record, such as a product's `categories`, returns it expanded in the same response. See [Filtering and query syntax](/docs/reference/v3/filtering-query-syntax#choose-which-fields-come-back).
+
+  - target: $.paths.*.*.parameters[?(@.name=='_page' && @.in=='query')]
+    description: Q#8, Q#90, Q#91, Q#92 (still http:// per FB-012, 2026-10-15)
+    update:
+      description: |-
+        Page to return, starting at `1`. A value below `1` returns `422`.
+
+        Instead of counting pages yourself, follow the `pagination.next_page` link in each response. The link starts with `http://`, so change it to `https://` before you request it. Otherwise the redirect can drop your `Authorization` header. See [Pagination](/docs/reference/v3/pagination).
+
+  - target: $.paths.*.*.parameters[?(@.name=='_page_size' && @.in=='query')]
+    description: Q#8, Q#90
+    update:
+      description: Results per page, from `1` to `1000`. A value above `1000` returns `422`.
+
+  - target: $.paths.*.*.parameters[?(@.name=='_sort_by' && @.in=='query')]
+    description: Q#9, Q#100
+    update:
+      description: Field to sort by, in ascending order. Prefix the field with `-` to sort in descending order, for example `_sort_by=-modified`.
+
+  - target: $.paths.*.*.parameters[?(@.name=='filters' && @.in=='query')]
+    description: Q#11, Q#99, Q#100, Q#116, FB-016
+    update:
+      description: |-
+        Every query parameter other than `_fields`, `_page`, `_page_size`, and `_sort_by` is a filter. Write each one as `field=value` or `field[operator]=value`, for example `status=Draft` or `created[gt]=2026-01-01`. Results must match every filter you send, unless you group filters with `_or`.
+
+        Operators:
+
+        - Comparison: `eq`, `gt`, `gte`, `lt`, `lte`
+        - Presence: `exists`, `null`
+        - Text and lists: `contains`, `contains:ignorecase`, `in`, `includes`, `intersects`
+        - Negation: prefix any operator with `!`, for example `status[!eq]=Archived`
+
+        To match one of several values, repeat the filter with `[in]`: `status[in]=Draft&status[in]=Completed`. A comma-separated list matches nothing.
+
+        `filters` is the name of this group, not a parameter you send. A query parameter literally named `filters` returns `400`. See [Filtering and query syntax](/docs/reference/v3/filtering-query-syntax) for functions, grouping with `_or`, and filters on related entities.
+
+  # --- path parameters -------------------------------------------------------
+  - target: $.paths.*.*.parameters[?(@.name=='identifier' && @.in=='path')]
+    description: config "ID prefixes" (24-character hex ObjectIds)
+    update:
+      description: ID of the record, a 24-character hexadecimal string such as `6a1f0c2e9b3d4a5f8c7e1a01`. It's the `id` returned when the record was created.
+
+  - target: $.paths.*.*.parameters[?(@.name=='path' && @.in=='path')]
+    description: Drill-in routes
+    update:
+      description: Name of the field to work on.
+
+  # Path parameters on nested routes. 00-fixes.yaml declares them (OAS-1).
+  - target: $.paths.*.*.parameters[?(@.name=='product_family_id' && @.in=='path')]
+    description: OAS-1 fixes
+    update:
+      description: ID of the product family, a 24-character hexadecimal string.
+
+  - target: $.paths.*.*.parameters[?(@.name=='attribute_id' && @.in=='path')]
+    description: OAS-1 fixes
+    update:
+      description: ID of the product attribute, a 24-character hexadecimal string.
+
+  - target: $.paths.*.*.parameters[?(@.name=='product_id' && @.in=='path')]
+    description: OAS-1 fixes
+    update:
+      description: ID of the product, a 24-character hexadecimal string.
+
+  - target: $.paths.*.*.parameters[?(@.name=='relationship_id' && @.in=='path')]
+    description: OAS-1 fixes
+    update:
+      description: ID of the relationship type, a 24-character hexadecimal string.
+
+  # --- error responses ---------------------------------------------------------
+  - target: $.paths.*.*.responses['400']
+    description: FB-010, Q#89
+    update:
+      description: The request asks for something the resource doesn't support, such as a field or operator that doesn't exist. `errors` names the problem.
+
+  # The 401 body is the same on every operation, so its example lives here.
+  # Other error examples differ per operation and go in ops/*.yaml.
+  - target: $.paths.*.*.responses['401']
+    description: 'Live 401 body from the PIM host is {"detail":"Unauthorized"}, not OperationResponse (List Products.bru "401 - Following next_page Verbatim Drops Auth", Q#92, OAS-5)'
+    update:
+      description: |-
+        The access token is missing, expired, or invalid. Tokens last 15 minutes: get a new one and retry. See [Authentication](/docs/reference/v3/authentication).
+
+        This response doesn't use the `data`/`errors` envelope. Its body is `{"detail": "Unauthorized"}`.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UnauthorizedResponse'
+          examples:
+            unauthorized:
+              summary: Missing or expired token
+              value:
+                detail: Unauthorized
+
+  - target: $.paths.*.*.responses['403']
+    description: Q#106, status-gating #4
+    update:
+      description: Your account doesn't have the feature or permission this request needs. `errors` names it.
+
+  - target: $.paths.*.*.responses['404']
+    description: Q#20, Q#95, Q#105, FB-034 (record missing, field missing, or not linked)
+    update:
+      description: No record with this ID exists in your account, or it was deleted. On some field routes, a field or link that doesn't exist also returns `404`. `errors` says which.
+
+  - target: $.paths.*.*.responses['422']
+    description: Q#18, Q#36, Q#40, Q#98, Q#118
+    update:
+      description: >-
+        The request failed validation. A required field may be missing, a value may have the wrong type or length, or the body may include a field the operation doesn't accept. `errors` describes the problem, usually as `<field>: <message>`. Some checks return `product data validation failed` without naming the field.

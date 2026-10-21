@@ -1,0 +1,250 @@
+# Operation edits for the product-attribute-groups endpoints: named groups that
+# organize attributes for display. Members are listed by attribute label in
+# `attribute_labels`.
+#
+# Written in Phase 3 (2026-10-20). Sources: config/api-testing.config.md (Q#),
+# bruno-collection/05-Product-Attribute-Groups/ and 06-Product-Attributes/Link
+# and Unlink Attribute Group.bru, glossary ("Attribute Group"), ATTR-3 answer.
+# Membership is changed only through /product-attributes/{identifier}/groups,
+# which is `pending` in upstream/visibility.yaml: never link to it from here.
+# `order` on PATCH is in the spec DTO but Q#108 says only `name` is patchable
+# (GRP-20), so the op text documents `name` only.
+overlay: 1.0.0
+info:
+  title: product-attribute-groups operations
+  version: 1.0.0
+actions:
+  # --- GET /api/v3/product-attribute-groups --------------------------------------
+  - target: $.paths['/api/v3/product-attribute-groups'].get
+    description: List Product Attribute Groups.bru (2026-09-22), Get Product Attribute Group by ID.bru (field list), glossary, Q#92
+    update:
+      summary: Search product attribute groups
+      operationId: search-product-attribute-groups
+      description: |-
+        Returns the attribute groups in your account, one page at a time. Each group has a `name`, an `order` (its display position), and `attribute_labels`, the labels of the attributes it contains.
+
+        Groups organize attributes for display. They don't change which attributes a product can hold. Product families control which attributes apply to their products. See [The Plytix data model](/docs/guides/data-model#product-attributes).
+
+        Related pages:
+
+        - [Filtering and query syntax](/docs/reference/v3/filtering-query-syntax)
+        - [Pagination](/docs/reference/v3/pagination)
+
+  - target: $.paths['/api/v3/product-attribute-groups'].get.responses['200'].content['application/json']
+    description: List Product Attribute Groups.bru "200 - Full Parameters" (2026-09-22), sanitized
+    update:
+      examples:
+        firstPage:
+          summary: First page, selected fields, sorted by name
+          description: '`GET /api/v3/product-attribute-groups?_fields=id&_fields=name&_fields=order&_page_size=2&_sort_by=name`'
+          value:
+            x-example-file: product-attribute-groups/search-200-first-page.json
+
+  # --- POST /api/v3/product-attribute-groups -------------------------------------
+  - target: $.paths['/api/v3/product-attribute-groups'].post
+    description: Q#25a, Q#104, Q#117, GEN-1, Create Product Attribute Group.bru (2026-09-07), Update Product Attribute Group.bru (attribute_labels rejected on POST, 2026-10-13)
+    update:
+      summary: Create a product attribute group
+      operationId: create-product-attribute-group
+      description: |-
+        Creates an empty attribute group and returns it, including its new `id` and its `order`. Only `name` is required, and it's the only field the body accepts.
+
+        A successful create returns `201` with the new group in `data`. Its `attribute_labels` starts empty. If a group with the same name already exists, the request returns `409` and creates nothing.
+
+        You can't add attributes in the same request: `attribute_labels` returns `422` with "Extra inputs are not permitted".
+
+        See [Update and delete records](/docs/reference/v3/updates-and-deletes).
+
+  - target: $.paths['/api/v3/product-attribute-groups'].post.requestBody.content['application/json']
+    description: Create Product Attribute Group.bru request (2026-09-07)
+    update:
+      examples:
+        name:
+          summary: New group
+          value:
+            name: Technical specifications
+
+  - target: $.paths['/api/v3/product-attribute-groups'].post.responses['201']
+    description: Create Product Attribute Group.bru "201 - Success" (2026-09-07), sanitized, order from the 2026-10-13 capture (Link and Unlink Attribute Group.bru); data is an object (Q#117)
+    update:
+      description: Created. `data` holds the new group.
+      content:
+        application/json:
+          examples:
+            created:
+              summary: Group created
+              value:
+                data:
+                  id: 6a1f0c2e9b3d4a5f8c7e1403
+                  name: Technical specifications
+                  order: 12
+                  attribute_labels: []
+                errors: []
+
+  - target: $.paths['/api/v3/product-attribute-groups'].post.responses['409']
+    description: Create Product Attribute Group.bru "409 - Duplicate Name" (2026-09-07)
+    update:
+      description: A group with this `name` already exists in your account. Nothing was created.
+      content:
+        application/json:
+          examples:
+            duplicateName:
+              summary: Name already exists
+              value:
+                data: []
+                errors:
+                  - name: AlreadyExists
+                    description: A group with the same name already exists
+
+  - target: $.paths['/api/v3/product-attribute-groups'].post.responses['422'].content['application/json']
+    description: Update Product Attribute Group.bru docs (attribute_labels rejected on POST and PATCH, 2026-10-13), Q#104
+    update:
+      examples:
+        attributeLabels:
+          summary: attribute_labels in the body
+          value:
+            data: []
+            errors:
+              - name: InputDTOValidationError
+                description: 'attribute_labels: Extra inputs are not permitted'
+
+  # --- GET /api/v3/product-attribute-groups/{identifier} -------------------------
+  - target: $.paths['/api/v3/product-attribute-groups/{identifier}'].get
+    description: Get Product Attribute Group by ID.bru (2026-09-21), Delete Product Attribute Group.bru 404 (2026-09-15), Link and Unlink Attribute Group.bru (attribute_labels reflects links, 2026-10-13)
+    update:
+      summary: Get a product attribute group
+      operationId: get-product-attribute-group
+      description: |-
+        Returns one attribute group by its `id`. An ID that matches nothing returns `404`.
+
+        `attribute_labels` lists the `label` of each attribute in the group. To get an attribute's name and type, search attributes by label with [Search product attributes](/docs/reference/v3/productattributes/search-product-attributes).
+
+  - target: $.paths['/api/v3/product-attribute-groups/{identifier}'].get.responses['200'].content['application/json']
+    description: Get Product Attribute Group by ID.bru "200 - Success" (2026-09-21), sanitized, account_id omitted, label list shortened
+    update:
+      examples:
+        group:
+          summary: Group with attributes
+          value:
+            data:
+              id: 6a1f0c2e9b3d4a5f8c7e1401
+              name: Amazon
+              order: 9
+              attribute_labels:
+                - condition
+                - vendor
+                - country_of_origin
+                - amazon_product_title
+                - amazon_ready
+              created: '2026-06-22T08:45:07.035000'
+              modified: '2026-06-22T08:45:07.035000'
+            errors: []
+
+  - target: $.paths['/api/v3/product-attribute-groups/{identifier}'].get.responses['404'].content['application/json']
+    description: Delete Product Attribute Group.bru "404 - Not Found After Delete" (2026-09-15)
+    update:
+      examples:
+        notFound:
+          summary: No group with this ID
+          value:
+            data: []
+            errors:
+              - name: NotFoundError
+                description: Document with id 6a1f0c2e9b3d4a5f8c7e1499 not found
+
+  # --- PATCH /api/v3/product-attribute-groups/{identifier} -----------------------
+  - target: $.paths['/api/v3/product-attribute-groups/{identifier}'].patch
+    description: Q#108, Q#116, Update Product Attribute Group.bru (2026-10-13); order not documented here (GRP-20)
+    update:
+      summary: Update a product attribute group
+      operationId: update-product-attribute-group
+      description: |-
+        Renames an attribute group. Send the new `name`. A successful update returns `204` with an empty body; read the group back to see it.
+
+        The group's attributes can't be changed here: `attribute_labels` returns `422` with "Extra inputs are not permitted".
+
+        See [Update and delete records](/docs/reference/v3/updates-and-deletes).
+
+  - target: $.paths['/api/v3/product-attribute-groups/{identifier}'].patch.requestBody.content['application/json']
+    description: Update Product Attribute Group.bru request (2026-10-13)
+    update:
+      examples:
+        rename:
+          summary: Rename the group
+          value:
+            name: Technical details
+
+  - target: $.paths['/api/v3/product-attribute-groups/{identifier}'].patch.responses['204']
+    description: Update Product Attribute Group.bru (2026-10-13)
+    update:
+      description: Updated. The response has no body.
+
+  - target: $.paths['/api/v3/product-attribute-groups/{identifier}'].patch.responses['422'].content['application/json']
+    description: Update Product Attribute Group.bru "Update attribute_labels - 422 Extra Inputs" (2026-10-13)
+    update:
+      examples:
+        attributeLabels:
+          summary: attribute_labels in the body
+          value:
+            data: []
+            errors:
+              - name: InputDTOValidationError
+                description: 'attribute_labels: Extra inputs are not permitted'
+
+  # --- DELETE /api/v3/product-attribute-groups/{identifier} ----------------------
+  - target: $.paths['/api/v3/product-attribute-groups/{identifier}'].delete
+    description: Delete Product Attribute Group.bru "204 - Success" + "404 - Not Found After Delete" (2026-09-15); effect on member attributes unknown (GRP-21)
+    update:
+      summary: Delete a product attribute group
+      operationId: delete-product-attribute-group
+      description: |-
+        Deletes one attribute group. A successful delete returns `204` with an empty body, and a later request for the group returns `404`.
+
+        See [Update and delete records](/docs/reference/v3/updates-and-deletes).
+
+  - target: $.paths['/api/v3/product-attribute-groups/{identifier}'].delete.responses['204']
+    update:
+      description: Deleted. The response has no body.
+
+  # --- GET /api/v3/product-attribute-groups/{identifier}/{path} -------------------
+  - target: $.paths['/api/v3/product-attribute-groups/{identifier}/{path}'].get
+    description: Get Product Attribute Group by ID.bru subpath discovery (2026-09-07, field list matches ProductAttributeGroupOutputDto); 200 body not captured (VERIFY.md)
+    update:
+      summary: Get a product attribute group field
+      operationId: get-product-attribute-group-field
+      description: |-
+        Returns the value of one field of an attribute group, such as `name` or `attribute_labels`, without the rest of the record. A field the group doesn't have returns `400`, and the message lists the fields you can ask for.
+
+  - target: $.paths['/api/v3/product-attribute-groups/{identifier}/{path}'].get.parameters[?(@.name=='path' && @.in=='path')]
+    description: Get Product Attribute Group by ID.bru field list
+    update:
+      description: The field to read, such as `name`, `order`, or `attribute_labels`.
+
+  # --- PATCH /api/v3/product-attribute-groups/{identifier}/{path} -----------------
+  - target: $.paths['/api/v3/product-attribute-groups/{identifier}/{path}'].patch
+    description: Q#108, Update Product Attribute Group.bru ("PATCH .../{path} with a bare string (.../name) also returns 204", 2026-10-13). Request body missing in spec (proposed fix GRP-22 in report).
+    update:
+      summary: Update a product attribute group field
+      operationId: update-product-attribute-group-field
+      description: |-
+        Renames an attribute group through its `name` field. Set `path` to `name` and send the new name on its own as the request body: `"Technical details"`, not `{"name": "Technical details"}`. A successful update returns `204` with an empty body.
+
+        See [Update and delete records](/docs/reference/v3/updates-and-deletes).
+
+  - target: $.paths['/api/v3/product-attribute-groups/{identifier}/{path}'].patch.parameters[?(@.name=='path' && @.in=='path')]
+    description: Q#108
+    update:
+      description: The field to change, `name`.
+
+  - target: $.paths['/api/v3/product-attribute-groups/{identifier}/{path}'].patch.responses['204']
+    description: Update Product Attribute Group.bru (2026-10-13)
+    update:
+      description: Updated. The response has no body.
+
+  # --- DELETE /api/v3/product-attribute-groups/{identifier}/{path} ----------------
+  - target: $.paths['/api/v3/product-attribute-groups/{identifier}/{path}'].delete
+    description: Spec only; no live capture, behavior unknown (VERIFY.md, GRP-23)
+    update:
+      summary: Delete a product attribute group field
+      operationId: delete-product-attribute-group-field
+      description: To delete the group itself, use [Delete a product attribute group](/docs/reference/v3/productattributegroups/delete-product-attribute-group).

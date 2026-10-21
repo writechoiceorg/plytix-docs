@@ -32,11 +32,14 @@ Ported from `plytix-docs/docs-fumadocs`: Plytix purple (`--color-fd-primary: #7a
 
 ## OpenAPI reference
 
-`openapi.json` (copied from the preview) drives the `reference/endpoints/` pages via `fumadocs-openapi`. Regenerate after the spec changes:
+`openapi.json` drives the V3 endpoint pages under `content/docs/reference/v3/<tag>/` via `fumadocs-openapi`. It's a **build artifact**: Plytix's spec (`upstream/openapi-v3.json`) plus our edits (`overlays/`, OpenAPI Overlay 1.0), filtered to the operations `upstream/visibility.yaml` marks public. Never edit it by hand. CI rebuilds it and fails if it differs.
 
 ```bash
-npm run generate:api
+npm run api:intake -- <new-plytix-spec.json>   # take in a new spec drop
+npm run api:build                              # rebuild openapi.json + MDX (fails on drift)
 ```
+
+See `overlays/README.md` for the workflow, target rules and drift codes.
 
 **Cloudflare-specific fix:** `lib/openapi.ts` imports `openapi.json` directly (`import openapiSchema from '@/openapi.json'`) instead of passing a file path to `createOpenAPI({ input: [...] })`. Workers have no filesystem, so the file-path form fails at request time with `[OpenAPI] Failed to resolve input`. If you copy this pattern elsewhere, keep the direct import.
 

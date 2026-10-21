@@ -1,3 +1,5 @@
+// Run by `npm run api:build` after it writes openapi.json; don't run it on a
+// hand-edited spec (see overlays/README.md).
 import { readFile, writeFile, rename, rm } from 'node:fs/promises';
 import path from 'node:path';
 import { generateFiles } from 'fumadocs-openapi';
@@ -156,6 +158,16 @@ const cutIndex = referenceMeta.pages.findIndex(
   (p) => p === '---[Webhook]Endpoints---' || p === '---Endpoints---' || p === 'endpoints',
 );
 const preservedPages = cutIndex === -1 ? referenceMeta.pages : referenceMeta.pages.slice(0, cutIndex);
+
+// Groups generated last time but gone from the spec now (the operations went
+// internal, were removed upstream, or moved tag): delete their folders, or the
+// stale pages would stay routable even though they've left the nav.
+const previousGroups = cutIndex === -1 ? [] : referenceMeta.pages.slice(cutIndex + 1);
+for (const tag of previousGroups) {
+  if (tagFolders.includes(tag) || preservedPages.includes(tag)) continue;
+  await rm(path.join(referenceDir, tag), { recursive: true, force: true });
+  console.log(`Removed stale endpoint group: ${tag}`);
+}
 
 await writeFile(
   referenceMetaPath,

@@ -1,0 +1,325 @@
+# Operation edits for the product-attributes endpoints: attribute definitions
+# (name, label, type, and type-specific settings) that products hold values for
+# in their `attributes` map.
+#
+# Written in Phase 3 (2026-10-20). Sources: config/api-testing.config.md (Q#),
+# feedback-flags.md (FB-), bruno-collection/06-Product-Attributes/, Plytix
+# answers ATTR-1..4 and PROD-9 in "Questions for the Plytix Dev Team.md".
+# Captures from 2026-09 that predate Q#104/Q#116 (group_ids on create, PATCH
+# returning 200 with a body) are superseded and not used.
+# The /product-attributes/{identifier}/groups link routes are `pending` in
+# upstream/visibility.yaml, so nothing here links to them.
+overlay: 1.0.0
+info:
+  title: product-attributes operations
+  version: 1.0.0
+actions:
+  # --- GET /api/v3/product-attributes --------------------------------------------
+  - target: $.paths['/api/v3/product-attributes'].get
+    description: Q#11, Q#30, Q#116, FB-032; filter examples follow the generic grammar (Q#11), not tested on this resource (VERIFY.md). Unfiltered-listing scoping not retested since 2026-09-22 (ATTR-20).
+    update:
+      summary: Search product attributes
+      operationId: search-product-attributes
+      description: |-
+        Returns attribute definitions, one page at a time. Each record holds the attribute's `id`, `name`, `label`, `type`, and the settings of that type, such as a dropdown's `options`.
+
+        Use it to find the `label` to use as a key in a product's `attributes` map, or to find attributes of one type, for example `type=CompletenessAttribute`. Products store custom attribute values keyed by `label`, not by the display `name`.
+
+        The `type` field tells you which shape a record has. The response schema below has one tab per type.
+
+        Related pages:
+
+        - [The Plytix data model](/docs/guides/data-model#product-attributes)
+        - [Sync your ERP](/docs/guides/syncing-your-erp-with-plytix)
+        - [Build a marketplace-specific product feed](/docs/guides/building-marketplace-specific-product-feeds)
+        - [Filtering and query syntax](/docs/reference/v3/filtering-query-syntax)
+        - [Pagination](/docs/reference/v3/pagination)
+
+  # --- POST /api/v3/product-attributes -------------------------------------------
+  - target: $.paths['/api/v3/product-attributes'].post
+    description: Q#22, Q#25a, Q#30, Q#66, Q#104, Q#109, Q#110, Q#116, Q#117, FB-006, FB-007, FB-032, ATTR-1, ATTR-3, ATTR-4, Create Text Attribute.bru (2026-09-07/22), Link and Unlink Attribute Group.bru (2026-10-13)
+    update:
+      summary: Create a product attribute
+      operationId: create-product-attribute
+      description: |-
+        Creates one attribute definition and returns it, including its new `id`. Creating an attribute doesn't give any product a value for it: it makes the field available to products.
+
+        `name` and `type` are required. `type` decides which other fields the body accepts. The request body schema below has one tab per type, and each tab lists that type's fields:
+
+        | `type` | Holds | Extra fields |
+        |---|---|---|
+        | `TextAttribute` | Text | `character_limit` |
+        | `HtmlAttribute` | HTML text | |
+        | `IntAttribute` | A whole number | |
+        | `DecimalAttribute` | A decimal number | |
+        | `BooleanAttribute` | `true` or `false` | |
+        | `DateAttribute` | A date | `include_time` |
+        | `UrlAttribute` | A URL | |
+        | `DropdownAttribute` | One of a list of options | `options`, `manual_sorting`, `sort_ascending`, `restricted` |
+        | `MultiSelectAttribute` | Several of a list of options | `options`, `manual_sorting`, `sort_ascending`, `restricted` |
+        | `MediaAttribute` | One asset | |
+        | `MediaGalleryAttribute` | Several assets | |
+        | `CompletenessAttribute` | A score Plytix calculates | `attributes` |
+        | `FormulaAttribute` | A value Plytix calculates | `formula`, `formula_str` |
+
+        A `type` that isn't in this table returns `422`, and the message lists the accepted values. You can't change `type` after the attribute exists.
+
+        `label` is the attribute's key: products store their values for it in `attributes.<label>`, and filters use `attributes.<label>`. It must use lowercase letters, digits, and underscores only (`^[a-z0-9_]+$`); anything else returns `422`. The label can't be changed later, so choose it with care. If you leave it out, Plytix sets it from `name`. When `name` contains capitals or spaces, send `label` yourself.
+
+        A successful create returns `201` with the new attribute in `data`. If an attribute with the same name already exists, the request returns `409` and creates nothing.
+
+        Completeness and formula attributes hold values that Plytix calculates on each product. You configure them here, and products can't write their values: a value sent in a product's `attributes` map is ignored without an error.
+
+        - `CompletenessAttribute`: list the attributes it scores in `attributes`, each as `{"id": "<attribute_id>"}`. A list of plain ID strings returns `422`.
+        - `FormulaAttribute`: each account can hold a limited number of formula attributes. When you reach the limit, the request returns `422` with "This account reached the limit of ... formula attributes". Ask your account manager if you need a higher limit.
+
+        The body accepts only the fields of the chosen type. Group membership isn't set here: `group_ids` returns `422` with "Extra inputs are not permitted".
+
+        Related pages:
+
+        - [The Plytix data model](/docs/guides/data-model#product-attributes)
+        - [Link an attribute to a product family](/docs/reference/v3/familyattributes/create-family-attribute), so products in a family can hold a value for it
+        - [Update and delete records](/docs/reference/v3/updates-and-deletes)
+
+  - target: $.paths['/api/v3/product-attributes'].post.requestBody.content['application/json']
+    description: Create Text Attribute.bru "201 - Full Parameters (TextAttribute)" (2026-09-22, minus group_ids per Q#104), "201 - Success (DropdownAttribute, With Options)" (2026-09-07), Completeness request shape from Q#109
+    update:
+      examples:
+        text:
+          summary: Text attribute
+          value:
+            name: Material
+            label: material
+            description: Main material of the product
+            type: TextAttribute
+            character_limit: 250
+        dropdown:
+          summary: Dropdown attribute
+          value:
+            name: Size
+            label: size
+            type: DropdownAttribute
+            options:
+              - Small
+              - Medium
+              - Large
+        completeness:
+          summary: Completeness attribute
+          description: Scores each product on the attributes listed in `attributes`.
+          value:
+            name: Catalog ready
+            label: catalog_ready
+            type: CompletenessAttribute
+            attributes:
+              - id: 6a1f0c2e9b3d4a5f8c7e1e10
+              - id: 6a1f0c2e9b3d4a5f8c7e1e11
+
+  - target: $.paths['/api/v3/product-attributes'].post.responses['201']
+    description: Create Text Attribute.bru "201 - Full Parameters (TextAttribute)" (2026-09-22) and "201 - Success (DropdownAttribute, With Options)" (2026-09-07), sanitized; data is an object (Q#117)
+    update:
+      description: Created. `data` holds the new attribute, with the fields of its type.
+      content:
+        application/json:
+          examples:
+            text:
+              summary: Text attribute
+              value:
+                x-example-file: product-attributes/create-201-text.json
+            dropdown:
+              summary: Dropdown attribute
+              description: '`manual_sorting`, `sort_ascending`, and `restricted` weren''t sent, so they hold their defaults.'
+              value:
+                x-example-file: product-attributes/create-201-dropdown.json
+
+  - target: $.paths['/api/v3/product-attributes'].post.responses['409']
+    description: Create Text Attribute.bru "Not idempotent to re-run" (2026-09-07), Q#25a, GEN-1
+    update:
+      description: An attribute with this `name` already exists in your account. Nothing was created.
+      content:
+        application/json:
+          examples:
+            duplicateName:
+              summary: Name already exists
+              value:
+                data: []
+                errors:
+                  - name: AlreadyExists
+                    description: An attribute with the same name already exists
+
+  - target: $.paths['/api/v3/product-attributes'].post.responses['422'].content['application/json']
+    description: 'Link and Unlink Attribute Group.bru (2026-10-13, group_ids); Create Text Attribute.bru "422 - FormulaAttribute Account Limit Reached" (2026-09-07); invalid type message is the captured prefix from Q#110 (2026-10-13), tag list elided'
+    update:
+      examples:
+        unknownType:
+          summary: Type that doesn't exist
+          description: Shortened. The full message goes on to list every accepted `type`.
+          value:
+            data: []
+            errors:
+              - name: InputDTOValidationError
+                description: "Input tag 'HierarchyAttribute' found using 'type' does not match any of the expected tags: ..."
+        groupIds:
+          summary: group_ids in the body
+          value:
+            data: []
+            errors:
+              - name: InputDTOValidationError
+                description: 'TextAttribute.group_ids: Extra inputs are not permitted'
+        formulaLimit:
+          summary: Formula attribute limit reached
+          value:
+            data: []
+            errors:
+              - name: ValidationError
+                description: This account reached the limit of 2 formula attributes
+
+  # --- GET /api/v3/product-attributes/{identifier} --------------------------------
+  - target: $.paths['/api/v3/product-attributes/{identifier}'].get
+    description: Get Product Attribute by ID.bru (2026-09-21), Update and Delete Product Attribute.bru 404 (2026-09-15); _fields per PROD-9 answer, not retested on this resource (VERIFY.md)
+    update:
+      summary: Get a product attribute
+      operationId: get-product-attribute
+      description: |-
+        Returns one attribute definition by its `id`. An ID that matches nothing returns `404`.
+
+        `data` holds the attribute itself, with the fields of its `type`. The response schema below has one tab per type.
+
+        To read a single field, such as `options` or `groups`, use [Get a product attribute field](/docs/reference/v3/productattributes/get-product-attribute-field).
+
+  - target: $.paths['/api/v3/product-attributes/{identifier}'].get.responses['200'].content['application/json']
+    description: Get Product Attribute by ID.bru "200 - Success (BooleanAttribute)" (2026-09-21), sanitized, account_id omitted
+    update:
+      examples:
+        boolean:
+          summary: Boolean attribute
+          description: The display `name` and the `label` can differ. Products key their value by `label`.
+          value:
+            data:
+              id: 6a1f0c2e9b3d4a5f8c7e1e12
+              name: Includes Zipper
+              label: zippered
+              description: null
+              status: ACTIVE
+              created: '2026-06-22T08:45:07.391000'
+              modified: '2026-06-22T08:45:07.391000'
+              type: BooleanAttribute
+            errors: []
+
+  - target: $.paths['/api/v3/product-attributes/{identifier}'].get.responses['404'].content['application/json']
+    description: Update and Delete Product Attribute.bru "404 - Not Found After Delete" (2026-09-15)
+    update:
+      examples:
+        notFound:
+          summary: No attribute with this ID
+          value:
+            data: []
+            errors:
+              - name: NotFoundError
+                description: Document with id 6a1f0c2e9b3d4a5f8c7e1e99 not found
+
+  # --- PATCH /api/v3/product-attributes/{identifier} ------------------------------
+  - target: $.paths['/api/v3/product-attributes/{identifier}'].patch
+    description: Q#66, Q#104, Q#116, spec ProductAttributeUpdateInputDto docstring (type/label/group_ids not patchable, per-type narrowing), Update and Delete Product Attribute.bru (2026-09-15/22; 200 bodies superseded by Q#116)
+    update:
+      summary: Update a product attribute
+      operationId: update-product-attribute
+      description: |-
+        Changes the settings you send and leaves the others as they are. A successful update returns `204` with an empty body. To see the result, read the attribute back.
+
+        The body takes the settings of every attribute type. Send only the ones that apply to this attribute's type: Plytix checks them against the attribute's `type` and rejects the rest. For example, `options` applies to dropdown and multi-select attributes, and `character_limit` to text attributes.
+
+        Some fields are fixed once the attribute exists:
+
+        - `label` can't be changed. Sending it returns `422`. Products keep their values under the same `attributes.<label>` key.
+        - `type` can't be changed.
+        - `name` can be changed. Renaming doesn't change `label`.
+
+        Group membership and product family membership aren't changed here. To link the attribute to a product family, use [Link an attribute to a product family](/docs/reference/v3/familyattributes/create-family-attribute).
+
+        See [Update and delete records](/docs/reference/v3/updates-and-deletes) for how PATCH works across the V3 API.
+
+  - target: $.paths['/api/v3/product-attributes/{identifier}'].patch.requestBody.content['application/json']
+    description: Update and Delete Product Attribute.bru requests "200 - Success (name, description, character_limit)" (2026-09-15) and "200 - Full Parameters (DropdownAttribute)" (2026-09-22)
+    update:
+      examples:
+        rename:
+          summary: Rename and describe a text attribute
+          value:
+            name: Material (outer shell)
+            description: Main material of the outer shell
+            character_limit: 100
+        dropdown:
+          summary: Change a dropdown's options and sorting
+          value:
+            options:
+              - Small
+              - Medium
+              - Large
+              - XL
+            manual_sorting: false
+            sort_ascending: true
+            restricted: true
+
+  - target: $.paths['/api/v3/product-attributes/{identifier}'].patch.responses['204']
+    description: Q#116
+    update:
+      description: Updated. The response has no body. Read the attribute to see the new values.
+
+  - target: $.paths['/api/v3/product-attributes/{identifier}'].patch.responses['422'].content['application/json']
+    description: Update and Delete Product Attribute.bru "422 - label Not Patchable" (2026-09-15), Q#66
+    update:
+      examples:
+        label:
+          summary: label in the body
+          value:
+            data: []
+            errors:
+              - name: InputDTOValidationError
+                description: 'label: Extra inputs are not permitted'
+
+  # --- DELETE /api/v3/product-attributes/{identifier} -----------------------------
+  - target: $.paths['/api/v3/product-attributes/{identifier}'].delete
+    description: Update and Delete Product Attribute.bru "204 - Success" + "404 - Not Found After Delete" (2026-09-15), Q#20; effect on product values unknown (ATTR-22)
+    update:
+      summary: Delete a product attribute
+      operationId: delete-product-attribute
+      description: |-
+        Deletes one attribute definition. A successful delete returns `204` with an empty body, and a later request for the attribute returns `404`.
+
+        Products key their values by the attribute's `label`, so check which products hold a value before you delete an attribute: filter products with `attributes.<label>[exists]=true`. See [Filtering and query syntax](/docs/reference/v3/filtering-query-syntax) and [Update and delete records](/docs/reference/v3/updates-and-deletes).
+
+  - target: $.paths['/api/v3/product-attributes/{identifier}'].delete.responses['204']
+    update:
+      description: Deleted. The response has no body.
+
+  # --- GET /api/v3/product-attributes/{identifier}/{path} --------------------------
+  - target: $.paths['/api/v3/product-attributes/{identifier}/{path}'].get
+    description: Get Product Attribute by ID.bru subpath discovery (2026-09-07, 400 lists fields); Link and Unlink Attribute Group.bru ("GET /product-attributes/{id}/groups lists the group", 2026-10-13)
+    update:
+      summary: Get a product attribute field
+      operationId: get-product-attribute-field
+      description: |-
+        Returns the value of one field of an attribute without the rest of the record. Set `path` to the field, for example `label` or `options`.
+
+        `groups` returns the attribute groups the attribute belongs to. A field the attribute doesn't have returns `400`, and the message lists the fields you can ask for.
+
+  - target: $.paths['/api/v3/product-attributes/{identifier}/{path}'].get.parameters[?(@.name=='path' && @.in=='path')]
+    description: Get Product Attribute by ID.bru, Link and Unlink Attribute Group.bru
+    update:
+      description: The field to read, such as `label`, `options`, or `groups`.
+
+  # --- PATCH /api/v3/product-attributes/{identifier}/{path} ------------------------
+  - target: $.paths['/api/v3/product-attributes/{identifier}/{path}'].patch
+    description: Untested on this resource and no request body in the spec (OAS-21, VERIFY.md), so this page redirects to the full update.
+    update:
+      summary: Update a product attribute field
+      operationId: update-product-attribute-field
+      description: To change an attribute's settings, use [Update a product attribute](/docs/reference/v3/productattributes/update-product-attribute), which documents the request body.
+
+  # --- DELETE /api/v3/product-attributes/{identifier}/{path} -----------------------
+  - target: $.paths['/api/v3/product-attributes/{identifier}/{path}'].delete
+    description: Spec only; no live capture, behavior unknown (VERIFY.md, ATTR-24; FAM-1 suggests 405)
+    update:
+      summary: Delete a product attribute field
+      operationId: delete-product-attribute-field
+      description: To delete the attribute itself, use [Delete a product attribute](/docs/reference/v3/productattributes/delete-product-attribute).

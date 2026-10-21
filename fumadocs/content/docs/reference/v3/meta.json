@@ -23,15 +23,6 @@
     "productfamilies",
     "familyattributes",
     "productattributes",
-    "productattributegroups",
-    "pimproductlists",
-    "channels",
-    "connections",
-    "ecatalogs",
-    "importprofiles",
-    "pdfcatalogs",
-    "productfamilymodels",
-    "probes",
-    "unknown"
+    "productattributegroups"
   ]
 }

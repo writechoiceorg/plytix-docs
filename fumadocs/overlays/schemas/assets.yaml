@@ -1,0 +1,71 @@
+# Schema edits for the assets endpoints (Phase 1 pilot: create body).
+# The oneOf branches get titles because fumadocs-openapi names its tabs after them.
+overlay: 1.0.0
+info:
+  title: assets schemas
+  version: 1.0.0
+actions:
+  - target: $.components.schemas.AssetCreateInputDto
+    update:
+      description: Body for creating an asset. Send either `url`, or `content` with `filename`.
+  - target: $.components.schemas.AssetCreateInputDto.oneOf[0]
+    update:
+      title: From a URL
+      description: Plytix downloads the file from `url`.
+  - target: $.components.schemas.AssetCreateInputDto.oneOf[1]
+    update:
+      title: From file content
+      description: You send the file's bytes, base64-encoded, in `content`, and its name in `filename`.
+  - target: $.components.schemas.AssetCreateInputDto.properties.url
+    update:
+      description: Address Plytix downloads the file from.
+      examples:
+        - https://example.com/images/bag-10157-front.jpg
+  - target: $.components.schemas.AssetCreateInputDto.properties.content
+    update:
+      description: The file's bytes, base64-encoded. Requires `filename`.
+  - target: $.components.schemas.AssetCreateInputDto.properties.filename
+    update:
+      description: File name, including the extension, such as `bag-10157-front.jpg`. Required with `content`. Optional with `url`.
+  - target: $.components.schemas.AssetCreateInputDto.properties.alt_text
+    update:
+      description: Text that describes the asset for people who can't see it.
+
+  # --- Phase 3 (2026-10-20): update body, output fields, enums ---------------------
+  # Sources: spec AssetUpdateInputDto/AssetOutputDto, Q#104, FB-030, Update Asset.bru.
+  - target: $.components.schemas.AssetUpdateInputDto
+    description: spec additionalProperties false, Q#104
+    update:
+      description: Send only the fields you want to change. Other fields, such as `category_ids`, return `422`.
+  - target: $.components.schemas.AssetUpdateInputDto.properties.filename
+    description: Update Asset.bru (filename applied, 2026-09-15)
+    update:
+      description: New file name, including the extension. The file's content doesn't change.
+      examples:
+        - bag-10157-front-view.jpg
+  - target: $.components.schemas.AssetUpdateInputDto.properties.alt_text
+    description: Update Asset.bru (alt_text applied, 2026-09-15); clearing with null is spec-only (VERIFY.md)
+    update:
+      description: Text that describes the asset for people who can't see it.
+      examples:
+        - Canvas backpack, front view
+  - target: $.components.schemas.AssetOutputDto.properties.path
+    description: FB-030 (open; 2026-10-15 re-check found path and no url)
+    update:
+      description: Storage path of the file inside Plytix. It isn't a download URL.
+  - target: $.components.schemas.AssetOutputDto.properties.n_products
+    description: spec
+    update:
+      description: Number of products that use the asset.
+  - target: $.components.schemas.AssetOutputDto.properties.n_catalogs
+    description: spec
+    update:
+      description: Number of catalogs that use the asset.
+  - target: $.components.schemas.AssetFileType
+    description: spec enum; IMAGES seen live (Create Asset.bru, List Products.bru)
+    update:
+      description: 'File type group of the asset, set from the file: `IMAGES`, `SOUNDS`, `VIDEOS`, `COMPRESSED`, `FEED_FILES`, `REPORTS`, `SPREADSHEETS`, `TEXTS`, or `OTHER`.'
+  - target: $.components.schemas.AssetStatus
+    description: spec enum; meaning of DELETED unconfirmed (ASSET-20)
+    update:
+      description: 'Status of the asset: `ACTIVE` or `DELETED`.'

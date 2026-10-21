@@ -1,0 +1,526 @@
+# Schema edits for the product-attributes endpoints.
+# Phase 3 (2026-10-20): create bodies (one titled oneOf branch per type, since
+# fumadocs-openapi names tabs after titles and ignores the discriminator), the
+# update body (replaces the migrated docstring), output DTO titles, enums.
+# Sources: spec 2026-10-02, Q#25a, Q#30, Q#47, Q#66, Q#104, Q#109, Q#110, FB-032,
+# bruno-collection/06-Product-Attributes/. Generated once from a script; edit by hand from here on.
+overlay: 1.0.0
+info:
+  title: product-attributes schemas
+  version: 1.0.0
+actions:
+  - target: $.components.schemas.TextAttributeCreateInputDto
+    update:
+      title: Text
+      description: Set `type` to `TextAttribute`. Holds text. Set `character_limit` to cap its length.
+  - target: $.components.schemas.TextAttributeCreateInputDto.properties.name
+    description: Q#25a
+    update:
+      description: "Display name of the attribute. It must be unique in your account: a name that already exists returns `409`."
+      examples:
+        - Material
+  - target: $.components.schemas.TextAttributeCreateInputDto.properties.label
+    description: Q#30, Q#66, Q#109, FB-032, Create Text Attribute.bru (label defaulting)
+    update:
+      description: Key of the attribute in each product's `attributes` map and in filters (`attributes.<label>`). Lowercase letters, digits, and underscores only, up to 255 characters; anything else returns `422`. It can't be changed after creation. If you leave it out, it's set from `name`, which works only when `name` already matches this pattern.
+      examples:
+        - material
+  - target: $.components.schemas.TextAttributeCreateInputDto.properties.description
+    update:
+      description: Description of the attribute, up to 200 characters.
+  - target: $.components.schemas.TextAttributeCreateInputDto.properties.type
+    description: spec discriminator; ProductAttributeUpdateInputDto docstring
+    update:
+      description: Attribute type. Must be `TextAttribute` for this body, and can't be changed later.
+  - target: $.components.schemas.TextAttributeCreateInputDto.properties.character_limit
+    update:
+      description: Maximum number of characters a value can hold. At least `10`.
+      examples:
+        - 250
+  - target: $.components.schemas.BooleanAttributeCreateInputDto
+    update:
+      title: Boolean
+      description: Set `type` to `BooleanAttribute`. Holds `true` or `false`.
+  - target: $.components.schemas.BooleanAttributeCreateInputDto.properties.name
+    description: Q#25a
+    update:
+      description: "Display name of the attribute. It must be unique in your account: a name that already exists returns `409`."
+      examples:
+        - Includes Zipper
+  - target: $.components.schemas.BooleanAttributeCreateInputDto.properties.label
+    description: Q#30, Q#66, Q#109, FB-032, Create Text Attribute.bru (label defaulting)
+    update:
+      description: Key of the attribute in each product's `attributes` map and in filters (`attributes.<label>`). Lowercase letters, digits, and underscores only, up to 255 characters; anything else returns `422`. It can't be changed after creation. If you leave it out, it's set from `name`, which works only when `name` already matches this pattern.
+      examples:
+        - zippered
+  - target: $.components.schemas.BooleanAttributeCreateInputDto.properties.description
+    update:
+      description: Description of the attribute, up to 200 characters.
+  - target: $.components.schemas.BooleanAttributeCreateInputDto.properties.type
+    description: spec discriminator; ProductAttributeUpdateInputDto docstring
+    update:
+      description: Attribute type. Must be `BooleanAttribute` for this body, and can't be changed later.
+  - target: $.components.schemas.DateAttributeCreateInputDto
+    update:
+      title: Date
+      description: Set `type` to `DateAttribute`. Holds a date, or a date and time when `include_time` is `true`.
+  - target: $.components.schemas.DateAttributeCreateInputDto.properties.name
+    description: Q#25a
+    update:
+      description: "Display name of the attribute. It must be unique in your account: a name that already exists returns `409`."
+      examples:
+        - Release date
+  - target: $.components.schemas.DateAttributeCreateInputDto.properties.label
+    description: Q#30, Q#66, Q#109, FB-032, Create Text Attribute.bru (label defaulting)
+    update:
+      description: Key of the attribute in each product's `attributes` map and in filters (`attributes.<label>`). Lowercase letters, digits, and underscores only, up to 255 characters; anything else returns `422`. It can't be changed after creation. If you leave it out, it's set from `name`, which works only when `name` already matches this pattern.
+      examples:
+        - release_date
+  - target: $.components.schemas.DateAttributeCreateInputDto.properties.description
+    update:
+      description: Description of the attribute, up to 200 characters.
+  - target: $.components.schemas.DateAttributeCreateInputDto.properties.type
+    description: spec discriminator; ProductAttributeUpdateInputDto docstring
+    update:
+      description: Attribute type. Must be `DateAttribute` for this body, and can't be changed later.
+  - target: $.components.schemas.DateAttributeCreateInputDto.properties.include_time
+    description: Create Text Attribute.bru type table (2026-09-07)
+    update:
+      description: Whether values include a time as well as a date. Defaults to `false`.
+  - target: $.components.schemas.DecimalAttributeCreateInputDto
+    update:
+      title: Decimal
+      description: Set `type` to `DecimalAttribute`. Holds a decimal number.
+  - target: $.components.schemas.DecimalAttributeCreateInputDto.properties.name
+    description: Q#25a
+    update:
+      description: "Display name of the attribute. It must be unique in your account: a name that already exists returns `409`."
+      examples:
+        - Weight (kg)
+  - target: $.components.schemas.DecimalAttributeCreateInputDto.properties.label
+    description: Q#30, Q#66, Q#109, FB-032, Create Text Attribute.bru (label defaulting)
+    update:
+      description: Key of the attribute in each product's `attributes` map and in filters (`attributes.<label>`). Lowercase letters, digits, and underscores only, up to 255 characters; anything else returns `422`. It can't be changed after creation. If you leave it out, it's set from `name`, which works only when `name` already matches this pattern.
+      examples:
+        - weight_kg
+  - target: $.components.schemas.DecimalAttributeCreateInputDto.properties.description
+    update:
+      description: Description of the attribute, up to 200 characters.
+  - target: $.components.schemas.DecimalAttributeCreateInputDto.properties.type
+    description: spec discriminator; ProductAttributeUpdateInputDto docstring
+    update:
+      description: Attribute type. Must be `DecimalAttribute` for this body, and can't be changed later.
+  - target: $.components.schemas.DropdownAttributeCreateInputDto
+    update:
+      title: Dropdown
+      description: Set `type` to `DropdownAttribute`. Holds one value from a list of `options`.
+  - target: $.components.schemas.DropdownAttributeCreateInputDto.properties.name
+    description: Q#25a
+    update:
+      description: "Display name of the attribute. It must be unique in your account: a name that already exists returns `409`."
+      examples:
+        - Size
+  - target: $.components.schemas.DropdownAttributeCreateInputDto.properties.label
+    description: Q#30, Q#66, Q#109, FB-032, Create Text Attribute.bru (label defaulting)
+    update:
+      description: Key of the attribute in each product's `attributes` map and in filters (`attributes.<label>`). Lowercase letters, digits, and underscores only, up to 255 characters; anything else returns `422`. It can't be changed after creation. If you leave it out, it's set from `name`, which works only when `name` already matches this pattern.
+      examples:
+        - size
+  - target: $.components.schemas.DropdownAttributeCreateInputDto.properties.description
+    update:
+      description: Description of the attribute, up to 200 characters.
+  - target: $.components.schemas.DropdownAttributeCreateInputDto.properties.type
+    description: spec discriminator; ProductAttributeUpdateInputDto docstring
+    update:
+      description: Attribute type. Must be `DropdownAttribute` for this body, and can't be changed later.
+  - target: $.components.schemas.DropdownAttributeCreateInputDto.properties.options
+    description: Create Text Attribute.bru "201 - Success (DropdownAttribute, With Options)" defaults (2026-09-07); MultiSelect same per type table
+    update:
+      description: The values products can choose from.
+      examples:
+        - - Small
+          - Medium
+          - Large
+  - target: $.components.schemas.DropdownAttributeCreateInputDto.properties.manual_sorting
+    description: Create Text Attribute.bru "201 - Success (DropdownAttribute, With Options)" defaults (2026-09-07); MultiSelect same per type table
+    update:
+      description: Whether the options keep the order you set. Defaults to `true`.
+  - target: $.components.schemas.DropdownAttributeCreateInputDto.properties.sort_ascending
+    description: Create Text Attribute.bru "201 - Success (DropdownAttribute, With Options)" defaults (2026-09-07); MultiSelect same per type table
+    update:
+      description: "Sort direction when `manual_sorting` is `false`: `true` for ascending, `false` for descending. Defaults to `true`."
+  - target: $.components.schemas.DropdownAttributeCreateInputDto.properties.restricted
+    description: Create Text Attribute.bru "201 - Success (DropdownAttribute, With Options)" defaults (2026-09-07); MultiSelect same per type table
+    update:
+      description: Whether values are limited to the listed `options`. Defaults to `false`.
+  - target: $.components.schemas.FormulaAttributeCreateInputDto
+    update:
+      title: Formula
+      description: "Set `type` to `FormulaAttribute`. Holds a value Plytix calculates on each product from a formula. Products can't write it: a value sent in a product's `attributes` map is ignored without an error. Each account can hold a limited number of formula attributes."
+  - target: $.components.schemas.FormulaAttributeCreateInputDto.properties.name
+    description: Q#25a
+    update:
+      description: "Display name of the attribute. It must be unique in your account: a name that already exists returns `409`."
+      examples:
+        - Price in USD
+  - target: $.components.schemas.FormulaAttributeCreateInputDto.properties.label
+    description: Q#30, Q#66, Q#109, FB-032, Create Text Attribute.bru (label defaulting)
+    update:
+      description: Key of the attribute in each product's `attributes` map and in filters (`attributes.<label>`). Lowercase letters, digits, and underscores only, up to 255 characters; anything else returns `422`. It can't be changed after creation. If you leave it out, it's set from `name`, which works only when `name` already matches this pattern.
+      examples:
+        - price_in_usd
+  - target: $.components.schemas.FormulaAttributeCreateInputDto.properties.description
+    update:
+      description: Description of the attribute, up to 200 characters.
+  - target: $.components.schemas.FormulaAttributeCreateInputDto.properties.type
+    description: spec discriminator; ProductAttributeUpdateInputDto docstring
+    update:
+      description: Attribute type. Must be `FormulaAttribute` for this body, and can't be changed later.
+  - target: $.components.schemas.FormulaAttributeCreateInputDto.properties.formula_str
+    description: spec field description; syntax not documented (ATTR-25)
+    update:
+      description: The formula, written as text.
+  - target: $.components.schemas.FormulaAttributeCreateInputDto.properties.formula
+    description: spec field description; shape not documented (ATTR-25)
+    update:
+      description: Formula definition. Its format isn't documented yet; use `formula_str`.
+  - target: $.components.schemas.HtmlAttributeCreateInputDto
+    update:
+      title: HTML
+      description: Set `type` to `HtmlAttribute`. Holds HTML text.
+  - target: $.components.schemas.HtmlAttributeCreateInputDto.properties.name
+    description: Q#25a
+    update:
+      description: "Display name of the attribute. It must be unique in your account: a name that already exists returns `409`."
+      examples:
+        - Long description
+  - target: $.components.schemas.HtmlAttributeCreateInputDto.properties.label
+    description: Q#30, Q#66, Q#109, FB-032, Create Text Attribute.bru (label defaulting)
+    update:
+      description: Key of the attribute in each product's `attributes` map and in filters (`attributes.<label>`). Lowercase letters, digits, and underscores only, up to 255 characters; anything else returns `422`. It can't be changed after creation. If you leave it out, it's set from `name`, which works only when `name` already matches this pattern.
+      examples:
+        - long_description
+  - target: $.components.schemas.HtmlAttributeCreateInputDto.properties.description
+    update:
+      description: Description of the attribute, up to 200 characters.
+  - target: $.components.schemas.HtmlAttributeCreateInputDto.properties.type
+    description: spec discriminator; ProductAttributeUpdateInputDto docstring
+    update:
+      description: Attribute type. Must be `HtmlAttribute` for this body, and can't be changed later.
+  - target: $.components.schemas.IntAttributeCreateInputDto
+    update:
+      title: Integer
+      description: Set `type` to `IntAttribute`. Holds a whole number.
+  - target: $.components.schemas.IntAttributeCreateInputDto.properties.name
+    description: Q#25a
+    update:
+      description: "Display name of the attribute. It must be unique in your account: a name that already exists returns `409`."
+      examples:
+        - Stock
+  - target: $.components.schemas.IntAttributeCreateInputDto.properties.label
+    description: Q#30, Q#66, Q#109, FB-032, Create Text Attribute.bru (label defaulting)
+    update:
+      description: Key of the attribute in each product's `attributes` map and in filters (`attributes.<label>`). Lowercase letters, digits, and underscores only, up to 255 characters; anything else returns `422`. It can't be changed after creation. If you leave it out, it's set from `name`, which works only when `name` already matches this pattern.
+      examples:
+        - stock
+  - target: $.components.schemas.IntAttributeCreateInputDto.properties.description
+    update:
+      description: Description of the attribute, up to 200 characters.
+  - target: $.components.schemas.IntAttributeCreateInputDto.properties.type
+    description: spec discriminator; ProductAttributeUpdateInputDto docstring
+    update:
+      description: Attribute type. Must be `IntAttribute` for this body, and can't be changed later.
+  - target: $.components.schemas.MediaAttributeCreateInputDto
+    update:
+      title: Media
+      description: Set `type` to `MediaAttribute`. Holds one asset.
+  - target: $.components.schemas.MediaAttributeCreateInputDto.properties.name
+    description: Q#25a
+    update:
+      description: "Display name of the attribute. It must be unique in your account: a name that already exists returns `409`."
+      examples:
+        - Packshot
+  - target: $.components.schemas.MediaAttributeCreateInputDto.properties.label
+    description: Q#30, Q#66, Q#109, FB-032, Create Text Attribute.bru (label defaulting)
+    update:
+      description: Key of the attribute in each product's `attributes` map and in filters (`attributes.<label>`). Lowercase letters, digits, and underscores only, up to 255 characters; anything else returns `422`. It can't be changed after creation. If you leave it out, it's set from `name`, which works only when `name` already matches this pattern.
+      examples:
+        - packshot
+  - target: $.components.schemas.MediaAttributeCreateInputDto.properties.description
+    update:
+      description: Description of the attribute, up to 200 characters.
+  - target: $.components.schemas.MediaAttributeCreateInputDto.properties.type
+    description: spec discriminator; ProductAttributeUpdateInputDto docstring
+    update:
+      description: Attribute type. Must be `MediaAttribute` for this body, and can't be changed later.
+  - target: $.components.schemas.MediaGalleryAttributeCreateInputDto
+    update:
+      title: Media gallery
+      description: Set `type` to `MediaGalleryAttribute`. Holds several assets.
+  - target: $.components.schemas.MediaGalleryAttributeCreateInputDto.properties.name
+    description: Q#25a
+    update:
+      description: "Display name of the attribute. It must be unique in your account: a name that already exists returns `409`."
+      examples:
+        - Lifestyle images
+  - target: $.components.schemas.MediaGalleryAttributeCreateInputDto.properties.label
+    description: Q#30, Q#66, Q#109, FB-032, Create Text Attribute.bru (label defaulting)
+    update:
+      description: Key of the attribute in each product's `attributes` map and in filters (`attributes.<label>`). Lowercase letters, digits, and underscores only, up to 255 characters; anything else returns `422`. It can't be changed after creation. If you leave it out, it's set from `name`, which works only when `name` already matches this pattern.
+      examples:
+        - lifestyle_images
+  - target: $.components.schemas.MediaGalleryAttributeCreateInputDto.properties.description
+    update:
+      description: Description of the attribute, up to 200 characters.
+  - target: $.components.schemas.MediaGalleryAttributeCreateInputDto.properties.type
+    description: spec discriminator; ProductAttributeUpdateInputDto docstring
+    update:
+      description: Attribute type. Must be `MediaGalleryAttribute` for this body, and can't be changed later.
+  - target: $.components.schemas.MultiSelectAttributeCreateInputDto
+    update:
+      title: Multi-select
+      description: Set `type` to `MultiSelectAttribute`. Holds several values from a list of `options`.
+  - target: $.components.schemas.MultiSelectAttributeCreateInputDto.properties.name
+    description: Q#25a
+    update:
+      description: "Display name of the attribute. It must be unique in your account: a name that already exists returns `409`."
+      examples:
+        - Tags
+  - target: $.components.schemas.MultiSelectAttributeCreateInputDto.properties.label
+    description: Q#30, Q#66, Q#109, FB-032, Create Text Attribute.bru (label defaulting)
+    update:
+      description: Key of the attribute in each product's `attributes` map and in filters (`attributes.<label>`). Lowercase letters, digits, and underscores only, up to 255 characters; anything else returns `422`. It can't be changed after creation. If you leave it out, it's set from `name`, which works only when `name` already matches this pattern.
+      examples:
+        - tags
+  - target: $.components.schemas.MultiSelectAttributeCreateInputDto.properties.description
+    update:
+      description: Description of the attribute, up to 200 characters.
+  - target: $.components.schemas.MultiSelectAttributeCreateInputDto.properties.type
+    description: spec discriminator; ProductAttributeUpdateInputDto docstring
+    update:
+      description: Attribute type. Must be `MultiSelectAttribute` for this body, and can't be changed later.
+  - target: $.components.schemas.MultiSelectAttributeCreateInputDto.properties.options
+    description: Create Text Attribute.bru "201 - Success (DropdownAttribute, With Options)" defaults (2026-09-07); MultiSelect same per type table
+    update:
+      description: The values products can choose from.
+      examples:
+        - - Small
+          - Medium
+          - Large
+  - target: $.components.schemas.MultiSelectAttributeCreateInputDto.properties.manual_sorting
+    description: Create Text Attribute.bru "201 - Success (DropdownAttribute, With Options)" defaults (2026-09-07); MultiSelect same per type table
+    update:
+      description: Whether the options keep the order you set. Defaults to `true`.
+  - target: $.components.schemas.MultiSelectAttributeCreateInputDto.properties.sort_ascending
+    description: Create Text Attribute.bru "201 - Success (DropdownAttribute, With Options)" defaults (2026-09-07); MultiSelect same per type table
+    update:
+      description: "Sort direction when `manual_sorting` is `false`: `true` for ascending, `false` for descending. Defaults to `true`."
+  - target: $.components.schemas.MultiSelectAttributeCreateInputDto.properties.restricted
+    description: Create Text Attribute.bru "201 - Success (DropdownAttribute, With Options)" defaults (2026-09-07); MultiSelect same per type table
+    update:
+      description: Whether values are limited to the listed `options`. Defaults to `false`.
+  - target: $.components.schemas.UrlAttributeCreateInputDto
+    update:
+      title: URL
+      description: Set `type` to `UrlAttribute`. Holds a URL.
+  - target: $.components.schemas.UrlAttributeCreateInputDto.properties.name
+    description: Q#25a
+    update:
+      description: "Display name of the attribute. It must be unique in your account: a name that already exists returns `409`."
+      examples:
+        - Product page
+  - target: $.components.schemas.UrlAttributeCreateInputDto.properties.label
+    description: Q#30, Q#66, Q#109, FB-032, Create Text Attribute.bru (label defaulting)
+    update:
+      description: Key of the attribute in each product's `attributes` map and in filters (`attributes.<label>`). Lowercase letters, digits, and underscores only, up to 255 characters; anything else returns `422`. It can't be changed after creation. If you leave it out, it's set from `name`, which works only when `name` already matches this pattern.
+      examples:
+        - product_page
+  - target: $.components.schemas.UrlAttributeCreateInputDto.properties.description
+    update:
+      description: Description of the attribute, up to 200 characters.
+  - target: $.components.schemas.UrlAttributeCreateInputDto.properties.type
+    description: spec discriminator; ProductAttributeUpdateInputDto docstring
+    update:
+      description: Attribute type. Must be `UrlAttribute` for this body, and can't be changed later.
+  - target: $.components.schemas.CompletenessAttributeCreateInputDto
+    update:
+      title: Completeness
+      description: "Set `type` to `CompletenessAttribute`. Holds a score Plytix calculates on each product from the attributes listed in `attributes`. Products can't write it: a value sent in a product's `attributes` map is ignored without an error."
+  - target: $.components.schemas.CompletenessAttributeCreateInputDto.properties.name
+    description: Q#25a
+    update:
+      description: "Display name of the attribute. It must be unique in your account: a name that already exists returns `409`."
+      examples:
+        - Catalog ready
+  - target: $.components.schemas.CompletenessAttributeCreateInputDto.properties.label
+    description: Q#30, Q#66, Q#109, FB-032, Create Text Attribute.bru (label defaulting)
+    update:
+      description: Key of the attribute in each product's `attributes` map and in filters (`attributes.<label>`). Lowercase letters, digits, and underscores only, up to 255 characters; anything else returns `422`. It can't be changed after creation. If you leave it out, it's set from `name`, which works only when `name` already matches this pattern.
+      examples:
+        - catalog_ready
+  - target: $.components.schemas.CompletenessAttributeCreateInputDto.properties.description
+    update:
+      description: Description of the attribute, up to 200 characters.
+  - target: $.components.schemas.CompletenessAttributeCreateInputDto.properties.type
+    description: spec discriminator; ProductAttributeUpdateInputDto docstring
+    update:
+      description: Attribute type. Must be `CompletenessAttribute` for this body, and can't be changed later.
+  - target: $.components.schemas.CompletenessAttributeCreateInputDto.properties.attributes
+    description: Q#47 (raw strings rejected), Q#109 (id objects work, 2026-10-13)
+    update:
+      description: 'The attributes this score covers. Give each one as an object with its `id`, such as `{"id": "6a1f0c2e9b3d4a5f8c7e1e10"}`. Plain ID strings return `422`.'
+  - target: $.components.schemas.ProductAttributeGenericGetOutputDto
+    update:
+      title: Other
+  - target: $.components.schemas.ProductAttributeGenericCreateOutputDto
+    update:
+      title: Other
+  - target: $.components.schemas.TextAttributeGetOutputDto
+    update:
+      title: Text
+  - target: $.components.schemas.TextAttributeCreateOutputDto
+    update:
+      title: Text
+  - target: $.components.schemas.MultilineAttributeGetOutputDto
+    update:
+      title: Multiline text
+  - target: $.components.schemas.BooleanAttributeGetOutputDto
+    update:
+      title: Boolean
+  - target: $.components.schemas.BooleanAttributeCreateOutputDto
+    update:
+      title: Boolean
+  - target: $.components.schemas.DateAttributeGetOutputDto
+    update:
+      title: Date
+  - target: $.components.schemas.DateAttributeCreateOutputDto
+    update:
+      title: Date
+  - target: $.components.schemas.DecimalAttributeGetOutputDto
+    update:
+      title: Decimal
+  - target: $.components.schemas.DecimalAttributeCreateOutputDto
+    update:
+      title: Decimal
+  - target: $.components.schemas.DropdownAttributeGetOutputDto
+    update:
+      title: Dropdown
+  - target: $.components.schemas.DropdownAttributeCreateOutputDto
+    update:
+      title: Dropdown
+  - target: $.components.schemas.FormulaAttributeGetOutputDto
+    update:
+      title: Formula
+  - target: $.components.schemas.FormulaAttributeCreateOutputDto
+    update:
+      title: Formula
+  - target: $.components.schemas.HtmlAttributeGetOutputDto
+    update:
+      title: HTML
+  - target: $.components.schemas.HtmlAttributeCreateOutputDto
+    update:
+      title: HTML
+  - target: $.components.schemas.IntAttributeGetOutputDto
+    update:
+      title: Integer
+  - target: $.components.schemas.IntAttributeCreateOutputDto
+    update:
+      title: Integer
+  - target: $.components.schemas.MediaAttributeGetOutputDto
+    update:
+      title: Media
+  - target: $.components.schemas.MediaAttributeCreateOutputDto
+    update:
+      title: Media
+  - target: $.components.schemas.MediaGalleryAttributeGetOutputDto
+    update:
+      title: Media gallery
+  - target: $.components.schemas.MediaGalleryAttributeCreateOutputDto
+    update:
+      title: Media gallery
+  - target: $.components.schemas.MultiSelectAttributeGetOutputDto
+    update:
+      title: Multi-select
+  - target: $.components.schemas.MultiSelectAttributeCreateOutputDto
+    update:
+      title: Multi-select
+  - target: $.components.schemas.UrlAttributeGetOutputDto
+    update:
+      title: URL
+  - target: $.components.schemas.UrlAttributeCreateOutputDto
+    update:
+      title: URL
+  - target: $.components.schemas.CompletenessAttributeGetOutputDto
+    update:
+      title: Completeness
+  - target: $.components.schemas.CompletenessAttributeCreateOutputDto
+    update:
+      title: Completeness
+  - target: $.components.schemas.RelatedAttributeInputDto
+    description: spec RelatedAttributeInputDto; id form confirmed (Q#109), label form spec only (VERIFY.md)
+    update:
+      description: An attribute the completeness score covers. Give exactly one of `id` or `label`.
+  - target: $.components.schemas.RelatedAttributeInputDto.oneOf[0]
+    update:
+      title: By ID
+  - target: $.components.schemas.RelatedAttributeInputDto.oneOf[1]
+    update:
+      title: By system attribute label
+  - target: $.components.schemas.RelatedAttributeInputDto.properties.id
+    update:
+      description: ID of the attribute.
+      examples:
+        - 6a1f0c2e9b3d4a5f8c7e1e10
+  - target: $.components.schemas.RelatedAttributeInputDto.properties.label
+    update:
+      description: Label of a system attribute. Use `id` for custom attributes.
+  - target: $.components.schemas.AttributeType
+    description: spec AttributeType enum vs create oneOf (13 types, Q#110); see ATTR-21
+    update:
+      description: Attribute type. One of the 13 types in the create body, from `TextAttribute` to `CompletenessAttribute`. Responses can also show `MultilineAttribute` and `ProductAttribute`.
+  - target: $.components.schemas.AttributeStatus
+    update:
+      description: "Status of the attribute: `ACTIVE` or `DELETED`."
+  - target: $.components.schemas.ProductAttributeUpdateInputDto
+    description: Rewritten 2026-10-20 from the migrated docstring (upstream description); Q#66, Q#104
+    update:
+      description: "Settings to change. The body lists the settings of every attribute type: send only the ones that apply to this attribute's `type`, because Plytix rejects the rest. `label`, `type`, and group or product family membership can't be changed here, and fields not listed return `422`."
+  - target: $.components.schemas.ProductAttributeUpdateInputDto.properties.name
+    update:
+      description: Display name of the attribute. Renaming doesn't change `label`.
+      examples:
+        - Material (outer shell)
+  - target: $.components.schemas.ProductAttributeUpdateInputDto.properties.description
+    update:
+      description: Description of the attribute, up to 200 characters.
+  - target: $.components.schemas.ProductAttributeUpdateInputDto.properties.character_limit
+    update:
+      description: "Text and multiline text attributes: maximum number of characters a value can hold. At least `10`."
+      examples:
+        - 100
+  - target: $.components.schemas.ProductAttributeUpdateInputDto.properties.include_time
+    update:
+      description: "Date attributes: whether values include a time as well as a date."
+  - target: $.components.schemas.ProductAttributeUpdateInputDto.properties.options
+    update:
+      description: "Dropdown and multi-select attributes: the values products can choose from."
+      examples:
+        - - Small
+          - Medium
+          - Large
+          - XL
+  - target: $.components.schemas.ProductAttributeUpdateInputDto.properties.manual_sorting
+    update:
+      description: "Dropdown and multi-select attributes: whether the options keep the order you set."
+  - target: $.components.schemas.ProductAttributeUpdateInputDto.properties.sort_ascending
+    update:
+      description: "Dropdown and multi-select attributes: sort direction when `manual_sorting` is `false`."
+  - target: $.components.schemas.ProductAttributeUpdateInputDto.properties.restricted
+    update:
+      description: "Dropdown and multi-select attributes: whether values are limited to the listed `options`."
+  - target: $.components.schemas.ProductAttributeUpdateInputDto.properties.attributes
+    update:
+      description: "Completeness attributes: the attributes the score covers, each as an object with its `id`."
+  - target: $.components.schemas.ProductAttributeUpdateInputDto.properties.formula_str
+    update:
+      description: "Formula attributes: the formula, written as text."

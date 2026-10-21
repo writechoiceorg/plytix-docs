@@ -1,0 +1,42 @@
+{
+  "data": [
+    {
+      "id": "6a1f0c2e9b3d4a5f8c7e1b03",
+      "assigned": true,
+      "content_type": "image/jpeg",
+      "extension": "jpg",
+      "file_size": 559164,
+      "file_type": "IMAGES",
+      "filename": "bag-10157-side.jpg",
+      "path": "public_files/pim/assets/.../6a1f0c2e9b3d4a5f8c7e1b03/bag-10157-side.jpg",
+      "downloaded_from": "https://example.com/images/bag-10157-side.jpg",
+      "n_catalogs": 0,
+      "n_products": 1,
+      "alt_text": "Canvas backpack, side view",
+      "status": "ACTIVE",
+      "created": "2026-06-22T08:44:19.008000",
+      "modified": "2026-06-22T08:44:19.046000"
+    },
+    {
+      "id": "6a1f0c2e9b3d4a5f8c7e1b02",
+      "assigned": true,
+      "content_type": "image/jpeg",
+      "extension": "jpg",
+      "file_size": 798520,
+      "file_type": "IMAGES",
+      "filename": "bag-10157-back.jpg",
+      "path": "public_files/pim/assets/.../6a1f0c2e9b3d4a5f8c7e1b02/bag-10157-back.jpg",
+      "downloaded_from": "https://example.com/images/bag-10157-back.jpg",
+      "n_catalogs": 0,
+      "n_products": 1,
+      "alt_text": null,
+      "status": "ACTIVE",
+      "created": "2026-06-22T08:44:18.978000",
+      "modified": "2026-06-22T08:44:18.990000"
+    }
+  ],
+  "errors": [],
+  "pagination": {
+    "next_page": "http://<api-host>/api/v3/assets?_page=2&_page_size=2"
+  }
+}

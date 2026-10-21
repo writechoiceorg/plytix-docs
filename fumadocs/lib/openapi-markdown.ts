@@ -145,9 +145,19 @@ function renderContent(doc: Json, content: Json | undefined) {
       const fields = renderSchema(doc, schema, 0, new Set());
       parts.push(fields || `Type: ${typeLabel(doc, schema)}`);
     }
-    const example = media.example ?? Object.values<Json>(media.examples ?? {})[0]?.value ?? schema?.example;
-    if (example !== undefined) {
-      parts.push(`Example:\n\n\`\`\`json\n${JSON.stringify(example, null, 2)}\n\`\`\``);
+    // Named examples (one per scenario) take precedence over a single example.
+    const named = Object.entries<Json>(media.examples ?? {}).filter(([, ex]) => ex?.value !== undefined);
+    if (named.length > 0) {
+      for (const [name, ex] of named) {
+        const label = ex.summary ? oneLine(ex.summary) : name;
+        const note = ex.description ? `\n\n${ex.description.trim()}` : '';
+        parts.push(`Example (${label}):${note}\n\n\`\`\`json\n${JSON.stringify(ex.value, null, 2)}\n\`\`\``);
+      }
+    } else {
+      const example = media.example ?? schema?.examples?.[0] ?? schema?.example;
+      if (example !== undefined) {
+        parts.push(`Example:\n\n\`\`\`json\n${JSON.stringify(example, null, 2)}\n\`\`\``);
+      }
     }
   }
   return parts;
