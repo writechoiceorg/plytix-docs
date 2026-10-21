@@ -1,0 +1,354 @@
+[
+  {
+    "source": "/docs/reference/v3/assetcategories/create_asset_categories_api_v3_asset_categories_post",
+    "destination": "/docs/reference/v3/assetcategories/create-asset-category"
+  },
+  {
+    "source": "/docs/reference/v3/assetcategories/delete_asset_categories_api_v3_asset_categories__identifier__delete",
+    "destination": "/docs/reference/v3/assetcategories/delete-asset-category"
+  },
+  {
+    "source": "/docs/reference/v3/assetcategories/delete_asset_categories_subpath_api_v3_asset_categories__identifier___path__delete",
+    "destination": "/docs/reference/v3/assetcategories/delete-asset-category-field"
+  },
+  {
+    "source": "/docs/reference/v3/assetcategories/get_asset_categories_api_v3_asset_categories__identifier__get",
+    "destination": "/docs/reference/v3/assetcategories/get-asset-category"
+  },
+  {
+    "source": "/docs/reference/v3/assetcategories/get_asset_categories_subpath_api_v3_asset_categories__identifier___path__get",
+    "destination": "/docs/reference/v3/assetcategories/get-asset-category-field"
+  },
+  {
+    "source": "/docs/reference/v3/assetcategories/search_asset_categories_api_v3_asset_categories_get",
+    "destination": "/docs/reference/v3/assetcategories/search-asset-categories"
+  },
+  {
+    "source": "/docs/reference/v3/assetcategories/update_asset_categories_api_v3_asset_categories__identifier__patch",
+    "destination": "/docs/reference/v3/assetcategories/update-asset-category"
+  },
+  {
+    "source": "/docs/reference/v3/assetcategories/update_asset_categories_subpath_api_v3_asset_categories__identifier___path__patch",
+    "destination": "/docs/reference/v3/assetcategories/update-asset-category-field"
+  },
+  {
+    "source": "/docs/reference/v3/assetlists/create_asset_lists_api_v3_asset_lists_post",
+    "destination": "/docs/reference/v3/assetlists/create-asset-list"
+  },
+  {
+    "source": "/docs/reference/v3/assetlists/delete_asset_lists_api_v3_asset_lists__identifier__delete",
+    "destination": "/docs/reference/v3/assetlists/delete-asset-list"
+  },
+  {
+    "source": "/docs/reference/v3/assetlists/delete_asset_lists_subpath_api_v3_asset_lists__identifier___path__delete",
+    "destination": "/docs/reference/v3/assetlists/delete-asset-list-field"
+  },
+  {
+    "source": "/docs/reference/v3/assetlists/get_asset_lists_api_v3_asset_lists__identifier__get",
+    "destination": "/docs/reference/v3/assetlists/get-asset-list"
+  },
+  {
+    "source": "/docs/reference/v3/assetlists/get_asset_lists_subpath_api_v3_asset_lists__identifier___path__get",
+    "destination": "/docs/reference/v3/assetlists/get-asset-list-field"
+  },
+  {
+    "source": "/docs/reference/v3/assetlists/search_asset_lists_api_v3_asset_lists_get",
+    "destination": "/docs/reference/v3/assetlists/search-asset-lists"
+  },
+  {
+    "source": "/docs/reference/v3/assetlists/update_asset_lists_api_v3_asset_lists__identifier__patch",
+    "destination": "/docs/reference/v3/assetlists/update-asset-list"
+  },
+  {
+    "source": "/docs/reference/v3/assetlists/update_asset_lists_subpath_api_v3_asset_lists__identifier___path__patch",
+    "destination": "/docs/reference/v3/assetlists/update-asset-list-field"
+  },
+  {
+    "source": "/docs/reference/v3/assets/create_assets_api_v3_assets_post",
+    "destination": "/docs/reference/v3/assets/create-asset"
+  },
+  {
+    "source": "/docs/reference/v3/assets/delete_assets_api_v3_assets__identifier__delete",
+    "destination": "/docs/reference/v3/assets/delete-asset"
+  },
+  {
+    "source": "/docs/reference/v3/assets/delete_assets_subpath_api_v3_assets__identifier___path__delete",
+    "destination": "/docs/reference/v3/assets/delete-asset-field"
+  },
+  {
+    "source": "/docs/reference/v3/assets/get_assets_api_v3_assets__identifier__get",
+    "destination": "/docs/reference/v3/assets/get-asset"
+  },
+  {
+    "source": "/docs/reference/v3/assets/get_assets_subpath_api_v3_assets__identifier___path__get",
+    "destination": "/docs/reference/v3/assets/get-asset-field"
+  },
+  {
+    "source": "/docs/reference/v3/assets/search_assets_api_v3_assets_get",
+    "destination": "/docs/reference/v3/assets/search-assets"
+  },
+  {
+    "source": "/docs/reference/v3/assets/update_assets_api_v3_assets__identifier__patch",
+    "destination": "/docs/reference/v3/assets/update-asset"
+  },
+  {
+    "source": "/docs/reference/v3/assets/update_assets_subpath_api_v3_assets__identifier___path__patch",
+    "destination": "/docs/reference/v3/assets/update-asset-field"
+  },
+  {
+    "source": "/docs/reference/v3/familyattributes/delete_family_attributes_drill_in_api_v3_product_families__product_family_id__attributes__attribute_id___path__delete",
+    "destination": "/docs/reference/v3/familyattributes/delete-family-attribute-field"
+  },
+  {
+    "source": "/docs/reference/v3/familyattributes/delete_family_attributes_identity_api_v3_product_families__product_family_id__attributes__attribute_id__delete",
+    "destination": "/docs/reference/v3/familyattributes/delete-family-attribute"
+  },
+  {
+    "source": "/docs/reference/v3/familyattributes/get_family_attributes_collection_api_v3_product_families__product_family_id__attributes_get",
+    "destination": "/docs/reference/v3/familyattributes/list-family-attributes"
+  },
+  {
+    "source": "/docs/reference/v3/familyattributes/get_family_attributes_drill_in_api_v3_product_families__product_family_id__attributes__attribute_id___path__get",
+    "destination": "/docs/reference/v3/familyattributes/get-family-attribute-field"
+  },
+  {
+    "source": "/docs/reference/v3/familyattributes/get_family_attributes_identity_api_v3_product_families__product_family_id__attributes__attribute_id__get",
+    "destination": "/docs/reference/v3/familyattributes/get-family-attribute"
+  },
+  {
+    "source": "/docs/reference/v3/familyattributes/patch_family_attributes_drill_in_api_v3_product_families__product_family_id__attributes__attribute_id___path__patch",
+    "destination": "/docs/reference/v3/familyattributes/update-family-attribute-field"
+  },
+  {
+    "source": "/docs/reference/v3/familyattributes/patch_family_attributes_identity_api_v3_product_families__product_family_id__attributes__attribute_id__patch",
+    "destination": "/docs/reference/v3/familyattributes/update-family-attribute"
+  },
+  {
+    "source": "/docs/reference/v3/familyattributes/post_family_attributes_collection_api_v3_product_families__product_family_id__attributes_post",
+    "destination": "/docs/reference/v3/familyattributes/create-family-attribute"
+  },
+  {
+    "source": "/docs/reference/v3/familyattributes/post_family_attributes_identity_api_v3_product_families__product_family_id__attributes__attribute_id__post",
+    "destination": "/docs/reference/v3/familyattributes/link-family-attribute"
+  },
+  {
+    "source": "/docs/reference/v3/familyattributes/search_family_attributes_api_v3_family_attributes_get",
+    "destination": "/docs/reference/v3/familyattributes/search-family-attributes"
+  },
+  {
+    "source": "/docs/reference/v3/productattributegroups/create_product_attribute_groups_api_v3_product_attribute_groups_post",
+    "destination": "/docs/reference/v3/productattributegroups/create-product-attribute-group"
+  },
+  {
+    "source": "/docs/reference/v3/productattributegroups/delete_product_attribute_groups_api_v3_product_attribute_groups__identifier__delete",
+    "destination": "/docs/reference/v3/productattributegroups/delete-product-attribute-group"
+  },
+  {
+    "source": "/docs/reference/v3/productattributegroups/delete_product_attribute_groups_subpath_api_v3_product_attribute_groups__identifier___path__delete",
+    "destination": "/docs/reference/v3/productattributegroups/delete-product-attribute-group-field"
+  },
+  {
+    "source": "/docs/reference/v3/productattributegroups/get_product_attribute_groups_api_v3_product_attribute_groups__identifier__get",
+    "destination": "/docs/reference/v3/productattributegroups/get-product-attribute-group"
+  },
+  {
+    "source": "/docs/reference/v3/productattributegroups/get_product_attribute_groups_subpath_api_v3_product_attribute_groups__identifier___path__get",
+    "destination": "/docs/reference/v3/productattributegroups/get-product-attribute-group-field"
+  },
+  {
+    "source": "/docs/reference/v3/productattributegroups/search_product_attribute_groups_api_v3_product_attribute_groups_get",
+    "destination": "/docs/reference/v3/productattributegroups/search-product-attribute-groups"
+  },
+  {
+    "source": "/docs/reference/v3/productattributegroups/update_product_attribute_groups_api_v3_product_attribute_groups__identifier__patch",
+    "destination": "/docs/reference/v3/productattributegroups/update-product-attribute-group"
+  },
+  {
+    "source": "/docs/reference/v3/productattributegroups/update_product_attribute_groups_subpath_api_v3_product_attribute_groups__identifier___path__patch",
+    "destination": "/docs/reference/v3/productattributegroups/update-product-attribute-group-field"
+  },
+  {
+    "source": "/docs/reference/v3/productattributes/create_product_attributes_api_v3_product_attributes_post",
+    "destination": "/docs/reference/v3/productattributes/create-product-attribute"
+  },
+  {
+    "source": "/docs/reference/v3/productattributes/delete_product_attributes_api_v3_product_attributes__identifier__delete",
+    "destination": "/docs/reference/v3/productattributes/delete-product-attribute"
+  },
+  {
+    "source": "/docs/reference/v3/productattributes/delete_product_attributes_subpath_api_v3_product_attributes__identifier___path__delete",
+    "destination": "/docs/reference/v3/productattributes/delete-product-attribute-field"
+  },
+  {
+    "source": "/docs/reference/v3/productattributes/get_product_attributes_api_v3_product_attributes__identifier__get",
+    "destination": "/docs/reference/v3/productattributes/get-product-attribute"
+  },
+  {
+    "source": "/docs/reference/v3/productattributes/get_product_attributes_subpath_api_v3_product_attributes__identifier___path__get",
+    "destination": "/docs/reference/v3/productattributes/get-product-attribute-field"
+  },
+  {
+    "source": "/docs/reference/v3/productattributes/search_product_attributes_api_v3_product_attributes_get",
+    "destination": "/docs/reference/v3/productattributes/search-product-attributes"
+  },
+  {
+    "source": "/docs/reference/v3/productattributes/update_product_attributes_api_v3_product_attributes__identifier__patch",
+    "destination": "/docs/reference/v3/productattributes/update-product-attribute"
+  },
+  {
+    "source": "/docs/reference/v3/productattributes/update_product_attributes_subpath_api_v3_product_attributes__identifier___path__patch",
+    "destination": "/docs/reference/v3/productattributes/update-product-attribute-field"
+  },
+  {
+    "source": "/docs/reference/v3/productcategories/create_product_categories_api_v3_product_categories_post",
+    "destination": "/docs/reference/v3/productcategories/create-product-category"
+  },
+  {
+    "source": "/docs/reference/v3/productcategories/delete_product_categories_api_v3_product_categories__identifier__delete",
+    "destination": "/docs/reference/v3/productcategories/delete-product-category"
+  },
+  {
+    "source": "/docs/reference/v3/productcategories/delete_product_categories_subpath_api_v3_product_categories__identifier___path__delete",
+    "destination": "/docs/reference/v3/productcategories/delete-product-category-field"
+  },
+  {
+    "source": "/docs/reference/v3/productcategories/get_product_categories_api_v3_product_categories__identifier__get",
+    "destination": "/docs/reference/v3/productcategories/get-product-category"
+  },
+  {
+    "source": "/docs/reference/v3/productcategories/get_product_categories_subpath_api_v3_product_categories__identifier___path__get",
+    "destination": "/docs/reference/v3/productcategories/get-product-category-field"
+  },
+  {
+    "source": "/docs/reference/v3/productcategories/search_product_categories_api_v3_product_categories_get",
+    "destination": "/docs/reference/v3/productcategories/search-product-categories"
+  },
+  {
+    "source": "/docs/reference/v3/productcategories/update_product_categories_api_v3_product_categories__identifier__patch",
+    "destination": "/docs/reference/v3/productcategories/update-product-category"
+  },
+  {
+    "source": "/docs/reference/v3/productcategories/update_product_categories_subpath_api_v3_product_categories__identifier___path__patch",
+    "destination": "/docs/reference/v3/productcategories/update-product-category-field"
+  },
+  {
+    "source": "/docs/reference/v3/productfamilies/create_product_families_api_v3_product_families_post",
+    "destination": "/docs/reference/v3/productfamilies/create-product-family"
+  },
+  {
+    "source": "/docs/reference/v3/productfamilies/create_product_families_subpath_api_v3_product_families__identifier___path__post",
+    "destination": "/docs/reference/v3/productfamilies/link-product-family-field"
+  },
+  {
+    "source": "/docs/reference/v3/productfamilies/delete_product_families_api_v3_product_families__identifier__delete",
+    "destination": "/docs/reference/v3/productfamilies/delete-product-family"
+  },
+  {
+    "source": "/docs/reference/v3/productfamilies/delete_product_families_subpath_api_v3_product_families__identifier___path__delete",
+    "destination": "/docs/reference/v3/productfamilies/delete-product-family-field"
+  },
+  {
+    "source": "/docs/reference/v3/productfamilies/get_product_families_api_v3_product_families__identifier__get",
+    "destination": "/docs/reference/v3/productfamilies/get-product-family"
+  },
+  {
+    "source": "/docs/reference/v3/productfamilies/get_product_families_subpath_api_v3_product_families__identifier___path__get",
+    "destination": "/docs/reference/v3/productfamilies/get-product-family-field"
+  },
+  {
+    "source": "/docs/reference/v3/productfamilies/search_product_families_api_v3_product_families_get",
+    "destination": "/docs/reference/v3/productfamilies/search-product-families"
+  },
+  {
+    "source": "/docs/reference/v3/productfamilies/update_product_families_api_v3_product_families__identifier__patch",
+    "destination": "/docs/reference/v3/productfamilies/update-product-family"
+  },
+  {
+    "source": "/docs/reference/v3/productfamilies/update_product_families_subpath_api_v3_product_families__identifier___path__patch",
+    "destination": "/docs/reference/v3/productfamilies/update-product-family-field"
+  },
+  {
+    "source": "/docs/reference/v3/productrelationships/delete_product_relationships_identity_api_v3_products__product_id__relationships__relationship_id__delete",
+    "destination": "/docs/reference/v3/productrelationships/delete-product-relationship"
+  },
+  {
+    "source": "/docs/reference/v3/productrelationships/get_product_relationships_identity_api_v3_products__product_id__relationships__relationship_id__get",
+    "destination": "/docs/reference/v3/productrelationships/get-product-relationship"
+  },
+  {
+    "source": "/docs/reference/v3/productrelationships/search_product_relationships_api_v3_product_relationships_get",
+    "destination": "/docs/reference/v3/productrelationships/search-product-relationships"
+  },
+  {
+    "source": "/docs/reference/v3/products/create_products_api_v3_products_post",
+    "destination": "/docs/reference/v3/products/create-product"
+  },
+  {
+    "source": "/docs/reference/v3/products/create_products_subpath_api_v3_products__identifier___path__post",
+    "destination": "/docs/reference/v3/products/link-product-field"
+  },
+  {
+    "source": "/docs/reference/v3/products/delete_products_api_v3_products__identifier__delete",
+    "destination": "/docs/reference/v3/products/delete-product"
+  },
+  {
+    "source": "/docs/reference/v3/products/delete_products_subpath_api_v3_products__identifier___path__delete",
+    "destination": "/docs/reference/v3/products/delete-product-field"
+  },
+  {
+    "source": "/docs/reference/v3/products/get_products_api_v3_products__identifier__get",
+    "destination": "/docs/reference/v3/products/get-product"
+  },
+  {
+    "source": "/docs/reference/v3/products/get_products_subpath_api_v3_products__identifier___path__get",
+    "destination": "/docs/reference/v3/products/get-product-field"
+  },
+  {
+    "source": "/docs/reference/v3/products/search_products",
+    "destination": "/docs/reference/v3/products/search-products"
+  },
+  {
+    "source": "/docs/reference/v3/products/update_products_api_v3_products__identifier__patch",
+    "destination": "/docs/reference/v3/products/update-product"
+  },
+  {
+    "source": "/docs/reference/v3/products/update_products_subpath_api_v3_products__identifier___path__patch",
+    "destination": "/docs/reference/v3/products/update-product-field"
+  },
+  {
+    "source": "/docs/reference/v3/relatedproducts/search_related_products_api_v3_related_products_get",
+    "destination": "/docs/reference/v3/relatedproducts/search-related-products"
+  },
+  {
+    "source": "/docs/reference/v3/relationships/create_relationships_api_v3_relationships_post",
+    "destination": "/docs/reference/v3/relationships/create-relationship"
+  },
+  {
+    "source": "/docs/reference/v3/relationships/delete_relationships_api_v3_relationships__identifier__delete",
+    "destination": "/docs/reference/v3/relationships/delete-relationship"
+  },
+  {
+    "source": "/docs/reference/v3/relationships/delete_relationships_subpath_api_v3_relationships__identifier___path__delete",
+    "destination": "/docs/reference/v3/relationships/delete-relationship-field"
+  },
+  {
+    "source": "/docs/reference/v3/relationships/get_relationships_api_v3_relationships__identifier__get",
+    "destination": "/docs/reference/v3/relationships/get-relationship"
+  },
+  {
+    "source": "/docs/reference/v3/relationships/get_relationships_subpath_api_v3_relationships__identifier___path__get",
+    "destination": "/docs/reference/v3/relationships/get-relationship-field"
+  },
+  {
+    "source": "/docs/reference/v3/relationships/search_relationships_api_v3_relationships_get",
+    "destination": "/docs/reference/v3/relationships/search-relationships"
+  },
+  {
+    "source": "/docs/reference/v3/relationships/update_relationships_api_v3_relationships__identifier__patch",
+    "destination": "/docs/reference/v3/relationships/update-relationship"
+  },
+  {
+    "source": "/docs/reference/v3/relationships/update_relationships_subpath_api_v3_relationships__identifier___path__patch",
+    "destination": "/docs/reference/v3/relationships/update-relationship-field"
+  }
+]
