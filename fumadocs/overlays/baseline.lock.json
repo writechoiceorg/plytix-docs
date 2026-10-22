@@ -1465,6 +1465,30 @@
         }
       }
     },
+    "00-fixes.yaml::$.paths['/api/v3/product-attributes/{identifier}/groups'].post": {
+      "nodes": {
+        "$.paths./api/v3/product-attributes/{identifier}/groups.post": {
+          "sig": null,
+          "upstream": {
+            "parameters": {
+              "$absent": true
+            }
+          }
+        }
+      }
+    },
+    "00-fixes.yaml::$.paths['/api/v3/product-attributes/{identifier}/groups/{id}'].delete": {
+      "nodes": {
+        "$.paths./api/v3/product-attributes/{identifier}/groups/{id}.delete": {
+          "sig": null,
+          "upstream": {
+            "parameters": {
+              "$absent": true
+            }
+          }
+        }
+      }
+    },
     "00-fixes.yaml::$.paths['/api/v3/product-families/{identifier}/{path}'].patch": {
       "nodes": {
         "$.paths./api/v3/product-families/{identifier}/{path}.patch": {
@@ -1576,6 +1600,30 @@
     "00-fixes.yaml::$.paths['/api/v3/product-families/{product_family_id}/attributes/{attribute_id}/{path}'].patch": {
       "nodes": {
         "$.paths./api/v3/product-families/{product_family_id}/attributes/{attribute_id}/{path}.patch": {
+          "sig": null,
+          "upstream": {
+            "parameters": {
+              "$absent": true
+            }
+          }
+        }
+      }
+    },
+    "00-fixes.yaml::$.paths['/api/v3/products/{identifier}/categories'].post": {
+      "nodes": {
+        "$.paths./api/v3/products/{identifier}/categories.post": {
+          "sig": null,
+          "upstream": {
+            "parameters": {
+              "$absent": true
+            }
+          }
+        }
+      }
+    },
+    "00-fixes.yaml::$.paths['/api/v3/products/{identifier}/categories/{id}'].delete": {
+      "nodes": {
+        "$.paths./api/v3/products/{identifier}/categories/{id}.delete": {
           "sig": null,
           "upstream": {
             "parameters": {
@@ -2143,22 +2191,6 @@
             "description": "Fields to return. Repeat the parameter for several fields; a relation name expands it."
           }
         },
-        "$.paths./api/v3/product-relationships.get.parameters[_fields@query]": {
-          "sig": {
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "$ref": null
-              }
-            }
-          },
-          "upstream": {
-            "description": "Fields to return. Repeat the parameter for several fields; a relation name expands it."
-          }
-        },
         "$.paths./api/v3/products.get.parameters[_fields@query]": {
           "sig": {
             "in": "query",
@@ -2387,18 +2419,6 @@
             "description": "1-based page number."
           }
         },
-        "$.paths./api/v3/product-relationships.get.parameters[_page@query]": {
-          "sig": {
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer"
-            }
-          },
-          "upstream": {
-            "description": "1-based page number."
-          }
-        },
         "$.paths./api/v3/products.get.parameters[_page@query]": {
           "sig": {
             "in": "query",
@@ -2524,18 +2544,6 @@
           }
         },
         "$.paths./api/v3/product-families.get.parameters[_page_size@query]": {
-          "sig": {
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer"
-            }
-          },
-          "upstream": {
-            "description": "Items per page."
-          }
-        },
-        "$.paths./api/v3/product-relationships.get.parameters[_page_size@query]": {
           "sig": {
             "in": "query",
             "required": false,
@@ -2735,27 +2743,6 @@
           }
         },
         "$.paths./api/v3/product-families.get.parameters[_sort_by@query]": {
-          "sig": {
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "$ref": null
-                },
-                {
-                  "type": "null",
-                  "$ref": null
-                }
-              ]
-            }
-          },
-          "upstream": {
-            "description": "Field to sort by. Prefix with `-` for descending."
-          }
-        },
-        "$.paths./api/v3/product-relationships.get.parameters[_sort_by@query]": {
           "sig": {
             "in": "query",
             "required": false,
@@ -2999,18 +2986,6 @@
             "description": "Any other query parameter is a filter. See the operation description for the grammar."
           }
         },
-        "$.paths./api/v3/product-relationships.get.parameters[filters@query]": {
-          "sig": {
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "object"
-            }
-          },
-          "upstream": {
-            "description": "Any other query parameter is a filter. See the operation description for the grammar."
-          }
-        },
         "$.paths./api/v3/products.get.parameters[filters@query]": {
           "sig": {
             "in": "query",
@@ -3129,17 +3104,6 @@
           }
         },
         "$.paths./api/v3/product-families.get.parameters[filters@query].example": {
-          "sig": null,
-          "upstream": {
-            ".": {
-              "status[eq]": "Draft",
-              "label[lower][contains:ignorecase]": "shirt",
-              "_or[0]sku[eq]": "A1",
-              "_or[0]price[gte]": "100"
-            }
-          }
-        },
-        "$.paths./api/v3/product-relationships.get.parameters[filters@query].example": {
           "sig": null,
           "upstream": {
             ".": {
@@ -3565,6 +3529,22 @@
             }
           }
         },
+        "$.paths./api/v3/product-attributes/{identifier}/groups.post.parameters[identifier@path]": {
+          "sig": null,
+          "upstream": {
+            "description": {
+              "$absent": true
+            }
+          }
+        },
+        "$.paths./api/v3/product-attributes/{identifier}/groups/{id}.delete.parameters[identifier@path]": {
+          "sig": null,
+          "upstream": {
+            "description": {
+              "$absent": true
+            }
+          }
+        },
         "$.paths./api/v3/product-attributes/{identifier}/{path}.delete.parameters[identifier@path]": {
           "sig": {
             "in": "path",
@@ -3811,6 +3791,22 @@
               "type": "string"
             }
           },
+          "upstream": {
+            "description": {
+              "$absent": true
+            }
+          }
+        },
+        "$.paths./api/v3/products/{identifier}/categories.post.parameters[identifier@path]": {
+          "sig": null,
+          "upstream": {
+            "description": {
+              "$absent": true
+            }
+          }
+        },
+        "$.paths./api/v3/products/{identifier}/categories/{id}.delete.parameters[identifier@path]": {
+          "sig": null,
           "upstream": {
             "description": {
               "$absent": true
@@ -4877,6 +4873,26 @@
             "description": "Bad Request"
           }
         },
+        "$.paths./api/v3/product-attributes/{identifier}/groups.post.responses.400": {
+          "sig": {
+            "application/json": {
+              "$ref": "#/components/schemas/OperationResponse"
+            }
+          },
+          "upstream": {
+            "description": "Bad Request"
+          }
+        },
+        "$.paths./api/v3/product-attributes/{identifier}/groups/{id}.delete.responses.400": {
+          "sig": {
+            "application/json": {
+              "$ref": "#/components/schemas/OperationResponse"
+            }
+          },
+          "upstream": {
+            "description": "Bad Request"
+          }
+        },
         "$.paths./api/v3/product-attributes/{identifier}/{path}.delete.responses.400": {
           "sig": {
             "application/json": {
@@ -5157,16 +5173,6 @@
             "description": "Bad Request"
           }
         },
-        "$.paths./api/v3/product-relationships.get.responses.400": {
-          "sig": {
-            "application/json": {
-              "$ref": "#/components/schemas/OperationResponse"
-            }
-          },
-          "upstream": {
-            "description": "Bad Request"
-          }
-        },
         "$.paths./api/v3/products.get.responses.400": {
           "sig": {
             "application/json": {
@@ -5208,6 +5214,26 @@
           }
         },
         "$.paths./api/v3/products/{identifier}.patch.responses.400": {
+          "sig": {
+            "application/json": {
+              "$ref": "#/components/schemas/OperationResponse"
+            }
+          },
+          "upstream": {
+            "description": "Bad Request"
+          }
+        },
+        "$.paths./api/v3/products/{identifier}/categories.post.responses.400": {
+          "sig": {
+            "application/json": {
+              "$ref": "#/components/schemas/OperationResponse"
+            }
+          },
+          "upstream": {
+            "description": "Bad Request"
+          }
+        },
+        "$.paths./api/v3/products/{identifier}/categories/{id}.delete.responses.400": {
           "sig": {
             "application/json": {
               "$ref": "#/components/schemas/OperationResponse"
@@ -5903,6 +5929,34 @@
             }
           }
         },
+        "$.paths./api/v3/product-attributes/{identifier}/groups.post.responses.401": {
+          "sig": {
+            "application/json": {
+              "$ref": "#/components/schemas/OperationResponse"
+            }
+          },
+          "upstream": {
+            "description": "Unauthorized",
+            "content/application~1json/schema/$ref": "#/components/schemas/OperationResponse",
+            "content/application~1json/examples": {
+              "$absent": true
+            }
+          }
+        },
+        "$.paths./api/v3/product-attributes/{identifier}/groups/{id}.delete.responses.401": {
+          "sig": {
+            "application/json": {
+              "$ref": "#/components/schemas/OperationResponse"
+            }
+          },
+          "upstream": {
+            "description": "Unauthorized",
+            "content/application~1json/schema/$ref": "#/components/schemas/OperationResponse",
+            "content/application~1json/examples": {
+              "$absent": true
+            }
+          }
+        },
         "$.paths./api/v3/product-attributes/{identifier}/{path}.delete.responses.401": {
           "sig": {
             "application/json": {
@@ -6295,20 +6349,6 @@
             }
           }
         },
-        "$.paths./api/v3/product-relationships.get.responses.401": {
-          "sig": {
-            "application/json": {
-              "$ref": "#/components/schemas/OperationResponse"
-            }
-          },
-          "upstream": {
-            "description": "Unauthorized",
-            "content/application~1json/schema/$ref": "#/components/schemas/OperationResponse",
-            "content/application~1json/examples": {
-              "$absent": true
-            }
-          }
-        },
         "$.paths./api/v3/products.get.responses.401": {
           "sig": {
             "application/json": {
@@ -6366,6 +6406,34 @@
           }
         },
         "$.paths./api/v3/products/{identifier}.patch.responses.401": {
+          "sig": {
+            "application/json": {
+              "$ref": "#/components/schemas/OperationResponse"
+            }
+          },
+          "upstream": {
+            "description": "Unauthorized",
+            "content/application~1json/schema/$ref": "#/components/schemas/OperationResponse",
+            "content/application~1json/examples": {
+              "$absent": true
+            }
+          }
+        },
+        "$.paths./api/v3/products/{identifier}/categories.post.responses.401": {
+          "sig": {
+            "application/json": {
+              "$ref": "#/components/schemas/OperationResponse"
+            }
+          },
+          "upstream": {
+            "description": "Unauthorized",
+            "content/application~1json/schema/$ref": "#/components/schemas/OperationResponse",
+            "content/application~1json/examples": {
+              "$absent": true
+            }
+          }
+        },
+        "$.paths./api/v3/products/{identifier}/categories/{id}.delete.responses.401": {
           "sig": {
             "application/json": {
               "$ref": "#/components/schemas/OperationResponse"
@@ -6973,6 +7041,26 @@
             "description": "Forbidden"
           }
         },
+        "$.paths./api/v3/product-attributes/{identifier}/groups.post.responses.403": {
+          "sig": {
+            "application/json": {
+              "$ref": "#/components/schemas/OperationResponse"
+            }
+          },
+          "upstream": {
+            "description": "Forbidden"
+          }
+        },
+        "$.paths./api/v3/product-attributes/{identifier}/groups/{id}.delete.responses.403": {
+          "sig": {
+            "application/json": {
+              "$ref": "#/components/schemas/OperationResponse"
+            }
+          },
+          "upstream": {
+            "description": "Forbidden"
+          }
+        },
         "$.paths./api/v3/product-attributes/{identifier}/{path}.delete.responses.403": {
           "sig": {
             "application/json": {
@@ -7253,16 +7341,6 @@
             "description": "Forbidden"
           }
         },
-        "$.paths./api/v3/product-relationships.get.responses.403": {
-          "sig": {
-            "application/json": {
-              "$ref": "#/components/schemas/OperationResponse"
-            }
-          },
-          "upstream": {
-            "description": "Forbidden"
-          }
-        },
         "$.paths./api/v3/products.get.responses.403": {
           "sig": {
             "application/json": {
@@ -7304,6 +7382,26 @@
           }
         },
         "$.paths./api/v3/products/{identifier}.patch.responses.403": {
+          "sig": {
+            "application/json": {
+              "$ref": "#/components/schemas/OperationResponse"
+            }
+          },
+          "upstream": {
+            "description": "Forbidden"
+          }
+        },
+        "$.paths./api/v3/products/{identifier}/categories.post.responses.403": {
+          "sig": {
+            "application/json": {
+              "$ref": "#/components/schemas/OperationResponse"
+            }
+          },
+          "upstream": {
+            "description": "Forbidden"
+          }
+        },
+        "$.paths./api/v3/products/{identifier}/categories/{id}.delete.responses.403": {
           "sig": {
             "application/json": {
               "$ref": "#/components/schemas/OperationResponse"
@@ -7737,6 +7835,26 @@
             "description": "Not Found"
           }
         },
+        "$.paths./api/v3/product-attributes/{identifier}/groups.post.responses.404": {
+          "sig": {
+            "application/json": {
+              "$ref": "#/components/schemas/OperationResponse"
+            }
+          },
+          "upstream": {
+            "description": "Not Found"
+          }
+        },
+        "$.paths./api/v3/product-attributes/{identifier}/groups/{id}.delete.responses.404": {
+          "sig": {
+            "application/json": {
+              "$ref": "#/components/schemas/OperationResponse"
+            }
+          },
+          "upstream": {
+            "description": "Not Found"
+          }
+        },
         "$.paths./api/v3/product-attributes/{identifier}/{path}.delete.responses.404": {
           "sig": {
             "application/json": {
@@ -7998,6 +8116,26 @@
           }
         },
         "$.paths./api/v3/products/{identifier}.patch.responses.404": {
+          "sig": {
+            "application/json": {
+              "$ref": "#/components/schemas/OperationResponse"
+            }
+          },
+          "upstream": {
+            "description": "Not Found"
+          }
+        },
+        "$.paths./api/v3/products/{identifier}/categories.post.responses.404": {
+          "sig": {
+            "application/json": {
+              "$ref": "#/components/schemas/OperationResponse"
+            }
+          },
+          "upstream": {
+            "description": "Not Found"
+          }
+        },
+        "$.paths./api/v3/products/{identifier}/categories/{id}.delete.responses.404": {
           "sig": {
             "application/json": {
               "$ref": "#/components/schemas/OperationResponse"
@@ -8511,6 +8649,26 @@
             "description": "Unprocessable Content"
           }
         },
+        "$.paths./api/v3/product-attributes/{identifier}/groups.post.responses.422": {
+          "sig": {
+            "application/json": {
+              "$ref": "#/components/schemas/OperationResponse"
+            }
+          },
+          "upstream": {
+            "description": "Unprocessable Content"
+          }
+        },
+        "$.paths./api/v3/product-attributes/{identifier}/groups/{id}.delete.responses.422": {
+          "sig": {
+            "application/json": {
+              "$ref": "#/components/schemas/OperationResponse"
+            }
+          },
+          "upstream": {
+            "description": "Unprocessable Content"
+          }
+        },
         "$.paths./api/v3/product-attributes/{identifier}/{path}.delete.responses.422": {
           "sig": {
             "application/json": {
@@ -8791,16 +8949,6 @@
             "description": "Unprocessable Content"
           }
         },
-        "$.paths./api/v3/product-relationships.get.responses.422": {
-          "sig": {
-            "application/json": {
-              "$ref": "#/components/schemas/OperationResponse"
-            }
-          },
-          "upstream": {
-            "description": "Unprocessable Content"
-          }
-        },
         "$.paths./api/v3/products.get.responses.422": {
           "sig": {
             "application/json": {
@@ -8842,6 +8990,26 @@
           }
         },
         "$.paths./api/v3/products/{identifier}.patch.responses.422": {
+          "sig": {
+            "application/json": {
+              "$ref": "#/components/schemas/OperationResponse"
+            }
+          },
+          "upstream": {
+            "description": "Unprocessable Content"
+          }
+        },
+        "$.paths./api/v3/products/{identifier}/categories.post.responses.422": {
+          "sig": {
+            "application/json": {
+              "$ref": "#/components/schemas/OperationResponse"
+            }
+          },
+          "upstream": {
+            "description": "Unprocessable Content"
+          }
+        },
+        "$.paths./api/v3/products/{identifier}/categories/{id}.delete.responses.422": {
           "sig": {
             "application/json": {
               "$ref": "#/components/schemas/OperationResponse"
@@ -11391,6 +11559,123 @@
         }
       }
     },
+    "ops/product-attributes.yaml::$.paths['/api/v3/product-attributes/{identifier}/groups'].post": {
+      "nodes": {
+        "$.paths./api/v3/product-attributes/{identifier}/groups.post": {
+          "sig": null,
+          "upstream": {
+            "summary": "Post-Product-Attributes-Groups Collection",
+            "operationId": "post_product_attributes_groups_collection_api_v3_product_attributes__identifier__groups_post",
+            "description": {
+              "$absent": true
+            }
+          }
+        }
+      }
+    },
+    "ops/product-attributes.yaml::$.paths['/api/v3/product-attributes/{identifier}/groups'].post.parameters[?(@.name=='identifier' && @.in=='path')]": {
+      "nodes": {
+        "$.paths./api/v3/product-attributes/{identifier}/groups.post.parameters[identifier@path]": {
+          "sig": null,
+          "upstream": {
+            "description": {
+              "$absent": true
+            }
+          }
+        }
+      }
+    },
+    "ops/product-attributes.yaml::$.paths['/api/v3/product-attributes/{identifier}/groups'].post.requestBody.content['application/json']": {
+      "nodes": {
+        "$.paths./api/v3/product-attributes/{identifier}/groups.post.requestBody.content.application/json": {
+          "sig": {
+            "$ref": "#/components/schemas/IdLinkInput"
+          },
+          "upstream": {
+            "examples": {
+              "$absent": true
+            }
+          }
+        }
+      }
+    },
+    "ops/product-attributes.yaml::$.paths['/api/v3/product-attributes/{identifier}/groups'].post.responses['201']": {
+      "nodes": {
+        "$.paths./api/v3/product-attributes/{identifier}/groups.post.responses.201": {
+          "sig": {
+            "application/json": {}
+          },
+          "upstream": {
+            "description": "Successful Response",
+            "content/application~1json/examples": {
+              "$absent": true
+            }
+          }
+        }
+      }
+    },
+    "ops/product-attributes.yaml::$.paths['/api/v3/product-attributes/{identifier}/groups'].post.responses['409']": {
+      "nodes": {
+        "$.paths./api/v3/product-attributes/{identifier}/groups.post.responses.409": {
+          "sig": {
+            "application/json": {
+              "$ref": "#/components/schemas/OperationResponse"
+            }
+          },
+          "upstream": {
+            "description": "Conflict"
+          }
+        }
+      }
+    },
+    "ops/product-attributes.yaml::$.paths['/api/v3/product-attributes/{identifier}/groups/{id}'].delete": {
+      "nodes": {
+        "$.paths./api/v3/product-attributes/{identifier}/groups/{id}.delete": {
+          "sig": null,
+          "upstream": {
+            "summary": "Delete-Product-Attributes-Groups Identity",
+            "operationId": "delete_product_attributes_groups_identity_api_v3_product_attributes__identifier__groups__id__delete",
+            "description": {
+              "$absent": true
+            }
+          }
+        }
+      }
+    },
+    "ops/product-attributes.yaml::$.paths['/api/v3/product-attributes/{identifier}/groups/{id}'].delete.parameters[?(@.name=='id' && @.in=='path')]": {
+      "nodes": {
+        "$.paths./api/v3/product-attributes/{identifier}/groups/{id}.delete.parameters[id@path]": {
+          "sig": null,
+          "upstream": {
+            "description": {
+              "$absent": true
+            }
+          }
+        }
+      }
+    },
+    "ops/product-attributes.yaml::$.paths['/api/v3/product-attributes/{identifier}/groups/{id}'].delete.parameters[?(@.name=='identifier' && @.in=='path')]": {
+      "nodes": {
+        "$.paths./api/v3/product-attributes/{identifier}/groups/{id}.delete.parameters[identifier@path]": {
+          "sig": null,
+          "upstream": {
+            "description": {
+              "$absent": true
+            }
+          }
+        }
+      }
+    },
+    "ops/product-attributes.yaml::$.paths['/api/v3/product-attributes/{identifier}/groups/{id}'].delete.responses['204']": {
+      "nodes": {
+        "$.paths./api/v3/product-attributes/{identifier}/groups/{id}.delete.responses.204": {
+          "sig": null,
+          "upstream": {
+            "description": "Successful Response"
+          }
+        }
+      }
+    },
     "ops/product-attributes.yaml::$.paths['/api/v3/product-attributes/{identifier}/{path}'].delete": {
       "nodes": {
         "$.paths./api/v3/product-attributes/{identifier}/{path}.delete": {
@@ -12052,23 +12337,6 @@
         }
       }
     },
-    "ops/product-families.yaml::$.paths['/api/v3/product-families'].post.responses['403']": {
-      "nodes": {
-        "$.paths./api/v3/product-families.post.responses.403": {
-          "sig": {
-            "application/json": {
-              "$ref": "#/components/schemas/OperationResponse"
-            }
-          },
-          "upstream": {
-            "description": "Forbidden",
-            "content/application~1json/examples": {
-              "$absent": true
-            }
-          }
-        }
-      }
-    },
     "ops/product-families.yaml::$.paths['/api/v3/product-families'].post.responses['409']": {
       "nodes": {
         "$.paths./api/v3/product-families.post.responses.409": {
@@ -12080,20 +12348,6 @@
           "upstream": {
             "description": "Conflict",
             "content/application~1json/examples": {
-              "$absent": true
-            }
-          }
-        }
-      }
-    },
-    "ops/product-families.yaml::$.paths['/api/v3/product-families'].post.responses['422'].content['application/json']": {
-      "nodes": {
-        "$.paths./api/v3/product-families.post.responses.422.content.application/json": {
-          "sig": {
-            "$ref": "#/components/schemas/OperationResponse"
-          },
-          "upstream": {
-            "examples": {
               "$absent": true
             }
           }
@@ -12889,6 +13143,154 @@
         }
       }
     },
+    "ops/products.yaml::$.paths['/api/v3/products/{identifier}/categories'].post": {
+      "nodes": {
+        "$.paths./api/v3/products/{identifier}/categories.post": {
+          "sig": null,
+          "upstream": {
+            "summary": "Post-Products-Categories Collection",
+            "operationId": "post_products_categories_collection_api_v3_products__identifier__categories_post",
+            "description": {
+              "$absent": true
+            }
+          }
+        }
+      }
+    },
+    "ops/products.yaml::$.paths['/api/v3/products/{identifier}/categories'].post.parameters[?(@.name=='identifier' && @.in=='path')]": {
+      "nodes": {
+        "$.paths./api/v3/products/{identifier}/categories.post.parameters[identifier@path]": {
+          "sig": null,
+          "upstream": {
+            "description": {
+              "$absent": true
+            }
+          }
+        }
+      }
+    },
+    "ops/products.yaml::$.paths['/api/v3/products/{identifier}/categories'].post.requestBody.content['application/json']": {
+      "nodes": {
+        "$.paths./api/v3/products/{identifier}/categories.post.requestBody.content.application/json": {
+          "sig": {
+            "$ref": "#/components/schemas/IdLinkInput"
+          },
+          "upstream": {
+            "examples": {
+              "$absent": true
+            }
+          }
+        }
+      }
+    },
+    "ops/products.yaml::$.paths['/api/v3/products/{identifier}/categories'].post.responses['201']": {
+      "nodes": {
+        "$.paths./api/v3/products/{identifier}/categories.post.responses.201": {
+          "sig": {
+            "application/json": {}
+          },
+          "upstream": {
+            "description": "Successful Response",
+            "content/application~1json/examples": {
+              "$absent": true
+            }
+          }
+        }
+      }
+    },
+    "ops/products.yaml::$.paths['/api/v3/products/{identifier}/categories'].post.responses['409']": {
+      "nodes": {
+        "$.paths./api/v3/products/{identifier}/categories.post.responses.409": {
+          "sig": {
+            "application/json": {
+              "$ref": "#/components/schemas/OperationResponse"
+            }
+          },
+          "upstream": {
+            "description": "Conflict",
+            "content/application~1json/examples": {
+              "$absent": true
+            }
+          }
+        }
+      }
+    },
+    "ops/products.yaml::$.paths['/api/v3/products/{identifier}/categories'].post.responses['422'].content['application/json']": {
+      "nodes": {
+        "$.paths./api/v3/products/{identifier}/categories.post.responses.422.content.application/json": {
+          "sig": {
+            "$ref": "#/components/schemas/OperationResponse"
+          },
+          "upstream": {
+            "examples": {
+              "$absent": true
+            }
+          }
+        }
+      }
+    },
+    "ops/products.yaml::$.paths['/api/v3/products/{identifier}/categories/{id}'].delete": {
+      "nodes": {
+        "$.paths./api/v3/products/{identifier}/categories/{id}.delete": {
+          "sig": null,
+          "upstream": {
+            "summary": "Delete-Products-Categories Identity",
+            "operationId": "delete_products_categories_identity_api_v3_products__identifier__categories__id__delete",
+            "description": {
+              "$absent": true
+            }
+          }
+        }
+      }
+    },
+    "ops/products.yaml::$.paths['/api/v3/products/{identifier}/categories/{id}'].delete.parameters[?(@.name=='id' && @.in=='path')]": {
+      "nodes": {
+        "$.paths./api/v3/products/{identifier}/categories/{id}.delete.parameters[id@path]": {
+          "sig": null,
+          "upstream": {
+            "description": {
+              "$absent": true
+            }
+          }
+        }
+      }
+    },
+    "ops/products.yaml::$.paths['/api/v3/products/{identifier}/categories/{id}'].delete.parameters[?(@.name=='identifier' && @.in=='path')]": {
+      "nodes": {
+        "$.paths./api/v3/products/{identifier}/categories/{id}.delete.parameters[identifier@path]": {
+          "sig": null,
+          "upstream": {
+            "description": {
+              "$absent": true
+            }
+          }
+        }
+      }
+    },
+    "ops/products.yaml::$.paths['/api/v3/products/{identifier}/categories/{id}'].delete.responses['204']": {
+      "nodes": {
+        "$.paths./api/v3/products/{identifier}/categories/{id}.delete.responses.204": {
+          "sig": null,
+          "upstream": {
+            "description": "Successful Response"
+          }
+        }
+      }
+    },
+    "ops/products.yaml::$.paths['/api/v3/products/{identifier}/categories/{id}'].delete.responses['404'].content['application/json']": {
+      "nodes": {
+        "$.paths./api/v3/products/{identifier}/categories/{id}.delete.responses.404.content.application/json": {
+          "sig": {
+            "$ref": "#/components/schemas/OperationResponse"
+          },
+          "upstream": {
+            "examples": {
+              "$absent": true
+            }
+          }
+        }
+      }
+    },
     "ops/products.yaml::$.paths['/api/v3/products/{identifier}/{path}'].delete": {
       "nodes": {
         "$.paths./api/v3/products/{identifier}/{path}.delete": {
@@ -13658,6 +14060,266 @@
         }
       }
     },
+    "schemas/asset-categories.yaml::$.components.schemas.AssetCategoryCreateOutputDto.properties.account_id": {
+      "nodes": {
+        "$.components.schemas.AssetCategoryCreateOutputDto.properties.account_id": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": null,
+                "$ref": "#/components/schemas/PydanticObjectId"
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/PydanticObjectId"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Owner account ID"
+            }
+          }
+        }
+      }
+    },
+    "schemas/asset-categories.yaml::$.components.schemas.AssetCategoryCreateOutputDto.properties.n_children": {
+      "nodes": {
+        "$.components.schemas.AssetCategoryCreateOutputDto.properties.n_children": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "N Children",
+              "description": "Number of direct children"
+            }
+          }
+        }
+      }
+    },
+    "schemas/asset-categories.yaml::$.components.schemas.AssetCategoryCreateOutputDto.properties.path": {
+      "nodes": {
+        "$.components.schemas.AssetCategoryCreateOutputDto.properties.path": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": "array",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Path",
+              "description": "Full path of names"
+            }
+          }
+        }
+      }
+    },
+    "schemas/asset-categories.yaml::$.components.schemas.AssetCategoryCreateOutputDto.properties.slug": {
+      "nodes": {
+        "$.components.schemas.AssetCategoryCreateOutputDto.properties.slug": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": "string",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Slug",
+              "description": "URL-friendly slug"
+            }
+          }
+        }
+      }
+    },
+    "schemas/asset-categories.yaml::$.components.schemas.AssetCategoryOutputDto.properties.account_id": {
+      "nodes": {
+        "$.components.schemas.AssetCategoryOutputDto.properties.account_id": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": null,
+                "$ref": "#/components/schemas/PydanticObjectId"
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/PydanticObjectId"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Owner account ID"
+            }
+          }
+        }
+      }
+    },
+    "schemas/asset-categories.yaml::$.components.schemas.AssetCategoryOutputDto.properties.n_children": {
+      "nodes": {
+        "$.components.schemas.AssetCategoryOutputDto.properties.n_children": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "N Children",
+              "description": "Number of direct children"
+            }
+          }
+        }
+      }
+    },
+    "schemas/asset-categories.yaml::$.components.schemas.AssetCategoryOutputDto.properties.path": {
+      "nodes": {
+        "$.components.schemas.AssetCategoryOutputDto.properties.path": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": "array",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Path",
+              "description": "Full path of names"
+            }
+          }
+        }
+      }
+    },
+    "schemas/asset-categories.yaml::$.components.schemas.AssetCategoryOutputDto.properties.slug": {
+      "nodes": {
+        "$.components.schemas.AssetCategoryOutputDto.properties.slug": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": "string",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Slug",
+              "description": "URL-friendly slug"
+            }
+          }
+        }
+      }
+    },
     "schemas/asset-categories.yaml::$.components.schemas.AssetCategoryUpdateInputDto": {
       "nodes": {
         "$.components.schemas.AssetCategoryUpdateInputDto": {
@@ -13801,6 +14463,37 @@
         }
       }
     },
+    "schemas/asset-lists.yaml::$.components.schemas.AssetListCreateOutputDto.properties.account_id": {
+      "nodes": {
+        "$.components.schemas.AssetListCreateOutputDto.properties.account_id": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": null,
+                "$ref": "#/components/schemas/PydanticObjectId"
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/PydanticObjectId"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Owner account ID"
+            }
+          }
+        }
+      }
+    },
     "schemas/asset-lists.yaml::$.components.schemas.AssetListCreateOutputDto.properties.query": {
       "nodes": {
         "$.components.schemas.AssetListCreateOutputDto.properties.query": {
@@ -13898,6 +14591,37 @@
           "upstream": {
             "title": {
               "$absent": true
+            }
+          }
+        }
+      }
+    },
+    "schemas/asset-lists.yaml::$.components.schemas.AssetListOutputDto.properties.account_id": {
+      "nodes": {
+        "$.components.schemas.AssetListOutputDto.properties.account_id": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": null,
+                "$ref": "#/components/schemas/PydanticObjectId"
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/PydanticObjectId"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Owner account ID"
             }
           }
         }
@@ -14325,6 +15049,388 @@
         }
       }
     },
+    "schemas/assets.yaml::$.components.schemas.AssetCreateOutputDto.properties.account_id": {
+      "nodes": {
+        "$.components.schemas.AssetCreateOutputDto.properties.account_id": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": null,
+                "$ref": "#/components/schemas/PydanticObjectId"
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/PydanticObjectId"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Owner account ID"
+            }
+          }
+        }
+      }
+    },
+    "schemas/assets.yaml::$.components.schemas.AssetCreateOutputDto.properties.checksum": {
+      "nodes": {
+        "$.components.schemas.AssetCreateOutputDto.properties.checksum": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": "string",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Checksum",
+              "description": "Checksum of the asset"
+            }
+          }
+        }
+      }
+    },
+    "schemas/assets.yaml::$.components.schemas.AssetCreateOutputDto.properties.content_type": {
+      "nodes": {
+        "$.components.schemas.AssetCreateOutputDto.properties.content_type": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": "string",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Content Type",
+              "description": "MIME type of the asset"
+            }
+          }
+        }
+      }
+    },
+    "schemas/assets.yaml::$.components.schemas.AssetCreateOutputDto.properties.extension": {
+      "nodes": {
+        "$.components.schemas.AssetCreateOutputDto.properties.extension": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": "string",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Extension",
+              "description": "File extension of the asset"
+            }
+          }
+        }
+      }
+    },
+    "schemas/assets.yaml::$.components.schemas.AssetCreateOutputDto.properties.file_modified": {
+      "nodes": {
+        "$.components.schemas.AssetCreateOutputDto.properties.file_modified": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": "string",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "File Modified",
+              "description": "Last modification timestamp of the file"
+            }
+          }
+        }
+      }
+    },
+    "schemas/assets.yaml::$.components.schemas.AssetCreateOutputDto.properties.file_size": {
+      "nodes": {
+        "$.components.schemas.AssetCreateOutputDto.properties.file_size": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "File Size",
+              "description": "Size of the file in bytes"
+            }
+          }
+        }
+      }
+    },
+    "schemas/assets.yaml::$.components.schemas.AssetCreateOutputDto.properties.file_type": {
+      "nodes": {
+        "$.components.schemas.AssetCreateOutputDto.properties.file_type": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": null,
+                "$ref": "#/components/schemas/AssetFileType"
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/AssetFileType"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Type of the file"
+            }
+          }
+        }
+      }
+    },
+    "schemas/assets.yaml::$.components.schemas.AssetCreateOutputDto.properties.n_catalogs": {
+      "nodes": {
+        "$.components.schemas.AssetCreateOutputDto.properties.n_catalogs": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "N Catalogs",
+              "description": "Number of catalogs the asset is associated with"
+            }
+          }
+        }
+      }
+    },
+    "schemas/assets.yaml::$.components.schemas.AssetCreateOutputDto.properties.n_products": {
+      "nodes": {
+        "$.components.schemas.AssetCreateOutputDto.properties.n_products": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "N Products",
+              "description": "Number of products the asset is associated with"
+            }
+          }
+        }
+      }
+    },
+    "schemas/assets.yaml::$.components.schemas.AssetCreateOutputDto.properties.path": {
+      "nodes": {
+        "$.components.schemas.AssetCreateOutputDto.properties.path": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": "string",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Path",
+              "description": "Path to the file"
+            }
+          }
+        }
+      }
+    },
+    "schemas/assets.yaml::$.components.schemas.AssetCreateOutputDto.properties.public": {
+      "nodes": {
+        "$.components.schemas.AssetCreateOutputDto.properties.public": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": "boolean",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Public",
+              "description": "Whether the asset is public"
+            }
+          }
+        }
+      }
+    },
+    "schemas/assets.yaml::$.components.schemas.AssetCreateOutputDto.properties.status": {
+      "nodes": {
+        "$.components.schemas.AssetCreateOutputDto.properties.status": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": null,
+                "$ref": "#/components/schemas/AssetStatus"
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/AssetStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Status of the asset"
+            }
+          }
+        }
+      }
+    },
     "schemas/assets.yaml::$.components.schemas.AssetFileType": {
       "nodes": {
         "$.components.schemas.AssetFileType": {
@@ -14343,7 +15449,298 @@
             ]
           },
           "upstream": {
-            "description": "Asset file type classification."
+            ".": {
+              "type": "string",
+              "enum": [
+                "IMAGES",
+                "SOUNDS",
+                "VIDEOS",
+                "COMPRESSED",
+                "FEED_FILES",
+                "REPORTS",
+                "SPREADSHEETS",
+                "TEXTS",
+                "OTHER"
+              ],
+              "title": "AssetFileType",
+              "description": "Asset file type classification."
+            }
+          }
+        }
+      }
+    },
+    "schemas/assets.yaml::$.components.schemas.AssetOutputDto.properties.account_id": {
+      "nodes": {
+        "$.components.schemas.AssetOutputDto.properties.account_id": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": null,
+                "$ref": "#/components/schemas/PydanticObjectId"
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/PydanticObjectId"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Owner account ID"
+            }
+          }
+        }
+      }
+    },
+    "schemas/assets.yaml::$.components.schemas.AssetOutputDto.properties.categories": {
+      "nodes": {
+        "$.components.schemas.AssetOutputDto.properties.categories": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": "array",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            "description": "Expanded categories"
+          }
+        }
+      }
+    },
+    "schemas/assets.yaml::$.components.schemas.AssetOutputDto.properties.checksum": {
+      "nodes": {
+        "$.components.schemas.AssetOutputDto.properties.checksum": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": "string",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Checksum",
+              "description": "Checksum of the asset"
+            }
+          }
+        }
+      }
+    },
+    "schemas/assets.yaml::$.components.schemas.AssetOutputDto.properties.content_type": {
+      "nodes": {
+        "$.components.schemas.AssetOutputDto.properties.content_type": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": "string",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Content Type",
+              "description": "MIME type of the asset"
+            }
+          }
+        }
+      }
+    },
+    "schemas/assets.yaml::$.components.schemas.AssetOutputDto.properties.downloaded_from": {
+      "nodes": {
+        "$.components.schemas.AssetOutputDto.properties.downloaded_from": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": "string",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Downloaded From",
+              "description": "Source from which the file was downloaded"
+            }
+          }
+        }
+      }
+    },
+    "schemas/assets.yaml::$.components.schemas.AssetOutputDto.properties.extension": {
+      "nodes": {
+        "$.components.schemas.AssetOutputDto.properties.extension": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": "string",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Extension",
+              "description": "File extension of the asset"
+            }
+          }
+        }
+      }
+    },
+    "schemas/assets.yaml::$.components.schemas.AssetOutputDto.properties.file_modified": {
+      "nodes": {
+        "$.components.schemas.AssetOutputDto.properties.file_modified": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": "string",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "File Modified",
+              "description": "Last modification timestamp of the file"
+            }
+          }
+        }
+      }
+    },
+    "schemas/assets.yaml::$.components.schemas.AssetOutputDto.properties.file_size": {
+      "nodes": {
+        "$.components.schemas.AssetOutputDto.properties.file_size": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "File Size",
+              "description": "Size of the file in bytes"
+            }
+          }
+        }
+      }
+    },
+    "schemas/assets.yaml::$.components.schemas.AssetOutputDto.properties.file_type": {
+      "nodes": {
+        "$.components.schemas.AssetOutputDto.properties.file_type": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": null,
+                "$ref": "#/components/schemas/AssetFileType"
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/AssetFileType"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Type of the file"
+            }
           }
         }
       }
@@ -14364,7 +15761,18 @@
             ]
           },
           "upstream": {
-            "description": "Number of catalogs the asset is associated with"
+            ".": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "N Catalogs",
+              "description": "Number of catalogs the asset is associated with"
+            }
           }
         }
       }
@@ -14385,7 +15793,18 @@
             ]
           },
           "upstream": {
-            "description": "Number of products the asset is associated with"
+            ".": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "N Products",
+              "description": "Number of products the asset is associated with"
+            }
           }
         }
       }
@@ -14406,7 +15825,81 @@
             ]
           },
           "upstream": {
-            "description": "Path to the file"
+            ".": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Path",
+              "description": "Path to the file"
+            }
+          }
+        }
+      }
+    },
+    "schemas/assets.yaml::$.components.schemas.AssetOutputDto.properties.public": {
+      "nodes": {
+        "$.components.schemas.AssetOutputDto.properties.public": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": "boolean",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Public",
+              "description": "Whether the asset is public"
+            }
+          }
+        }
+      }
+    },
+    "schemas/assets.yaml::$.components.schemas.AssetOutputDto.properties.status": {
+      "nodes": {
+        "$.components.schemas.AssetOutputDto.properties.status": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": null,
+                "$ref": "#/components/schemas/AssetStatus"
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/AssetStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Status of the asset"
+            }
           }
         }
       }
@@ -14422,7 +15915,15 @@
             ]
           },
           "upstream": {
-            "description": "Asset status values."
+            ".": {
+              "type": "string",
+              "enum": [
+                "ACTIVE",
+                "DELETED"
+              ],
+              "title": "AssetStatus",
+              "description": "Asset status values."
+            }
           }
         }
       }
@@ -14505,6 +16006,37 @@
         }
       }
     },
+    "schemas/product-attribute-groups.yaml::$.components.schemas.ProductAttributeGroupCreateOutputDto.properties.account_id": {
+      "nodes": {
+        "$.components.schemas.ProductAttributeGroupCreateOutputDto.properties.account_id": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": null,
+                "$ref": "#/components/schemas/PydanticObjectId"
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/PydanticObjectId"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Owner account ID"
+            }
+          }
+        }
+      }
+    },
     "schemas/product-attribute-groups.yaml::$.components.schemas.ProductAttributeGroupCreateOutputDto.properties.attribute_labels": {
       "nodes": {
         "$.components.schemas.ProductAttributeGroupCreateOutputDto.properties.attribute_labels": {
@@ -14521,7 +16053,52 @@
             ]
           },
           "upstream": {
-            "description": "Attribute labels"
+            ".": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Attribute Labels",
+              "description": "Attribute labels"
+            }
+          }
+        }
+      }
+    },
+    "schemas/product-attribute-groups.yaml::$.components.schemas.ProductAttributeGroupOutputDto.properties.account_id": {
+      "nodes": {
+        "$.components.schemas.ProductAttributeGroupOutputDto.properties.account_id": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": null,
+                "$ref": "#/components/schemas/PydanticObjectId"
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/PydanticObjectId"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Owner account ID"
+            }
           }
         }
       }
@@ -14542,7 +16119,21 @@
             ]
           },
           "upstream": {
-            "description": "Attribute labels"
+            ".": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Attribute Labels",
+              "description": "Attribute labels"
+            }
           }
         }
       }
@@ -14764,6 +16355,37 @@
         }
       }
     },
+    "schemas/product-attributes.yaml::$.components.schemas.BooleanAttributeGetOutputDto.properties.account_id": {
+      "nodes": {
+        "$.components.schemas.BooleanAttributeGetOutputDto.properties.account_id": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": null,
+                "$ref": "#/components/schemas/PydanticObjectId"
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/PydanticObjectId"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Owner account ID"
+            }
+          }
+        }
+      }
+    },
     "schemas/product-attributes.yaml::$.components.schemas.CompletenessAttributeCreateInputDto": {
       "nodes": {
         "$.components.schemas.CompletenessAttributeCreateInputDto": {
@@ -14893,6 +16515,37 @@
           },
           "upstream": {
             "title": "CompletenessAttributeGetOutputDto"
+          }
+        }
+      }
+    },
+    "schemas/product-attributes.yaml::$.components.schemas.CompletenessAttributeGetOutputDto.properties.account_id": {
+      "nodes": {
+        "$.components.schemas.CompletenessAttributeGetOutputDto.properties.account_id": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": null,
+                "$ref": "#/components/schemas/PydanticObjectId"
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/PydanticObjectId"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Owner account ID"
+            }
           }
         }
       }
@@ -15030,6 +16683,37 @@
         }
       }
     },
+    "schemas/product-attributes.yaml::$.components.schemas.DateAttributeGetOutputDto.properties.account_id": {
+      "nodes": {
+        "$.components.schemas.DateAttributeGetOutputDto.properties.account_id": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": null,
+                "$ref": "#/components/schemas/PydanticObjectId"
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/PydanticObjectId"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Owner account ID"
+            }
+          }
+        }
+      }
+    },
     "schemas/product-attributes.yaml::$.components.schemas.DecimalAttributeCreateInputDto": {
       "nodes": {
         "$.components.schemas.DecimalAttributeCreateInputDto": {
@@ -15138,6 +16822,37 @@
           },
           "upstream": {
             "title": "DecimalAttributeGetOutputDto"
+          }
+        }
+      }
+    },
+    "schemas/product-attributes.yaml::$.components.schemas.DecimalAttributeGetOutputDto.properties.account_id": {
+      "nodes": {
+        "$.components.schemas.DecimalAttributeGetOutputDto.properties.account_id": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": null,
+                "$ref": "#/components/schemas/PydanticObjectId"
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/PydanticObjectId"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Owner account ID"
+            }
           }
         }
       }
@@ -15341,6 +17056,37 @@
         }
       }
     },
+    "schemas/product-attributes.yaml::$.components.schemas.DropdownAttributeGetOutputDto.properties.account_id": {
+      "nodes": {
+        "$.components.schemas.DropdownAttributeGetOutputDto.properties.account_id": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": null,
+                "$ref": "#/components/schemas/PydanticObjectId"
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/PydanticObjectId"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Owner account ID"
+            }
+          }
+        }
+      }
+    },
     "schemas/product-attributes.yaml::$.components.schemas.FormulaAttributeCreateInputDto": {
       "nodes": {
         "$.components.schemas.FormulaAttributeCreateInputDto": {
@@ -15391,7 +17137,16 @@
             ]
           },
           "upstream": {
-            "description": "Formula definition"
+            ".": {
+              "anyOf": [
+                {},
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Formula",
+              "description": "Formula definition"
+            }
           }
         }
       }
@@ -15483,6 +17238,36 @@
         }
       }
     },
+    "schemas/product-attributes.yaml::$.components.schemas.FormulaAttributeCreateOutputDto.properties.formula": {
+      "nodes": {
+        "$.components.schemas.FormulaAttributeCreateOutputDto.properties.formula": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": null,
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {},
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Formula",
+              "description": "Formula definition"
+            }
+          }
+        }
+      }
+    },
     "schemas/product-attributes.yaml::$.components.schemas.FormulaAttributeGetOutputDto": {
       "nodes": {
         "$.components.schemas.FormulaAttributeGetOutputDto": {
@@ -15491,6 +17276,67 @@
           },
           "upstream": {
             "title": "FormulaAttributeGetOutputDto"
+          }
+        }
+      }
+    },
+    "schemas/product-attributes.yaml::$.components.schemas.FormulaAttributeGetOutputDto.properties.account_id": {
+      "nodes": {
+        "$.components.schemas.FormulaAttributeGetOutputDto.properties.account_id": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": null,
+                "$ref": "#/components/schemas/PydanticObjectId"
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/PydanticObjectId"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Owner account ID"
+            }
+          }
+        }
+      }
+    },
+    "schemas/product-attributes.yaml::$.components.schemas.FormulaAttributeGetOutputDto.properties.formula": {
+      "nodes": {
+        "$.components.schemas.FormulaAttributeGetOutputDto.properties.formula": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": null,
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {},
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Formula",
+              "description": "Formula definition"
+            }
           }
         }
       }
@@ -15607,6 +17453,37 @@
         }
       }
     },
+    "schemas/product-attributes.yaml::$.components.schemas.HtmlAttributeGetOutputDto.properties.account_id": {
+      "nodes": {
+        "$.components.schemas.HtmlAttributeGetOutputDto.properties.account_id": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": null,
+                "$ref": "#/components/schemas/PydanticObjectId"
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/PydanticObjectId"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Owner account ID"
+            }
+          }
+        }
+      }
+    },
     "schemas/product-attributes.yaml::$.components.schemas.IntAttributeCreateInputDto": {
       "nodes": {
         "$.components.schemas.IntAttributeCreateInputDto": {
@@ -15715,6 +17592,37 @@
           },
           "upstream": {
             "title": "IntAttributeGetOutputDto"
+          }
+        }
+      }
+    },
+    "schemas/product-attributes.yaml::$.components.schemas.IntAttributeGetOutputDto.properties.account_id": {
+      "nodes": {
+        "$.components.schemas.IntAttributeGetOutputDto.properties.account_id": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": null,
+                "$ref": "#/components/schemas/PydanticObjectId"
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/PydanticObjectId"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Owner account ID"
+            }
           }
         }
       }
@@ -15831,6 +17739,37 @@
         }
       }
     },
+    "schemas/product-attributes.yaml::$.components.schemas.MediaAttributeGetOutputDto.properties.account_id": {
+      "nodes": {
+        "$.components.schemas.MediaAttributeGetOutputDto.properties.account_id": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": null,
+                "$ref": "#/components/schemas/PydanticObjectId"
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/PydanticObjectId"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Owner account ID"
+            }
+          }
+        }
+      }
+    },
     "schemas/product-attributes.yaml::$.components.schemas.MediaGalleryAttributeCreateInputDto": {
       "nodes": {
         "$.components.schemas.MediaGalleryAttributeCreateInputDto": {
@@ -15939,6 +17878,37 @@
           },
           "upstream": {
             "title": "MediaGalleryAttributeGetOutputDto"
+          }
+        }
+      }
+    },
+    "schemas/product-attributes.yaml::$.components.schemas.MediaGalleryAttributeGetOutputDto.properties.account_id": {
+      "nodes": {
+        "$.components.schemas.MediaGalleryAttributeGetOutputDto.properties.account_id": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": null,
+                "$ref": "#/components/schemas/PydanticObjectId"
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/PydanticObjectId"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Owner account ID"
+            }
           }
         }
       }
@@ -16142,6 +18112,37 @@
         }
       }
     },
+    "schemas/product-attributes.yaml::$.components.schemas.MultiSelectAttributeGetOutputDto.properties.account_id": {
+      "nodes": {
+        "$.components.schemas.MultiSelectAttributeGetOutputDto.properties.account_id": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": null,
+                "$ref": "#/components/schemas/PydanticObjectId"
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/PydanticObjectId"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Owner account ID"
+            }
+          }
+        }
+      }
+    },
     "schemas/product-attributes.yaml::$.components.schemas.MultilineAttributeGetOutputDto": {
       "nodes": {
         "$.components.schemas.MultilineAttributeGetOutputDto": {
@@ -16150,6 +18151,37 @@
           },
           "upstream": {
             "title": "MultilineAttributeGetOutputDto"
+          }
+        }
+      }
+    },
+    "schemas/product-attributes.yaml::$.components.schemas.MultilineAttributeGetOutputDto.properties.account_id": {
+      "nodes": {
+        "$.components.schemas.MultilineAttributeGetOutputDto.properties.account_id": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": null,
+                "$ref": "#/components/schemas/PydanticObjectId"
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/PydanticObjectId"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Owner account ID"
+            }
           }
         }
       }
@@ -16174,6 +18206,68 @@
           },
           "upstream": {
             "title": "ProductAttributeGenericGetOutputDto"
+          }
+        }
+      }
+    },
+    "schemas/product-attributes.yaml::$.components.schemas.ProductAttributeGenericGetOutputDto.properties.account_id": {
+      "nodes": {
+        "$.components.schemas.ProductAttributeGenericGetOutputDto.properties.account_id": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": null,
+                "$ref": "#/components/schemas/PydanticObjectId"
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/PydanticObjectId"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Owner account ID"
+            }
+          }
+        }
+      }
+    },
+    "schemas/product-attributes.yaml::$.components.schemas.ProductAttributeGetBaseOutputDto.properties.account_id": {
+      "nodes": {
+        "$.components.schemas.ProductAttributeGetBaseOutputDto.properties.account_id": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": null,
+                "$ref": "#/components/schemas/PydanticObjectId"
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/PydanticObjectId"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Owner account ID"
+            }
           }
         }
       }
@@ -16581,6 +18675,37 @@
         }
       }
     },
+    "schemas/product-attributes.yaml::$.components.schemas.TextAttributeGetOutputDto.properties.account_id": {
+      "nodes": {
+        "$.components.schemas.TextAttributeGetOutputDto.properties.account_id": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": null,
+                "$ref": "#/components/schemas/PydanticObjectId"
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/PydanticObjectId"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Owner account ID"
+            }
+          }
+        }
+      }
+    },
     "schemas/product-attributes.yaml::$.components.schemas.UrlAttributeCreateInputDto": {
       "nodes": {
         "$.components.schemas.UrlAttributeCreateInputDto": {
@@ -16693,6 +18818,37 @@
         }
       }
     },
+    "schemas/product-attributes.yaml::$.components.schemas.UrlAttributeGetOutputDto.properties.account_id": {
+      "nodes": {
+        "$.components.schemas.UrlAttributeGetOutputDto.properties.account_id": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": null,
+                "$ref": "#/components/schemas/PydanticObjectId"
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/PydanticObjectId"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Owner account ID"
+            }
+          }
+        }
+      }
+    },
     "schemas/product-categories.yaml::$.components.schemas.ProductCategoryCreateInputDto": {
       "nodes": {
         "$.components.schemas.ProductCategoryCreateInputDto": {
@@ -16756,6 +18912,167 @@
         }
       }
     },
+    "schemas/product-categories.yaml::$.components.schemas.ProductCategoryCreateOutputDto.properties.account_id": {
+      "nodes": {
+        "$.components.schemas.ProductCategoryCreateOutputDto.properties.account_id": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": null,
+                "$ref": "#/components/schemas/PydanticObjectId"
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/PydanticObjectId"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Owner account ID"
+            }
+          }
+        }
+      }
+    },
+    "schemas/product-categories.yaml::$.components.schemas.ProductCategoryCreateOutputDto.properties.n_children": {
+      "nodes": {
+        "$.components.schemas.ProductCategoryCreateOutputDto.properties.n_children": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "N Children",
+              "description": "Number of direct children"
+            }
+          }
+        }
+      }
+    },
+    "schemas/product-categories.yaml::$.components.schemas.ProductCategoryCreateOutputDto.properties.path": {
+      "nodes": {
+        "$.components.schemas.ProductCategoryCreateOutputDto.properties.path": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": "array",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Path",
+              "description": "Full path of names"
+            }
+          }
+        }
+      }
+    },
+    "schemas/product-categories.yaml::$.components.schemas.ProductCategoryCreateOutputDto.properties.slug": {
+      "nodes": {
+        "$.components.schemas.ProductCategoryCreateOutputDto.properties.slug": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": "string",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Slug",
+              "description": "URL-friendly slug"
+            }
+          }
+        }
+      }
+    },
+    "schemas/product-categories.yaml::$.components.schemas.ProductCategoryGetOutputDto.properties.account_id": {
+      "nodes": {
+        "$.components.schemas.ProductCategoryGetOutputDto.properties.account_id": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": null,
+                "$ref": "#/components/schemas/PydanticObjectId"
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/PydanticObjectId"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Owner account ID"
+            }
+          }
+        }
+      }
+    },
     "schemas/product-categories.yaml::$.components.schemas.ProductCategoryGetOutputDto.properties.n_children": {
       "nodes": {
         "$.components.schemas.ProductCategoryGetOutputDto.properties.n_children": {
@@ -16772,7 +19089,18 @@
             ]
           },
           "upstream": {
-            "description": "Number of direct children"
+            ".": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "N Children",
+              "description": "Number of direct children"
+            }
           }
         }
       }
@@ -16814,9 +19142,20 @@
             ]
           },
           "upstream": {
-            "description": "Full path of names",
-            "examples": {
-              "$absent": true
+            ".": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Path",
+              "description": "Full path of names"
             }
           }
         }
@@ -16838,7 +19177,18 @@
             ]
           },
           "upstream": {
-            "description": "URL-friendly slug"
+            ".": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Slug",
+              "description": "URL-friendly slug"
+            }
           }
         }
       }
@@ -16901,19 +19251,47 @@
             "type": "object"
           },
           "upstream": {
-            "description": "Reference to an attribute by label, with an optional id (for system attributes)."
+            ".": {
+              "properties": {
+                "id": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Id",
+                  "description": "Attribute ID"
+                },
+                "label": {
+                  "type": "string",
+                  "minLength": 1,
+                  "title": "Label",
+                  "description": "Attribute label"
+                }
+              },
+              "additionalProperties": false,
+              "type": "object",
+              "required": [
+                "label"
+              ],
+              "title": "AttributeRefInputDto",
+              "description": "Reference to an attribute by label, with an optional id (for system attributes)."
+            }
           }
         }
       }
     },
-    "schemas/product-families.yaml::$.components.schemas.AttributeRefInputDto.properties.id": {
+    "schemas/product-families.yaml::$.components.schemas.FamilyAttributeOutputDto.properties.account_id": {
       "nodes": {
-        "$.components.schemas.AttributeRefInputDto.properties.id": {
+        "$.components.schemas.FamilyAttributeOutputDto.properties.account_id": {
           "sig": {
             "anyOf": [
               {
-                "type": "string",
-                "$ref": null
+                "type": null,
+                "$ref": "#/components/schemas/PydanticObjectId"
               },
               {
                 "type": "null",
@@ -16922,24 +19300,16 @@
             ]
           },
           "upstream": {
-            "description": "Attribute ID",
-            "examples": {
-              "$absent": true
-            }
-          }
-        }
-      }
-    },
-    "schemas/product-families.yaml::$.components.schemas.AttributeRefInputDto.properties.label": {
-      "nodes": {
-        "$.components.schemas.AttributeRefInputDto.properties.label": {
-          "sig": {
-            "type": "string"
-          },
-          "upstream": {
-            "description": "Attribute label",
-            "examples": {
-              "$absent": true
+            ".": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/PydanticObjectId"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Owner account ID"
             }
           }
         }
@@ -16977,45 +19347,26 @@
             ]
           },
           "upstream": {
-            "description": "Attributes to link without inheritance, as attribute IDs or {id, label} objects",
-            "examples": {
-              "$absent": true
-            }
-          }
-        }
-      }
-    },
-    "schemas/product-families.yaml::$.components.schemas.ProductFamilyCreateInputDto.properties.attributes.anyOf[0]": {
-      "nodes": {
-        "$.components.schemas.ProductFamilyCreateInputDto.properties.attributes.anyOf[0]": {
-          "sig": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "$ref": null
-            }
-          },
-          "upstream": {
-            "title": {
-              "$absent": true
-            }
-          }
-        }
-      }
-    },
-    "schemas/product-families.yaml::$.components.schemas.ProductFamilyCreateInputDto.properties.attributes.anyOf[1]": {
-      "nodes": {
-        "$.components.schemas.ProductFamilyCreateInputDto.properties.attributes.anyOf[1]": {
-          "sig": {
-            "type": "array",
-            "items": {
-              "type": null,
-              "$ref": "#/components/schemas/AttributeRefInputDto"
-            }
-          },
-          "upstream": {
-            "title": {
-              "$absent": true
+            ".": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "items": {
+                    "$ref": "#/components/schemas/AttributeRefInputDto"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Attributes",
+              "description": "Attributes to link without inheritance, as attribute IDs or {id, label} objects"
             }
           }
         }
@@ -17056,42 +19407,26 @@
             ]
           },
           "upstream": {
-            "description": "Attributes to link at the parent level, as attribute IDs or {id, label} objects"
-          }
-        }
-      }
-    },
-    "schemas/product-families.yaml::$.components.schemas.ProductFamilyCreateInputDto.properties.parent_attributes.anyOf[0]": {
-      "nodes": {
-        "$.components.schemas.ProductFamilyCreateInputDto.properties.parent_attributes.anyOf[0]": {
-          "sig": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "$ref": null
-            }
-          },
-          "upstream": {
-            "title": {
-              "$absent": true
-            }
-          }
-        }
-      }
-    },
-    "schemas/product-families.yaml::$.components.schemas.ProductFamilyCreateInputDto.properties.parent_attributes.anyOf[1]": {
-      "nodes": {
-        "$.components.schemas.ProductFamilyCreateInputDto.properties.parent_attributes.anyOf[1]": {
-          "sig": {
-            "type": "array",
-            "items": {
-              "type": null,
-              "$ref": "#/components/schemas/AttributeRefInputDto"
-            }
-          },
-          "upstream": {
-            "title": {
-              "$absent": true
+            ".": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "items": {
+                    "$ref": "#/components/schemas/AttributeRefInputDto"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Parent Attributes",
+              "description": "Attributes to link at the parent level, as attribute IDs or {id, label} objects"
             }
           }
         }
@@ -17117,42 +19452,184 @@
             ]
           },
           "upstream": {
-            "description": "Attributes to link at the variant level, as attribute IDs or {id, label} objects"
+            ".": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "items": {
+                    "$ref": "#/components/schemas/AttributeRefInputDto"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Variant Attributes",
+              "description": "Attributes to link at the variant level, as attribute IDs or {id, label} objects"
+            }
           }
         }
       }
     },
-    "schemas/product-families.yaml::$.components.schemas.ProductFamilyCreateInputDto.properties.variant_attributes.anyOf[0]": {
+    "schemas/product-families.yaml::$.components.schemas.ProductFamilyCreateOutputDto.properties.account_id": {
       "nodes": {
-        "$.components.schemas.ProductFamilyCreateInputDto.properties.variant_attributes.anyOf[0]": {
+        "$.components.schemas.ProductFamilyCreateOutputDto.properties.account_id": {
           "sig": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "$ref": null
-            }
+            "anyOf": [
+              {
+                "type": null,
+                "$ref": "#/components/schemas/PydanticObjectId"
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
           },
           "upstream": {
-            "title": {
-              "$absent": true
+            ".": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/PydanticObjectId"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Owner account ID"
             }
           }
         }
       }
     },
-    "schemas/product-families.yaml::$.components.schemas.ProductFamilyCreateInputDto.properties.variant_attributes.anyOf[1]": {
+    "schemas/product-families.yaml::$.components.schemas.ProductFamilyCreateOutputDto.properties.total_attributes": {
       "nodes": {
-        "$.components.schemas.ProductFamilyCreateInputDto.properties.variant_attributes.anyOf[1]": {
+        "$.components.schemas.ProductFamilyCreateOutputDto.properties.total_attributes": {
           "sig": {
-            "type": "array",
-            "items": {
-              "type": null,
-              "$ref": "#/components/schemas/AttributeRefInputDto"
-            }
+            "anyOf": [
+              {
+                "type": "integer",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
           },
           "upstream": {
-            "title": {
-              "$absent": true
+            ".": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Total Attributes",
+              "description": "Total number of attributes in the family"
+            }
+          }
+        }
+      }
+    },
+    "schemas/product-families.yaml::$.components.schemas.ProductFamilyCreateOutputDto.properties.total_models": {
+      "nodes": {
+        "$.components.schemas.ProductFamilyCreateOutputDto.properties.total_models": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Total Models",
+              "description": "Total number of models in the family"
+            }
+          }
+        }
+      }
+    },
+    "schemas/product-families.yaml::$.components.schemas.ProductFamilyCreateOutputDto.properties.total_products": {
+      "nodes": {
+        "$.components.schemas.ProductFamilyCreateOutputDto.properties.total_products": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Total Products",
+              "description": "Total number of products in the family"
+            }
+          }
+        }
+      }
+    },
+    "schemas/product-families.yaml::$.components.schemas.ProductFamilyOutputDto.properties.account_id": {
+      "nodes": {
+        "$.components.schemas.ProductFamilyOutputDto.properties.account_id": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": null,
+                "$ref": "#/components/schemas/PydanticObjectId"
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/PydanticObjectId"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Owner account ID"
             }
           }
         }
@@ -17175,6 +19652,102 @@
           },
           "upstream": {
             "description": "Family-attribute association rows (_fields=family_attributes.*)"
+          }
+        }
+      }
+    },
+    "schemas/product-families.yaml::$.components.schemas.ProductFamilyOutputDto.properties.total_attributes": {
+      "nodes": {
+        "$.components.schemas.ProductFamilyOutputDto.properties.total_attributes": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Total Attributes",
+              "description": "Total number of attributes in the family"
+            }
+          }
+        }
+      }
+    },
+    "schemas/product-families.yaml::$.components.schemas.ProductFamilyOutputDto.properties.total_models": {
+      "nodes": {
+        "$.components.schemas.ProductFamilyOutputDto.properties.total_models": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Total Models",
+              "description": "Total number of models in the family"
+            }
+          }
+        }
+      }
+    },
+    "schemas/product-families.yaml::$.components.schemas.ProductFamilyOutputDto.properties.total_products": {
+      "nodes": {
+        "$.components.schemas.ProductFamilyOutputDto.properties.total_products": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Total Products",
+              "description": "Total number of products in the family"
+            }
           }
         }
       }
@@ -17409,6 +19982,104 @@
         }
       }
     },
+    "schemas/products.yaml::$.components.schemas.ProductCreateOutputDto.properties.account_id": {
+      "nodes": {
+        "$.components.schemas.ProductCreateOutputDto.properties.account_id": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": null,
+                "$ref": "#/components/schemas/PydanticObjectId"
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/PydanticObjectId"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Owner account ID"
+            }
+          }
+        }
+      }
+    },
+    "schemas/products.yaml::$.components.schemas.ProductCreateOutputDto.properties.num_variations": {
+      "nodes": {
+        "$.components.schemas.ProductCreateOutputDto.properties.num_variations": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Num Variations",
+              "description": "Number of variations"
+            }
+          }
+        }
+      }
+    },
+    "schemas/products.yaml::$.components.schemas.ProductCreateOutputDto.properties.overwritten_attributes": {
+      "nodes": {
+        "$.components.schemas.ProductCreateOutputDto.properties.overwritten_attributes": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": "array",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Overwritten Attributes",
+              "description": "Overwritten attribute names"
+            }
+          }
+        }
+      }
+    },
     "schemas/products.yaml::$.components.schemas.ProductDataSheetLinkOutputDto": {
       "nodes": {
         "$.components.schemas.ProductDataSheetLinkOutputDto": {
@@ -17583,6 +20254,79 @@
         }
       }
     },
+    "schemas/products.yaml::$.components.schemas.ProductOutputDto.properties.account_id": {
+      "nodes": {
+        "$.components.schemas.ProductOutputDto.properties.account_id": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": null,
+                "$ref": "#/components/schemas/PydanticObjectId"
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/PydanticObjectId"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Owner account ID"
+            }
+          }
+        }
+      }
+    },
+    "schemas/products.yaml::$.components.schemas.ProductOutputDto.properties.assets": {
+      "nodes": {
+        "$.components.schemas.ProductOutputDto.properties.assets": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": "array",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            "description": "Asset ids, or expanded assets when explicitly requested"
+          }
+        }
+      }
+    },
+    "schemas/products.yaml::$.components.schemas.ProductOutputDto.properties.categories": {
+      "nodes": {
+        "$.components.schemas.ProductOutputDto.properties.categories": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": "array",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            "description": "Expanded categories, present only when explicitly requested"
+          }
+        }
+      }
+    },
     "schemas/products.yaml::$.components.schemas.ProductOutputDto.properties.channels": {
       "nodes": {
         "$.components.schemas.ProductOutputDto.properties.channels": {
@@ -17653,6 +20397,94 @@
         }
       }
     },
+    "schemas/products.yaml::$.components.schemas.ProductOutputDto.properties.num_variations": {
+      "nodes": {
+        "$.components.schemas.ProductOutputDto.properties.num_variations": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Num Variations",
+              "description": "Number of variations"
+            }
+          }
+        }
+      }
+    },
+    "schemas/products.yaml::$.components.schemas.ProductOutputDto.properties.overwritten_attributes": {
+      "nodes": {
+        "$.components.schemas.ProductOutputDto.properties.overwritten_attributes": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": "array",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Overwritten Attributes",
+              "description": "Overwritten attribute names"
+            }
+          }
+        }
+      }
+    },
+    "schemas/products.yaml::$.components.schemas.ProductOutputDto.properties.parent": {
+      "nodes": {
+        "$.components.schemas.ProductOutputDto.properties.parent": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": null,
+                "$ref": "#/components/schemas/ProductOutputDto"
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            "description": "Parent id, or expanded parent product when explicitly requested"
+          }
+        }
+      }
+    },
     "schemas/products.yaml::$.components.schemas.ProductOutputDto.properties.product_data_sheets": {
       "nodes": {
         "$.components.schemas.ProductOutputDto.properties.product_data_sheets": {
@@ -17688,6 +20520,48 @@
         }
       }
     },
+    "schemas/products.yaml::$.components.schemas.ProductOutputDto.properties.product_family": {
+      "nodes": {
+        "$.components.schemas.ProductOutputDto.properties.product_family": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": null,
+                "$ref": "#/components/schemas/ProductFamilyOutputDto"
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            "description": "Product family id, or expanded product family when explicitly requested"
+          }
+        }
+      }
+    },
+    "schemas/products.yaml::$.components.schemas.ProductOutputDto.properties.product_relationships": {
+      "nodes": {
+        "$.components.schemas.ProductOutputDto.properties.product_relationships": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": "array",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            "description": "Product relationship ids, or full rows when expanded (explicit request only)"
+          }
+        }
+      }
+    },
     "schemas/products.yaml::$.components.schemas.ProductOutputDto.properties.static_lists": {
       "nodes": {
         "$.components.schemas.ProductOutputDto.properties.static_lists": {
@@ -17718,6 +20592,59 @@
               ],
               "title": "Static Lists",
               "description": "Expanded static lists, present only when explicitly requested"
+            }
+          }
+        }
+      }
+    },
+    "schemas/products.yaml::$.components.schemas.ProductOutputDto.properties.thumbnail": {
+      "nodes": {
+        "$.components.schemas.ProductOutputDto.properties.thumbnail": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": null,
+                "$ref": "#/components/schemas/AssetOutputDto"
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            "description": "Expanded thumbnail asset, present only when explicitly requested"
+          }
+        }
+      }
+    },
+    "schemas/products.yaml::$.components.schemas.ProductRelationshipModelOutputDto.properties.relationship_label": {
+      "nodes": {
+        "$.components.schemas.ProductRelationshipModelOutputDto.properties.relationship_label": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": "string",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Relationship Label",
+              "description": "Relationship label"
             }
           }
         }
@@ -17882,6 +20809,68 @@
         }
       }
     },
+    "schemas/relationships.yaml::$.components.schemas.RelationshipCreateOutputDto.properties.account_id": {
+      "nodes": {
+        "$.components.schemas.RelationshipCreateOutputDto.properties.account_id": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": null,
+                "$ref": "#/components/schemas/PydanticObjectId"
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/PydanticObjectId"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Owner account ID"
+            }
+          }
+        }
+      }
+    },
+    "schemas/relationships.yaml::$.components.schemas.RelationshipOutputDto.properties.account_id": {
+      "nodes": {
+        "$.components.schemas.RelationshipOutputDto.properties.account_id": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": null,
+                "$ref": "#/components/schemas/PydanticObjectId"
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/PydanticObjectId"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Owner account ID"
+            }
+          }
+        }
+      }
+    },
     "schemas/relationships.yaml::$.components.schemas.RelationshipStatus": {
       "nodes": {
         "$.components.schemas.RelationshipStatus": {
@@ -17920,6 +20909,136 @@
             "description": "Name of the relationship",
             "examples": {
               "$absent": true
+            }
+          }
+        }
+      }
+    },
+    "schemas/shared.yaml::$.components.schemas.CategoryBaseOutputDto.properties.account_id": {
+      "nodes": {
+        "$.components.schemas.CategoryBaseOutputDto.properties.account_id": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": null,
+                "$ref": "#/components/schemas/PydanticObjectId"
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/PydanticObjectId"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Owner account ID"
+            }
+          }
+        }
+      }
+    },
+    "schemas/shared.yaml::$.components.schemas.CategoryBaseOutputDto.properties.n_children": {
+      "nodes": {
+        "$.components.schemas.CategoryBaseOutputDto.properties.n_children": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "N Children",
+              "description": "Number of direct children"
+            }
+          }
+        }
+      }
+    },
+    "schemas/shared.yaml::$.components.schemas.CategoryBaseOutputDto.properties.path": {
+      "nodes": {
+        "$.components.schemas.CategoryBaseOutputDto.properties.path": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": "array",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Path",
+              "description": "Full path of names"
+            }
+          }
+        }
+      }
+    },
+    "schemas/shared.yaml::$.components.schemas.CategoryBaseOutputDto.properties.slug": {
+      "nodes": {
+        "$.components.schemas.CategoryBaseOutputDto.properties.slug": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": "string",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Slug",
+              "description": "URL-friendly slug"
             }
           }
         }

@@ -12,7 +12,7 @@ Key points on this page:
 - A filter is `field[operator]=value`, and equality needs no operator at all.
 - `&` combines filters with AND. OR uses an indexed `_or[#]` prefix on each filter it joins.
 - Custom attributes are addressed as `attributes.<name>`.
-- `_fields` controls which fields come back, and it's repeated once per field. It works on searches only.
+- `_fields` controls which fields come back, and it's repeated once per field. Without it, a response holds the default fields, and related entities come back only when you name them.
 - Case-insensitive text matching is `contains:ignorecase`.
 
 ## How a filter is written
@@ -168,17 +168,17 @@ _fields=sku&_fields=label&_fields=status
 | Goal | Syntax |
 |---|---|
 | Selected fields | `_fields=<field1>&_fields=<field2>` |
-| All fields | Default when `_fields` is absent |
+| Default fields | Returned when `_fields` is absent. Related entities, such as `categories` or `assets`, aren't included until you name them |
 | All fields, explicit | `_fields=*` |
 | Fields on a related entity | `_fields=<entity>.<field>` |
 | All fields on a related entity | `_fields=<entity>.*` |
 
-Requesting a related entity's fields expands that entity in the response. There is no separate expand parameter: `_fields=categories` already returns fully expanded category objects. `_fields=<entity>` and `_fields=<entity>.*` return the same thing.
+Requesting a related entity's fields expands that entity in the response. There is no separate expand parameter: `_fields=categories` already returns fully expanded category objects. `_fields=<entity>` and `_fields=<entity>.*` return the same thing. A to-one relation, such as a product's `parent` or `product_family`, expands to a single object. A to-many relation, such as `categories` or `assets`, expands to a list.
 
 <Callout type="warn" title="Three things to know about _fields">
-  **It only works on searches.** `_fields` is silently ignored on `GET /<resource>/<id>`, which always returns the full shape. Use it on the search endpoint and filter down to the one record instead.
+  **It works on single records too.** `GET /api/v3/products/<id>?_fields=sku` returns only the `sku`. This was tested on products. On other resources, check that the response is narrowed before you rely on it.
 
-  **A valid response field isn't always a valid `_fields` value.** `_fields=category_ids` returns `400 HiddenFieldError` even though the field is declared in the spec, because ID-only fields are hidden to avoid exposing denormalization. The expanded `_fields=categories` works and returns the same data. Search endpoints can also accept a narrower set than the resource itself: `_fields=type` returns a `400` on product lists and asset lists while appearing on every single-record response.
+  **A valid response field isn't always a valid `_fields` value.** `_fields=category_ids` returns `400 HiddenFieldError` even though the field is declared in the spec, because ID-only fields are hidden to avoid exposing denormalization. The expanded `_fields=categories` works and returns the same data. Search endpoints can also accept a narrower set than the resource itself: `_fields=type` returns a `400` on asset-list searches, even though `type` appears on every single asset list.
 
   **An unknown value may fail either way.** Some unknown fields return a `400` naming the error, and others are dropped with no error and no key in the response. Check that every field you asked for came back rather than trusting the status code.
 </Callout>

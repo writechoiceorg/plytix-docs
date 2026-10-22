@@ -33,6 +33,7 @@ Every fix in `00-fixes.yaml` cites one of these IDs through `x-plytix-question`.
 ### OAS-4
 
 - **Observed:** `upstream/visibility.yaml` (seeded from "Plytix API v3 - endpoint visibility.xlsx") marks 16 sub-resource link operations as `pending`, for example `POST /api/v3/products/{identifier}/categories`. They aren't in the sheet, so they stay out of the docs.
+- **Update (2026-10-22):** under the 16 Oct 2026 handoff ("dedicated association operations"), the product-category and attribute-group link routes are now `public`, and the product channel, e-catalog and PDF catalog link routes are `internal`. The asset category, asset static list and product static list link routes stay `pending` (product lists: PROD-18).
 - **Question:** Which of the 16 link operations are public? Going forward, who owns the visibility decision for new operations, and would you rather filter internal operations out of the exported spec yourselves?
 
 | Plytix response |
@@ -520,6 +521,114 @@ Every fix in `00-fixes.yaml` cites one of these IDs through `x-plytix-question`.
 
 - **Observed:** Every product attribute output schema (`TextAttributeGetOutputDto`, `ProductAttributeGenericCreateOutputDto`, and 28 more) declares the ID as `_id`, but attribute responses return `id` (`Create Text Attribute.bru`, `Get Product Attribute by ID.bru`). We correct this in our overlay, as for product families (FAM-22).
 - **Question:** Can the attribute output schemas declare `id` instead of `_id`?
+
+| Plytix response |
+| :---- |
+
+## Field-audit handoff (16 Oct 2026)
+
+Raised while applying `materials/api-references/endpoint-reviews/Plytix_API_v3_Writechoice_Reference.html` (the handoff) and the 8 Oct field audit PDF next to it. The handoff decides what's public; verified live behavior still decides how the API behaves.
+
+### OAS-26
+
+- **Observed:** The handoff excludes fields that the live API still returns, and that the spec still declares: `account_id` on every output; products' `num_variations` and `overwritten_attributes`; relationships' `relationship_label`; assets' `content_type`, `extension`, `file_size`, `file_type`, `file_modified`, `n_catalogs`, `n_products`, `public`, `status`, `checksum`, `path`, and `downloaded_from`; categories' `slug`, `n_children`, and `path`; attribute groups' `attribute_labels`; product families' `total_products`, `total_attributes`, and `total_models` (and `attributes`, `parent_attributes`, `variant_attributes` on create); attributes' `formula`. As of 2026-10-22 the docs hide all of them (overlay `remove` actions), so a reader who calls the API sees fields the reference doesn't list.
+- **Question:** When will the API and the generated spec filter these fields out of public responses (and reject the excluded create fields)? Until then, should the docs say that responses can contain undocumented fields?
+
+| Plytix response |
+| :---- |
+
+### OAS-27
+
+- **Observed:** The handoff makes fields "excluded", but doesn't say whether they stay usable in filters and `_sort_by`. Examples: `extension` (we replaced our `extension` filter examples with `filename` and `created`), `num_variations` (confirmed sortable live, FB-009), `slug`, `n_children`.
+- **Question:** Can clients still filter or sort by an excluded field? If not, will the request return `400`?
+
+| Plytix response |
+| :---- |
+
+### OAS-28
+
+- **Observed:** Several `400` errors list the record's fields verbatim, including excluded ones, for example `"Field 'products' not found. Available fields: ['id', 'account_id', 'assigned', 'content_type', ...]"` on `GET /assets/{id}/{path}`, and the same on categories, families, relationships and asset lists. We keep those messages verbatim in the error examples.
+- **Question:** Will these messages be filtered to the public fields? If so, we'll update the examples.
+
+| Plytix response |
+| :---- |
+
+### OAS-29
+
+- **Observed:** `_fields=type` returns `400` on asset list search (quirk #77), and the handoff marks `type` as a default read field on asset lists and product lists. We keep the caveat in the docs.
+- **Question:** Is this a bug that will be fixed? Does the same `400` apply to product lists?
+
+| Plytix response |
+| :---- |
+
+### OAS-30
+
+- **Observed:** The handoff lists "interface-oriented metadata" as pending, with no field list. The candidates we document today are `order` (categories, attribute groups), and `manual_sorting` and `sort_ascending` (dropdown and multi-select attributes).
+- **Question:** Which fields count as interface-oriented metadata, and will any of them leave the public model?
+
+| Plytix response |
+| :---- |
+
+### PROD-18
+
+- **Observed:** The handoff treats product lists as public and a product's `static_lists` as expandable. The 13 Oct visibility sheet marked `/pim-product-lists` as removed, so the docs leave out the routes (`upstream/visibility.yaml`), the product link routes for `static_lists` (still `pending`), and `static_lists` on products (`schemas/products.yaml`).
+- **Question:** Which decision is current? If product lists are public, we'll publish the routes and the expansion.
+
+| Plytix response |
+| :---- |
+
+### PROD-19
+
+- **Observed:** The field audit marks `sku` as editable, but `ProductUpdateInputDto` has no `sku` and rejects fields it doesn't declare (`422`). The docs say the update body doesn't accept `sku`.
+- **Question:** Is editing `sku` planned? If so, what happens to references by SKU (for example `GET /products/{sku}`) after a change?
+
+| Plytix response |
+| :---- |
+
+### PROD-20
+
+- **Observed:** The handoff says an explicit `""` or `[]` is distinct from deletion. Live, a text attribute set to `""` or spaces, and a multi-select set to `[]`, are stored as absent: `[!exists]=true`, `[length]=0` and `[eq]=` return the same records (FB-015, confirmed by Plytix in PM-26). The docs describe the live behavior.
+- **Question:** Which is the target? If empty values will be stored as distinct from absent ones, when, and how will filters tell them apart?
+
+| Plytix response |
+| :---- |
+
+### CAT-24
+
+- **Observed:** The audit makes `order` writable on create and edit for product categories, asset categories and attribute groups. No input DTO declares it for categories (CAT-22), and live `PATCH` on groups accepts only `name` (quirk #108, GRP-20). The docs don't document writing `order`.
+- **Question:** When will `order` be accepted, and on which operations? Does changing one record's `order` shift its siblings?
+
+| Plytix response |
+| :---- |
+
+### ASSET-25
+
+- **Observed:** The audit lists `url` as a default read field on assets, but live asset records have no URL field (FB-030, rechecked 2026-10-15). The docs now say asset records don't currently include a download URL, and `path` is hidden.
+- **Question:** When will `url` be returned, and what does it point to (a permanent file URL, or a signed URL that expires)?
+
+| Plytix response |
+| :---- |
+
+### GRP-24
+
+- **Observed:** The handoff replaces a group's `attribute_labels` with a related `attributes` list, but `ProductAttributeGroupOutputDto` has no `attributes` property, and the shape isn't defined. The docs no longer show a group's members.
+- **Question:** What does `attributes` on a group look like (attribute IDs, or full attribute records), is it a default field or an expansion, and when will the spec declare it?
+
+| Plytix response |
+| :---- |
+
+### ATTR-29
+
+- **Observed:** The audit doesn't list attribute `status` (declared and returned live) or `formula_attribute_labels`, so their public status is unclear. We still document `status`.
+- **Question:** Are attribute `status` and `formula_attribute_labels` public? If `status` stays, can a client see `DELETED`?
+
+| Plytix response |
+| :---- |
+
+### FAM-24
+
+- **Observed:** `POST /api/v3/product-families/{product_family_id}/attributes` declares no request body, and neither does the product relationship collection `POST` (the handoff's "incomplete association schemas"). We document the family-attribute body (`attribute_id`, `level`) from live captures through `00-fixes.yaml`.
+- **Question:** Can the spec declare these request bodies upstream, so we can drop our fixes?
 
 | Plytix response |
 | :---- |

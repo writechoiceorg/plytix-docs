@@ -12,33 +12,18 @@ _openapi:
     headings: []
     contents:
       - content: >-
-          Creates a product family and returns it, including its new `id`. Only
-          `name` is required.
+          Creates a product family and returns it, including its new `id`.
+          `name` is the only field in the body.
 
 
           Family names are unique in your account. If a family with that name
           already exists, the request returns `409` and creates nothing.
 
 
-          To link attributes in the same request, list them in `attributes`.
-          Each attribute is linked at `no_level`, so its values don't pass down
-          from parents to variants. A new family can already have some
-          attributes linked, so `total_attributes` can be higher than the number
-          you send. To add attributes after the family exists, use [Link an
-          attribute to a product
-          family](/reference/v3/family-attributes/add-attribute-to-family).
-
-
-          Refer to attributes in one of two forms: their IDs, or objects with
-          the attribute's `label` and, optionally, its `id`. Use the same form
-          in every attribute array of the request. Mixing forms returns `422`.
-
-
-          `parent_attributes` and `variant_attributes` link attributes at
-          `parent_level` and `variant_level`. On some accounts these fields
-          return `403` with "Automatic inheritance is not available for this
-          account", and nothing is created. If you get this response, ask your
-          Plytix contact whether inheritance is available for your account.
+          To add attributes to the family, link them after it exists with [Link
+          an attribute to a product
+          family](/reference/v3/family-attributes/add-attribute-to-family). Each
+          link sets the attribute's inheritance `level`.
 
 
           See [The Plytix data

@@ -25,7 +25,7 @@ Follow the steps below to read a product's current categories, remove one of the
      -H "Authorization: Bearer <access_token>"
    ```
 
-   The response lists each linked category in full, including its `id`, `name`, and `path`. You need the `id` of the one you're removing.
+   The response lists each linked category in full, including its `id` and `name`. You need the `id` of the one you're removing.
 
    You can also get the same data from the search endpoint with `_fields=categories`, which is useful when you're looking up several products at once. What you can't do is ask for `category_ids`: Plytix hides the ID arrays behind a product's links, such as `category_ids` and `asset_ids`, and returns `400` if you request one.
 
@@ -77,7 +77,7 @@ Follow the steps below to remove a relationship link without deleting the relati
      --data-urlencode "_fields=product_relationships"
    ```
 
-   Each entry carries a `relationship_id` and a `relationship_label`. The `relationship_id` is what you need next.
+   Each entry carries a `relationship_id`, which is what you need next.
 
 2. **Unlink the relationship.**
 

@@ -3,10 +3,7 @@
     {
       "id": "6a1f0c2e9b3d4a5f8c7e1c01",
       "name": "Sample Categories",
-      "path": ["Sample Categories"],
-      "slug": "sample-categories",
       "order": 1,
-      "n_children": 2,
       "created": "2026-06-22T08:44:08.293000",
       "modified": "2026-06-22T08:44:08.293000"
     },
@@ -14,10 +11,7 @@
       "id": "6a1f0c2e9b3d4a5f8c7e1c02",
       "name": "Drinkware",
       "parent_id": "6a1f0c2e9b3d4a5f8c7e1c01",
-      "path": ["Sample Categories", "Drinkware"],
-      "slug": "drinkware",
       "order": 1,
-      "n_children": 0,
       "created": "2026-06-22T08:44:08.293000",
       "modified": "2026-06-22T08:44:08.293000"
     },
@@ -25,10 +19,7 @@
       "id": "6a1f0c2e9b3d4a5f8c7e1c03",
       "name": "Kettles & Teapots",
       "parent_id": "6a1f0c2e9b3d4a5f8c7e1c01",
-      "path": ["Sample Categories", "Kettles & Teapots"],
-      "slug": "kettles-teapots",
       "order": 2,
-      "n_children": 0,
       "created": "2026-06-22T08:44:08.293000",
       "modified": "2026-06-22T08:44:08.293000"
     }

@@ -1,12 +1,13 @@
 # Operation edits for the product-attribute-groups endpoints: named groups that
-# organize attributes for display. Members are listed by attribute label in
-# `attribute_labels`.
+# organize attributes for display. attribute_labels is excluded by Plytix's
+# 16 Oct 2026 handoff and its replacement (`attributes`) isn't defined yet
+# (GRP-24), so no text or example here shows a group's members.
 #
 # Written in Phase 3 (2026-10-20). Sources: config/api-testing.config.md (Q#),
 # bruno-collection/05-Product-Attribute-Groups/ and 06-Product-Attributes/Link
 # and Unlink Attribute Group.bru, glossary ("Attribute Group"), ATTR-3 answer.
 # Membership is changed only through /product-attributes/{identifier}/groups,
-# which is `pending` in upstream/visibility.yaml: never link to it from here.
+# public since 2026-10-22 (ops/product-attributes.yaml).
 # `order` on PATCH is in the spec DTO but Q#108 says only `name` is patchable
 # (GRP-20), so the op text documents `name` only.
 overlay: 1.0.0
@@ -21,7 +22,9 @@ actions:
       summary: Search product attribute groups
       operationId: search-product-attribute-groups
       description: |-
-        Returns the attribute groups in your account, one page at a time. Each group has a `name`, an `order` (its display position), and `attribute_labels`, the labels of the attributes it contains.
+        Returns the attribute groups in your account, one page at a time. Each group has a `name` and an `order`, its display position.
+
+        To add an attribute to a group or take it out, use [Link an attribute to a group](/reference/v3/product-attributes/link-product-attribute-group) and [Unlink an attribute from a group](/reference/v3/product-attributes/delete-product-attribute-group-link). To see the groups an attribute belongs to, read the attribute with `_fields=groups`.
 
         Groups organize attributes for display. They don't change which attributes a product can hold. Product families control which attributes apply to their products. See [The Plytix data model](/docs/guides/data-model#product-attributes).
 
@@ -55,9 +58,9 @@ actions:
       description: |-
         Creates an empty attribute group and returns it, including its new `id` and its `order`. Only `name` is required, and it's the only field the body accepts.
 
-        A successful create returns `201` with the new group in `data`. Its `attribute_labels` starts empty. If a group with the same name already exists, the request returns `409` and creates nothing.
+        A successful create returns `201` with the new group in `data`. If a group with the same name already exists, the request returns `409` and creates nothing.
 
-        You can't add attributes in the same request: `attribute_labels` returns `422` with "Extra inputs are not permitted".
+        You can't add attributes in the same request, and fields other than `name` return `422`. Add attributes afterwards with [Link an attribute to a group](/reference/v3/product-attributes/link-product-attribute-group).
 
         See [Update and delete records](/reference/v3/updates-and-deletes).
 
@@ -71,7 +74,7 @@ actions:
             name: Rich Information
 
   - target: $.paths['/api/v3/product-attribute-groups'].post.responses['201']
-    description: Create Product Attribute Group.bru "201 - Success" (2026-09-07), sanitized, order from the 2026-10-13 capture (Link and Unlink Attribute Group.bru); data is an object (Q#117)
+    description: Create Product Attribute Group.bru "201 - Success" (2026-09-07), sanitized, order from the 2026-10-13 capture (Link and Unlink Attribute Group.bru); data is an object (Q#117); attribute_labels stripped (16 Oct handoff)
     update:
       description: Created. `data` holds the new group.
       content:
@@ -84,7 +87,6 @@ actions:
                   id: 6a1f0c2e9b3d4a5f8c7e1403
                   name: Rich Information
                   order: 12
-                  attribute_labels: []
                 errors: []
 
   - target: $.paths['/api/v3/product-attribute-groups'].post.responses['409']
@@ -107,7 +109,7 @@ actions:
     update:
       examples:
         attributeLabels:
-          summary: attribute_labels in the body
+          summary: Group membership in the body
           value:
             data: []
             errors:
@@ -121,27 +123,21 @@ actions:
       summary: Get a product attribute group
       operationId: get-product-attribute-group
       description: |-
-        Returns one attribute group by its `id`. An ID that matches nothing returns `404`.
+        Returns one attribute group by its `id`, with its `name`, its `order`, and its timestamps. An ID that matches nothing returns `404`.
 
-        `attribute_labels` lists the `label` of each attribute in the group. To get an attribute's name and type, search attributes by label with [Search product attributes](/reference/v3/product-attributes/search-product-attributes).
+        To see which groups an attribute belongs to, read the attribute with `_fields=groups` in [Get a product attribute](/reference/v3/product-attributes/get-product-attribute).
 
   - target: $.paths['/api/v3/product-attribute-groups/{identifier}'].get.responses['200'].content['application/json']
-    description: Get Product Attribute Group by ID.bru "200 - Success" (2026-09-21), sanitized, account_id omitted, label list shortened
+    description: Get Product Attribute Group by ID.bru "200 - Success" (2026-09-21), sanitized, account_id omitted; attribute_labels stripped (16 Oct handoff, GRP-24)
     update:
       examples:
         group:
-          summary: Group with attributes
+          summary: One group
           value:
             data:
               id: 6a1f0c2e9b3d4a5f8c7e1401
               name: Dimensions
               order: 9
-              attribute_labels:
-                - product_weight_kg
-                - product_length_mm
-                - product_width_mm
-                - product_height_mm
-                - packed_product_weight_kg
               created: '2026-06-22T08:45:07.035000'
               modified: '2026-06-22T08:45:07.035000'
             errors: []
@@ -167,7 +163,7 @@ actions:
       description: |-
         Renames an attribute group. Send the new `name`. A successful update returns `204` with an empty body; read the group back to see it.
 
-        The group's attributes can't be changed here: `attribute_labels` returns `422` with "Extra inputs are not permitted".
+        The group's attributes can't be changed here, and fields other than `name` return `422`. Use [Link an attribute to a group](/reference/v3/product-attributes/link-product-attribute-group) and [Unlink an attribute from a group](/reference/v3/product-attributes/delete-product-attribute-group-link) instead.
 
         See [Update and delete records](/reference/v3/updates-and-deletes).
 
@@ -190,7 +186,7 @@ actions:
     update:
       examples:
         attributeLabels:
-          summary: attribute_labels in the body
+          summary: Group membership in the body
           value:
             data: []
             errors:
@@ -219,28 +215,23 @@ actions:
       summary: Get a product attribute group field
       operationId: get-product-attribute-group-field
       description: |-
-        Returns the value of one field of an attribute group, such as `name` or `attribute_labels`, without the rest of the record. A field the group doesn't have returns `400`, and the message lists the fields you can ask for.
+        Returns the value of one field of an attribute group, such as `name` or `order`, without the rest of the record. A field the group doesn't have returns `400`, and the message lists the fields you can ask for.
 
   - target: $.paths['/api/v3/product-attribute-groups/{identifier}/{path}'].get.responses['200'].content['application/json']
-    description: "Sanitized, unverified: the 200 body for a field wasn't captured (VERIFY.md). Shape follows the products field route captures; values come from this resource's GET example"
+    description: "Sanitized, unverified: the 200 body for a field wasn't captured (VERIFY.md). Shape follows the products field route captures; values come from this resource's GET example. attribute_labels example replaced with name (16 Oct handoff)"
     update:
       examples:
-        attributeLabels:
-          summary: The group's attributes
-          description: '`GET /api/v3/product-attribute-groups/{identifier}/attribute_labels`'
+        name:
+          summary: One field
+          description: '`GET /api/v3/product-attribute-groups/{identifier}/name`'
           value:
-            data:
-              - product_weight_kg
-              - product_length_mm
-              - product_width_mm
-              - product_height_mm
-              - packed_product_weight_kg
+            data: Dimensions
             errors: []
 
   - target: $.paths['/api/v3/product-attribute-groups/{identifier}/{path}'].get.parameters[?(@.name=='path' && @.in=='path')]
     description: Get Product Attribute Group by ID.bru field list
     update:
-      description: The field to read, such as `name`, `order`, or `attribute_labels`.
+      description: The field to read, such as `name` or `order`.
 
   # --- PATCH /api/v3/product-attribute-groups/{identifier}/{path} -----------------
   - target: $.paths['/api/v3/product-attribute-groups/{identifier}/{path}'].patch

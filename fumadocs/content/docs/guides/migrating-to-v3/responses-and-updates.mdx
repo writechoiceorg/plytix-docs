@@ -185,7 +185,7 @@ Other fields and records are cleared in other ways, and they aren't interchangea
 | DELETE on a link, such as `/products/{identifier}/categories/{id}` | Removes only that link. The product and the category both remain |
 
 <Callout type="warn" title="Erasing an override doesn't bring back the parent's value">
-  If a variant overrides a value it inherits from its parent, deleting that override leaves the variant with no value for the attribute. It doesn't make the variant show the parent's value again, and the attribute stays listed in the variant's `overwritten_attributes` array. Sending `null` to `PATCH /products/{identifier}/attributes/{name}` has the same result. We haven't found a way to make an overridden variant inherit again, so test on a disposable record first.
+  If a variant overrides a value it inherits from its parent, deleting that override leaves the variant with no value for the attribute. It doesn't make the variant show the parent's value again. Sending `null` to `PATCH /products/{identifier}/attributes/{name}` has the same result. We haven't found a way to make an overridden variant inherit again, so test on a disposable record first.
 </Callout>
 
 {/* FLAG (open):

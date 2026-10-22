@@ -6,6 +6,8 @@
     "get-product-attribute",
     "update-product-attribute",
     "delete-product-attribute",
+    "link-product-attribute-group",
+    "delete-product-attribute-group-link",
     "get-product-attribute-field",
     "update-product-attribute-field",
     "delete-product-attribute-field"

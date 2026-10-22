@@ -51,22 +51,30 @@ actions:
         'created[gt]': '2026-01-01'
 
   - target: $.paths['/api/v3/products'].get.parameters[?(@.name=='_fields' && @.in=='query')]
-    description: Q#10, Q#12, Q#100, Q#113, PROD-3
+    description: Q#10, Q#12, Q#100, Q#113, PROD-3; 16 Oct 2026 handoff (default fields only without _fields; assets, thumbnail, categories, parent, product_family expandable; thumbnail/parent/product_family expansion untested, VERIFY.md); relationship_label excluded
     update:
       description: |-
-        Fields to return for each product. Repeat the parameter once per field, for example `_fields=sku&_fields=label`. Leave it out, or send `_fields=*`, to get every field.
+        Fields to return for each product. Repeat the parameter once per field, for example `_fields=sku&_fields=label`. Leave it out to get the product's default fields.
 
-        `categories` and `assets` come back as full objects, so you don't need a second request. Ask for `categories`, not `category_ids`: `category_ids` doesn't exist and returns `400`.
+        Related records come back only when you name them, expanded in the same response, so you don't need a second request:
 
-        `product_relationships` returns only each relationship's ID and label. To get the related products, use [Search related products](/reference/v3/related-products/search-related-products) with `product_id=<id>`.
+        - `assets`: the product's assets, as a list
+        - `thumbnail`: the thumbnail asset, as an object
+        - `categories`: the product categories, as a list
+        - `parent`: a variant's parent product, as an object
+        - `product_family`: the product family, as an object
+
+        Ask for `categories`, not `category_ids`: `category_ids` doesn't exist and returns `400`.
+
+        `product_relationships` returns only the ID of each relationship type the product uses. To get the related products, use [Search related products](/reference/v3/related-products/search-related-products) with `product_id=<id>`.
 
   - target: $.paths['/api/v3/products'].get.parameters[?(@.name=='_sort_by' && @.in=='query')]
-    description: Q#9, Q#100, FB-009, FB-029
+    description: Q#9, Q#100, FB-009, FB-029; num_variations dropped from the list (excluded by the 16 Oct handoff)
     update:
       description: |-
         Field to sort by, in ascending order. Prefix the field with `-` to sort in descending order, for example `_sort_by=-modified`. Repeat the parameter to sort by several fields, applied in the order you list them.
 
-        These fields are confirmed sortable: `sku`, `id`, `status`, `created`, `modified`, `product_level`, `num_variations`, `label`, `gtin`, `parent_id`, and `product_family_id`. Sorting by the same field twice, or by `thumbnail_id`, returns `400`.
+        These fields are confirmed sortable: `sku`, `id`, `status`, `created`, `modified`, `product_level`, `label`, `gtin`, `parent_id`, and `product_family_id`. Sorting by the same field twice, or by `thumbnail_id`, returns `400`.
 
         If you also send `_fields`, include each sort field in it. Otherwise the request returns `400`.
 
@@ -134,7 +142,7 @@ actions:
 
         See [Reconstruct parent/variant hierarchies](/docs/guides/reconstructing-parent-variant-hierarchies).
 
-        The body accepts only the fields listed below. List fields such as `category_ids` and `static_list_ids` return `422` with "Extra inputs are not permitted". Link categories after the product exists, with [Link a record to a product](/reference/v3/products/add-product-field).
+        The body accepts only the fields listed below. List fields such as `category_ids` and `static_list_ids` return `422` with "Extra inputs are not permitted". Link categories after the product exists, with [Link a category to a product](/reference/v3/products/link-product-category).
 
   - target: $.paths['/api/v3/products'].post.requestBody.content['application/json']
     description: Create Product - Full Featured.bru (minus category_ids/static_list_ids, now rejected per Q#93)
@@ -319,18 +327,18 @@ actions:
 
   # --- GET /api/v3/products/{identifier} (Phase 2) ------------------------------
   - target: $.paths['/api/v3/products/{identifier}'].get
-    description: Q#86, Q#91, Q#113, FB-004, PROD-5, PROD-9
+    description: Q#86, Q#91, Q#113, FB-004, PROD-5, PROD-9; 16 Oct 2026 handoff (default fields; relations only when named)
     update:
       summary: Get a product
       operationId: get-product
       description: |-
         Returns one product. You can use the product's `id` or its SKU as the identifier: `GET /api/v3/products/GF-Basket` returns the same record as a request with the product's ID. An identifier that matches nothing returns `404`.
 
-        To return only some fields, use `_fields`, for example `_fields=sku&_fields=label`. Without it, you get the full record.
+        To return only some fields, use `_fields`, for example `_fields=sku&_fields=label`. Without it, you get the product's default fields. Related records (`assets`, `thumbnail`, `categories`, `parent`, and `product_family`) come back only when you name them in `_fields`.
 
         `data` holds the product object itself, not a list, and the response has no `pagination` key.
 
-        `product_relationships` lists only each relationship's ID and label. To get the related products, use [Search related products](/reference/v3/related-products/search-related-products) with `product_id=<id>`.
+        `product_relationships` lists only the ID of each relationship type the product uses. To get the related products, use [Search related products](/reference/v3/related-products/search-related-products) with `product_id=<id>`.
 
   - target: $.paths['/api/v3/products/{identifier}'].get.parameters[?(@.name=='identifier' && @.in=='path')]
     description: Q#86 (GET only)
@@ -404,7 +412,7 @@ actions:
       description: The field to read, such as `attributes`, `attributes/collection`, or `categories`.
 
   - target: $.paths['/api/v3/products/{identifier}/{path}'].get.responses['200'].content['application/json']
-    description: Get Product Subpath - Attributes.bru "200 - Attributes Subpath (Full Map)" (2026-09-07); Unlink Category from Product.bru "Verify After Unlink" (2026-10-08)
+    description: Get Product Subpath - Attributes.bru "200 - Attributes Subpath (Full Map)" (2026-09-07); Unlink Category from Product.bru "Verify After Unlink" (2026-10-08), path, slug, n_children stripped (16 Oct handoff)
     update:
       examples:
         attributes:
@@ -431,12 +439,7 @@ actions:
               - id: 6a1f0c2e9b3d4a5f8c7e1c02
                 name: Drinkware
                 parent_id: 6a1f0c2e9b3d4a5f8c7e1c01
-                path:
-                  - Sample Categories
-                  - Drinkware
-                slug: drinkware
                 order: 1
-                n_children: 0
             errors: []
             pagination: {}
 
@@ -452,6 +455,8 @@ actions:
         A successful link returns `201` with the linked ID. Send one record per request: the body doesn't take a list of IDs.
 
         If the record is already linked to the product, the request returns `409`. An ID that doesn't exist returns `404`.
+
+        For categories, [Link a category to a product](/reference/v3/products/link-product-category) documents the same request on its dedicated route.
 
         Assets can't be linked here. To use an asset on a product, set it as the product's `thumbnail_id` or as a value of a media attribute. See [Safely remove categories, assets, or relationships](/docs/guides/safely-removing-categories-assets-or-relationships#connect-other-assets-to-a-product) and [Update and delete records](/reference/v3/updates-and-deletes).
 
@@ -566,7 +571,9 @@ actions:
 
         A successful call returns `204` with an empty body. The product itself is never deleted.
 
-        If a variant overrode a value it inherited from its parent, deleting the value doesn't bring the parent's value back. The attribute is removed from the variant, and `attributes.<label>` stays in `overwritten_attributes`.
+        If a variant overrode a value it inherited from its parent, deleting the value doesn't bring the parent's value back. The attribute is removed from the variant.
+
+        To unlink a category, you can also use [Unlink a category from a product](/reference/v3/products/delete-product-category-link).
 
         A collection without an ID, such as `categories` on its own, returns `405`. A field the product doesn't have returns `404`, and so does a record that isn't linked to the product.
 
@@ -642,3 +649,121 @@ actions:
             errors:
               - name: NotFoundError
                 description: Linked id '6a1f0c2e9b3d4a5f8c7e1c09' not found in relationship 'categories'
+
+  # --- POST /api/v3/products/{identifier}/categories (public since 2026-10-22) ------
+  # Dedicated association route, made public under the 16 Oct 2026 handoff's
+  # "dedicated association operations" principle. Captures: Link Category to
+  # Product.bru (201, 409, 422; 2026-10-08), Q#94, Q#105 (404 on an unknown ID).
+  # The 404 body on this route is from the generic link route capture (Q#105); not
+  # replayed on this route since (VERIFY.md).
+  - target: $.paths['/api/v3/products/{identifier}/categories'].post
+    description: Link Category to Product.bru (2026-10-08), Q#93, Q#94, Q#105
+    update:
+      summary: Link a category to a product
+      operationId: link-product-category
+      description: |-
+        Files a product under one existing product category. Send the category's ID as `{"id": "<category_id>"}`. A successful link returns `201` with the linked category's ID.
+
+        Send one category per request: the body doesn't take a list of IDs. The product's other categories stay linked.
+
+        If the category is already linked to the product, the request returns `409` and nothing changes. A category ID that doesn't exist returns `404`.
+
+        Products don't accept `category_ids` on create or update (`422`), so this is how to add a category to a product. To check the result, read the product with `_fields=categories`. To remove the link, use [Unlink a category from a product](/reference/v3/products/delete-product-category-link). See [Update and delete records](/reference/v3/updates-and-deletes).
+
+  - target: $.paths['/api/v3/products/{identifier}/categories'].post.parameters[?(@.name=='identifier' && @.in=='path')]
+    description: config "ID prefixes"; Link Category to Product.bru used the product ID
+    update:
+      description: ID of the product, a 24-character hexadecimal string such as `6a1f0c2e9b3d4a5f8c7e1a01`.
+
+  - target: $.paths['/api/v3/products/{identifier}/categories'].post.requestBody.content['application/json']
+    description: Link Category to Product.bru request (2026-10-08), sanitized
+    update:
+      examples:
+        category:
+          summary: Link one category
+          value:
+            id: 6a1f0c2e9b3d4a5f8c7e1c02
+
+  - target: $.paths['/api/v3/products/{identifier}/categories'].post.responses['201']
+    description: Link Category to Product.bru "Link Category - 201 Created" (2026-10-08), sanitized
+    update:
+      description: Linked. `data.id` is the ID of the linked category.
+      content:
+        application/json:
+          examples:
+            linked:
+              summary: Category linked
+              value:
+                data:
+                  id: 6a1f0c2e9b3d4a5f8c7e1c02
+                errors: []
+
+  - target: $.paths['/api/v3/products/{identifier}/categories'].post.responses['409']
+    description: Link Category to Product.bru "Link Category - 409 Already Linked" (2026-10-08), sanitized
+    update:
+      description: The category is already linked to this product. Nothing changed.
+      content:
+        application/json:
+          examples:
+            alreadyLinked:
+              summary: Category already linked
+              value:
+                data: []
+                errors:
+                  - name: AlreadyExists
+                    description: "'6a1f0c2e9b3d4a5f8c7e1c02' is already linked to products 6a1f0c2e9b3d4a5f8c7e1a01 through 'categories'"
+
+  - target: $.paths['/api/v3/products/{identifier}/categories'].post.responses['422'].content['application/json']
+    description: Link Category to Product.bru "Link Category - 422 Wrong Body Shape" (2026-10-08)
+    update:
+      examples:
+        wrongBody:
+          summary: List field instead of id
+          description: 'Body `{"category_ids": ["6a1f0c2e9b3d4a5f8c7e1c02"]}`'
+          value:
+            data: []
+            errors:
+              - name: InputDTOValidationError
+                description: 'id: Field required'
+              - name: InputDTOValidationError
+                description: 'category_ids: Extra inputs are not permitted'
+
+  # --- DELETE /api/v3/products/{identifier}/categories/{id} (public since 2026-10-22)
+  - target: $.paths['/api/v3/products/{identifier}/categories/{id}'].delete
+    description: Unlink Category from Product.bru (204 scoped unlink, product intact; 2026-10-08), Q#94, Q#95; 404 for a category that isn't linked per Q#105/FB-034 on the generic route (VERIFY.md)
+    update:
+      summary: Unlink a category from a product
+      operationId: delete-product-category-link
+      description: |-
+        Takes a product out of one product category. A successful call returns `204` with an empty body.
+
+        Only that one link is removed. The product, the category, and the product's other categories stay as they are.
+
+        To file the product under a category again, use [Link a category to a product](/reference/v3/products/link-product-category). See [Safely remove categories, assets, or relationships](/docs/guides/safely-removing-categories-assets-or-relationships#remove-a-category-from-a-product) and [Update and delete records](/reference/v3/updates-and-deletes).
+
+  - target: $.paths['/api/v3/products/{identifier}/categories/{id}'].delete.parameters[?(@.name=='identifier' && @.in=='path')]
+    description: config "ID prefixes"
+    update:
+      description: ID of the product, a 24-character hexadecimal string such as `6a1f0c2e9b3d4a5f8c7e1a01`.
+
+  - target: $.paths['/api/v3/products/{identifier}/categories/{id}'].delete.parameters[?(@.name=='id' && @.in=='path')]
+    description: Unlink Category from Product.bru (category ID in the path)
+    update:
+      description: ID of the product category to unlink, a 24-character hexadecimal string such as `6a1f0c2e9b3d4a5f8c7e1c02`.
+
+  - target: $.paths['/api/v3/products/{identifier}/categories/{id}'].delete.responses['204']
+    description: Unlink Category from Product.bru "Unlink Category - 204 No Content" (2026-10-08)
+    update:
+      description: Unlinked. The response has no body.
+
+  - target: $.paths['/api/v3/products/{identifier}/categories/{id}'].delete.responses['404'].content['application/json']
+    description: Q#105 / FB-034 message template, captured on the generic DELETE /products/{id}/{path} route; not replayed on this route (VERIFY.md)
+    update:
+      examples:
+        notLinked:
+          summary: Category isn't linked to the product
+          value:
+            data: []
+            errors:
+              - name: NotFoundError
+                description: "'6a1f0c2e9b3d4a5f8c7e1c02' is not linked to products 6a1f0c2e9b3d4a5f8c7e1a01 through 'categories'"

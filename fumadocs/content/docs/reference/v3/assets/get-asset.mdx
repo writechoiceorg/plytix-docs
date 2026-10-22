@@ -16,11 +16,12 @@ _openapi:
           returns `404`.
 
 
-          `data` holds the asset object itself, not a list. `path` is the file's
-          storage path inside Plytix, not a download URL.
+          `data` holds the asset object itself, not a list. Asset records don't
+          currently include a download URL.
 
 
-          To see which asset categories the asset belongs to, use [Get an asset
+          To see which asset categories the asset belongs to, add
+          `_fields=categories`, or use [Get an asset
           field](/reference/v3/assets/get-asset-field) with `categories`.
 ---
 

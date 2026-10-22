@@ -13,6 +13,11 @@
 #   contract (see fumadocs/overlays/VERIFY.md). Overlay edits for it are kept
 #   but not applied; set it back to `public` to restore the page.
 #   Operations missing from this file are excluded too, and the build reports them.
+#
+# 2026-10-22 (Plytix field-audit handoff, 16 Oct 2026): the dedicated product-category
+# and attribute-group link routes are public; the product channel, e-catalog and
+# PDF catalog link routes are internal; GET /api/v3/product-relationships is on hold
+# (published schema doesn't match the live shape, FB-024).
 operations:
   "GET /api/v3/asset-categories": public
   "POST /api/v3/asset-categories": public
@@ -104,8 +109,8 @@ operations:
   "GET /api/v3/product-attributes/{identifier}": public
   "PATCH /api/v3/product-attributes/{identifier}": public
   "DELETE /api/v3/product-attributes/{identifier}": public
-  "POST /api/v3/product-attributes/{identifier}/groups": pending
-  "DELETE /api/v3/product-attributes/{identifier}/groups/{id}": pending
+  "POST /api/v3/product-attributes/{identifier}/groups": public
+  "DELETE /api/v3/product-attributes/{identifier}/groups/{id}": public
   "GET /api/v3/product-attributes/{identifier}/{path}": public
   "PATCH /api/v3/product-attributes/{identifier}/{path}": public
   "DELETE /api/v3/product-attributes/{identifier}/{path}": public
@@ -135,20 +140,20 @@ operations:
   "GET /api/v3/product-families/{product_family_id}/attributes/{attribute_id}/{path}": public
   "PATCH /api/v3/product-families/{product_family_id}/attributes/{attribute_id}/{path}": public
   "DELETE /api/v3/product-families/{product_family_id}/attributes/{attribute_id}/{path}": public
-  "GET /api/v3/product-relationships": public
+  "GET /api/v3/product-relationships": on-hold
   "GET /api/v3/products": public
   "POST /api/v3/products": public
   "GET /api/v3/products/{identifier}": public
   "PATCH /api/v3/products/{identifier}": public
   "DELETE /api/v3/products/{identifier}": public
-  "POST /api/v3/products/{identifier}/categories": pending
-  "DELETE /api/v3/products/{identifier}/categories/{id}": pending
-  "POST /api/v3/products/{identifier}/channels": pending
-  "DELETE /api/v3/products/{identifier}/channels/{id}": pending
-  "POST /api/v3/products/{identifier}/ecatalogs": pending
-  "DELETE /api/v3/products/{identifier}/ecatalogs/{id}": pending
-  "POST /api/v3/products/{identifier}/product_data_sheets": pending
-  "DELETE /api/v3/products/{identifier}/product_data_sheets/{id}": pending
+  "POST /api/v3/products/{identifier}/categories": public
+  "DELETE /api/v3/products/{identifier}/categories/{id}": public
+  "POST /api/v3/products/{identifier}/channels": internal
+  "DELETE /api/v3/products/{identifier}/channels/{id}": internal
+  "POST /api/v3/products/{identifier}/ecatalogs": internal
+  "DELETE /api/v3/products/{identifier}/ecatalogs/{id}": internal
+  "POST /api/v3/products/{identifier}/product_data_sheets": internal
+  "DELETE /api/v3/products/{identifier}/product_data_sheets/{id}": internal
   "POST /api/v3/products/{identifier}/static_lists": pending
   "DELETE /api/v3/products/{identifier}/static_lists/{id}": pending
   "GET /api/v3/products/{identifier}/{path}": public

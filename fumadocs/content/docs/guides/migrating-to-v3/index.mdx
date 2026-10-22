@@ -28,9 +28,9 @@ Before you start, you need:
    | Operation | Why V3 |
    |---|---|
    | Searching and reading any resource | Richer operators, real `OR` grouping, field expansion in one call |
-   | Create, update, and delete on products, assets, categories, asset categories, product attributes, attribute groups, families, and relationships | Consistent conventions across every resource |
+   | Create, update, and delete on products, assets, categories, asset categories, product attributes, attribute groups, families, and relationship types | Consistent conventions across every resource |
    | Linking products to categories, assets to categories, and attributes to groups | Dedicated link and unlink endpoints, rather than rewriting an array |
-   | Adding and removing product relationships | V3's `DELETE /products/{product_id}/relationships/{relationship_id}` is a scoped unlink; V1 needs a separate `/unlink` call |
+   | Removing product relationships | V3's `DELETE /products/{product_id}/relationships/{relationship_id}` is a scoped unlink; V1 needs a separate `/unlink` call. Adding links and changing quantities aren't available through V3 yet, so keep those calls on V1/V2 for now; see [Product relationships](/docs/guides/migrating-to-v3/endpoint-mapping#product-relationships) |
    | Creating variants | `parent_id` and `product_family_id` on the product itself |
    | Connecting assets to a product | Media and media gallery attributes: a media attribute takes a bare asset ID and a gallery takes an array of IDs. `thumbnail_id` sets the main image |
 

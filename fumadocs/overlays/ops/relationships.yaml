@@ -18,18 +18,18 @@ info:
 actions:
   # --- GET /api/v3/relationships ------------------------------------------------
   - target: $.paths['/api/v3/relationships'].get
-    description: Q#74 (_fields, _sort_by, paging, status filter together), Q#91, Q#113 (relationship_label on products), List Relationships.bru (2026-09-21/22)
+    description: Q#74 (_fields, _sort_by, paging, status filter together), Q#91, Q#113, List Relationships.bru (2026-09-21/22); relationship_label excluded by the 16 Oct handoff; search-product-relationships link repointed (GET /product-relationships on hold, FB-024)
     update:
       summary: Search relationships
       operationId: search-relationships
       description: |-
         Returns the relationship types in your account, such as "Gift basket" or "Recommended products", one page at a time. A relationship type names a kind of connection between products. It doesn't hold the product links themselves.
 
-        Each record holds the type's `id`, its `name`, its `label`, and its `status`. A product's `product_relationships` field names each type it uses by `relationship_id` and `relationship_label`, which match `id` and `label` here. A label doesn't always match the name: in the first example below, the type named "Cross-sell" has the label `related_products`.
+        Each record holds the type's `id`, its `name`, its `label`, and its `status`. A product's `product_relationships` field names each type it uses by `relationship_id`, which matches `id` here.
 
         Filters use the same syntax as every V3 search, for example `status=ACTIVE`. To sort by name, send `_sort_by=name`.
 
-        To see which products are linked under each type, use [Search product relationships](/reference/v3/product-relationships/search-product-relationships). To get the products on the other end of one product's links, use [Search related products](/reference/v3/related-products/search-related-products) with `product_id=<id>`.
+        To see which products are linked under a type, use [Search related products](/reference/v3/related-products/search-related-products), for example with `product_id=<id>` to get the products on the other end of one product's links.
 
         Related pages:
 
@@ -46,7 +46,7 @@ actions:
   - target: $.paths['/api/v3/relationships'].get.parameters[?(@.name=='_fields' && @.in=='query')]
     description: List Relationships.bru "200 - Full Parameters" (2026-09-22, all six fields)
     update:
-      description: Fields to return for each relationship type, from `id`, `name`, `label`, `status`, `created`, and `modified`. Repeat the parameter once per field, for example `_fields=id&_fields=label`. Leave it out to get every field.
+      description: Fields to return for each relationship type, from `id`, `name`, `label`, `status`, `created`, and `modified`. Repeat the parameter once per field, for example `_fields=id&_fields=label`. Leave it out to get the default fields.
 
   - target: $.paths['/api/v3/relationships'].get.responses['200'].content['application/json']
     description: List Relationships.bru "200 - Success" (2026-09-21) and "200 - Full Parameters" (2026-09-22), sanitized, names/labels replaced with placeholders, account_id omitted
@@ -85,7 +85,7 @@ actions:
 
         Names are unique in your account. If a relationship type with that name already exists, the request returns `409` and creates nothing.
 
-        Creating a type doesn't link any products. To see which products use a type, use [Search product relationships](/reference/v3/product-relationships/search-product-relationships). See [The Plytix data model](/docs/guides/data-model#relationships) and [Update and delete records](/reference/v3/updates-and-deletes).
+        Creating a type doesn't link any products. To see which products are linked, use [Search related products](/reference/v3/related-products/search-related-products). See [The Plytix data model](/docs/guides/data-model#relationships) and [Update and delete records](/reference/v3/updates-and-deletes).
 
   - target: $.paths['/api/v3/relationships'].post.requestBody.content['application/json']
     description: Create Relationship.bru request (2026-09-15)

@@ -331,7 +331,7 @@
   },
   {
     "source": "/docs/reference/v3/productrelationships/delete_product_relationships_drill_in_api_v3_products__product_id__relationships__relationship_id___path__delete",
-    "destination": "/reference/v3/product-relationships/search-product-relationships",
+    "destination": "/reference/v3/product-relationships/get-product-relationship",
     "permanent": true
   },
   {
@@ -341,12 +341,12 @@
   },
   {
     "source": "/docs/reference/v3/productrelationships/get_product_relationships_collection_api_v3_products__product_id__relationships_get",
-    "destination": "/reference/v3/product-relationships/search-product-relationships",
+    "destination": "/reference/v3/product-relationships/get-product-relationship",
     "permanent": true
   },
   {
     "source": "/docs/reference/v3/productrelationships/get_product_relationships_drill_in_api_v3_products__product_id__relationships__relationship_id___path__get",
-    "destination": "/reference/v3/product-relationships/search-product-relationships",
+    "destination": "/reference/v3/product-relationships/get-product-relationship",
     "permanent": true
   },
   {
@@ -356,27 +356,27 @@
   },
   {
     "source": "/docs/reference/v3/productrelationships/patch_product_relationships_drill_in_api_v3_products__product_id__relationships__relationship_id___path__patch",
-    "destination": "/reference/v3/product-relationships/search-product-relationships",
+    "destination": "/reference/v3/product-relationships/get-product-relationship",
     "permanent": true
   },
   {
     "source": "/docs/reference/v3/productrelationships/patch_product_relationships_identity_api_v3_products__product_id__relationships__relationship_id__patch",
-    "destination": "/reference/v3/product-relationships/search-product-relationships",
+    "destination": "/reference/v3/product-relationships/get-product-relationship",
     "permanent": true
   },
   {
     "source": "/docs/reference/v3/productrelationships/post_product_relationships_collection_api_v3_products__product_id__relationships_post",
-    "destination": "/reference/v3/product-relationships/search-product-relationships",
+    "destination": "/reference/v3/product-relationships/get-product-relationship",
     "permanent": true
   },
   {
     "source": "/docs/reference/v3/productrelationships/post_product_relationships_identity_api_v3_products__product_id__relationships__relationship_id__post",
-    "destination": "/reference/v3/product-relationships/search-product-relationships",
+    "destination": "/reference/v3/product-relationships/get-product-relationship",
     "permanent": true
   },
   {
     "source": "/docs/reference/v3/productrelationships/search_product_relationships_api_v3_product_relationships_get",
-    "destination": "/reference/v3/product-relationships/search-product-relationships",
+    "destination": "/reference/v3/product-relationships/get-product-relationship",
     "permanent": true
   },
   {
@@ -976,42 +976,37 @@
   },
   {
     "source": "/reference/v3/product-relationships/add-related-products",
-    "destination": "/reference/v3/product-relationships/search-product-relationships",
+    "destination": "/reference/v3/product-relationships/get-product-relationship",
     "permanent": true
   },
   {
     "source": "/reference/v3/product-relationships/add-related-products-to-relationship",
-    "destination": "/reference/v3/product-relationships/search-product-relationships",
+    "destination": "/reference/v3/product-relationships/get-product-relationship",
     "permanent": true
   },
   {
     "source": "/reference/v3/product-relationships/delete-product-relationship-field",
-    "destination": "/reference/v3/product-relationships/search-product-relationships",
+    "destination": "/reference/v3/product-relationships/get-product-relationship",
     "permanent": true
   },
   {
     "source": "/reference/v3/product-relationships/get-product-relationship-field",
-    "destination": "/reference/v3/product-relationships/search-product-relationships",
+    "destination": "/reference/v3/product-relationships/get-product-relationship",
     "permanent": true
   },
   {
     "source": "/reference/v3/product-relationships/list-product-relationships",
-    "destination": "/reference/v3/product-relationships/search-product-relationships",
+    "destination": "/reference/v3/product-relationships/get-product-relationship",
     "permanent": true
   },
   {
     "source": "/reference/v3/product-relationships/update-product-relationship",
-    "destination": "/reference/v3/product-relationships/search-product-relationships",
+    "destination": "/reference/v3/product-relationships/get-product-relationship",
     "permanent": true
   },
   {
     "source": "/reference/v3/product-relationships/update-product-relationship-field",
-    "destination": "/reference/v3/product-relationships/search-product-relationships",
-    "permanent": true
-  },
-  {
-    "source": "/reference/v3/products/link-product-category",
-    "destination": "/reference/v3/products/search-products",
+    "destination": "/reference/v3/product-relationships/get-product-relationship",
     "permanent": true
   },
   {

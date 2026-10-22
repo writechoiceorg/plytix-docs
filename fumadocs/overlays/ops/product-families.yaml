@@ -14,6 +14,10 @@
 #   doesn't change that): recommended for on-hold. Its edits stay here so the
 #   page is correct if it's published anyway.
 # - account_id is left out of examples (sanitization rule).
+# - 2026-10-22, 16 Oct 2026 field-audit handoff: families are created with a
+#   name only (attributes, parent_attributes, variant_attributes excluded, so the
+#   create 403 and the mixed-reference 422 are gone); counters excluded;
+#   family_attributes is expandable with _fields (untested, FAM-23, VERIFY.md).
 overlay: 1.0.0
 info:
   title: product-families operations
@@ -21,18 +25,18 @@ info:
 actions:
   # --- GET /api/v3/product-families --------------------------------------------
   - target: $.paths['/api/v3/product-families'].get
-    description: Q#74 (_fields, _sort_by=name, paging together), Q#91, Q#11/Q#99 (filter grammar API-wide), List Product Families.bru (2026-09-21/22)
+    description: Q#74 (_fields, _sort_by=name, paging together), Q#91, Q#11/Q#99 (filter grammar API-wide), List Product Families.bru (2026-09-21/22); 16 Oct handoff (counters excluded, family_attributes expandable)
     update:
       summary: Search product families
       operationId: search-product-families
       description: |-
-        Returns the product families in your account, one page at a time. Each record holds the family's `id` and `name`, the number of products in it (`total_products`), and the number of attributes linked to it (`total_attributes`).
+        Returns the product families in your account, one page at a time. Each record holds the family's `id`, its `name`, and its timestamps.
 
         Use it to find a family's `id` before you assign products to the family with `product_family_id`, or before you work with its attributes.
 
         Filters use the same syntax as every V3 search, for example `name[contains:ignorecase]=aprons`. To sort by name, send `_sort_by=name`.
 
-        By default, records don't list the family's attributes. To get them, with each attribute's inheritance `level`, use [List a product family's attributes](/reference/v3/family-attributes/list-family-attributes).
+        To get each family's attributes, with each attribute's inheritance `level`, add `_fields=family_attributes`. They come back only when you name them in `_fields`. You can also list one family's attributes with [List a product family's attributes](/reference/v3/family-attributes/list-family-attributes).
 
         Related pages:
 
@@ -50,10 +54,10 @@ actions:
   - target: $.paths['/api/v3/product-families'].get.parameters[?(@.name=='_fields' && @.in=='query')]
     description: Q#74, List Product Families.bru "200 - Full Parameters" (2026-09-22)
     update:
-      description: Fields to return for each product family, for example `_fields=id&_fields=name`. Repeat the parameter once per field. Leave it out to get every field.
+      description: Fields to return for each product family, for example `_fields=id&_fields=name`. Repeat the parameter once per field. Leave it out to get the default fields. The family's attribute links come back only when you name `family_attributes`.
 
   - target: $.paths['/api/v3/product-families'].get.responses['200'].content['application/json']
-    description: List Product Families.bru (2026-09-21 page 1; 2026-09-22 full parameters, request shown without its name[icontains] filter, which Q#99 later rejected; the filter excluded only "Office Supplies", which sorts after the two results), sanitized, account_id omitted
+    description: List Product Families.bru (2026-09-21 page 1; 2026-09-22 full parameters, request shown without its name[icontains] filter, which Q#99 later rejected; the filter excluded only "Office Supplies", which sorts after the two results), sanitized, account_id omitted; counters stripped and total_products dropped from selectedFields (16 Oct handoff)
     update:
       examples:
         firstPage:
@@ -63,60 +67,43 @@ actions:
             x-example-file: product-families/search-200-first-page.json
         selectedFields:
           summary: Select fields and sort by name
-          description: '`GET /api/v3/product-families?_fields=id&_fields=name&_fields=total_products&_sort_by=name&_page_size=2`'
+          description: '`GET /api/v3/product-families?_fields=id&_fields=name&_sort_by=name&_page_size=2`'
           value:
             data:
               - id: 6a1f0c2e9b3d4a5f8c7e1d03
                 name: Aprons
-                total_products: 46
               - id: 6a1f0c2e9b3d4a5f8c7e1d01
                 name: Gift Baskets
-                total_products: 7
             errors: []
             pagination:
-              next_page: http://<api-host>/api/v3/product-families?_fields=id&_fields=name&_fields=total_products&_sort_by=name&_page=2&_page_size=2
+              next_page: http://<api-host>/api/v3/product-families?_fields=id&_fields=name&_sort_by=name&_page=2&_page_size=2
 
   # --- POST /api/v3/product-families -------------------------------------------
   - target: $.paths['/api/v3/product-families'].post
-    description: Q#60, Q#72, Q#73, Q#117, status-gating #4 (re-confirmed 2026-10-14, error name Forbidden), Create Product Family.bru (2026-09-15/22), GEN-1, PM-25
+    description: Q#60, Q#117, Create Product Family.bru (2026-09-15/22), GEN-1, PM-25; 16 Oct handoff (name only; attributes through family attributes)
     update:
       summary: Create a product family
       operationId: create-product-family
       description: |-
-        Creates a product family and returns it, including its new `id`. Only `name` is required.
+        Creates a product family and returns it, including its new `id`. `name` is the only field in the body.
 
         Family names are unique in your account. If a family with that name already exists, the request returns `409` and creates nothing.
 
-        To link attributes in the same request, list them in `attributes`. Each attribute is linked at `no_level`, so its values don't pass down from parents to variants. A new family can already have some attributes linked, so `total_attributes` can be higher than the number you send. To add attributes after the family exists, use [Link an attribute to a product family](/reference/v3/family-attributes/add-attribute-to-family).
-
-        Refer to attributes in one of two forms: their IDs, or objects with the attribute's `label` and, optionally, its `id`. Use the same form in every attribute array of the request. Mixing forms returns `422`.
-
-        `parent_attributes` and `variant_attributes` link attributes at `parent_level` and `variant_level`. On some accounts these fields return `403` with "Automatic inheritance is not available for this account", and nothing is created. If you get this response, ask your Plytix contact whether inheritance is available for your account.
+        To add attributes to the family, link them after it exists with [Link an attribute to a product family](/reference/v3/family-attributes/add-attribute-to-family). Each link sets the attribute's inheritance `level`.
 
         See [The Plytix data model](/docs/guides/data-model#product-families-and-variants) for how levels work, and [Update and delete records](/reference/v3/updates-and-deletes).
 
   - target: $.paths['/api/v3/product-families'].post.requestBody.content['application/json']
-    description: Create Product Family.bru "201 - Success" and "201 - Full Parameters" requests (2026-09-22), sanitized
+    description: Create Product Family.bru "201 - Success" request (2026-09-22), sanitized; withAttributes dropped (16 Oct handoff)
     update:
       examples:
         nameOnly:
           summary: Name only
           value:
             name: Mugs
-        withAttributes:
-          summary: Link attributes at no_level
-          value:
-            name: Mugs
-            attributes:
-              - id: 6a1f0c2e9b3d4a5f8c7e1e04
-                label: collection
-              - id: 6a1f0c2e9b3d4a5f8c7e1e05
-                label: size
-              - id: 6a1f0c2e9b3d4a5f8c7e1e06
-                label: color
 
   - target: $.paths['/api/v3/product-families'].post.responses['201']
-    description: Create Product Family.bru 201 captures (2026-09-15 name only, total_attributes 4; 2026-09-22 with three attributes, total_attributes 7), sanitized
+    description: Create Product Family.bru 201 capture (2026-09-15, name only), sanitized; counters stripped and the withAttributes example dropped (16 Oct handoff)
     update:
       description: Created. `data` holds the new product family.
       content:
@@ -128,39 +115,9 @@ actions:
                 data:
                   id: 6a1f0c2e9b3d4a5f8c7e1d04
                   name: Mugs
-                  total_products: 0
-                  total_attributes: 4
-                  total_models: 1
                   created: '2026-09-15T16:28:02.086000+00:00'
                   modified: '2026-09-15T16:28:02.090000+00:00'
                 errors: []
-            withAttributes:
-              summary: Family created with three attributes
-              value:
-                data:
-                  id: 6a1f0c2e9b3d4a5f8c7e1d04
-                  name: Mugs
-                  total_products: 0
-                  total_attributes: 7
-                  total_models: 1
-                  created: '2026-09-22T22:17:00.683000+00:00'
-                  modified: '2026-09-22T22:17:00.797000+00:00'
-                errors: []
-
-  - target: $.paths['/api/v3/product-families'].post.responses['403']
-    description: status-gating #4 (2026-10-14 retest, name Forbidden; 2026-09-22 capture said PermissionError), Q#73
-    update:
-      description: This account can't link attributes through `parent_attributes` or `variant_attributes`. Nothing was created.
-      content:
-        application/json:
-          examples:
-            inheritanceUnavailable:
-              summary: Automatic inheritance not available
-              value:
-                data: []
-                errors:
-                  - name: Forbidden
-                    description: Automatic inheritance is not available for this account
 
   - target: $.paths['/api/v3/product-families'].post.responses['409']
     description: Create Product Family.bru "409 - Duplicate Name" (2026-09-15), GEN-1
@@ -177,28 +134,16 @@ actions:
                   - name: AlreadyExists
                     description: A Product family with same name already exists
 
-  - target: $.paths['/api/v3/product-families'].post.responses['422'].content['application/json']
-    description: Create Product Family.bru "422 - Mixed Attribute Reference Forms" (2026-09-22), Q#72
-    update:
-      examples:
-        mixedReferences:
-          summary: IDs and objects mixed across attribute arrays
-          value:
-            data: []
-            errors:
-              - name: InputDTOValidationError
-                description: 'Value error, attributes: attribute references must be either all IDs or all {id, label} objects, not mixed across attributes, parent_attributes, variant_attributes'
-
   # --- GET /api/v3/product-families/{identifier} ----------------------------------
   - target: $.paths['/api/v3/product-families/{identifier}'].get
-    description: Get Product Family by ID.bru (2026-09-21), Update and Delete Product Family.bru 404 after delete (2026-09-15)
+    description: Get Product Family by ID.bru (2026-09-21), Update and Delete Product Family.bru 404 after delete (2026-09-15); 16 Oct handoff (counters excluded, family_attributes expandable, untested FAM-23)
     update:
       summary: Get a product family
       operationId: get-product-family
       description: |-
-        Returns one product family by its ID, with its name and its product and attribute counts. An ID that matches no family returns `404`.
+        Returns one product family by its ID, with its name and its timestamps. An ID that matches no family returns `404`.
 
-        By default, the family's attributes aren't included. To get them, with each attribute's inheritance `level`, use [List a product family's attributes](/reference/v3/family-attributes/list-family-attributes).
+        To get the family's attributes, with each attribute's inheritance `level`, add `_fields=family_attributes`. They come back only when you name them in `_fields`. You can also use [List a product family's attributes](/reference/v3/family-attributes/list-family-attributes).
 
   - target: $.paths['/api/v3/product-families/{identifier}'].get.parameters[?(@.name=='identifier' && @.in=='path')]
     description: config "ID prefixes"; products carry the family ID in product_family_id
@@ -206,7 +151,7 @@ actions:
       description: ID of the product family, a 24-character hexadecimal string such as `6a1f0c2e9b3d4a5f8c7e1d01`. A product's `product_family_id` holds this ID.
 
   - target: $.paths['/api/v3/product-families/{identifier}'].get.responses['200'].content['application/json']
-    description: Get Product Family by ID.bru "200 - Success" (2026-09-21), sanitized, account_id omitted
+    description: Get Product Family by ID.bru "200 - Success" (2026-09-21), sanitized, account_id omitted; counters stripped (16 Oct handoff)
     update:
       examples:
         family:
@@ -215,9 +160,6 @@ actions:
             data:
               id: 6a1f0c2e9b3d4a5f8c7e1d01
               name: Gift Baskets
-              total_products: 7
-              total_attributes: 61
-              total_models: 1
               created: '2026-06-22T08:44:08.740000'
               modified: '2026-06-22T08:44:08.740000'
             errors: []
@@ -314,7 +256,7 @@ actions:
   - target: $.paths['/api/v3/product-families/{identifier}/{path}'].get.parameters[?(@.name=='path' && @.in=='path')]
     description: Get Product Family by ID.bru raw field list
     update:
-      description: The field to read, such as `name` or `total_products`.
+      description: The field to read, such as `name` or `created`.
 
   # --- POST /api/v3/product-families/{identifier}/{path} (recommended on-hold) ------
   - target: $.paths['/api/v3/product-families/{identifier}/{path}'].post

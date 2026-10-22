@@ -52,8 +52,7 @@ _openapi:
 
           | `CompletenessAttribute` | A score Plytix calculates | `attributes` |
 
-          | `FormulaAttribute` | A value Plytix calculates | `formula`,
-          `formula_str` |
+          | `FormulaAttribute` | A value Plytix calculates | `formula_str` |
 
 
           A `type` that isn't in this table returns `422`, and the message lists
@@ -92,7 +91,9 @@ _openapi:
 
           The body accepts only the fields of the chosen type. Group membership
           isn't set here: `group_ids` returns `422` with "Extra inputs are not
-          permitted".
+          permitted". To add the attribute to a group, use [Link an attribute to
+          a
+          group](/reference/v3/product-attributes/link-product-attribute-group).
 
 
           Related pages:

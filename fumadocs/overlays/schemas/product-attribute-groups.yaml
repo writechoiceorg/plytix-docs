@@ -10,7 +10,7 @@ actions:
   - target: $.components.schemas.ProductAttributeGroupCreateInputDto
     description: Q#104 (attribute_labels removed, 422)
     update:
-      description: Body for creating an attribute group. `name` is the only field. Fields not listed here, such as `attribute_labels`, return `422`.
+      description: Body for creating an attribute group. `name` is the only field, and fields not listed here return `422`. To add attributes to the group, use [Link an attribute to a group](/reference/v3/product-attributes/link-product-attribute-group).
   - target: $.components.schemas.ProductAttributeGroupCreateInputDto.properties.name
     description: Q#25a, Create Product Attribute Group.bru 409
     update:
@@ -21,7 +21,7 @@ actions:
   - target: $.components.schemas.ProductAttributeGroupUpdateInputDto
     description: Q#108, Update Product Attribute Group.bru (attribute_labels 422); replaces the upstream docstring
     update:
-      description: Body for renaming an attribute group. Send `name`. Fields not listed, such as `attribute_labels`, return `422`.
+      description: Body for renaming an attribute group. Send `name`. Fields not listed here return `422`.
   - target: $.components.schemas.ProductAttributeGroupUpdateInputDto.properties.name
     description: Update Product Attribute Group.bru (2026-10-13)
     update:
@@ -33,14 +33,19 @@ actions:
     update:
       description: Display position of the group. Changing `order` through this operation isn't confirmed yet.
 
-  - target: $.components.schemas.ProductAttributeGroupOutputDto.properties.attribute_labels
-    description: Get Product Attribute Group by ID.bru, Link and Unlink Attribute Group.bru (2026-10-13), Q#30
-    update:
-      description: The `label` of each attribute in the group. Products use the same labels as keys in their `attributes` map.
   - target: $.components.schemas.ProductAttributeGroupOutputDto.properties.order
     update:
       description: Display position of the group among your attribute groups.
+
+  # --- fields Plytix's 16 Oct 2026 handoff excludes from the public model -----------
+  # attribute_labels is replaced by a related `attributes` list whose shape isn't
+  # defined yet (GRP-24), so no example shows group members (2026-10-22). The live
+  # API still returns attribute_labels (OAS-26).
+  - target: $.components.schemas.ProductAttributeGroupOutputDto.properties.account_id
+    remove: true
+  - target: $.components.schemas.ProductAttributeGroupOutputDto.properties.attribute_labels
+    remove: true
+  - target: $.components.schemas.ProductAttributeGroupCreateOutputDto.properties.account_id
+    remove: true
   - target: $.components.schemas.ProductAttributeGroupCreateOutputDto.properties.attribute_labels
-    description: Create Product Attribute Group.bru (empty on create)
-    update:
-      description: The `label` of each attribute in the group. Empty for a new group.
+    remove: true

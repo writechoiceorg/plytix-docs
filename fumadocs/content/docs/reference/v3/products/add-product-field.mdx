@@ -18,6 +18,8 @@ _openapi:
 
           If the record is already linked to the product, the request returns `409`. An ID that doesn't exist returns `404`.
 
+          For categories, [Link a category to a product](/reference/v3/products/link-product-category) documents the same request on its dedicated route.
+
           Assets can't be linked here. To use an asset on a product, set it as the product's `thumbnail_id` or as a value of a media attribute. See [Safely remove categories, assets, or relationships](/docs/guides/safely-removing-categories-assets-or-relationships#connect-other-assets-to-a-product) and [Update and delete records](/reference/v3/updates-and-deletes).
 ---
 

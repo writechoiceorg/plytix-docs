@@ -20,6 +20,12 @@ _openapi:
           response schema below has one tab per type.
 
 
+          To get the attribute groups the attribute belongs to, add
+          `_fields=groups`. To get its product family links, with their `level`,
+          add `_fields=family_attributes`. These relations come back only when
+          you name them in `_fields`.
+
+
           To read a single field, such as `options` or `groups`, use [Get a
           product attribute
           field](/reference/v3/product-attributes/get-product-attribute-field).

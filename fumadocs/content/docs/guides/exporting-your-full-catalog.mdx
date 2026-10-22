@@ -70,12 +70,12 @@ Follow the steps below to request the fields you need, walk the pages until you 
    {
      "id": "6a38f614c3d65a5f868b1a06",
      "sku": "Black Kettle",
-     "categories": [{ "id": "...", "name": "Kettles & Teapots", "path": ["Sample Categories", "Kettles & Teapots"] }],
-     "assets": [{ "id": "...", "filename": "kettle_blue.jpg", "content_type": "image/jpeg", "file_size": 559164, "path": "public_files/pim/assets/..." }]
+     "categories": [{ "id": "...", "name": "Kettles & Teapots" }],
+     "assets": [{ "id": "...", "filename": "kettle_blue.jpg", "alt_text": "Black kettle on a kitchen counter" }]
    }
    ```
 
-   Because `assets` returns each asset's metadata, such as its file name, type, size, and `path`, your export doesn't need a separate lookup per asset. It doesn't include the files themselves. `path` is where Plytix stores the file, not a download URL, so if you also need the files, plan that as a separate step.
+   The example is trimmed to a few fields of each related object. Because `categories` and `assets` return the related records themselves, such as each category's name and each asset's file name and alt text, your export doesn't need a separate lookup per category or asset. It doesn't include the asset files themselves, and asset records don't currently include a download URL, so if you also need the files, plan that as a separate step.
 
 4. **Scope the export if you don't need the whole catalog.**
 

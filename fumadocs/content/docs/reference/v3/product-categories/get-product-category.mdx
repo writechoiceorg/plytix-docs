@@ -12,17 +12,18 @@ _openapi:
     headings: []
     contents:
       - content: >-
-          Returns one product category by its ID, including its place in the
-          tree (`parent_id`, `path`, `n_children`) and its timestamps. An ID
-          that matches no category returns `404`.
+          Returns one product category by its ID, including its `parent_id` and
+          its timestamps. An ID that matches no category returns `404`.
 
 
           `data` holds the category object itself, not a list. A top-level
           category returns `parent_id` as `null`.
 
 
-          To read only one field, such as the parent category, use [Get a
-          product category
+          To get the parent category as an object, add `_fields=parent`. To get
+          every category above it, add `_fields=parents`. These relations come
+          back only when you name them in `_fields`. To read only one field, use
+          [Get a product category
           field](/reference/v3/product-categories/get-product-category-field).
 ---
 

@@ -10,7 +10,7 @@ Related files:
 
 ## 1. Restore the operations on hold (deferred from Phase 2)
 
-Eleven operations are `on-hold` in `../upstream/visibility.yaml`: the live API contradicted the spec, so they're left out of the docs. Their overlay text is kept but not applied, and their drift baseline is preserved.
+Twelve operations are `on-hold` in `../upstream/visibility.yaml`: the live API contradicted the spec, so they're left out of the docs. Their overlay text is kept but not applied, and their drift baseline is preserved.
 
 | Operations | Why they're on hold | Question |
 |---|---|---|
@@ -19,6 +19,7 @@ Eleven operations are `on-hold` in `../upstream/visibility.yaml`: the live API c
 | `GET`, `PATCH`, `DELETE /api/v3/products/{product_id}/relationships/{relationship_id}/{path}` | Never worked | REL-2 |
 | `GET .../relationships/{relationship_id}/related-products`, `/{related_product_id}`, `/{related_product_id}/{path}` | Empty results or `404` for links that exist (quirk #63; still broken 2026-10-13) | REL-1, REL-2 |
 | `POST /api/v3/product-families/{identifier}/{path}` | `405` for every path (quirk #67) | FAM-21 |
+| `GET /api/v3/product-relationships` | The published item schema doesn't match the live shape (FB-024); held on 2026-10-22. Its page `/reference/v3/product-relationships/search-product-relationships` is gone, so restore links to it when it comes back | REL-2 |
 
 To restore one, once Plytix confirms the contract and a live test passes:
 

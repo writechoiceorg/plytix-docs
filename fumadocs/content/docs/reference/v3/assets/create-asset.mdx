@@ -19,8 +19,6 @@ _openapi:
 
           Send exactly one of `url` or `content`. A body with neither returns `422`. With `url`, you can also send `filename` to name the stored file.
 
-          The response describes the stored file: `content_type`, `file_type`, `extension`, and `file_size` come from the file itself.
-
           Plytix doesn't check for duplicates, so each request creates a new asset, even for a URL you've used before. Before you retry a request that timed out, search your assets to check whether the first request went through.
 
           Creating an asset doesn't attach it to a product. To use the asset on a product, set it as the product's `thumbnail_id`, or as a value of a media or media gallery attribute. See [Safely remove categories, assets, or relationships](/docs/guides/safely-removing-categories-assets-or-relationships#connect-other-assets-to-a-product).

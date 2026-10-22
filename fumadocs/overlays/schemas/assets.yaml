@@ -49,23 +49,68 @@ actions:
       description: Text that describes the asset for people who can't see it.
       examples:
         - Adventure mug in blue, front view
+
+  # --- fields Plytix's 16 Oct 2026 handoff excludes from the public model -----------
+  # File metadata, counters, housekeeping and account fields (2026-10-22). The live
+  # API still returns them (QUESTIONS.md OAS-26), and asset records have no download
+  # URL (FB-030, ASSET-25). AssetFileType and AssetStatus were only reachable
+  # through the removed fields.
+  - target: $.components.schemas.AssetOutputDto.properties.account_id
+    remove: true
+  - target: $.components.schemas.AssetOutputDto.properties.content_type
+    remove: true
+  - target: $.components.schemas.AssetOutputDto.properties.checksum
+    remove: true
+  - target: $.components.schemas.AssetOutputDto.properties.extension
+    remove: true
+  - target: $.components.schemas.AssetOutputDto.properties.file_size
+    remove: true
+  - target: $.components.schemas.AssetOutputDto.properties.file_type
+    remove: true
+  - target: $.components.schemas.AssetOutputDto.properties.file_modified
+    remove: true
   - target: $.components.schemas.AssetOutputDto.properties.path
-    description: FB-030 (open; 2026-10-15 re-check found path and no url)
-    update:
-      description: Storage path of the file inside Plytix. It isn't a download URL.
-  - target: $.components.schemas.AssetOutputDto.properties.n_products
-    description: spec
-    update:
-      description: Number of products that use the asset.
+    remove: true
+  - target: $.components.schemas.AssetOutputDto.properties.downloaded_from
+    remove: true
   - target: $.components.schemas.AssetOutputDto.properties.n_catalogs
-    description: spec
-    update:
-      description: Number of catalogs that use the asset.
+    remove: true
+  - target: $.components.schemas.AssetOutputDto.properties.n_products
+    remove: true
+  - target: $.components.schemas.AssetOutputDto.properties.public
+    remove: true
+  - target: $.components.schemas.AssetOutputDto.properties.status
+    remove: true
+  - target: $.components.schemas.AssetCreateOutputDto.properties.account_id
+    remove: true
+  - target: $.components.schemas.AssetCreateOutputDto.properties.content_type
+    remove: true
+  - target: $.components.schemas.AssetCreateOutputDto.properties.checksum
+    remove: true
+  - target: $.components.schemas.AssetCreateOutputDto.properties.extension
+    remove: true
+  - target: $.components.schemas.AssetCreateOutputDto.properties.file_size
+    remove: true
+  - target: $.components.schemas.AssetCreateOutputDto.properties.file_type
+    remove: true
+  - target: $.components.schemas.AssetCreateOutputDto.properties.file_modified
+    remove: true
+  - target: $.components.schemas.AssetCreateOutputDto.properties.path
+    remove: true
+  - target: $.components.schemas.AssetCreateOutputDto.properties.n_catalogs
+    remove: true
+  - target: $.components.schemas.AssetCreateOutputDto.properties.n_products
+    remove: true
+  - target: $.components.schemas.AssetCreateOutputDto.properties.public
+    remove: true
+  - target: $.components.schemas.AssetCreateOutputDto.properties.status
+    remove: true
   - target: $.components.schemas.AssetFileType
-    description: spec enum; IMAGES seen live (Create Asset.bru, List Products.bru)
-    update:
-      description: 'File type group of the asset, set from the file: `IMAGES`, `SOUNDS`, `VIDEOS`, `COMPRESSED`, `FEED_FILES`, `REPORTS`, `SPREADSHEETS`, `TEXTS`, or `OTHER`.'
+    remove: true
   - target: $.components.schemas.AssetStatus
-    description: spec enum; meaning of DELETED unconfirmed (ASSET-20)
+    remove: true
+
+  # --- relations you can expand with _fields (16 Oct handoff; untested, VERIFY.md) ----
+  - target: $.components.schemas.AssetOutputDto.properties.categories
     update:
-      description: 'Status of the asset: `ACTIVE` or `DELETED`.'
+      description: The asset categories the asset belongs to, as full category records. Returned only when you name `categories` in `_fields`.

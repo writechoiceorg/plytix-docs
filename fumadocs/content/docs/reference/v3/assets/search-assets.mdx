@@ -25,14 +25,14 @@ _openapi:
           group filters with `_or`.
 
 
-          Each asset describes its file: `filename`, `extension`,
-          `content_type`, `file_type`, and `file_size`. `path` is the file's
-          storage path inside Plytix, not a download URL, and the record has no
-          URL field.
+          Each asset holds its `filename`, its `alt_text`, whether it's
+          `assigned`, and its timestamps. Asset records don't currently include
+          a download URL.
 
 
-          `n_products` and `n_catalogs` count the products and catalogs that use
-          the asset. Check them before you delete an asset.
+          To get the asset categories each asset belongs to, add
+          `_fields=categories`. They come back only when you name them in
+          `_fields`.
 
 
           Results come back 25 per page by default, up to 1000 with

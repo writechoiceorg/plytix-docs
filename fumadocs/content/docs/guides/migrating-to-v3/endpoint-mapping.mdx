@@ -44,14 +44,10 @@ Every V1 endpoint below except the variant list also has a V2 counterpart under 
 | `POST /api/v1/products/{parent_product_id}/variants` | `POST /api/v3/products` with `parent_id` | Creates a new product as a variant. It inherits the parent's `product_family_id`, and sending a different family returns `422`. |
 | `POST /api/v1/products/{product_id}/variant/{variant_id}` | `PATCH /api/v3/products/{variant_id}` with `{"parent_id": "<product_id>"}` | Links an existing product as a variant. Don't send `product_family_id` in the same request. |
 | `DELETE /api/v1/products/{parent_product_id}/variant/{variant_id}` | `PATCH /api/v3/products/{variant_id}` with `{"parent_id": null}` | Unlinks the variant, which becomes a standalone product. This doesn't delete it. |
-| `GET /api/v1/products/{product_id}/variants` | `GET /api/v3/products?parent_id=<parent_id>` {/* [PENDING] */} | Lists the parent's variants. |
+| `GET /api/v1/products/{product_id}/variants` | `GET /api/v3/products?parent_id=<parent_id>` | Lists the parent's direct variants. To filter by the parent's SKU instead, use `parent.sku=<sku>`. |
 | `POST /api/v1/products/{parent_product_id}/variants/resync` | No V3 equivalent | |
 
 A product's position in the hierarchy is reported by `product_level`: `0` SINGLE, `1` PARENT, `2` VARIANT, `3` SUB_VARIANT. A standalone product starts at `0` and becomes `1` as soon as another product references it through `parent_id`. See [Rebuild parent and variant products](/docs/guides/reconstructing-parent-variant-hierarchies).
-
-{/* FLAG (open):
-  Listing a parent's variants with `?parent_id=<id>` is unconfirmed. It follows from `parent_id` being a real product field, but filtering on it was never tested, and [Rebuild parent and variant products](/docs/guides/reconstructing-parent-variant-hierarchies) reads the hierarchy from the parent's own `num_variations` instead. Verify with `endpoint-tester` before publishing, or drop the row and point at the parent-read method.
-*/}
 
 {/* FLAG (open):
   Linking with `parent_id` on PATCH and unlinking with `"parent_id": null` follow the 2026-10-02 spec (`ProductUpdateInputDto.parent_id`: "null detaches the product from its current parent") and the October 13 spec cited in the review, but neither is tested live. V1 warns that unlinking "might cause data loss". What V3 does to the variant's attribute values is unconfirmed (FB-022). Test with `endpoint-tester` before publishing.
@@ -63,29 +59,24 @@ V1 and V2 handle related products differently, so each legacy row names its vers
 
 | Legacy endpoint | V3 | Notes |
 |---|---|---|
-| `POST /api/v1/products/{product_id}/relationships/{relationship_id}` | `POST /api/v3/products/{product_id}/relationships` | Body: `{"relationship_id": "<id>", "related_products": [{"product_id": "<id>", "quantity": 1}]}`. V1 names the list `product_relationships` and takes the relationship ID in the path. |
-| `POST /api/v2/products/{product_id}/relationships/{relationship_id}` | `POST /api/v3/products/{product_id}/relationships` | Same as the row above. |
-| `PATCH /api/v1/products/{product_id}/relationships/{relationship_id}/product/{related_product_id}` | `PATCH /api/v3/products/{product_id}/relationships/{relationship_id}` | Body: `{"related_products": [{"product_id": "<related_product_id>", "quantity": 5}]}`. V1 sends `{"quantity": 5}` on the related product's own path. |
-| `PATCH /api/v2/products/{product_id}/relationships/{relationship_id}` | `PATCH /api/v3/products/{product_id}/relationships/{relationship_id}` | V2 names the list `product_relationships`. |
+| `POST /api/v1/products/{product_id}/relationships/{relationship_id}` | Not available yet | Linking related products through V3 isn't available yet. See the callout below. |
+| `POST /api/v2/products/{product_id}/relationships/{relationship_id}` | Not available yet | Same as the row above. |
+| `PATCH /api/v1/products/{product_id}/relationships/{relationship_id}/product/{related_product_id}` | Not available yet | Changing a related product's quantity through V3 isn't available yet. See the callout below. |
+| `PATCH /api/v2/products/{product_id}/relationships/{relationship_id}` | Not available yet | Same as the row above. |
 | `POST /api/v1/products/{product_id}/relationships/{relationship_id}/unlink` | No dedicated endpoint | V1 removes only the products listed in the body. See the V3 `DELETE` row for the difference. |
 | `DELETE /api/v2/products/{product_id}/relationships/{relationship_id}` | No dedicated endpoint | V2 removes only the product IDs listed in the body. See the V3 `DELETE` row for the difference. |
 | Not available | `DELETE /api/v3/products/{product_id}/relationships/{relationship_id}` | Removes the whole association: every related product under that relationship, for this product. The product itself stays. |
-| Not available | `GET /api/v3/products/{product_id}/relationships` | Lists the product's relationships. |
-| Not available | `GET /api/v3/products/{product_id}/relationships/{relationship_id}/related-products` {/* [PENDING] */} | |
-| Not available | `GET /api/v3/product-relationships` | Filter by `product_id`. |
-| Not available | `GET /api/v3/related-products` | Filter by `product_id`. |
+| Not available | [`GET /api/v3/related-products`](/reference/v3/related-products/search-related-products) | Lists product-to-product links with each link's `quantity`. Filter by `product_id`. |
 
-When you change one related product's quantity with `PATCH`, it isn't confirmed yet whether related products left out of `related_products` are kept. Until it is, send every related product you want to keep, with its current quantity.
-
-<Callout type="warn" title="Relationship writes failed in our latest test">
-  The spec declares `POST` and `PATCH` on `/api/v3/products/{product_id}/relationships`, but when we tried them on October 15, 2026, `POST` returned `405 Method Not Allowed` and `PATCH` returned `422` with "relationships: Extra inputs are not permitted". Reading relationships through `GET /api/v3/product-relationships` still works. Test a write against your account before you move a relationship workflow to V3.
+<Callout type="warn" title="Relationship links can't be created or changed through V3 yet">
+  The spec declares `POST` and `PATCH` on `/api/v3/products/{product_id}/relationships`, but they aren't available yet. When we tried them on October 15, 2026, `POST` returned `405 Method Not Allowed` and `PATCH` returned `422` with "relationships: Extra inputs are not permitted". Keep your legacy calls for creating links and changing quantities until Plytix confirms the V3 contract. To read links in V3, use [`GET /api/v3/related-products`](/reference/v3/related-products/search-related-products).
 </Callout>
 
 {/* FLAG (open):
-  Live relationship writes on the development account contradict the spec and our own 2026-09-15 results (FB-024). Both routes the spec declares for `POST` returned `405`, and `GET /products/{id}/relationships` returned `404 Field 'relationships' does not exist`. Remove the callout once Plytix confirms the current contract. */}
+  REL-2. Live relationship writes on the development account contradict the spec and our own 2026-09-15 results (FB-024). Both routes the spec declares for `POST` returned `405`, and `GET /products/{id}/relationships` returned `404 Field 'relationships' does not exist`. These routes, the nested related-products GETs, and `GET /api/v3/product-relationships` (FB-024 shape mismatch) are on hold, so the table no longer lists them. Restore the V3 write rows once Plytix confirms the current contract. */}
 
 <Callout type="info" title="Narrow the account-wide association endpoints">
-  `GET /api/v3/product-relationships`, `GET /api/v3/related-products`, and `GET /api/v3/family-attributes` return every matching record in your account when called with no filter. Add a filter to read only the records you need: `product_id` on the two relationship endpoints, and `product_family_id` on family attributes.
+  `GET /api/v3/related-products` and `GET /api/v3/family-attributes` return every matching record in your account when called with no filter. Add a filter to read only the records you need: `product_id` on related products, and `product_family_id` on family attributes.
 </Callout>
 
 {/* FLAG (open):
@@ -152,7 +143,7 @@ File categories are called asset categories in V3.
 
 | V1 | V3 | Notes |
 |---|---|---|
-| `POST /api/v1/product_families` | `POST /api/v3/product-families` | |
+| `POST /api/v1/product_families` | `POST /api/v3/product-families` | V3 creates the family from its `name` only. Link attributes afterward with `POST /api/v3/product-families/{product_family_id}/attributes`. |
 | `POST /api/v1/product_families/search` | `GET /api/v3/product-families` | |
 | `GET /api/v1/product_families/{product_family_id}` | `GET /api/v3/product-families/{identifier}` | |
 | `PATCH /api/v1/product_families/{product_family_id}` | `PATCH /api/v3/product-families/{identifier}` | |
@@ -171,12 +162,12 @@ V1 links through dedicated endpoints. V3 originally accepted `category_ids` and 
 
 | Link | V1 | V3 |
 |---|---|---|
-| Product to category | `POST /api/v1/products/{product_id}/categories` | `POST /api/v3/products/{identifier}/categories` |
-| Product from category | `DELETE /api/v1/products/{product_id}/categories/{category_id}` | `DELETE /api/v3/products/{identifier}/categories/{id}` |
+| Product to category | `POST /api/v1/products/{product_id}/categories` | [`POST /api/v3/products/{identifier}/categories`](/reference/v3/products/link-product-category) |
+| Product from category | `DELETE /api/v1/products/{product_id}/categories/{category_id}` | [`DELETE /api/v3/products/{identifier}/categories/{id}`](/reference/v3/products/delete-product-category-link) |
 | Asset to category | Through `categories` on the asset | `POST /api/v3/assets/{identifier}/categories` |
 | Asset from category | Through `categories` on the asset | `DELETE /api/v3/assets/{identifier}/categories/{id}` |
-| Attribute to group | `attribute_labels` on `POST /api/v1/attribute-groups/product`, or the full `attribute_labels` list on `PATCH /api/v1/attribute-groups/product/{attribute_group_id}` | `POST /api/v3/product-attributes/{identifier}/groups` |
-| Attribute from group | The `attribute_labels` list without that attribute, on `PATCH /api/v1/attribute-groups/product/{attribute_group_id}` | `DELETE /api/v3/product-attributes/{identifier}/groups/{id}` |
+| Attribute to group | `attribute_labels` on `POST /api/v1/attribute-groups/product`, or the full `attribute_labels` list on `PATCH /api/v1/attribute-groups/product/{attribute_group_id}` | [`POST /api/v3/product-attributes/{identifier}/groups`](/reference/v3/product-attributes/link-product-attribute-group) |
+| Attribute from group | The `attribute_labels` list without that attribute, on `PATCH /api/v1/attribute-groups/product/{attribute_group_id}` | [`DELETE /api/v3/product-attributes/{identifier}/groups/{id}`](/reference/v3/product-attributes/delete-product-attribute-group-link) |
 | Product to asset | `POST /api/v1/products/{product_id}/assets` | No dedicated endpoint. See [Products](#products) |
 | Product from asset | `DELETE /api/v1/products/{product_id}/assets/{asset_id}` | No dedicated endpoint. See [Products](#products) |
 | Product to family | `POST /api/v1/products/{product_id}/family` | `PATCH /api/v3/products/{identifier}` with `product_family_id` |

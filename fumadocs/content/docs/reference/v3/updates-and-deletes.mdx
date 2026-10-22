@@ -9,7 +9,7 @@ This page documents which method to use for each kind of change, what comes back
 
 Key points on this page:
 
-- POST returns the full created record. PATCH returns `204` with no body, so an update has to be read back.
+- Each write returns the status and body its operation declares. PATCH returns `204` with no body, so an update has to be read back.
 - PATCH is the standard way to change a record, because it touches only the top-level fields you name.
 - Naming a map field such as `attributes` in a PATCH on the record replaces that whole map, deleting anything you left out. A partial map sent to `PATCH .../attributes` is merged instead.
 - On the attribute types tested, sending `""`, `[]`, or `null` clears the value, so the attribute ends up absent rather than stored as empty.
@@ -35,14 +35,13 @@ Key points on this page:
 
 ## What a write returns
 
-A successful POST returns the complete created record. PATCH and DELETE return no body at all, so the only way to see the result of an update is to read the record back.
+Each operation declares its own success status and response body, so check the operation's page in the API reference rather than assuming one shape for every write. PATCH and DELETE return no body at all, so the only way to see the result of an update is to read the record back.
 
 | Operation | Status | Body |
 |---|---|---|
-| Create | `201` | The full created record |
+| Create | `201` | As declared by the operation. Creating a product returns the new product in `data`, without expanded relations. Linking a category to a product returns only the linked category's `id` |
 | Update | `204` | None |
 | Delete | `204` | None |
-| Accepted for async processing | `202` | A `process_id` for tracking |
 
 ## What a PATCH replaces
 
@@ -87,7 +86,7 @@ curl --request DELETE \
 ```
 
 <Callout type="warn" title="Erasing a variant's value doesn't restore inheritance">
-  In testing, deleting a value that a variant had overridden left the variant with no value for that attribute. It didn't bring back the parent's value, and the attribute stayed listed in the variant's `overwritten_attributes` array. Check on a test record before running a delete across a catalog.
+  In testing, deleting a value that a variant had overridden left the variant with no value for that attribute. It didn't bring back the parent's value. Check on a test record before running a delete across a catalog.
 </Callout>
 
 Field-level writes apply to attributes only. You can POST, PATCH, or DELETE a single attribute on a record through its field path; other fields are changed with PATCH on the record.
@@ -105,13 +104,7 @@ curl --request GET \
 
 The same path pattern extends through related entities, in the form `/api/v3/<entities>/<identifier>/<subentity>/<identifier>/<field>`.
 
-## Advanced updates
-
-Some changes can't be expressed by assigning a value to a field, such as inserting an item at a specific position in a list. For those, V3 accepts JSON Patch: send a PATCH with the content type `application/json-patch+json` and a body that describes the change as a list of RFC 6902 operations, each naming an `op`, a `path`, and, where the operation needs one, a `value`.
-
-## Async operations
-
-An operation that can't complete within the request returns `202` with a `process_id` rather than a result. Track it through the Process Manager API, and the record changes once processing finishes.
+{/* FLAG (open): The "Advanced updates" (JSON Patch, `application/json-patch+json`) and "Async operations" (`202` with `process_id`, Process Manager API) sections were removed on 2026-10-22. Neither is declared in the public V3 spec, and Plytix's 16 Oct handoff keeps bulk and job-management operations out of current examples ("Use each operation's declared status and schema"). Restore only if Plytix publishes them. */}
 
 ## Write safely
 

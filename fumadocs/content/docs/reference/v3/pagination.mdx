@@ -110,7 +110,7 @@ Use these three parameters to control paging and sort order:
 |---|---|---|
 | `_page` | integer | The page to return. Must be 1 or greater. Defaults to `1` |
 | `_page_size` | integer | Records per page. Maximum `1000`. Defaults to `25` |
-| `_sort_by` | string | Field to sort by. Prefix with `-` for descending |
+| `_sort_by` | string | Field to sort by. Prefix with `-` for descending. Repeat it to sort by several fields |
 
 Both bounds are enforced, and the error names the parameter and the limit. `_page=0` returns:
 
@@ -127,6 +127,16 @@ Both bounds are enforced, and the error names the parameter and the limit. `_pag
 ```
 
 `_page_size=1001` returns the same shape with `"query._page_size: Input should be less than or equal to 1000"`.
+
+### Sort by more than one field
+
+Repeat `_sort_by` to sort by several fields. They apply in the order you send them, so this sorts by `product_level` first and then by SKU, descending, within each level:
+
+```text
+_sort_by=product_level&_sort_by=-sku
+```
+
+Each field can appear only once. Naming the same field twice, even with other fields between, returns `400` with `"Sorting by 'sku' more than once is not allowed."`
 
 ### There are no count parameters
 

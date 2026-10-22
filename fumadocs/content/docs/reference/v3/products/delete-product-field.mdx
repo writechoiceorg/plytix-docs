@@ -19,7 +19,9 @@ _openapi:
 
           A successful call returns `204` with an empty body. The product itself is never deleted.
 
-          If a variant overrode a value it inherited from its parent, deleting the value doesn't bring the parent's value back. The attribute is removed from the variant, and `attributes.<label>` stays in `overwritten_attributes`.
+          If a variant overrode a value it inherited from its parent, deleting the value doesn't bring the parent's value back. The attribute is removed from the variant.
+
+          To unlink a category, you can also use [Unlink a category from a product](/reference/v3/products/delete-product-category-link).
 
           A collection without an ID, such as `categories` on its own, returns `405`. A field the product doesn't have returns `404`, and so does a record that isn't linked to the product.
 

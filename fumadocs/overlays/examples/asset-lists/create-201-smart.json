@@ -5,7 +5,7 @@
     "query": [
       [
         {"operator": "like", "field": "filename", "value": "kettle", "field_type": null},
-        {"operator": "eq", "field": "extension", "value": "jpg", "field_type": null}
+        {"operator": "like", "field": "filename", "value": ".jpg", "field_type": null}
       ],
       [
         {"operator": "eq", "field": "filename", "value": "Kettle handle - White.png", "field_type": null}

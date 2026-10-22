@@ -92,17 +92,17 @@ actions:
   - target: $.components.schemas.FilterModel
     update:
       title: Field condition
-      description: 'One condition on an asset field, such as `{"field": "extension", "operator": "eq", "value": "jpg"}`.'
+      description: 'One condition on an asset field, such as `{"field": "filename", "operator": "like", "value": "mug"}`.'
   - target: $.components.schemas.FilterModel.properties.field
     update:
-      description: The asset field to test, such as `filename`, `extension`, or `alt_text`.
+      description: The asset field to test, such as `filename` or `alt_text`.
       examples:
-        - extension
+        - filename
   - target: $.components.schemas.FilterModel.properties.value
     update:
       description: The value to compare with. With `!exists`, send `true`.
       examples:
-        - jpg
+        - mug
   - target: $.components.schemas.FilterModel.properties.field_type
     update:
       description: Type of the field. Optional in requests. Responses include it, set to `null` on asset fields.
@@ -113,3 +113,10 @@ actions:
     update:
       title: Relationship condition
       description: A condition on product relationships. For asset fields, use a field condition.
+
+  # --- fields Plytix's 16 Oct 2026 handoff excludes from the public model -----------
+  # The live API still returns them (QUESTIONS.md OAS-26). 2026-10-22.
+  - target: $.components.schemas.AssetListOutputDto.properties.account_id
+    remove: true
+  - target: $.components.schemas.AssetListCreateOutputDto.properties.account_id
+    remove: true

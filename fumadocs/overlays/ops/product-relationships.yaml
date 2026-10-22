@@ -1,5 +1,7 @@
 # Operation edits for the product-relationships endpoints.
-# Phase 2 (2026-10-20): search, get and delete are published. The write routes,
+# Phase 2 (2026-10-20): search, get and delete are published. 2026-10-22: the
+# search (GET /product-relationships) is on hold too: its published schema doesn't
+# match the live shape (FB-024). The write routes,
 # the per-product list and the field routes are on hold (visibility.yaml,
 # VERIFY.md); their actions below are kept but not applied.
 # Sources: Q#62, Q#112, Q#113, FB-024, Manage Product Relationship Link.bru,
@@ -10,12 +12,12 @@ info:
   version: 1.0.0
 actions:
   - target: $.paths['/api/v3/products/{product_id}/relationships/{relationship_id}'].get
-    description: Manage Product Relationship Link.bru GET (2026-09-15); not retested after FB-024 (VERIFY.md)
+    description: Manage Product Relationship Link.bru GET (2026-09-15); not retested after FB-024 (VERIFY.md); relationship_label excluded by the 16 Oct handoff
     update:
       summary: Get a product's relationship link
       operationId: get-product-relationship
       description: |-
-        Returns one product's link to one relationship type: the `relationship_id`, the `relationship_label`, and the `product_id`.
+        Returns one product's link to one relationship type: the `relationship_id` and the `product_id`.
 
         The response doesn't list the related products. To get those, use [Search related products](/reference/v3/related-products/search-related-products) with `product_id=<id>`.
   - target: $.paths['/api/v3/products/{product_id}/relationships/{relationship_id}'].post
@@ -79,7 +81,7 @@ actions:
       description: |-
         List every relationship link a product currently has. Each entry is flat (`{relationship_id, relationship_label, product_id}`) and a product with no links returns an empty `data` array.
 
-        Results are scoped by the `product_id` in the URL, so this needs none of the filtering that [Search-Product-Relationships](/reference/v3/product-relationships/search-product-relationships) requires. `product_id` is the product's Plytix `id`, not its SKU.
+        Results are scoped by the `product_id` in the URL, so it needs no filters. `product_id` is the product's Plytix `id`, not its SKU.
 
         The entries name the relationship types the product takes part in, not the products on the other end of them, there's no `related_product_id` in this shape. For that, use [Search-Related-Products](/reference/v3/related-products/search-related-products) with `?product_id=<id>`.
     x-review: 'On hold (visibility.yaml): live behavior contradicts the spec (FB-024, 2026-10-15: POST 405, PATCH 422, collection GET 404; Q#63/Q#112: nested related-products GETs empty or 404, REL-1 "fix in progress"). This text is from before Phase 2: rewrite it when the operation is restored.'
@@ -114,7 +116,7 @@ actions:
       example:
         product_id: 6a1f0c2e9b3d4a5f8c7e1a01
   - target: $.paths['/api/v3/products/{product_id}/relationships/{relationship_id}'].get.responses['200'].content['application/json']
-    description: Manage Product Relationship Link.bru GET 200 (2026-09-15), sanitized
+    description: Manage Product Relationship Link.bru GET 200 (2026-09-15), sanitized; relationship_label stripped (16 Oct handoff)
     update:
       examples:
         link:
@@ -122,7 +124,6 @@ actions:
           value:
             data:
               relationship_id: 6a1f0c2e9b3d4a5f8c7e1f01
-              relationship_label: gift_basket
               product_id: 6a1f0c2e9b3d4a5f8c7e1a01
             errors: []
   - target: $.paths['/api/v3/products/{product_id}/relationships/{relationship_id}'].delete.responses['204']

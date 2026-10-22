@@ -11,14 +11,10 @@ _openapi:
   structuredData:
     headings: []
     contents:
-      - content: >-
-          Renames an attribute group. Send the new `name`. A successful update
-          returns `204` with an empty body; read the group back to see it.
+      - content: |-
+          Renames an attribute group. Send the new `name`. A successful update returns `204` with an empty body; read the group back to see it.
 
-
-          The group's attributes can't be changed here: `attribute_labels`
-          returns `422` with "Extra inputs are not permitted".
-
+          The group's attributes can't be changed here, and fields other than `name` return `422`. Use [Link an attribute to a group](/reference/v3/product-attributes/link-product-attribute-group) and [Unlink an attribute from a group](/reference/v3/product-attributes/delete-product-attribute-group-link) instead.
 
           See [Update and delete records](/reference/v3/updates-and-deletes).
 ---

@@ -84,3 +84,24 @@ These responses had `schema: {}` and no example, so the reference showed `null`.
 | `GET /product-families/{id}/attributes/{attribute_id}/level` 200 body | `ops/family-attributes.yaml` | FAM-3 |
 | `POST /product-families/{id}/attributes/{attribute_id}` 201 body and default `level` | `ops/family-attributes.yaml` | FAM-2 |
 | `GET /product-attributes` 200 page (example ported from the pre-overlay staging spec) | `ops/product-attributes.yaml` | ATTR-20 |
+
+## Field-audit handoff (2026-10-22)
+
+These claims come from Plytix's 16 Oct 2026 handoff (`materials/api-references/endpoint-reviews/Plytix_API_v3_Writechoice_Reference.html`) or from captures replayed on a different route, and haven't been tested live. The excluded fields are hidden from the docs although the live API still returns them (QUESTIONS.md OAS-26).
+
+| Check | Overlay | Closes |
+|---|---|---|
+| Without `_fields`, each resource returns only its default fields: no relations, and none of the excluded fields once Plytix filters them | `10-shared.yaml`, `ops/products.yaml` | OAS-26 |
+| Product expansions: `_fields=thumbnail`, `parent`, `product_family` (object or `null`); `assets`, `categories` (lists) | `ops/products.yaml`, `schemas/products.yaml` | |
+| Asset expansion: `_fields=categories` on `GET /assets` and `/assets/{id}` | `ops/assets.yaml`, `schemas/assets.yaml` | |
+| Category expansions: `_fields=parent` (object) and `_fields=parents` (list; order?) on product and asset categories, search and get | `ops/product-categories.yaml`, `ops/asset-categories.yaml` | |
+| Category search filtered by `parent_id=<id>` returns the direct children (used in the PM-61 delete warning); top-level categories with `parent_id[null]` or `[!exists]` | `ops/product-categories.yaml`, `ops/asset-categories.yaml` | CAT-21 |
+| Attribute expansions: `_fields=groups` and `_fields=family_attributes` on search and get | `ops/product-attributes.yaml` | |
+| Product family expansion: `_fields=family_attributes` on search and get | `ops/product-families.yaml`, `schemas/product-families.yaml` | FAM-23 |
+| Family attribute expansions: `_fields=product_family` and `_fields=attribute`; a link with `level: null` | `ops/family-attributes.yaml` | |
+| `PATCH /products/{id}` with `product_family_id: null` removes the family (spec and handoff; untested live) | `ops/products.yaml`, `schemas/products.yaml` | |
+| Filter function `[lower]` and the negated group `_!or` (spec prose and handoff) | `10-shared.yaml`, `reference/v3/filtering-and-search.mdx` | |
+| `filename[contains:ignorecase]` on asset search, and `filename` `like` `.jpg` in an asset list `query` (new examples replacing `extension`) | `ops/assets.yaml`, `ops/asset-lists.yaml`, `schemas/asset-lists.yaml` | OAS-27 |
+| Newly public `POST /products/{id}/categories` and `DELETE /products/{id}/categories/{id}`: 201/409/422 captured 2026-10-08 on the same URLs, but the `404` bodies (unknown ID, category not linked) come from the generic `/{path}` route | `ops/products.yaml` | |
+| Newly public `POST /product-attributes/{id}/groups` and `DELETE /product-attributes/{id}/groups/{id}`: 201 captured 2026-10-13; `409` body, `404`/`422` bodies and the DELETE `204` not captured in full | `ops/product-attributes.yaml` | |
+| Families created with `name` only; the API still accepts `attributes`, `parent_attributes`, `variant_attributes` (hidden from the docs) | `ops/product-families.yaml`, `schemas/product-families.yaml` | OAS-26 |

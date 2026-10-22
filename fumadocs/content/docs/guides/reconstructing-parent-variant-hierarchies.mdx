@@ -40,7 +40,7 @@ Follow the steps below to read your products, group them by parent, and add the 
 
    Index the products by `id`, then attach each product that has a `parent_id` to the product it points at. Treat a product whose `parent_id` is missing or `null` as top level. A sub-variant's `parent_id` points at its variant, not at the top-level parent, so the same grouping produces the third level with no extra requests.
 
-   Don't rebuild the tree from `product_level` or `num_variations`. They tell you a product's position and how many variations it has, but neither lists which products those are. `parent_id` is the only field that connects a child to its parent.
+   Don't rebuild the tree from `product_level`. It tells you where a product sits, but not which products sit above or below it. `parent_id` is the only field that connects a child to its parent.
 
 3. **Read a single parent's children when you only need one branch.**
 
@@ -100,18 +100,18 @@ Follow the steps below to read your products, group them by parent, and add the 
 
    This is the shape your integration produces, not an API response. Plytix returns the same products as a flat, paged list.
 
-## Read which values a variant overrides
+## Interpret a variant's values
+
+A variant's values come back resolved. A value the variant inherits from its parent appears in the variant's `attributes` map the same way as a value the variant holds itself, so a single read doesn't show where a value comes from. To work that out, combine the attribute's `level` from step 4 with the parent's and the variant's values for that attribute. Only attributes linked at `parent_level` or `variant_level` pass values down. An attribute linked at `no_level` holds the variant's own value, or none.
+
+Be careful when you delete a value on a variant. In testing, deleting a value that a variant had overridden left the variant with no value for that attribute. It didn't bring back the parent's value. Try it on a test record before you delete overrides across a catalog.
 
 {/* FLAG (open):
-  Verified 2026-10-15 on the development account only, with one attribute linked at `parent_level` (FB-037). The spec describes the field only as "Overwritten attribute names". Confirm with Plytix when entries are added and whether they are ever removed. */}
-
-When a variant overrides a value it inherits, Plytix adds that attribute to the variant's `overwritten_attributes` array as `attributes.<label>`, for example `attributes.brand`. Use it to find the attributes a variant customized. In testing, the entry stayed in the array after the override was deleted, so the array records that an override happened, not that the variant currently holds a value.
-
-The array doesn't tell you where the rest of the variant's values come from. An attribute missing from it may be inherited, but it may also be linked at `no_level`, calculated by Plytix, or not set at all. For an attribute that isn't linked at `parent_level` or `variant_level`, the array stays empty even when a variant holds its own value. To work out where a value comes from, combine the attribute's `level` from step 4 with the parent's and the variant's values for that attribute.
+  The `overwritten_attributes` subsection was removed on 2026-10-22: Plytix's 16 Oct field-audit handoff excludes the field from V3, and "inheritance provenance" (how inherited vs overridden values are shown) is on its "still pending" list. The live API still returns the field (FB-037). Restore guidance here once Plytix defines the public representation. */}
 
 ## Create a hierarchy to test against
 
-If your account has no parent and variant products yet, follow the steps below to create a family, a parent, and a variant. To use a family you already have, find it with `GET /api/v3/product-families`, where `total_products` shows which families already hold products, and skip to step 3.
+If your account has no parent and variant products yet, follow the steps below to create a family, a parent, and a variant. To use a family you already have, find its ID with `GET /api/v3/product-families` and skip to step 3.
 
 1. **Create a product family.**
 
@@ -122,7 +122,7 @@ If your account has no parent and variant products yet, follow the steps below t
      -d '{"name": "Aprons"}'
    ```
 
-   You can also link attributes at creation: `attributes` links them at `no_level`. A family's own `PATCH` accepts `name` only, because changing which attributes belong to a family propagates across every product in it.
+   A family is created from its `name` only. Link its attributes in the next step. A family's own `PATCH` accepts `name` only, because changing which attributes belong to a family propagates across every product in it.
 
 2. **Link attributes to the family, choosing each one's level.**
 
@@ -133,7 +133,7 @@ If your account has no parent and variant products yet, follow the steps below t
      -d '{"attribute_id": "<attribute_id>", "level": "no_level"}'
    ```
 
-   `level` takes `parent_level`, `variant_level`, or `no_level`. If you leave it out, the attribute is linked at `no_level`, but sending it on every link keeps your intent visible. `no_level` links the attribute without inheritance. The other two levels depend on automatic inheritance: on accounts without it, changing a link's level with `PATCH /api/v3/product-families/<family_id>/attributes/<attribute_id>`, or sending `parent_attributes` or `variant_attributes` when you create a family, returns `403`:
+   `level` takes `parent_level`, `variant_level`, or `no_level`. If you leave it out, the attribute is linked at `no_level`, but sending it on every link keeps your intent visible. `no_level` links the attribute without inheritance. The other two levels depend on automatic inheritance: on accounts without it, changing a link's level with `PATCH /api/v3/product-families/<family_id>/attributes/<attribute_id>` returns `403`:
 
    ```json
    {"errors": [{"name": "Forbidden", "description": "Automatic inheritance is not available for this account"}]}
@@ -147,7 +147,7 @@ If your account has no parent and variant products yet, follow the steps below t
    curl -X POST "https://pim.plytix.com/api/v3/products" \
      -H "Authorization: Bearer <access_token>" \
      -H "Content-Type: application/json" \
-     -d '{"sku": "Black Kettle", "product_family_id": "<family_id>"}'
+     -d '{"sku": "BAMBOO-APRON", "product_family_id": "<family_id>"}'
    ```
 
    A successful create returns `201` with the new product in `data`, without expanded relations. Its `product_level` is `0`: putting a product in a family doesn't make it a parent. It becomes one in the next step, when a variant points at it.
@@ -158,7 +158,7 @@ If your account has no parent and variant products yet, follow the steps below t
    curl -X POST "https://pim.plytix.com/api/v3/products" \
      -H "Authorization: Bearer <access_token>" \
      -H "Content-Type: application/json" \
-     -d '{"sku": "Black Kettle_1", "parent_id": "<parent_id>"}'
+     -d '{"sku": "BAMBOO-APRON-RED", "parent_id": "<parent_id>"}'
    ```
 
    Leave `product_family_id` out: the variant takes its family from the parent. If you send it, it must match the parent's family. A different family returns `422` with an error that names no field: `{"name": "ValidationError", "description": "product data validation failed"}`.
@@ -170,7 +170,7 @@ If your account has no parent and variant products yet, follow the steps below t
      -H "Authorization: Bearer <access_token>"
    ```
 
-   Once the product has a variant, its `product_level` is `1` and its `num_variations` counts each variant. The variant reads back at `product_level: 2`. To read the structure the way your integration will, follow [Rebuild the hierarchy from existing products](#rebuild-the-hierarchy-from-existing-products).
+   Once the product has a variant, its `product_level` is `1`. The variant reads back at `product_level: 2` with `parent_id` set to the parent's ID, and a search with `parent_id=<parent_id>` returns it. To read the structure the way your integration will, follow [Rebuild the hierarchy from existing products](#rebuild-the-hierarchy-from-existing-products).
 
 ## Related articles
 

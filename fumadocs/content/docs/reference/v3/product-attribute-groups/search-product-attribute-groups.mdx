@@ -11,23 +11,16 @@ _openapi:
   structuredData:
     headings: []
     contents:
-      - content: >-
-          Returns the attribute groups in your account, one page at a time. Each
-          group has a `name`, an `order` (its display position), and
-          `attribute_labels`, the labels of the attributes it contains.
+      - content: |-
+          Returns the attribute groups in your account, one page at a time. Each group has a `name` and an `order`, its display position.
 
+          To add an attribute to a group or take it out, use [Link an attribute to a group](/reference/v3/product-attributes/link-product-attribute-group) and [Unlink an attribute from a group](/reference/v3/product-attributes/delete-product-attribute-group-link). To see the groups an attribute belongs to, read the attribute with `_fields=groups`.
 
-          Groups organize attributes for display. They don't change which
-          attributes a product can hold. Product families control which
-          attributes apply to their products. See [The Plytix data
-          model](/docs/guides/data-model#product-attributes).
-
+          Groups organize attributes for display. They don't change which attributes a product can hold. Product families control which attributes apply to their products. See [The Plytix data model](/docs/guides/data-model#product-attributes).
 
           Related pages:
 
-
           - [Filtering and search](/reference/v3/filtering-and-search)
-
           - [Pagination](/reference/v3/pagination)
 ---
 

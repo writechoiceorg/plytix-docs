@@ -17,15 +17,12 @@ _openapi:
 
 
           To create a subcategory, set `parent_id` to the ID of the parent asset
-          category. Leave it out to create a top-level category. The response's
-          `path` lists the names from the top of the tree down to the new
-          category.
+          category. Leave it out to create a top-level category.
 
 
           A successful create returns `201`. `data` holds the new category's
-          `id`, `name`, `path`, `slug`, `order`, and `n_children`, plus
-          `parent_id` for a subcategory. To get every field, including
-          `created`, read the category back.
+          `id`, `name`, and `order`, plus `parent_id` for a subcategory. To get
+          `created` and `modified`, read the category back.
 
 
           Re-creating an asset category that already exists, with the same

@@ -521,6 +521,63 @@ actions:
               name:
                 summary: New name (path `name`)
                 value: Mugs and Cups
+  # Dedicated association routes made public on 2026-10-22 (16 Oct 2026 handoff).
+  - target: $.paths['/api/v3/products/{identifier}/categories'].post
+    description: POST /api/v3/products/{identifier}/categories uses {identifier} in its path but doesn't declare it.
+    x-plytix-question: OAS-1
+    update:
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+            title: identifier
+  - target: $.paths['/api/v3/products/{identifier}/categories/{id}'].delete
+    description: DELETE /api/v3/products/{identifier}/categories/{id} uses {identifier}, {id} in its path but doesn't declare them.
+    x-plytix-question: OAS-1
+    update:
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+            title: identifier
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: id
+  - target: $.paths['/api/v3/product-attributes/{identifier}/groups'].post
+    description: POST /api/v3/product-attributes/{identifier}/groups uses {identifier} in its path but doesn't declare it.
+    x-plytix-question: OAS-1
+    update:
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+            title: identifier
+  - target: $.paths['/api/v3/product-attributes/{identifier}/groups/{id}'].delete
+    description: DELETE /api/v3/product-attributes/{identifier}/groups/{id} uses {identifier}, {id} in its path but doesn't declare them.
+    x-plytix-question: OAS-1
+    update:
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+            title: identifier
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: id
   - target: $.components.schemas.ProductFamilyOutputDto
     description: ProductFamilyOutputDto declares `_id`, but every live response returns `id` (List Product Families.bru, Get Product Family by ID.bru, Create Product Family.bru).
     x-plytix-question: FAM-22

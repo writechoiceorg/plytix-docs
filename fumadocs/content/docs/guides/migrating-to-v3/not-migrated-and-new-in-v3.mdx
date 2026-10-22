@@ -32,14 +32,13 @@ The current V3 contract has no bulk create, update, or delete endpoints. Bulk en
 
 ## New entry points in V3
 
-These V3 entry points have no V1 path of their own. One is a new resource. The other three are new top-level views of associations that V1 already managed under families and products. The list isn't exhaustive; see the [V3 API reference](/reference/v3) for every resource.
+These V3 entry points have no V1 path of their own. One is a new resource. The other two are new top-level views of associations that V1 already managed under families and products. The list isn't exhaustive; see the [V3 API reference](/reference/v3) for every resource.
 
 | V3 entry point | What it is | Managed through |
 |---|---|---|
 | `/api/v3/asset-lists` | A new resource: saved asset lists | Its own endpoints |
 | `/api/v3/family-attributes` | A view of family-to-attribute associations and their levels. Narrow it with `product_family_id` | Read-only here. Link, change, and unlink attributes through `/api/v3/product-families/{product_family_id}/attributes` |
-| `/api/v3/product-relationships` | A view of product relationship records: which products link to which relationship | Read-only here. Manage them through `/api/v3/products/{product_id}/relationships` |
-| `/api/v3/related-products` | A view of related-product entries, including `quantity` and an optional expanded `product` | Read-only here. Change them through `/api/v3/products/{product_id}/relationships/{relationship_id}` |
+| [`/api/v3/related-products`](/reference/v3/related-products/search-related-products) | A view of related-product entries, including `quantity` and an optional expanded `product`. Narrow it with `product_id` | Read-only here. Creating and changing links through V3 isn't available yet; see [Product relationships](/docs/guides/migrating-to-v3/endpoint-mapping#product-relationships) |
 
 ## What V2 covers
 

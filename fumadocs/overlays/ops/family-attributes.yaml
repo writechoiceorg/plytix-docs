@@ -13,7 +13,7 @@ info:
 actions:
   # --- GET /api/v3/family-attributes --------------------------------------------
   - target: $.paths['/api/v3/family-attributes'].get
-    description: Q#74, Q#112, FB-025, SEC-1, Get Family Attributes (Top-Level).bru
+    description: Q#74, Q#112, FB-025, SEC-1, Get Family Attributes (Top-Level).bru; 16 Oct 2026 handoff (product_family and attribute expandable, level can be null; expansions untested, VERIFY.md)
     update:
       summary: Search family attributes
       operationId: search-family-attributes
@@ -28,7 +28,9 @@ actions:
         - `variant_level`: a variant's value passes down to its sub-variants.
         - `no_level`: values don't pass down.
 
-        See [The Plytix data model](/docs/guides/data-model#product-families-and-variants). Records hold IDs only. To get an attribute's name and type, look it up with [Search product attributes](/reference/v3/product-attributes/search-product-attributes).
+        `level` is `null` when the attribute has no level. See [The Plytix data model](/docs/guides/data-model#product-families-and-variants).
+
+        To get the product family or the attribute as a full record, with the attribute's name and type, add `_fields=product_family` or `_fields=attribute`. These relations come back only when you name them in `_fields`.
 
         Related pages:
 
@@ -62,14 +64,14 @@ actions:
               next_page: http://<api-host>/api/v3/family-attributes?_page=2&_page_size=2
 
   - target: $.paths['/api/v3/product-families/{product_family_id}/attributes'].get
-    description: Get Family Attributes Collection.bru (2026-09-15/21), Q#73
+    description: Get Family Attributes Collection.bru (2026-09-15/21), Q#73; 16 Oct 2026 handoff (product_family and attribute expandable, level can be null; untested, VERIFY.md)
     update:
       summary: List a product family's attributes
       operationId: list-family-attributes
       description: |-
-        Returns the attributes linked to one product family, with each link's `level`. Each record names the `product_family_id`, the `attribute_id`, and the `level`.
+        Returns the attributes linked to one product family, with each link's `level`. Each record names the `product_family_id`, the `attribute_id`, and the `level`, which is `parent_level`, `variant_level`, `no_level`, or `null` when the attribute has no level.
 
-        Records hold IDs only. To get an attribute's name and type, look it up with [Search product attributes](/reference/v3/product-attributes/search-product-attributes).
+        To get the attribute as a full record, with its name and type, add `_fields=attribute`. To get the product family, add `_fields=product_family`. These relations come back only when you name them in `_fields`.
 
         To filter or page through links, including across families, use [Search family attributes](/reference/v3/family-attributes/search-family-attributes).
 

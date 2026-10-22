@@ -6,6 +6,8 @@
     "get-product",
     "update-product",
     "delete-product",
+    "link-product-category",
+    "delete-product-category-link",
     "get-product-field",
     "add-product-field",
     "update-product-field",

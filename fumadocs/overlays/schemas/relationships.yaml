@@ -36,3 +36,10 @@ actions:
     description: Spec enum; ACTIVE on create (Create Relationship.bru); a deleted type returns 404 (REL-21 asks whether DELETED is ever visible)
     update:
       description: Status of the relationship type, set by Plytix. A new relationship type is `ACTIVE`. A deleted type returns `404`.
+
+  # --- fields Plytix's 16 Oct 2026 handoff excludes from the public model -----------
+  # The live API still returns them (QUESTIONS.md OAS-26). 2026-10-22.
+  - target: $.components.schemas.RelationshipOutputDto.properties.account_id
+    remove: true
+  - target: $.components.schemas.RelationshipCreateOutputDto.properties.account_id
+    remove: true

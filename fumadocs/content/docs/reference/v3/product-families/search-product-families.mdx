@@ -13,9 +13,7 @@ _openapi:
     contents:
       - content: >-
           Returns the product families in your account, one page at a time. Each
-          record holds the family's `id` and `name`, the number of products in
-          it (`total_products`), and the number of attributes linked to it
-          (`total_attributes`).
+          record holds the family's `id`, its `name`, and its timestamps.
 
 
           Use it to find a family's `id` before you assign products to the
@@ -28,9 +26,10 @@ _openapi:
           `_sort_by=name`.
 
 
-          By default, records don't list the family's attributes. To get them,
-          with each attribute's inheritance `level`, use [List a product
-          family's
+          To get each family's attributes, with each attribute's inheritance
+          `level`, add `_fields=family_attributes`. They come back only when you
+          name them in `_fields`. You can also list one family's attributes with
+          [List a product family's
           attributes](/reference/v3/family-attributes/list-family-attributes).
 
 

@@ -17,13 +17,15 @@ _openapi:
           the body accepts.
 
 
-          A successful create returns `201` with the new group in `data`. Its
-          `attribute_labels` starts empty. If a group with the same name already
-          exists, the request returns `409` and creates nothing.
+          A successful create returns `201` with the new group in `data`. If a
+          group with the same name already exists, the request returns `409` and
+          creates nothing.
 
 
-          You can't add attributes in the same request: `attribute_labels`
-          returns `422` with "Extra inputs are not permitted".
+          You can't add attributes in the same request, and fields other than
+          `name` return `422`. Add attributes afterwards with [Link an attribute
+          to a
+          group](/reference/v3/product-attributes/link-product-attribute-group).
 
 
           See [Update and delete records](/reference/v3/updates-and-deletes).

@@ -45,7 +45,7 @@ actions:
     description: Q#77 (2026-09-22, valid _fields list from the 400; revision_id accepted but absent), List Asset Lists.bru
     update:
       description: |-
-        Fields to return for each list. Repeat the parameter once per field, for example `_fields=id&_fields=name`. Leave it out to get every field.
+        Fields to return for each list. Repeat the parameter once per field, for example `_fields=id&_fields=name`. Leave it out to get the default fields.
 
         Accepted fields include `id`, `name`, `query`, `created`, and `modified`. `type` isn't accepted on this operation and returns `400`.
 
@@ -83,14 +83,14 @@ actions:
         - For a `Smart` list, send a `query`. The list's members are the assets that match it.
         - For a `Static` list, leave `query` out. Membership is stored on each asset. Plytix generates the list's `query`, which points at the list's own ID.
 
-        A `query` is a list of groups, and each group is a list of conditions. An asset is in the list when it matches every condition in at least one group. Each condition names a `field`, an `operator`, and a `value`, for example `{"field": "extension", "operator": "eq", "value": "jpg"}`.
+        A `query` is a list of groups, and each group is a list of conditions. An asset is in the list when it matches every condition in at least one group. Each condition names a `field`, an `operator`, and a `value`, for example `{"field": "filename", "operator": "like", "value": "mug"}`.
 
         The operators in a `query` aren't the same as the search filter operators. For example, `like` works in a `query` but not as a search filter. `FilterOperator` in the request body lists the operators the spec allows. `eq`, `like`, `in`, and `!exists` have been confirmed.
 
         A successful create returns `201` with the new list. Each condition comes back with a `field_type` key added. A body without `name` or `type` returns `422`, with one entry in `errors` for each missing field. A list name that's already in use returns `409`.
 
   - target: $.paths['/api/v3/asset-lists'].post.requestBody.content['application/json']
-    description: Create Smart Asset List.bru requests (2026-09-08 single condition, 2026-09-22 multi-group); Static body per Q#34 and spec if/then
+    description: Create Smart Asset List.bru requests (2026-09-08 single condition, 2026-09-22 multi-group); Static body per Q#34 and spec if/then. 2026-10-22, extension conditions replaced with filename like (extension excluded by the 16 Oct handoff; untested, VERIFY.md)
     update:
       examples:
         smart:
@@ -99,12 +99,12 @@ actions:
             name: JPG Images
             type: Smart
             query:
-              - - field: extension
-                  operator: eq
-                  value: jpg
+              - - field: filename
+                  operator: like
+                  value: .jpg
         smartGroups:
           summary: Smart list, two groups
-          description: 'Two groups: `filename` `like` `kettle` and `extension` `eq` `jpg`, or `filename` `eq` `Kettle handle - White.png`.'
+          description: 'Two groups: `filename` `like` `kettle` and `filename` `like` `.jpg`, or `filename` `eq` `Kettle handle - White.png`.'
           value:
             name: Kettle Images
             type: Smart
@@ -112,9 +112,9 @@ actions:
               - - field: filename
                   operator: like
                   value: kettle
-                - field: extension
-                  operator: eq
-                  value: jpg
+                - field: filename
+                  operator: like
+                  value: .jpg
               - - field: filename
                   operator: eq
                   value: 'Kettle handle - White.png'
@@ -125,7 +125,7 @@ actions:
             type: Static
 
   - target: $.paths['/api/v3/asset-lists'].post.responses['201']
-    description: Create Smart Asset List.bru "201 - Full Parameters (Multi-Group Query)" (2026-09-22), sanitized, account_id omitted
+    description: Create Smart Asset List.bru "201 - Full Parameters (Multi-Group Query)" (2026-09-22), sanitized, account_id omitted; extension condition replaced with filename like .jpg to match the request (2026-10-22)
     update:
       description: Created. `data` holds the new list.
       content:
@@ -174,7 +174,7 @@ actions:
   - target: $.paths['/api/v3/asset-lists/{identifier}'].get.parameters[?(@.name=='_fields' && @.in=='query')]
     description: Asset list field names (Get Asset List by ID.bru field list, 2026-09-08)
     update:
-      description: Fields to return, for example `_fields=name&_fields=type`. Repeat the parameter once per field. Leave it out to get every field.
+      description: Fields to return, for example `_fields=name&_fields=type`. Repeat the parameter once per field. Leave it out to get the default fields.
 
   - target: $.paths['/api/v3/asset-lists/{identifier}'].get.responses['200'].content['application/json']
     description: Get Asset List by ID.bru "200 - Success (Static List)" (2026-09-21), sanitized, account_id omitted

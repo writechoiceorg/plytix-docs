@@ -19,15 +19,18 @@ _openapi:
 
 
           To return only some fields, use `_fields`, for example
-          `_fields=sku&_fields=label`. Without it, you get the full record.
+          `_fields=sku&_fields=label`. Without it, you get the product's default
+          fields. Related records (`assets`, `thumbnail`, `categories`,
+          `parent`, and `product_family`) come back only when you name them in
+          `_fields`.
 
 
           `data` holds the product object itself, not a list, and the response
           has no `pagination` key.
 
 
-          `product_relationships` lists only each relationship's ID and label.
-          To get the related products, use [Search related
+          `product_relationships` lists only the ID of each relationship type
+          the product uses. To get the related products, use [Search related
           products](/reference/v3/related-products/search-related-products) with
           `product_id=<id>`.
 ---

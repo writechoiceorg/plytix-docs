@@ -180,10 +180,6 @@ actions:
     description: spec field description; syntax not documented (ATTR-25)
     update:
       description: The formula, written as text.
-  - target: $.components.schemas.FormulaAttributeCreateInputDto.properties.formula
-    description: spec field description; shape not documented (ATTR-25)
-    update:
-      description: Formula definition. Its format isn't documented yet; use `formula_str`.
   - target: $.components.schemas.HtmlAttributeCreateInputDto
     update:
       title: HTML
@@ -524,3 +520,45 @@ actions:
   - target: $.components.schemas.ProductAttributeUpdateInputDto.properties.formula_str
     update:
       description: "Formula attributes: the formula, written as text."
+
+  # --- fields Plytix's 16 Oct 2026 handoff excludes from the public model -----------
+  # account_id on every GET output, and the parsed `formula` tree (formula_str stays).
+  # The live API still returns them (QUESTIONS.md OAS-26). 2026-10-22.
+  - target: $.components.schemas.BooleanAttributeGetOutputDto.properties.account_id
+    remove: true
+  - target: $.components.schemas.CompletenessAttributeGetOutputDto.properties.account_id
+    remove: true
+  - target: $.components.schemas.DateAttributeGetOutputDto.properties.account_id
+    remove: true
+  - target: $.components.schemas.DecimalAttributeGetOutputDto.properties.account_id
+    remove: true
+  - target: $.components.schemas.DropdownAttributeGetOutputDto.properties.account_id
+    remove: true
+  - target: $.components.schemas.FormulaAttributeGetOutputDto.properties.account_id
+    remove: true
+  - target: $.components.schemas.HtmlAttributeGetOutputDto.properties.account_id
+    remove: true
+  - target: $.components.schemas.IntAttributeGetOutputDto.properties.account_id
+    remove: true
+  - target: $.components.schemas.MediaAttributeGetOutputDto.properties.account_id
+    remove: true
+  - target: $.components.schemas.MediaGalleryAttributeGetOutputDto.properties.account_id
+    remove: true
+  - target: $.components.schemas.MultiSelectAttributeGetOutputDto.properties.account_id
+    remove: true
+  - target: $.components.schemas.MultilineAttributeGetOutputDto.properties.account_id
+    remove: true
+  - target: $.components.schemas.TextAttributeGetOutputDto.properties.account_id
+    remove: true
+  - target: $.components.schemas.UrlAttributeGetOutputDto.properties.account_id
+    remove: true
+  - target: $.components.schemas.ProductAttributeGenericGetOutputDto.properties.account_id
+    remove: true
+  - target: $.components.schemas.ProductAttributeGetBaseOutputDto.properties.account_id
+    remove: true
+  - target: $.components.schemas.FormulaAttributeCreateInputDto.properties.formula
+    remove: true
+  - target: $.components.schemas.FormulaAttributeCreateOutputDto.properties.formula
+    remove: true
+  - target: $.components.schemas.FormulaAttributeGetOutputDto.properties.formula
+    remove: true

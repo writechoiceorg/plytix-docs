@@ -7,8 +7,9 @@
 # answers ATTR-1..4 and PROD-9 in "Questions for the Plytix Dev Team.md".
 # Captures from 2026-09 that predate Q#104/Q#116 (group_ids on create, PATCH
 # returning 200 with a body) are superseded and not used.
-# The /product-attributes/{identifier}/groups link routes are `pending` in
-# upstream/visibility.yaml, so nothing here links to them.
+# The /product-attributes/{identifier}/groups link routes are public since
+# 2026-10-22 (16 Oct 2026 handoff, "dedicated association operations"); their
+# actions are at the end of this file.
 overlay: 1.0.0
 info:
   title: product-attributes operations
@@ -16,7 +17,7 @@ info:
 actions:
   # --- GET /api/v3/product-attributes --------------------------------------------
   - target: $.paths['/api/v3/product-attributes'].get
-    description: Q#11, Q#30, Q#116, FB-032; filter examples follow the generic grammar (Q#11), not tested on this resource (VERIFY.md). Unfiltered-listing scoping not retested since 2026-09-22 (ATTR-20).
+    description: Q#11, Q#30, Q#116, FB-032; groups and family_attributes expandable per the 16 Oct handoff (untested, VERIFY.md); filter examples follow the generic grammar (Q#11), not tested on this resource (VERIFY.md). Unfiltered-listing scoping not retested since 2026-09-22 (ATTR-20).
     update:
       summary: Search product attributes
       operationId: search-product-attributes
@@ -26,6 +27,8 @@ actions:
         Use it to find the `label` to use as a key in a product's `attributes` map, or to find attributes of one type, for example `type=CompletenessAttribute`. Products store custom attribute values keyed by `label`, not by the display `name`.
 
         The `type` field tells you which shape a record has. The response schema below has one tab per type.
+
+        To get the attribute groups each attribute belongs to, add `_fields=groups`. To get its product family links, with their `level`, add `_fields=family_attributes`. These relations come back only when you name them in `_fields`.
 
         Related pages:
 
@@ -96,7 +99,7 @@ actions:
         | `MediaAttribute` | One asset | |
         | `MediaGalleryAttribute` | Several assets | |
         | `CompletenessAttribute` | A score Plytix calculates | `attributes` |
-        | `FormulaAttribute` | A value Plytix calculates | `formula`, `formula_str` |
+        | `FormulaAttribute` | A value Plytix calculates | `formula_str` |
 
         A `type` that isn't in this table returns `422`, and the message lists the accepted values. You can't change `type` after the attribute exists.
 
@@ -109,7 +112,7 @@ actions:
         - `CompletenessAttribute`: list the attributes it scores in `attributes`, each as `{"id": "<attribute_id>"}`. A list of plain ID strings returns `422`.
         - `FormulaAttribute`: each account can hold a limited number of formula attributes. When you reach the limit, the request returns `422` with "This account reached the limit of ... formula attributes". Ask your account manager if you need a higher limit.
 
-        The body accepts only the fields of the chosen type. Group membership isn't set here: `group_ids` returns `422` with "Extra inputs are not permitted".
+        The body accepts only the fields of the chosen type. Group membership isn't set here: `group_ids` returns `422` with "Extra inputs are not permitted". To add the attribute to a group, use [Link an attribute to a group](/reference/v3/product-attributes/link-product-attribute-group).
 
         Related pages:
 
@@ -211,7 +214,7 @@ actions:
 
   # --- GET /api/v3/product-attributes/{identifier} --------------------------------
   - target: $.paths['/api/v3/product-attributes/{identifier}'].get
-    description: Get Product Attribute by ID.bru (2026-09-21), Update and Delete Product Attribute.bru 404 (2026-09-15); _fields per PROD-9 answer, not retested on this resource (VERIFY.md)
+    description: Get Product Attribute by ID.bru (2026-09-21), Update and Delete Product Attribute.bru 404 (2026-09-15); _fields per PROD-9 answer, not retested on this resource (VERIFY.md); groups and family_attributes expandable per the 16 Oct handoff (untested, VERIFY.md)
     update:
       summary: Get a product attribute
       operationId: get-product-attribute
@@ -219,6 +222,8 @@ actions:
         Returns one attribute definition by its `id`. An ID that matches nothing returns `404`.
 
         `data` holds the attribute itself, with the fields of its `type`. The response schema below has one tab per type.
+
+        To get the attribute groups the attribute belongs to, add `_fields=groups`. To get its product family links, with their `level`, add `_fields=family_attributes`. These relations come back only when you name them in `_fields`.
 
         To read a single field, such as `options` or `groups`, use [Get a product attribute field](/reference/v3/product-attributes/get-product-attribute-field).
 
@@ -270,7 +275,7 @@ actions:
         - `type` can't be changed.
         - `name` can be changed. Renaming doesn't change `label`.
 
-        Group membership and product family membership aren't changed here. To link the attribute to a product family, use [Link an attribute to a product family](/reference/v3/family-attributes/add-attribute-to-family).
+        Group membership and product family membership aren't changed here. To add the attribute to a group, use [Link an attribute to a group](/reference/v3/product-attributes/link-product-attribute-group). To link the attribute to a product family, use [Link an attribute to a product family](/reference/v3/family-attributes/add-attribute-to-family).
 
         See [Update and delete records](/reference/v3/updates-and-deletes) for how PATCH works across the V3 API.
 
@@ -370,3 +375,77 @@ actions:
       summary: Delete a product attribute field
       operationId: delete-product-attribute-field
       description: To delete the attribute itself, use [Delete a product attribute](/reference/v3/product-attributes/delete-product-attribute).
+
+  # --- POST /api/v3/product-attributes/{identifier}/groups (public since 2026-10-22)
+  # Link and Unlink Attribute Group.bru (2026-10-13): 201 body captured; 409 named
+  # in the capture notes, but its full message wasn't recorded, so no 409 example.
+  - target: $.paths['/api/v3/product-attributes/{identifier}/groups'].post
+    description: Link and Unlink Attribute Group.bru (201, 409 noted, GET .../groups lists the group; 2026-10-13), Q#104 (group_ids and attribute_labels rejected)
+    update:
+      summary: Link an attribute to a group
+      operationId: link-product-attribute-group
+      description: |-
+        Adds the attribute to one existing attribute group. Send the group's ID as `{"id": "<group_id>"}`. A successful link returns `201` with the group's ID.
+
+        Send one group per request. If the attribute is already in the group, the request returns `409`.
+
+        Attributes and groups don't accept membership lists on create or update (`422`), so this is how to put an attribute in a group. To check the result, use [Get a product attribute field](/reference/v3/product-attributes/get-product-attribute-field) with `groups`. To take the attribute out of the group, use [Unlink an attribute from a group](/reference/v3/product-attributes/delete-product-attribute-group-link).
+
+  - target: $.paths['/api/v3/product-attributes/{identifier}/groups'].post.parameters[?(@.name=='identifier' && @.in=='path')]
+    description: Link and Unlink Attribute Group.bru used the attribute ID
+    update:
+      description: ID of the product attribute, a 24-character hexadecimal string such as `6a1f0c2e9b3d4a5f8c7e1e04`.
+
+  - target: $.paths['/api/v3/product-attributes/{identifier}/groups'].post.requestBody.content['application/json']
+    description: Link and Unlink Attribute Group.bru request (2026-10-13), sanitized (Dimensions group ID from the groups search example)
+    update:
+      examples:
+        group:
+          summary: Link to one group
+          value:
+            id: 6a1f0c2e9b3d4a5f8c7e1401
+
+  - target: $.paths['/api/v3/product-attributes/{identifier}/groups'].post.responses['201']
+    description: Link and Unlink Attribute Group.bru "Link Attribute to Group - 201 Created" (2026-10-13), sanitized
+    update:
+      description: Linked. `data.id` is the ID of the group.
+      content:
+        application/json:
+          examples:
+            linked:
+              summary: Attribute added to a group
+              value:
+                data:
+                  id: 6a1f0c2e9b3d4a5f8c7e1401
+                errors: []
+
+  - target: $.paths['/api/v3/product-attributes/{identifier}/groups'].post.responses['409']
+    description: Link and Unlink Attribute Group.bru docs ("duplicate -> 409 AlreadyExists"); full body not captured
+    update:
+      description: The attribute is already in this group. Nothing changed.
+
+  # --- DELETE /api/v3/product-attributes/{identifier}/groups/{id} (public since 2026-10-22)
+  - target: $.paths['/api/v3/product-attributes/{identifier}/groups/{id}'].delete
+    description: Link and Unlink Attribute Group.bru docs (DELETE .../groups/{group_id} -> 204, group membership empties; 2026-10-13); error bodies not captured
+    update:
+      summary: Unlink an attribute from a group
+      operationId: delete-product-attribute-group-link
+      description: |-
+        Takes the attribute out of one attribute group. A successful call returns `204` with an empty body.
+
+        The attribute and the group aren't deleted, and the attribute's other groups stay as they are. To add it to a group again, use [Link an attribute to a group](/reference/v3/product-attributes/link-product-attribute-group).
+
+  - target: $.paths['/api/v3/product-attributes/{identifier}/groups/{id}'].delete.parameters[?(@.name=='identifier' && @.in=='path')]
+    description: config "ID prefixes"
+    update:
+      description: ID of the product attribute, a 24-character hexadecimal string such as `6a1f0c2e9b3d4a5f8c7e1e04`.
+
+  - target: $.paths['/api/v3/product-attributes/{identifier}/groups/{id}'].delete.parameters[?(@.name=='id' && @.in=='path')]
+    description: Link and Unlink Attribute Group.bru (group ID in the path)
+    update:
+      description: ID of the attribute group to take the attribute out of, a 24-character hexadecimal string such as `6a1f0c2e9b3d4a5f8c7e1401`.
+
+  - target: $.paths['/api/v3/product-attributes/{identifier}/groups/{id}'].delete.responses['204']
+    description: Link and Unlink Attribute Group.bru (2026-10-13)
+    update:
+      description: Unlinked. The response has no body.

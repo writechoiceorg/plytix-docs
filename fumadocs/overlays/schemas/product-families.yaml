@@ -11,9 +11,9 @@ info:
 actions:
   # --- create body ---------------------------------------------------------------
   - target: $.components.schemas.ProductFamilyCreateInputDto
-    description: Spec (additionalProperties false), Q#72
+    description: Spec (additionalProperties false); 16 Oct 2026 handoff (families are created with a name, attributes are linked through family attributes)
     update:
-      description: Body for creating a product family. Only `name` is required. In `attributes`, `parent_attributes`, and `variant_attributes`, refer to every attribute in the same form, either IDs or objects with the attribute's `label` and, optionally, its `id`.
+      description: Body for creating a product family. `name` is the only field. To add attributes to the family, use [Link an attribute to a product family](/reference/v3/family-attributes/add-attribute-to-family) after you create it.
 
   - target: $.components.schemas.ProductFamilyCreateInputDto.properties.name
     description: Spec maxLength 300; 409 on duplicate (Create Product Family.bru, GEN-1)
@@ -22,65 +22,42 @@ actions:
       examples:
         - Mugs
 
+  # --- fields Plytix's 16 Oct 2026 handoff excludes from the public model -----------
+  # Create input: attributes, parent_attributes and variant_attributes are excluded
+  # (attributes are assigned through family_attributes), so AttributeRefInputDto,
+  # used only by them, goes too. Output: account and counters. The live API still
+  # accepts and returns them (QUESTIONS.md OAS-26). 2026-10-22.
   - target: $.components.schemas.ProductFamilyCreateInputDto.properties.attributes
-    description: Q#73 (always no_level), Create Product Family.bru "201 - Full Parameters"
-    update:
-      description: Attributes to link to the family at `no_level`, so their values don't pass down from parents to variants.
-      examples:
-        - - id: 6a1f0c2e9b3d4a5f8c7e1e04
-            label: collection
-
+    remove: true
   - target: $.components.schemas.ProductFamilyCreateInputDto.properties.parent_attributes
-    description: Q#73, status-gating #4 (403 without automatic inheritance)
-    update:
-      description: Attributes to link at `parent_level`, so a parent's value passes down to its variants and sub-variants. On some accounts this field returns `403` with "Automatic inheritance is not available for this account", and nothing is created.
-
+    remove: true
   - target: $.components.schemas.ProductFamilyCreateInputDto.properties.variant_attributes
-    description: Q#73, status-gating #4 (403 without automatic inheritance)
-    update:
-      description: Attributes to link at `variant_level`, so a variant's value passes down to its sub-variants. On some accounts this field returns `403` with "Automatic inheritance is not available for this account", and nothing is created.
-
-  # Branch titles for the three attribute arrays (anyOf renders as tabs).
-  - target: $.components.schemas.ProductFamilyCreateInputDto.properties.attributes.anyOf[0]
-    update:
-      title: Attribute IDs
-  - target: $.components.schemas.ProductFamilyCreateInputDto.properties.attributes.anyOf[1]
-    update:
-      title: Attribute references
-  - target: $.components.schemas.ProductFamilyCreateInputDto.properties.parent_attributes.anyOf[0]
-    update:
-      title: Attribute IDs
-  - target: $.components.schemas.ProductFamilyCreateInputDto.properties.parent_attributes.anyOf[1]
-    update:
-      title: Attribute references
-  - target: $.components.schemas.ProductFamilyCreateInputDto.properties.variant_attributes.anyOf[0]
-    update:
-      title: Attribute IDs
-  - target: $.components.schemas.ProductFamilyCreateInputDto.properties.variant_attributes.anyOf[1]
-    update:
-      title: Attribute references
-
-  # --- attribute reference (used only by the create body) ---------------------------
+    remove: true
   - target: $.components.schemas.AttributeRefInputDto
-    description: Spec (label required, id optional), Create Product Family.bru "201 - Full Parameters" ({id, label} form)
-    update:
-      description: One attribute, referred to by an object with the attribute's `label` and, optionally, its `id`.
-  - target: $.components.schemas.AttributeRefInputDto.properties.label
-    update:
-      description: The attribute's `label`, its snake_case name.
-      examples:
-        - brand
-  - target: $.components.schemas.AttributeRefInputDto.properties.id
-    update:
-      description: The attribute's ID.
-      examples:
-        - 6a1f0c2e9b3d4a5f8c7e1e04
-
-  # --- output: family_attributes (FAM-23: the _fields projection is untested) ---------
+    remove: true
+  - target: $.components.schemas.ProductFamilyOutputDto.properties.account_id
+    remove: true
+  - target: $.components.schemas.ProductFamilyOutputDto.properties.total_products
+    remove: true
+  - target: $.components.schemas.ProductFamilyOutputDto.properties.total_attributes
+    remove: true
+  - target: $.components.schemas.ProductFamilyOutputDto.properties.total_models
+    remove: true
+  - target: $.components.schemas.ProductFamilyCreateOutputDto.properties.account_id
+    remove: true
+  - target: $.components.schemas.ProductFamilyCreateOutputDto.properties.total_products
+    remove: true
+  - target: $.components.schemas.ProductFamilyCreateOutputDto.properties.total_attributes
+    remove: true
+  - target: $.components.schemas.ProductFamilyCreateOutputDto.properties.total_models
+    remove: true
+  - target: $.components.schemas.FamilyAttributeOutputDto.properties.account_id
+    remove: true
+  # --- output: family_attributes (16 Oct handoff: expandable with _fields) ----------
   - target: $.components.schemas.ProductFamilyOutputDto.properties.family_attributes
-    description: Spec only ("_fields=family_attributes.*"), never tested (FAM-23); review M2
+    description: 16 Oct handoff (expandable); spec "_fields=family_attributes.*"; never tested live (FAM-23, VERIFY.md)
     update:
-      description: Attribute links of the family, when requested. Requesting them with `_fields` isn't confirmed yet. To get a family's attributes, use [List a product family's attributes](/reference/v3/family-attributes/list-family-attributes).
+      description: The family's attribute links, each with the attribute and its `level`. Returned only when you name `family_attributes` in `_fields`. To list them on their own, use [List a product family's attributes](/reference/v3/family-attributes/list-family-attributes).
 
   # --- update body ---------------------------------------------------------------
   - target: $.components.schemas.ProductFamilyUpdateInputDto
