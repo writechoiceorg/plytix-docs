@@ -1,5 +1,5 @@
 ---
-title: "The Plytix data model"
+title: "Plytix data model"
 description: "Learn how products, attributes, product families, categories, assets, and relationships fit together, and which parts the API can change."
 ---
 
@@ -28,14 +28,13 @@ In short:
 | Product Category | A node in a hierarchical tree you file products under | `/api/v3/product-categories` |
 | Asset | A file in Plytix DAM, such as an image, video, or document | `/api/v3/assets` |
 | Relationship | A named type of connection between products, such as "Accessories" | `/api/v3/relationships` |
-| Product list | A saved set of products, either Static or Smart | `/api/v3/pim-product-lists` |
-| Asset list | The same idea, for assets | `/api/v3/asset-lists` |
+| Asset list | A saved set of assets, either Static or Smart | `/api/v3/asset-lists` |
 
 ## Products
 
 A product is the unit everything else attaches to. It carries two kinds of data, and the difference matters when you write queries.
 
-Everything that isn't a custom attribute value sits at the top level of the product object. That includes system fields (`id`, `sku`, `label`, `gtin`, `status`, `product_level`, `num_variations`), relationship fields (`categories`, `assets`, `product_relationships`, `static_lists`), timestamps (`created`, `modified`), and foreign keys that point at other entities (`product_family_id`, `parent_id`, which the dashboard shows as "Variant of", and `thumbnail_id`). The system fields are the System Attributes that ship with every Plytix account. You can't rename or delete them.
+Everything that isn't a custom attribute value sits at the top level of the product object. That includes system fields (`id`, `sku`, `label`, `gtin`, `status`, `product_level`, `num_variations`), relationship fields (`categories`, `assets`, `product_relationships`), timestamps (`created`, `modified`), and foreign keys that point at other entities (`product_family_id`, `parent_id`, which the dashboard shows as "Variant of", and `thumbnail_id`). The system fields are the System Attributes that ship with every Plytix account. You can't rename or delete them.
 
 Your own attribute values sit inside the `attributes` map, keyed by each attribute's label, its snake-case identifier such as `short_description` (not its display name):
 
@@ -106,7 +105,7 @@ Categories are a tree. Each category has a `parent_id`, a `path` array holding t
 
 A product can belong to more than one category. Its `categories` field returns the full category objects, each with its `id`, `name`, and `path`, so you don't need a second call to turn an ID into a name.
 
-Adding and removing categories happens through dedicated endpoints: `POST /api/v3/products/{id}/categories` links one, and `DELETE /api/v3/products/{id}/categories/{category_id}` unlinks it. See [Safely remove categories, assets, or relationships](/docs/guides/safely-removing-categories-assets-or-relationships).
+Adding and removing categories happens through dedicated endpoints: `POST /api/v3/products/{id}/categories` links one, and `DELETE /api/v3/products/{id}/categories/{category_id}` unlinks it. See [Unlink categories, assets, or relationships](/docs/guides/safely-removing-categories-assets-or-relationships).
 
 Assets have their own separate tree, `/api/v3/asset-categories`. Product categories and asset categories don't share nodes.
 
@@ -131,14 +130,14 @@ Both steps are writable. `POST /api/v3/relationships` creates the type, and `POS
 
 You read a product's relationships through its `product_relationships` field.
 
-## Lists
+## Asset lists
 
-Both products and assets support lists, and both come in two flavors:
+Asset lists group assets, and come in two flavors:
 
-- Static lists hold a fixed set of members you add and remove yourself.
+- Static lists hold a fixed set of assets you add and remove yourself.
 - Smart lists store a `query` instead of members, so their contents update as your data changes. These are what the dashboard calls smart lists.
 
-A product's `static_lists` field shows the static lists it belongs to.
+An asset's `static_lists` field shows the static lists it belongs to. Add an asset to a static list with `POST /api/v3/assets/{identifier}/static_lists`, and remove it with `DELETE /api/v3/assets/{identifier}/static_lists/{id}`.
 
 ## How related data comes back
 
@@ -154,20 +153,17 @@ GET /api/v3/products?categories.name[intersects]=Backpacks&_fields=sku&_fields=c
 
 What you can't ask for is the underlying ID array. Every field ending in `_ids` is hidden from responses, so `_fields=category_ids` returns `400` with a `HiddenFieldError`. Use the plural name instead: `categories`, not `category_ids`.
 
-Two more details about reads:
-
-- `_fields` only narrows the response on the search endpoint. `GET /api/v3/products/{id}` always returns the full product, whatever you pass.
-- Products also carry `channels`, `ecatalogs`, and `product_data_sheets`, which record where their content gets published. These are read-only.
+Also note that `_fields` only narrows the response on the search endpoint. `GET /api/v3/products/{id}` always returns the full product, whatever you pass.
 
 ## Related articles
 
 Now that you know how the entities fit together, you can explore these related guides.
 
 <Cards>
-  <Card icon={<OrganizationRegular />} title="Reconstruct parent/variant hierarchies" href="/docs/guides/reconstructing-parent-variant-hierarchies">
+  <Card icon={<OrganizationRegular />} title="Rebuild parent and variant products" href="/docs/guides/reconstructing-parent-variant-hierarchies">
     See product levels, families, and inheritance working in real requests.
   </Card>
-  <Card icon={<FilterRegular />} title="Audit product data quality with filters" href="/docs/guides/auditing-product-data-quality-with-filters">
+  <Card icon={<FilterRegular />} title="Audit product data quality" href="/docs/guides/auditing-product-data-quality-with-filters">
     Query system fields and the attributes map to find incomplete products.
   </Card>
 </Cards>

@@ -6,8 +6,11 @@ info:
   version: 1.0.0
 actions:
   - target: $
-    description: Bearer auth (verified live; see /docs/reference/v3/authentication) and the nav order of the endpoint groups.
+    description: Base URL, bearer auth (verified live; see /reference/v3/authentication) and the nav order of the endpoint groups.
     update:
+      servers:
+        - url: https://pim.plytix.com
+          description: Plytix PIM API
       security:
         - bearerAuth: []
       tags:
@@ -43,4 +46,4 @@ actions:
           bearerAuth:
             type: http
             scheme: bearer
-            description: "Exchange your API key and password for a short-lived access token, then send it as `Authorization: Bearer <token>`. See [Authentication](/docs/reference/v3/authentication)."
+            description: "Exchange your API key and password for a short-lived access token, then send it as `Authorization: Bearer <token>`. See [Authentication](/reference/v3/authentication)."

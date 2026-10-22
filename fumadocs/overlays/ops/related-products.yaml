@@ -14,7 +14,7 @@ actions:
       description: |-
         Fetch a single product-to-product link: the record connecting `product_id` to `related_product_id` under `relationship_id`.
 
-        > **Warning:** This endpoint returns `404 NotFoundError` for links that do exist, the same underlying problem that makes its [collection form](/docs/reference/v3/relatedproducts/get_related_products_collection_api_v3_products__product_id__relationships__relationship_id__related_products_get) come back empty. Don't use it to check whether two products are linked. Use [Search-Related-Products](/docs/reference/v3/relatedproducts/search_related_products_api_v3_related_products_get) with `?product_id=<id>` instead.
+        > **Warning:** This endpoint returns `404 NotFoundError` for links that do exist, the same underlying problem that makes its [collection form](/reference/v3/related-products/get_related_products_collection_api_v3_products__product_id__relationships__relationship_id__related_products_get) come back empty. Don't use it to check whether two products are linked. Use [Search-Related-Products](/reference/v3/related-products/search-related-products) with `?product_id=<id>` instead.
 
         All three path segments take Plytix IDs, not SKUs.
     x-review: 'On hold (visibility.yaml): live behavior contradicts the spec (FB-024, 2026-10-15: POST 405, PATCH 422, collection GET 404; Q#63/Q#112: nested related-products GETs empty or 404, REL-1 "fix in progress"). This text is from before Phase 2: rewrite it when the operation is restored.'
@@ -24,7 +24,7 @@ actions:
       description: |-
         Fetch a single field from one product-to-product link, such as `quantity`, instead of the whole record.
 
-        > **Warning:** This resolves the link through the same lookup as [Get-Related-Products Identity](/docs/reference/v3/relatedproducts/get_related_products_identity_api_v3_products__product_id__relationships__relationship_id__related_products__related_product_id__get), which can't find links that do exist, so expect the same `404` here. Read a link's fields through [Search-Related-Products](/docs/reference/v3/relatedproducts/search_related_products_api_v3_related_products_get) with `?product_id=<id>` and `_fields` instead.
+        > **Warning:** This resolves the link through the same lookup as [Get-Related-Products Identity](/reference/v3/related-products/get_related_products_identity_api_v3_products__product_id__relationships__relationship_id__related_products__related_product_id__get), which can't find links that do exist, so expect the same `404` here. Read a link's fields through [Search-Related-Products](/reference/v3/related-products/search-related-products) with `?product_id=<id>` and `_fields` instead.
 
         All path segments take Plytix IDs, not SKUs.
     x-review: 'On hold (visibility.yaml): live behavior contradicts the spec (FB-024, 2026-10-15: POST 405, PATCH 422, collection GET 404; Q#63/Q#112: nested related-products GETs empty or 404, REL-1 "fix in progress"). This text is from before Phase 2: rewrite it when the operation is restored.'
@@ -34,9 +34,9 @@ actions:
       description: |-
         List the products linked to one product under a single relationship type.
 
-        > **Warning:** This endpoint returns an empty `data` array even when the relationship has live links. Use [Search-Related-Products](/docs/reference/v3/relatedproducts/search_related_products_api_v3_related_products_get) with `?product_id=<id>` instead.
+        > **Warning:** This endpoint returns an empty `data` array even when the relationship has live links. Use [Search-Related-Products](/reference/v3/related-products/search-related-products) with `?product_id=<id>` instead.
 
-        Both path segments take Plytix IDs: `product_id` is the product's `id`, not its SKU, and `relationship_id` is the ID of the relationship type, from [Search-Relationships](/docs/reference/v3/relationships/search-relationships). To see which relationship types a product takes part in, use [Get-Product-Relationships Collection](/docs/reference/v3/productrelationships/get_product_relationships_collection_api_v3_products__product_id__relationships_get).
+        Both path segments take Plytix IDs: `product_id` is the product's `id`, not its SKU, and `relationship_id` is the ID of the relationship type, from [Search-Relationships](/reference/v3/relationships/search-relationships). To see which relationship types a product takes part in, use [Get-Product-Relationships Collection](/reference/v3/product-relationships/get_product_relationships_collection_api_v3_products__product_id__relationships_get).
     x-review: 'On hold (visibility.yaml): live behavior contradicts the spec (FB-024, 2026-10-15: POST 405, PATCH 422, collection GET 404; Q#63/Q#112: nested related-products GETs empty or 404, REL-1 "fix in progress"). This text is from before Phase 2: rewrite it when the operation is restored.'
   - target: $.paths['/api/v3/related-products'].get
     description: Q#112 (scoped; account_id rejected; relationship_id filter returns 200), Q#113, Get Related Products (Top-Level).bru (2026-09-15/22)
@@ -50,8 +50,8 @@ actions:
 
         Related pages:
 
-        - [Filtering and query syntax](/docs/reference/v3/filtering-query-syntax)
-        - [Pagination](/docs/reference/v3/pagination)
+        - [Filtering and search](/reference/v3/filtering-and-search)
+        - [Pagination](/reference/v3/pagination)
   - target: $.paths['/api/v3/related-products'].get.responses['200'].content['application/json']
     description: Get Related Products (Top-Level).bru "Full Parameters" (2026-09-22), sanitized
     update:

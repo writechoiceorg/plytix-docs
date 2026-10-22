@@ -17,7 +17,7 @@ actions:
       description: |-
         Returns one product's link to one relationship type: the `relationship_id`, the `relationship_label`, and the `product_id`.
 
-        The response doesn't list the related products. To get those, use [Search related products](/docs/reference/v3/relatedproducts/search-related-products) with `product_id=<id>`.
+        The response doesn't list the related products. To get those, use [Search related products](/reference/v3/related-products/search-related-products) with `product_id=<id>`.
   - target: $.paths['/api/v3/products/{product_id}/relationships/{relationship_id}'].post
     description: Migrated 2026-10-20 from the hand-edited openapi.json.
     update:
@@ -26,24 +26,24 @@ actions:
 
         The body carries the related products as `related_products`, an array of `{"product_id": "<id>", "quantity": N}` entries. The nested field is `product_id`; `id` is rejected.
 
-        [Post-Product-Relationships Collection](/docs/reference/v3/productrelationships/post_product_relationships_collection_api_v3_products__product_id__relationships_post) is the confirmed form of this operation, taking the same `related_products` array plus `relationship_id` in the body, and returning each `related_product_id` it created. Prefer it unless you specifically want the relationship type pinned in the URL.
+        [Post-Product-Relationships Collection](/reference/v3/product-relationships/post_product_relationships_collection_api_v3_products__product_id__relationships_post) is the confirmed form of this operation, taking the same `related_products` array plus `relationship_id` in the body, and returning each `related_product_id` it created. Prefer it unless you specifically want the relationship type pinned in the URL.
     x-review: 'On hold (visibility.yaml): live behavior contradicts the spec (FB-024, 2026-10-15: POST 405, PATCH 422, collection GET 404; Q#63/Q#112: nested related-products GETs empty or 404, REL-1 "fix in progress"). This text is from before Phase 2: rewrite it when the operation is restored.'
   - target: $.paths['/api/v3/products/{product_id}/relationships/{relationship_id}'].delete
     description: Q#62, Manage Product Relationship Link.bru DELETE 204 + product intact (2026-09-15); safely-remove guide; not retested after FB-024 (VERIFY.md)
     update:
       summary: Remove a relationship from a product
-      operationId: delete-product-relationship
+      operationId: remove-product-relationship
       description: |-
         Removes the product's link to one relationship type. A successful call returns `204` with an empty body.
 
-        The product itself, the relationship type, and the related products aren't deleted. See [Safely remove categories, assets, or relationships](/docs/guides/safely-removing-categories-assets-or-relationships#remove-a-relationship-from-a-product) and [Update and delete records](/docs/reference/v3/updates-and-deletes).
+        The product itself, the relationship type, and the related products aren't deleted. See [Safely remove categories, assets, or relationships](/docs/guides/safely-removing-categories-assets-or-relationships#remove-a-relationship-from-a-product) and [Update and delete records](/reference/v3/updates-and-deletes).
   - target: $.paths['/api/v3/products/{product_id}/relationships/{relationship_id}'].patch
     description: Migrated 2026-10-20 from the hand-edited openapi.json.
     update:
       description: |-
-        Update the related products on an existing link, most often to change a `quantity`. The body is `{"related_products": [{"product_id": "<id>", "quantity": 5}]}`, the same entry shape as [Post-Product-Relationships Collection](/docs/reference/v3/productrelationships/post_product_relationships_collection_api_v3_products__product_id__relationships_post).
+        Update the related products on an existing link, most often to change a `quantity`. The body is `{"related_products": [{"product_id": "<id>", "quantity": 5}]}`, the same entry shape as [Post-Product-Relationships Collection](/reference/v3/product-relationships/post_product_relationships_collection_api_v3_products__product_id__relationships_post).
 
-        Send the full array you want the link to end up with. That makes this the way to drop one related product from a multi-product link: PATCH the array without it. To remove the link and every product under it at once, use [Delete-Product-Relationships Identity](/docs/reference/v3/productrelationships/delete_product_relationships_identity_api_v3_products__product_id__relationships__relationship_id__delete).
+        Send the full array you want the link to end up with. That makes this the way to drop one related product from a multi-product link: PATCH the array without it. To remove the link and every product under it at once, use [Delete-Product-Relationships Identity](/reference/v3/product-relationships/remove-product-relationship).
 
         The response carries the related product's ID twice per entry, as both `product_id` and `related_product_id` with the same value. Either one identifies the product on the other end of the link.
     x-review: 'On hold (visibility.yaml): live behavior contradicts the spec (FB-024, 2026-10-15: POST 405, PATCH 422, collection GET 404; Q#63/Q#112: nested related-products GETs empty or 404, REL-1 "fix in progress"). This text is from before Phase 2: rewrite it when the operation is restored.'
@@ -55,7 +55,7 @@ actions:
 
         `path` accepts the link record's own fields: `_id`, `product_id`, `account_id`, `relationship_id`, and `relationship_label`. Any other name returns `400` with a `ValueError` listing those five. `account_id` is readable here even though no other response on this resource returns it.
 
-        A link holds only three visible fields, so [Get-Product-Relationships Identity](/docs/reference/v3/productrelationships/get_product_relationships_identity_api_v3_products__product_id__relationships__relationship_id__get) usually gets you the same thing in one call.
+        A link holds only three visible fields, so [Get-Product-Relationships Identity](/reference/v3/product-relationships/get-product-relationship) usually gets you the same thing in one call.
     x-review: 'On hold (visibility.yaml): live behavior contradicts the spec (FB-024, 2026-10-15: POST 405, PATCH 422, collection GET 404; Q#63/Q#112: nested related-products GETs empty or 404, REL-1 "fix in progress"). This text is from before Phase 2: rewrite it when the operation is restored.'
   - target: $.paths['/api/v3/products/{product_id}/relationships/{relationship_id}/{path}'].delete
     description: Migrated 2026-10-20 from the hand-edited openapi.json.
@@ -63,7 +63,7 @@ actions:
       description: |-
         Delete a single field from a product's relationship link.
 
-        > **Warning:** Don't use this to unlink a product. Subpath deletes elsewhere in the V3 API don't perform scoped field removal, they reject the call or act on the parent record instead of the single field named in the path. [Delete-Product-Relationships Identity](/docs/reference/v3/productrelationships/delete_product_relationships_identity_api_v3_products__product_id__relationships__relationship_id__delete) is the confirmed, safe unlink: it removes the link and leaves the product intact.
+        > **Warning:** Don't use this to unlink a product. Subpath deletes elsewhere in the V3 API don't perform scoped field removal, they reject the call or act on the parent record instead of the single field named in the path. [Delete-Product-Relationships Identity](/reference/v3/product-relationships/remove-product-relationship) is the confirmed, safe unlink: it removes the link and leaves the product intact.
     x-review: 'On hold (visibility.yaml): live behavior contradicts the spec (FB-024, 2026-10-15: POST 405, PATCH 422, collection GET 404; Q#63/Q#112: nested related-products GETs empty or 404, REL-1 "fix in progress"). This text is from before Phase 2: rewrite it when the operation is restored.'
   - target: $.paths['/api/v3/products/{product_id}/relationships/{relationship_id}/{path}'].patch
     description: Migrated 2026-10-20 from the hand-edited openapi.json.
@@ -71,7 +71,7 @@ actions:
       description: |-
         Update a single field on one of a product's relationship links. `path` is the field name, and the request body is that field's new value on its own, not an object wrapping it.
 
-        The only part of a link meant to change is its `related_products` array, and [Patch-Product-Relationships Identity](/docs/reference/v3/productrelationships/patch_product_relationships_identity_api_v3_products__product_id__relationships__relationship_id__patch) is the confirmed way to change it, taking `{"related_products": [...]}` as a partial object. Use that endpoint instead. `relationship_id` and `relationship_label` identify the link and its type, so rewriting them here isn't a supported way to move a product to another relationship type; link it under the new type with [Post-Product-Relationships Collection](/docs/reference/v3/productrelationships/post_product_relationships_collection_api_v3_products__product_id__relationships_post), then unlink the old one with [Delete-Product-Relationships Identity](/docs/reference/v3/productrelationships/delete_product_relationships_identity_api_v3_products__product_id__relationships__relationship_id__delete).
+        The only part of a link meant to change is its `related_products` array, and [Patch-Product-Relationships Identity](/reference/v3/product-relationships/patch_product_relationships_identity_api_v3_products__product_id__relationships__relationship_id__patch) is the confirmed way to change it, taking `{"related_products": [...]}` as a partial object. Use that endpoint instead. `relationship_id` and `relationship_label` identify the link and its type, so rewriting them here isn't a supported way to move a product to another relationship type; link it under the new type with [Post-Product-Relationships Collection](/reference/v3/product-relationships/post_product_relationships_collection_api_v3_products__product_id__relationships_post), then unlink the old one with [Delete-Product-Relationships Identity](/reference/v3/product-relationships/remove-product-relationship).
     x-review: 'On hold (visibility.yaml): live behavior contradicts the spec (FB-024, 2026-10-15: POST 405, PATCH 422, collection GET 404; Q#63/Q#112: nested related-products GETs empty or 404, REL-1 "fix in progress"). This text is from before Phase 2: rewrite it when the operation is restored.'
   - target: $.paths['/api/v3/products/{product_id}/relationships'].get
     description: Migrated 2026-10-20 from the hand-edited openapi.json.
@@ -79,9 +79,9 @@ actions:
       description: |-
         List every relationship link a product currently has. Each entry is flat (`{relationship_id, relationship_label, product_id}`) and a product with no links returns an empty `data` array.
 
-        Results are scoped by the `product_id` in the URL, so this needs none of the filtering that [Search-Product-Relationships](/docs/reference/v3/productrelationships/search_product_relationships_api_v3_product_relationships_get) requires. `product_id` is the product's Plytix `id`, not its SKU.
+        Results are scoped by the `product_id` in the URL, so this needs none of the filtering that [Search-Product-Relationships](/reference/v3/product-relationships/search-product-relationships) requires. `product_id` is the product's Plytix `id`, not its SKU.
 
-        The entries name the relationship types the product takes part in, not the products on the other end of them, there's no `related_product_id` in this shape. For that, use [Search-Related-Products](/docs/reference/v3/relatedproducts/search_related_products_api_v3_related_products_get) with `?product_id=<id>`.
+        The entries name the relationship types the product takes part in, not the products on the other end of them, there's no `related_product_id` in this shape. For that, use [Search-Related-Products](/reference/v3/related-products/search-related-products) with `?product_id=<id>`.
     x-review: 'On hold (visibility.yaml): live behavior contradicts the spec (FB-024, 2026-10-15: POST 405, PATCH 422, collection GET 404; Q#63/Q#112: nested related-products GETs empty or 404, REL-1 "fix in progress"). This text is from before Phase 2: rewrite it when the operation is restored.'
   - target: $.paths['/api/v3/products/{product_id}/relationships'].post
     description: Migrated 2026-10-20 from the hand-edited openapi.json.
@@ -89,9 +89,9 @@ actions:
       description: |-
         Link one or more products to this product under a relationship type. Returns `201` with the created link.
 
-        Both body fields are required: `{"relationship_id": "<id>", "related_products": [{"product_id": "<id>", "quantity": 3}, {"product_id": "<id>", "quantity": 7}]}`. `relationship_id` is the ID of the relationship type, from [Search-Relationships](/docs/reference/v3/relationships/search-relationships). Inside `related_products`, the field is `product_id`, passing `id` returns `422` naming both the missing field and the extra one. `quantity` is optional and defaults to `1`.
+        Both body fields are required: `{"relationship_id": "<id>", "related_products": [{"product_id": "<id>", "quantity": 3}, {"product_id": "<id>", "quantity": 7}]}`. `relationship_id` is the ID of the relationship type, from [Search-Relationships](/reference/v3/relationships/search-relationships). Inside `related_products`, the field is `product_id`, passing `id` returns `422` naming both the missing field and the extra one. `quantity` is optional and defaults to `1`.
 
-        The response is richer than this resource's `GET` views: its `related_products` entries carry `related_product_id` and `last_modified` per link, so it tells you which products ended up on the other end. Keep that response, or read the links back with [Search-Related-Products](/docs/reference/v3/relatedproducts/search_related_products_api_v3_related_products_get) using `?product_id=<id>`.
+        The response is richer than this resource's `GET` views: its `related_products` entries carry `related_product_id` and `last_modified` per link, so it tells you which products ended up on the other end. Keep that response, or read the links back with [Search-Related-Products](/reference/v3/related-products/search-related-products) using `?product_id=<id>`.
     x-review: 'On hold (visibility.yaml): live behavior contradicts the spec (FB-024, 2026-10-15: POST 405, PATCH 422, collection GET 404; Q#63/Q#112: nested related-products GETs empty or 404, REL-1 "fix in progress"). This text is from before Phase 2: rewrite it when the operation is restored.'
   - target: $.paths['/api/v3/product-relationships'].get
     description: Q#112 (scoped, relationship_id filter returns 200), FB-024 (shape changed 2026-10-15, uncaptured), Q#113
@@ -101,12 +101,12 @@ actions:
       description: |-
         Returns the relationship links of the products in your account, one page at a time: which products use which relationship types.
 
-        To get the products on the other end of a product's relationships, with their quantities, use [Search related products](/docs/reference/v3/relatedproducts/search-related-products) with `product_id=<id>`.
+        To get the products on the other end of a product's relationships, with their quantities, use [Search related products](/reference/v3/related-products/search-related-products) with `product_id=<id>`.
 
         Related pages:
 
-        - [Filtering and query syntax](/docs/reference/v3/filtering-query-syntax)
-        - [Pagination](/docs/reference/v3/pagination)
+        - [Filtering and search](/reference/v3/filtering-and-search)
+        - [Pagination](/reference/v3/pagination)
   - target: $.paths['/api/v3/products/{product_id}/relationships/{relationship_id}'].get.responses['200'].content['application/json']
     description: Manage Product Relationship Link.bru GET 200 (2026-09-15), sanitized
     update:

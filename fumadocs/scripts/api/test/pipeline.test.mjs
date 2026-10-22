@@ -254,7 +254,7 @@ test('links to a reference page this spec will not generate fail, even if a stal
       actions: [
         {
           target: "$.paths['/api/v3/products'].post",
-          update: { description: 'See [Search products](/docs/reference/v3/products/search-products).' },
+          update: { description: 'See [Search products](/reference/v3/products/search-products).' },
         },
       ],
     },

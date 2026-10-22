@@ -80,7 +80,7 @@ actions:
   - target: $.components.schemas.ProductFamilyOutputDto.properties.family_attributes
     description: Spec only ("_fields=family_attributes.*"), never tested (FAM-23); review M2
     update:
-      description: Attribute links of the family, when requested. Requesting them with `_fields` isn't confirmed yet. To get a family's attributes, use [List a product family's attributes](/docs/reference/v3/familyattributes/list-family-attributes).
+      description: Attribute links of the family, when requested. Requesting them with `_fields` isn't confirmed yet. To get a family's attributes, use [List a product family's attributes](/reference/v3/family-attributes/list-family-attributes).
 
   # --- update body ---------------------------------------------------------------
   - target: $.components.schemas.ProductFamilyUpdateInputDto

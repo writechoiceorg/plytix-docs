@@ -9,7 +9,7 @@ overlays/*.yaml             our edits, applied in lexical order of path, later f
 overlays/baseline.lock.json generated: what each edit overrode, for drift detection (commit it)
         │
         ▼  npm run api:build
-openapi.json  →  content/docs/reference/v3/<tag>/*.mdx
+openapi.json  →  content/docs/reference/v3/<tag folder>/*.mdx
 ```
 
 ## Files
@@ -49,7 +49,7 @@ Paths use the upstream form (`/api/v3/product-categories/{identifier}`). Tags ar
 
 ## operationIds (page URLs)
 
-Each operation's `operationId` is its page filename and URL (`/docs/reference/v3/<tag>/<operationId>`). Upstream IDs are FastAPI function names that change when Plytix renames a function, so we set our own in `ops/<tag>.yaml`:
+Each operation's `operationId` is its page filename and URL (`/reference/v3/<tag folder>/<operationId>`, with the tag folder in kebab case: `assetcategories` becomes `asset-categories`). Upstream IDs are FastAPI function names that change when Plytix renames a function, so we set our own in `ops/<tag>.yaml`:
 
 - kebab-case, `<verb>-<resource>`, resource in the singular for one record and the plural for search: `search-products`, `create-product`, `update-product`, `delete-product-category`
 - verbs: `search` (paginated, filterable), `list` (a nested collection without filters), `get`, `create`, `update`, `delete`, plus `link` for routes that attach an existing record
@@ -87,4 +87,4 @@ Fields we never touched aren't recorded, so upstream changes to them flow straig
 
 ## Writing descriptions
 
-Follow `.claude/skills/writer/references/style-guide.md` and `glossary.md`. Descriptions are Markdown (links, tables, code). Link to other pages with site routes (`/docs/guides/...`, `/docs/reference/v3/...`); the build fails on a link to a page that doesn't exist. Don't state behavior that no source confirms: add a question to `QUESTIONS.md` instead.
+Follow `.claude/skills/writer/references/style-guide.md` and `glossary.md`. Descriptions are Markdown (links, tables, code). Link to other pages with site routes (`/docs/guides/...`, `/reference/v3/...`); the build fails on a link to a page that doesn't exist. Don't state behavior that no source confirms: add a question to `QUESTIONS.md` instead.

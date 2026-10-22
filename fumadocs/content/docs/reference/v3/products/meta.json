@@ -7,7 +7,7 @@
     "update-product",
     "delete-product",
     "get-product-field",
-    "link-product-field",
+    "add-product-field",
     "update-product-field",
     "delete-product-field"
   ],

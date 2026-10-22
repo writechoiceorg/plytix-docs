@@ -1,17 +1,17 @@
 ---
-title: Reconstruct parent/variant hierarchies
+title: Rebuild parent and variant products
 description: Read existing products through the V3 API and rebuild their parent, variant, and sub-variant structure from parent_id and product_level.
 ---
 
 import { ArrowClockwiseRegular, OrganizationRegular } from '@/components/icons';
 
-Rebuild the parent, variant, and sub-variant structure of products that already exist in Plytix, in the shape an ERP or marketplace expects. The V3 API doesn't return a hierarchy as a tree. Each product carries a `parent_id` that points at the product one level above it and a `product_level` that says where it sits, so you read the products through the product search and assemble the tree in your integration. Every request uses a bearer token, and searches return their records in `data` and page through `pagination.next_page`. Product families add the attribute levels that decide which values a variant can take from its parent; see [The Plytix data model](/docs/guides/data-model) for how they fit together. Inheritance between levels is an account-level feature that isn't enabled on every account, so ask your Plytix contact whether your account has it before you rely on inherited values. If you don't have a hierarchy yet, the last section shows how to create one to test against.
+Rebuild the parent, variant, and sub-variant structure of products that already exist in Plytix, in the shape an ERP or marketplace expects. The V3 API doesn't return a hierarchy as a tree. Each product carries a `parent_id` that points at the product one level above it and a `product_level` that says where it sits, so you read the products through the product search and assemble the tree in your integration. Every request uses a bearer token, and searches return their records in `data` and page through `pagination.next_page`. Product families add the attribute levels that decide which values a variant can take from its parent; see [Plytix data model](/docs/guides/data-model) for how they fit together. Inheritance between levels is an account-level feature that isn't enabled on every account, so ask your Plytix contact whether your account has it before you rely on inherited values. If you don't have a hierarchy yet, the last section shows how to create one to test against.
 
 ## Prerequisites
 
 Before you start, make sure you have the following:
 
-- A bearer token. See [Authentication](/docs/reference/v3/authentication), or the [Quickstart](/docs/guides/quickstart) for a first walkthrough.
+- A bearer token. See [Authentication](/reference/v3/authentication), or the [Quickstart](/docs/guides/quickstart) for a first walkthrough.
 - Products already linked as parents and variants. If you don't have any, [create a hierarchy to test against](#create-a-hierarchy-to-test-against) first.
 
 ## Rebuild the hierarchy from existing products
@@ -34,7 +34,7 @@ Follow the steps below to read your products, group them by parent, and add the 
 
    These five fields are what reconstruction needs. `parent_id` holds the ID of the product one level up, and `product_level` says where each product sits: `0` standalone, `1` parent, `2` variant, or `3` sub-variant. Add `label` or any attribute your output also needs.
 
-   Follow `pagination.next_page` until it's missing, `null`, or empty, and replace `http://` with `https://` in the link before you request it. [Export your full catalog](/docs/guides/exporting-your-full-catalog) covers the paging loop in detail, including why sorting by `id` matters.
+   Follow `pagination.next_page` until it's missing, `null`, or empty, replace `http://` with `https://` in the link, and check that its host and path match your search before you request it. [Export your full catalog](/docs/guides/exporting-your-full-catalog) covers the paging loop in detail, including why sorting by `id` matters.
 
 2. **Group the products by `parent_id`.**
 
@@ -177,10 +177,10 @@ If your account has no parent and variant products yet, follow the steps below t
 Now that you know how to build and read a hierarchy, you can explore these related guides.
 
 <Cards>
-  <Card icon={<ArrowClockwiseRegular />} title="Sync your ERP" href="/docs/guides/syncing-your-erp-with-plytix">
+  <Card icon={<ArrowClockwiseRegular />} title="Sync your ERP with Plytix" href="/docs/guides/syncing-your-erp-with-plytix">
     Apply the same read/write pattern to keep hierarchy data in sync.
   </Card>
-  <Card icon={<OrganizationRegular />} title="The Plytix data model" href="/docs/guides/data-model">
+  <Card icon={<OrganizationRegular />} title="Plytix data model" href="/docs/guides/data-model">
     See how product levels, families, and inheritance fit together.
   </Card>
 </Cards>

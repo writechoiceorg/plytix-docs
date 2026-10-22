@@ -32,14 +32,14 @@ actions:
 
         Filters use the same syntax as every V3 search, for example `name[contains:ignorecase]=apparel`. To sort by name, send `_sort_by=name`.
 
-        By default, records don't list the family's attributes. To get them, with each attribute's inheritance `level`, use [List a product family's attributes](/docs/reference/v3/familyattributes/list-family-attributes).
+        By default, records don't list the family's attributes. To get them, with each attribute's inheritance `level`, use [List a product family's attributes](/reference/v3/family-attributes/list-family-attributes).
 
         Related pages:
 
         - [The Plytix data model](/docs/guides/data-model#product-families-and-variants)
         - [Reconstruct parent/variant hierarchies](/docs/guides/reconstructing-parent-variant-hierarchies)
-        - [Filtering and query syntax](/docs/reference/v3/filtering-query-syntax)
-        - [Pagination](/docs/reference/v3/pagination)
+        - [Filtering and search](/reference/v3/filtering-and-search)
+        - [Pagination](/reference/v3/pagination)
 
   - target: $.paths['/api/v3/product-families'].get.parameters[?(@.name=='_fields' && @.in=='query')]
     description: Q#74, List Product Families.bru "200 - Full Parameters" (2026-09-22)
@@ -81,13 +81,13 @@ actions:
 
         Family names are unique in your account. If a family with that name already exists, the request returns `409` and creates nothing.
 
-        To link attributes in the same request, list them in `attributes`. Each attribute is linked at `no_level`, so its values don't pass down from parents to variants. A new family can already have some attributes linked, so `total_attributes` can be higher than the number you send. To add attributes after the family exists, use [Link an attribute to a product family](/docs/reference/v3/familyattributes/create-family-attribute).
+        To link attributes in the same request, list them in `attributes`. Each attribute is linked at `no_level`, so its values don't pass down from parents to variants. A new family can already have some attributes linked, so `total_attributes` can be higher than the number you send. To add attributes after the family exists, use [Link an attribute to a product family](/reference/v3/family-attributes/add-attribute-to-family).
 
         Refer to attributes in one of two forms: their IDs, or objects with the attribute's `label` and, optionally, its `id`. Use the same form in every attribute array of the request. Mixing forms returns `422`.
 
         `parent_attributes` and `variant_attributes` link attributes at `parent_level` and `variant_level`. On some accounts these fields return `403` with "Automatic inheritance is not available for this account", and nothing is created. If you get this response, ask your Plytix contact whether inheritance is available for your account.
 
-        See [The Plytix data model](/docs/guides/data-model#product-families-and-variants) for how levels work, and [Update and delete records](/docs/reference/v3/updates-and-deletes).
+        See [The Plytix data model](/docs/guides/data-model#product-families-and-variants) for how levels work, and [Update and delete records](/reference/v3/updates-and-deletes).
 
   - target: $.paths['/api/v3/product-families'].post.requestBody.content['application/json']
     description: Create Product Family.bru "201 - Success" and "201 - Full Parameters" requests (2026-09-22), sanitized
@@ -192,7 +192,7 @@ actions:
       description: |-
         Returns one product family by its ID, with its name and its product and attribute counts. An ID that matches no family returns `404`.
 
-        By default, the family's attributes aren't included. To get them, with each attribute's inheritance `level`, use [List a product family's attributes](/docs/reference/v3/familyattributes/list-family-attributes).
+        By default, the family's attributes aren't included. To get them, with each attribute's inheritance `level`, use [List a product family's attributes](/reference/v3/family-attributes/list-family-attributes).
 
   - target: $.paths['/api/v3/product-families/{identifier}'].get.parameters[?(@.name=='identifier' && @.in=='path')]
     description: config "ID prefixes"; products carry the family ID in product_family_id
@@ -237,9 +237,9 @@ actions:
       description: |-
         Changes a product family's name. `name` is the only field you can change here. A successful update returns `204` with an empty body.
 
-        Attribute fields such as `attributes` aren't accepted and return `422`, because changing which attributes belong to a family affects every product in it. Manage a family's attributes with [Link an attribute to a product family](/docs/reference/v3/familyattributes/create-family-attribute) and [Unlink an attribute from a product family](/docs/reference/v3/familyattributes/delete-family-attribute).
+        Attribute fields such as `attributes` aren't accepted and return `422`, because changing which attributes belong to a family affects every product in it. Manage a family's attributes with [Link an attribute to a product family](/reference/v3/family-attributes/add-attribute-to-family) and [Unlink an attribute from a product family](/reference/v3/family-attributes/remove-attribute-from-family).
 
-        See [Update and delete records](/docs/reference/v3/updates-and-deletes).
+        See [Update and delete records](/reference/v3/updates-and-deletes).
 
   - target: $.paths['/api/v3/product-families/{identifier}'].patch.requestBody.content['application/json']
     description: Update and Delete Product Family.bru "200 - Success (Root PATCH)" request (2026-09-15)
@@ -264,7 +264,7 @@ actions:
       description: |-
         Deletes one product family. A successful delete returns `204` with an empty body, and a later request for the family returns `404`.
 
-        To take a single product out of its family without deleting the family, update the product with `product_family_id` set to `null`. See [Update a product](/docs/reference/v3/products/update-product) and [Update and delete records](/docs/reference/v3/updates-and-deletes).
+        To take a single product out of its family without deleting the family, update the product with `product_family_id` set to `null`. See [Update a product](/reference/v3/products/update-product) and [Update and delete records](/reference/v3/updates-and-deletes).
 
   - target: $.paths['/api/v3/product-families/{identifier}'].delete.responses['204']
     description: Update and Delete Product Family.bru (2026-09-15)
@@ -306,7 +306,7 @@ actions:
       summary: Create a product family field
       operationId: link-product-family-field
       description: |-
-        This route returns `405` for every field. To rename a product family, use [Update a product family field](/docs/reference/v3/productfamilies/update-product-family-field) or [Rename a product family](/docs/reference/v3/productfamilies/update-product-family). To link an attribute to a family, use [Link an attribute to a product family](/docs/reference/v3/familyattributes/create-family-attribute).
+        This route returns `405` for every field. To rename a product family, use [Update a product family field](/reference/v3/product-families/update-product-family-field) or [Rename a product family](/reference/v3/product-families/update-product-family). To link an attribute to a family, use [Link an attribute to a product family](/reference/v3/family-attributes/add-attribute-to-family).
 
   - target: $.paths['/api/v3/product-families/{identifier}/{path}'].post.responses['405']
     description: Update and Delete Product Family.bru "405 - Not Allowed (Spec Mismatch)" (2026-09-15)
@@ -332,7 +332,7 @@ actions:
       description: |-
         Changes one field of a product family. `name` is the only field you can change: set `path` to `name` and send the new name on its own as a JSON string, such as `"Bags and Backpacks"`, not an object. A successful update returns `204` with an empty body.
 
-        This has the same effect as [Rename a product family](/docs/reference/v3/productfamilies/update-product-family). See [Update and delete records](/docs/reference/v3/updates-and-deletes).
+        This has the same effect as [Rename a product family](/reference/v3/product-families/update-product-family). See [Update and delete records](/reference/v3/updates-and-deletes).
 
   - target: $.paths['/api/v3/product-families/{identifier}/{path}'].patch.parameters[?(@.name=='path' && @.in=='path')]
     description: Q#60
@@ -350,7 +350,7 @@ actions:
     update:
       summary: Delete a product family field
       operationId: delete-product-family-field
-      description: To remove an attribute from a product family, use [Unlink an attribute from a product family](/docs/reference/v3/familyattributes/delete-family-attribute). To delete the family itself, use [Delete a product family](/docs/reference/v3/productfamilies/delete-product-family).
+      description: To remove an attribute from a product family, use [Unlink an attribute from a product family](/reference/v3/family-attributes/remove-attribute-from-family). To delete the family itself, use [Delete a product family](/reference/v3/product-families/delete-product-family).
 
   - target: $.paths['/api/v3/product-families/{identifier}/{path}'].delete.parameters[?(@.name=='path' && @.in=='path')]
     description: Get Product Family by ID.bru raw field list

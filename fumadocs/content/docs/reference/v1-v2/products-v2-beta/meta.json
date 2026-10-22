@@ -1,0 +1,25 @@
+{
+  "title": "Products (V2 beta)",
+  "pages": [
+    "create-product",
+    "search-products",
+    "unlink-variant",
+    "add-variant",
+    "resync-variants",
+    "get-product",
+    "update-product",
+    "delete-product",
+    "list-product-assets",
+    "link-product-asset",
+    "unlink-product-asset",
+    "list-product-categories",
+    "link-product-category",
+    "unlink-product-category",
+    "assign-product-family",
+    "add-related-products",
+    "update-related-products",
+    "remove-related-products",
+    "link-variant"
+  ],
+  "icon": "Package"
+}

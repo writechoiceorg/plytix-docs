@@ -10,6 +10,21 @@ export const SITE_ROOT = path.resolve(import.meta.dirname, '../../..');
 
 export const HTTP_METHODS = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace'];
 
+// URL folder for each tag: the spec's tags are flattened (assetcategories), so
+// published URLs spell them out in kebab case. generate-docs.mjs uses this too.
+export const TAG_FOLDERS = {
+  productcategories: 'product-categories',
+  assetcategories: 'asset-categories',
+  assetlists: 'asset-lists',
+  productrelationships: 'product-relationships',
+  relatedproducts: 'related-products',
+  productfamilies: 'product-families',
+  familyattributes: 'family-attributes',
+  productattributes: 'product-attributes',
+  productattributegroups: 'product-attribute-groups',
+};
+export const tagFolder = (tag) => TAG_FOLDERS[tag] ?? tag;
+
 export const readJson = async (file) => JSON.parse(await readFile(file, 'utf-8'));
 export const readYaml = async (file) => YAML.parse(await readFile(file, 'utf-8'));
 

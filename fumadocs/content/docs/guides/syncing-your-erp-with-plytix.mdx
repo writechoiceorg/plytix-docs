@@ -1,11 +1,11 @@
 ---
-title: Sync your ERP
+title: Sync your ERP with Plytix
 description: Read product data from Plytix, detect what changed, and push stock, price, and status updates back so your ERP and Plytix stay in sync.
 ---
 
 import { DocumentEditRegular, GaugeRegular } from '@/components/icons';
 
-Keep product data consistent between your ERP and Plytix with a recurring sync: an initial import that reads the whole catalog once, then scheduled runs that read only what changed in Plytix and write your ERP's changes back. This guide covers both directions, how archives and deletions travel, and how to recover when a run fails partway. All requests use the V3 API at `https://pim.plytix.com/api/v3`. Searches return `data` as an array with a `pagination` object, single-product reads and creates return `data` as one object, and a successful `PATCH` returns `204` with no body. Read [Update and delete records](/docs/reference/v3/updates-and-deletes) before you write, because a `PATCH` that names the `attributes` map replaces the whole map.
+Keep product data consistent between your ERP and Plytix with a recurring sync: an initial import that reads the whole catalog once, then scheduled runs that read only what changed in Plytix and write your ERP's changes back. This guide covers both directions, how archives and deletions travel, and how to recover when a run fails partway. All requests use the V3 API at `https://pim.plytix.com/api/v3`. Searches return `data` as an array with a `pagination` object, single-product reads and creates return `data` as one object, and a successful `PATCH` returns `204` with no body. Read [Update and delete records](/reference/v3/updates-and-deletes) before you write, because a `PATCH` that names the `attributes` map replaces the whole map.
 
 ## Prerequisites
 
@@ -33,7 +33,7 @@ Follow the steps below to authenticate and load every product into your ERP once
 
 1. **Get an access token.**
 
-   How you get a token depends on the API version. V1/V2 exchange your API Key and password for a bearer token, as described in [Authentication](/docs/reference/legacy/token-authentication). V3 is moving to a new token-based authentication model whose details aren't published yet; see [Authentication and base URLs](/docs/guides/migrating-to-v3/authentication-and-base-urls). Whichever you use, request a new token when a call returns `401`. The examples below send the token as `Authorization: Bearer <access_token>`.
+   How you get a token depends on the API version. V1/V2 exchange your API Key and password for a bearer token, as described in [Authentication](/reference/v1-v2/token-authentication). V3 is moving to a new token-based authentication model whose details aren't published yet; see [Authentication and base URLs](/docs/guides/migrating-to-v3/authentication-and-base-urls). Whichever you use, request a new token when a call returns `401`. The examples below send the token as `Authorization: Bearer <access_token>`.
 
 2. **Record the run boundary.**
 
@@ -86,7 +86,7 @@ Follow the steps below on each scheduled run to read the products that changed s
      --data-urlencode "_page_size=100"
    ```
 
-   `modified` is the last-modification timestamp, so this returns edits as well as new products. Filtering on `created` instead returns only products added in the window. Read every page. Each page runs the query again, so a product edited while you're paging moves out of the window and can shift the pages after it. See [Searching and pagination](/docs/guides/migrating-to-v3/searching-and-pagination) for that risk, and [Reconcile on a slower schedule](#reconcile-on-a-slower-schedule) for the safety net.
+   `modified` is the last-modification timestamp, so this returns edits as well as new products. Filtering on `created` instead returns only products added in the window. Read every page. Each page runs the query again, so a product edited while you're paging moves out of the window and can shift the pages after it. See [Search and pagination](/docs/guides/migrating-to-v3/searching-and-pagination) for that risk, and [Reconcile on a slower schedule](#reconcile-on-a-slower-schedule) for the safety net.
 
    {/* FLAG (open):
      Retested 2026-10-15 on the development account (FB-027): `modified[gte]` and `modified[lt]` combine in one request, full UTC timestamps, fractional seconds, and offsets are all accepted, `modified` advances after a single-attribute `PATCH` and after archiving, and archived products stay in the results with `status: Archived`. An invalid date returns `200` with an empty list instead of an error, so validate timestamps before sending. Still open: whether any call lists products deleted since a given time.
@@ -128,7 +128,7 @@ Follow the steps below to write ERP-owned fields back to Plytix and create the p
    */}
 
    <Callout type="error" title="Don't send a partial attributes map to the product itself">
-     `PATCH /products/<product_id>` with `{"attributes": {"price": 34.99}}` replaces the entire `attributes` map. In testing, every attribute missing from the payload was removed; see the before-and-after example in [Responses and updates](/docs/guides/migrating-to-v3/responses-and-updates#how-patch-treats-the-attributes-map). Top-level fields such as `label` and `status` are merged, so you can send them on their own. To change several attributes in one request, you have to read the current map, merge your changes, and send the whole map back. V3 has no conditional write, so a change another user makes between your read and your write is overwritten. In a sync loop, use the single-attribute path instead.
+     `PATCH /products/<product_id>` with `{"attributes": {"price": 34.99}}` replaces the entire `attributes` map. In testing, every attribute missing from the payload was removed; see the before-and-after example in [Responses and updates](/docs/guides/migrating-to-v3/responses-and-updates#how-patch-treats-the-attributes-map). Top-level fields such as `label` and `status` are merged, so you can send them on their own. To change several attributes in one request, send a partial map to `PATCH /products/<product_id>/attributes`, which merges it into the existing map. To change one, use the single-attribute path.
    </Callout>
 
 3. **Create the products Plytix doesn't have yet.**
@@ -147,9 +147,9 @@ Follow the steps below to write ERP-owned fields back to Plytix and create the p
    | Fields | Result |
    |---|---|
    | `label`, `gtin`, `status`, `attributes`, `thumbnail_id`, `product_family_id`, `parent_id` | Accepted in the same request. |
-   | `category_ids`, `static_list_ids`, `channel_ids`, `ecatalog_ids`, `product_data_sheet_ids` | Rejected with `422` and `"Extra inputs are not permitted"`, on create and on `PATCH` alike. |
+   | `category_ids` and the other `*_ids` link arrays | Rejected with `422` and `"Extra inputs are not permitted"`, on create and on `PATCH` alike. |
 
-   Categories are attached afterwards with `POST /products/<product_id>/categories`, sending `{"id": "<category_id>"}`. See [Safely remove categories, assets, or relationships](/docs/guides/safely-removing-categories-assets-or-relationships) for the full link and unlink pattern.
+   Categories are attached afterwards with `POST /products/<product_id>/categories`, sending `{"id": "<category_id>"}`. See [Unlink categories, assets, or relationships](/docs/guides/safely-removing-categories-assets-or-relationships) for the full link and unlink pattern.
 
    Checking for the SKU before you create doesn't rule out a conflict, because another process can create the same SKU between your check and your `POST`. If the create returns `409`, search for the SKU, confirm it's the product you meant to create, and update it instead of repeating the `POST`.
 
@@ -174,7 +174,7 @@ A scheduled pull can miss a change, and it never shows a deletion. On a slower s
 
 Design each run so you can repeat it safely. Plan for these failures:
 
-- **Rate limits:** your access token carries your account's limits, as described in [Rate limits](/docs/reference/v3/rate-limits). Pace requests under them. If a request returns `429`, wait before retrying and slow the whole run down. The limits haven't been observed being enforced in testing, so the `429` response hasn't been captured yet.
+- **Rate limits:** your access token carries your account's limits, as described in [Rate limits](/reference/v3/rate-limits). Pace requests under them. If a request returns `429`, wait before retrying and slow the whole run down. The limits haven't been observed being enforced in testing, so the `429` response hasn't been captured yet.
 - **Transient failures:** retry timeouts and `5xx` responses a few times, with an increasing delay between attempts. Don't retry `4xx` responses such as `422` unchanged, because the request itself needs fixing.
 - **Retried writes:** a single-attribute `PATCH` is safe to repeat, because sending the same value twice leaves the same result. A `POST` isn't. Handle a `409` as described in step 3 of [Push ERP changes to Plytix](#push-erp-changes-to-plytix).
 - **Partial runs:** because the checkpoint advances only after the whole window succeeds, a failed run is retried in full on the next schedule. Log the products that failed, so you can find the ones that fail on every run.
@@ -207,10 +207,10 @@ Check the problems below if you run into issues while following this guide.
 Now that you know how to keep your ERP and Plytix in sync, you can explore these related pages.
 
 <Cards>
-  <Card icon={<DocumentEditRegular />} title="Update and delete records" href="/docs/reference/v3/updates-and-deletes">
+  <Card icon={<DocumentEditRegular />} title="Update and delete records" href="/reference/v3/updates-and-deletes">
     Check how V3 writes treat the attributes map, empty values, and deletes.
   </Card>
-  <Card icon={<GaugeRegular />} title="Rate limits" href="/docs/reference/v3/rate-limits">
+  <Card icon={<GaugeRegular />} title="Rate limits" href="/reference/v3/rate-limits">
     How the API rate limits work, so you can pace these single-item calls on a large catalog.
   </Card>
 </Cards>

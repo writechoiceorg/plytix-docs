@@ -67,3 +67,25 @@ actions:
   - target: $.components.schemas.ProductUpdateInputDto.properties.product_family_id
     update:
       description: ID of the product family to assign. `null` removes the product from its current family.
+
+  # --- links to resources that aren't in the public docs ----------------------------
+  # Channels, eCatalogs, PDF catalogs (`product_data_sheets`) and PIM product lists
+  # (`static_lists` on a product) are marked internal in Plytix's endpoint
+  # visibility sheet, so a product's expanded links to them are left out too.
+  # An asset's `static_lists` are asset lists, which are public, so those stay.
+  - target: $.components.schemas.ProductOutputDto.properties.channels
+    remove: true
+  - target: $.components.schemas.ProductOutputDto.properties.ecatalogs
+    remove: true
+  - target: $.components.schemas.ProductOutputDto.properties.product_data_sheets
+    remove: true
+  - target: $.components.schemas.ProductOutputDto.properties.static_lists
+    remove: true
+  - target: $.components.schemas.ProductChannelLinkOutputDto
+    remove: true
+  - target: $.components.schemas.ProductECatalogLinkOutputDto
+    remove: true
+  - target: $.components.schemas.ProductDataSheetLinkOutputDto
+    remove: true
+  - target: $.components.schemas.ProductListOutputDto
+    remove: true

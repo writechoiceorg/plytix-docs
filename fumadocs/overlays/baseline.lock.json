@@ -8872,6 +8872,9 @@
         "$": {
           "sig": null,
           "upstream": {
+            "servers": {
+              "$absent": true
+            },
             "security": {
               "$absent": true
             },
@@ -16667,6 +16670,35 @@
         }
       }
     },
+    "schemas/products.yaml::$.components.schemas.ProductChannelLinkOutputDto": {
+      "nodes": {
+        "$.components.schemas.ProductChannelLinkOutputDto": {
+          "sig": {
+            "type": "object"
+          },
+          "upstream": {
+            ".": {
+              "properties": {
+                "id": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/PydanticObjectId"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "description": "Linked channel id"
+                }
+              },
+              "type": "object",
+              "title": "ProductChannelLinkOutputDto",
+              "description": "One channel a product links to.\n\nCarries just the id today. It is a row rather than a bare id so a resolved\nname or status can be added later without changing the field's type — and\neach link gets its own DTO so it can grow independently: a resolved data\nsheet has fields a channel never will."
+            }
+          }
+        }
+      }
+    },
     "schemas/products.yaml::$.components.schemas.ProductCreateDto": {
       "nodes": {
         "$.components.schemas.ProductCreateDto": {
@@ -16837,6 +16869,320 @@
           },
           "upstream": {
             "description": "Thumbnail asset reference ID"
+          }
+        }
+      }
+    },
+    "schemas/products.yaml::$.components.schemas.ProductDataSheetLinkOutputDto": {
+      "nodes": {
+        "$.components.schemas.ProductDataSheetLinkOutputDto": {
+          "sig": {
+            "type": "object"
+          },
+          "upstream": {
+            ".": {
+              "properties": {
+                "id": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Id",
+                  "description": "Linked product data sheet id"
+                }
+              },
+              "type": "object",
+              "title": "ProductDataSheetLinkOutputDto",
+              "description": "One product data sheet a product links to — id only.\n\nIts id is a ``UUID``: data sheets live in another service and are not Mongo\ndocuments of this database. Pydantic converts the stored BSON ``Binary``,\nand serializes it as the canonical string form."
+            }
+          }
+        }
+      }
+    },
+    "schemas/products.yaml::$.components.schemas.ProductECatalogLinkOutputDto": {
+      "nodes": {
+        "$.components.schemas.ProductECatalogLinkOutputDto": {
+          "sig": {
+            "type": "object"
+          },
+          "upstream": {
+            ".": {
+              "properties": {
+                "id": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/PydanticObjectId"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "description": "Linked ecatalog id"
+                }
+              },
+              "type": "object",
+              "title": "ProductECatalogLinkOutputDto",
+              "description": "One ecatalog a product links to — id only, see the channel DTO above."
+            }
+          }
+        }
+      }
+    },
+    "schemas/products.yaml::$.components.schemas.ProductListOutputDto": {
+      "nodes": {
+        "$.components.schemas.ProductListOutputDto": {
+          "sig": {
+            "type": "object"
+          },
+          "upstream": {
+            ".": {
+              "properties": {
+                "id": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/PydanticObjectId"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "description": "List ID"
+                },
+                "account_id": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/PydanticObjectId"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "description": "Owner account ID"
+                },
+                "name": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Name",
+                  "description": "List name"
+                },
+                "query": {
+                  "anyOf": [
+                    {
+                      "items": {
+                        "items": {
+                          "anyOf": [
+                            {
+                              "$ref": "#/components/schemas/ProductRelationshipAggregationFilterModel"
+                            },
+                            {
+                              "$ref": "#/components/schemas/FilterModel"
+                            }
+                          ]
+                        },
+                        "type": "array"
+                      },
+                      "type": "array"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Query",
+                  "description": "Query for the list"
+                },
+                "created": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Created",
+                  "description": "Creation timestamp"
+                },
+                "modified": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Modified",
+                  "description": "Last modification timestamp"
+                },
+                "type": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/ProductListType"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "description": "List type"
+                }
+              },
+              "type": "object",
+              "title": "ProductListOutputDto",
+              "description": "Output DTO for ProductList entity with optional fields to support projections."
+            }
+          }
+        }
+      }
+    },
+    "schemas/products.yaml::$.components.schemas.ProductOutputDto.properties.channels": {
+      "nodes": {
+        "$.components.schemas.ProductOutputDto.properties.channels": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": "array",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "items": {
+                    "$ref": "#/components/schemas/ProductChannelLinkOutputDto"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Channels",
+              "description": "Linked channels, id only (explicit request only)"
+            }
+          }
+        }
+      }
+    },
+    "schemas/products.yaml::$.components.schemas.ProductOutputDto.properties.ecatalogs": {
+      "nodes": {
+        "$.components.schemas.ProductOutputDto.properties.ecatalogs": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": "array",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "items": {
+                    "$ref": "#/components/schemas/ProductECatalogLinkOutputDto"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Ecatalogs",
+              "description": "Linked ecatalogs, id only (explicit request only)"
+            }
+          }
+        }
+      }
+    },
+    "schemas/products.yaml::$.components.schemas.ProductOutputDto.properties.product_data_sheets": {
+      "nodes": {
+        "$.components.schemas.ProductOutputDto.properties.product_data_sheets": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": "array",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "items": {
+                    "$ref": "#/components/schemas/ProductDataSheetLinkOutputDto"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Product Data Sheets",
+              "description": "Linked product data sheets, id only (explicit request only)"
+            }
+          }
+        }
+      }
+    },
+    "schemas/products.yaml::$.components.schemas.ProductOutputDto.properties.static_lists": {
+      "nodes": {
+        "$.components.schemas.ProductOutputDto.properties.static_lists": {
+          "sig": {
+            "anyOf": [
+              {
+                "type": "array",
+                "$ref": null
+              },
+              {
+                "type": "null",
+                "$ref": null
+              }
+            ]
+          },
+          "upstream": {
+            ".": {
+              "anyOf": [
+                {
+                  "items": {
+                    "$ref": "#/components/schemas/ProductListOutputDto"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Static Lists",
+              "description": "Expanded static lists, present only when explicitly requested"
+            }
           }
         }
       }
@@ -17051,42 +17397,6 @@
           },
           "upstream": {
             "description": "Standard response envelope for every non-DELETE operation.\n\nExactly one of ``data`` / ``errors`` is populated:\n\n* GET / CREATE / BULK_CREATE / BULK_DELETE / BULK_PATCH / UPDATE success → ``data`` is the returned object/value.\n* SEARCH success → ``data`` is a list of results.\n* Failure → ``errors`` is set, ``data`` is an empty list.\n\nExample::\n\n    # GET / CREATE / BULK_CREATE / BULK_DELETE / BULK_PATCH / UPDATE success\n    OperationResponse(data={\"id\": 1, \"name\": \"Widget\"})\n\n    # SEARCH success\n    OperationResponse(data=[{\"id\": 1, \"name\": \"Widget\"}])\n\nAn error-shaped instance (``errors`` set) is what a registered exception\nhandler returns — see :mod:`plytix_api_tools.core.exception_registry`.\nApplication code signals failure by raising, not by constructing one of\nthese directly."
-          }
-        }
-      }
-    },
-    "schemas/shared.yaml::$.components.schemas.ProductChannelLinkOutputDto": {
-      "nodes": {
-        "$.components.schemas.ProductChannelLinkOutputDto": {
-          "sig": {
-            "type": "object"
-          },
-          "upstream": {
-            "description": "One channel a product links to.\n\nCarries just the id today. It is a row rather than a bare id so a resolved\nname or status can be added later without changing the field's type — and\neach link gets its own DTO so it can grow independently: a resolved data\nsheet has fields a channel never will."
-          }
-        }
-      }
-    },
-    "schemas/shared.yaml::$.components.schemas.ProductDataSheetLinkOutputDto": {
-      "nodes": {
-        "$.components.schemas.ProductDataSheetLinkOutputDto": {
-          "sig": {
-            "type": "object"
-          },
-          "upstream": {
-            "description": "One product data sheet a product links to — id only.\n\nIts id is a ``UUID``: data sheets live in another service and are not Mongo\ndocuments of this database. Pydantic converts the stored BSON ``Binary``,\nand serializes it as the canonical string form."
-          }
-        }
-      }
-    },
-    "schemas/shared.yaml::$.components.schemas.ProductECatalogLinkOutputDto": {
-      "nodes": {
-        "$.components.schemas.ProductECatalogLinkOutputDto": {
-          "sig": {
-            "type": "object"
-          },
-          "upstream": {
-            "description": "One ecatalog a product links to — id only, see the channel DTO above."
           }
         }
       }

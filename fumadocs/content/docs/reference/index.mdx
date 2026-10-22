@@ -5,15 +5,15 @@ description: Choose an API version to browse its endpoint reference.
 
 import { HistoryRegular, RocketRegular } from '@/components/icons';
 
-Plytix's API is available in two versions. Use the switcher at the top of this section (or the cards below) to move between them.
+Plytix's API is available in two versions. Each one has its own section in the sidebar, or use the cards below to open either one.
 
 <Cards>
-  <Card icon={<RocketRegular />} title="V3 (Current)" href="/docs/reference/v3">
-    The current REST API. Use this for all new integrations.
+  <Card icon={<RocketRegular />} title="V3 (Beta)" href="/reference/v3">
+    The newest version of the REST API, currently in beta. Use this for new integrations.
   </Card>
-  <Card icon={<HistoryRegular />} title="Legacy (V1/V2)" href="/docs/reference/legacy/api-v1-v2-reference">
+  <Card icon={<HistoryRegular />} title="V1/V2 (Legacy)" href="/reference/v1-v2/api-v1-v2-reference">
     Reference for teams still integrating against V1, plus the small set of V2 (beta) endpoints.
   </Card>
 </Cards>
 
-See [Migrating to V3](/docs/guides/migrating-to-v3) for guidance on moving an existing V1/V2 integration to V3.
+See [Migration overview](/docs/guides/migrating-to-v3) for guidance on moving an existing V1/V2 integration to V3.

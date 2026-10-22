@@ -100,6 +100,8 @@ Requesting that URL as given returns a `301` redirect to the `https` address. Ma
 
 Rewrite the scheme to `https` before you request the URL.
 
+Before you attach your token, also check that the link points where you expect: the same host as your V3 base URL, the default `https` port, no user name or password in the URL, and the same collection path you searched, such as `/api/v3/products`. Stop if any of these differ, and apply the same check to a `next_page` you saved to resume later. Don't let your HTTP client forward `Authorization` across redirects. Options such as curl's `--location-trusted` send your token to whatever host the redirect names.
+
 ## Request parameters
 
 Use these three parameters to control paging and sort order:
@@ -142,15 +144,15 @@ The application doesn't return a count of matching records, and there is no para
 }
 ```
 
-The pagination block carries no counts either. This is a difference from V1, whose search responses included `total_count`. If you're migrating, see [Migrating to V3](/docs/guides/migrating-to-v3).
+The pagination block carries no counts either. This is a difference from V1, whose search responses included `total_count`. If you're migrating, see [Migration overview](/docs/guides/migrating-to-v3).
 
 ## Page through results safely
 
 Keep these points in mind when you page through a large result set:
 
 - **Don't assume a total.** The pagination block carries no count, so the only reliable way to know how many records matched is to page to the end and tally as you go. For a set you know is small, `_page_size=1000` gets you everything in one request.
-- **Watch the request rate.** Paging through a large result set is many requests in rapid succession. Rate limits vary by account and are carried in your access token's claims, so pace a long loop and back off on `429`. See [Rate limits](/docs/reference/v3/rate-limits).
-- **Ask for fewer fields.** `_fields` narrows each record to what you need, which makes a long paging run noticeably cheaper. See [Filtering and Query Syntax](/docs/reference/v3/filtering-query-syntax).
+- **Watch the request rate.** Paging through a large result set is many requests in rapid succession. Rate limits vary by account and are carried in your access token's claims, so pace a long loop and back off on `429`. See [Rate limits](/reference/v3/rate-limits).
+- **Ask for fewer fields.** `_fields` narrows each record to what you need, which makes a long paging run noticeably cheaper. See [Filtering and Query Syntax](/reference/v3/filtering-and-search).
 - **Expect the set to shift under you.** Results can change during pagination, and a catalog that changes mid-run can move records between pages. Use a deterministic sort, such as `_sort_by=id`, and a reconciliation pass. A date filter alone doesn't guarantee a point-in-time snapshot.
 
 ## Related resources
@@ -158,7 +160,7 @@ Keep these points in mind when you page through a large result set:
 Now that you can page through results, you can explore these related pages.
 
 <Cards>
-  <Card icon={<ArrowClockwiseRegular />} title="Sync your ERP" href="/docs/guides/syncing-your-erp-with-plytix">
+  <Card icon={<ArrowClockwiseRegular />} title="Sync your ERP with Plytix" href="/docs/guides/syncing-your-erp-with-plytix">
     Keep a paged sync correct with a reconciliation pass.
   </Card>
   <Card icon={<ArrowDownloadRegular />} title="Export your full catalog" href="/docs/guides/exporting-your-full-catalog">

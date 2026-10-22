@@ -172,7 +172,7 @@ export async function searchDocs(server: SearchServer, query: string, limit = DE
           (hasTerm(location, term) ? LOCATION_WEIGHT : 0);
         score += weight * (idf.get(term) ?? 1);
       }
-      const isLegacy = page.url.includes('/reference/legacy/');
+      const isLegacy = page.url.includes('/reference/v1-v2/');
       const isV3 = page.url.includes('/reference/v3/');
       if ((isLegacy && !wantsLegacy) || (isV3 && wantsLegacy)) score *= OTHER_VERSION_FACTOR;
       return { ...page, score };

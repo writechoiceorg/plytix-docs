@@ -9,7 +9,7 @@
 import { spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
-import { SITE_ROOT, operations } from './util.mjs';
+import { SITE_ROOT, operations, tagFolder } from './util.mjs';
 
 export function redoclyLint(specFile, configFile) {
   const cli = path.join(SITE_ROOT, 'node_modules/@redocly/cli/bin/cli.js');
@@ -32,7 +32,7 @@ export function redoclyLint(specFile, configFile) {
 }
 
 // Routes every V3 reference page will have after generation.
-export const referenceUrl = (tag, operationId) => `/docs/reference/v3/${tag}/${operationId}`;
+export const referenceUrl = (tag, operationId) => `/reference/v3/${tagFolder(tag)}/${operationId}`;
 
 function collectStrings(node, out = []) {
   if (typeof node === 'string') out.push(node);
@@ -49,18 +49,18 @@ export function checkSpec(spec, { contentDir }) {
     if (!op.tags?.length) errors.push(`${key}: no tag, so it has no nav group or URL`);
     else if (op.operationId) {
       generated.add(referenceUrl(op.tags[0], op.operationId));
-      generatedTags.add(op.tags[0]);
+      generatedTags.add(tagFolder(op.tags[0]));
     }
   }
   // Pages under a generated group are rebuilt from this spec, so the files on
   // disk may be stale (a renamed operationId leaves its old MDX until
   // generate-docs runs). Check those links against the spec, not the disk.
   const isGeneratedGroup = (url) => {
-    const m = url.match(/^\/docs\/reference\/v3\/([^/]+)\/[^/]+$/);
+    const m = url.match(/^\/reference\/v3\/([^/]+)\/[^/]+$/);
     return m && generatedTags.has(m[1]);
   };
 
-  const linkRe = /\]\((\/docs\/[^)\s#]*)(?:#[^)\s]*)?\)|href="(\/docs\/[^"#]*)/g;
+  const linkRe = /\]\((\/(?:docs|reference)\/[^)\s#]*)(?:#[^)\s]*)?\)|href="(\/(?:docs|reference)\/[^"#]*)/g;
   const broken = new Set();
   for (const text of collectStrings(spec.paths).concat(collectStrings(spec.components))) {
     for (const m of text.matchAll(linkRe)) {
@@ -70,7 +70,8 @@ export function checkSpec(spec, { contentDir }) {
         broken.add(url);
         continue;
       }
-      const rel = url.replace(/^\/docs\/?/, '');
+      // /docs/<x> is content/docs/<x>; /reference/<x> is content/docs/reference/<x>.
+      const rel = url.startsWith('/reference') ? 'reference' + url.slice('/reference'.length) : url.replace(/^\/docs\/?/, '');
       const candidates = [`${rel}.mdx`, `${rel}/index.mdx`, `${rel}.md`].map((c) => path.join(contentDir, c));
       if (!candidates.some((c) => existsSync(c))) broken.add(url);
     }

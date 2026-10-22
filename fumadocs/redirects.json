@@ -1,0 +1,1052 @@
+[
+  {
+    "source": "/docs/guides/overview",
+    "destination": "/docs/guides/what-is-the-plytix-api",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/assetcategories/create_asset_categories_api_v3_asset_categories_post",
+    "destination": "/reference/v3/asset-categories/create-asset-category",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/assetcategories/delete_asset_categories_api_v3_asset_categories__identifier__delete",
+    "destination": "/reference/v3/asset-categories/delete-asset-category",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/assetcategories/delete_asset_categories_subpath_api_v3_asset_categories__identifier___path__delete",
+    "destination": "/reference/v3/asset-categories/delete-asset-category-field",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/assetcategories/get_asset_categories_api_v3_asset_categories__identifier__get",
+    "destination": "/reference/v3/asset-categories/get-asset-category",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/assetcategories/get_asset_categories_subpath_api_v3_asset_categories__identifier___path__get",
+    "destination": "/reference/v3/asset-categories/get-asset-category-field",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/assetcategories/search_asset_categories_api_v3_asset_categories_get",
+    "destination": "/reference/v3/asset-categories/search-asset-categories",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/assetcategories/update_asset_categories_api_v3_asset_categories__identifier__patch",
+    "destination": "/reference/v3/asset-categories/update-asset-category",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/assetcategories/update_asset_categories_subpath_api_v3_asset_categories__identifier___path__patch",
+    "destination": "/reference/v3/asset-categories/update-asset-category-field",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/assetlists/create_asset_lists_api_v3_asset_lists_post",
+    "destination": "/reference/v3/asset-lists/create-asset-list",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/assetlists/delete_asset_lists_api_v3_asset_lists__identifier__delete",
+    "destination": "/reference/v3/asset-lists/delete-asset-list",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/assetlists/delete_asset_lists_subpath_api_v3_asset_lists__identifier___path__delete",
+    "destination": "/reference/v3/asset-lists/delete-asset-list-field",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/assetlists/get_asset_lists_api_v3_asset_lists__identifier__get",
+    "destination": "/reference/v3/asset-lists/get-asset-list",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/assetlists/get_asset_lists_subpath_api_v3_asset_lists__identifier___path__get",
+    "destination": "/reference/v3/asset-lists/get-asset-list-field",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/assetlists/search_asset_lists_api_v3_asset_lists_get",
+    "destination": "/reference/v3/asset-lists/search-asset-lists",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/assetlists/update_asset_lists_api_v3_asset_lists__identifier__patch",
+    "destination": "/reference/v3/asset-lists/update-asset-list",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/assetlists/update_asset_lists_subpath_api_v3_asset_lists__identifier___path__patch",
+    "destination": "/reference/v3/asset-lists/update-asset-list-field",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/assets/create_assets_api_v3_assets_post",
+    "destination": "/reference/v3/assets/create-asset",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/assets/delete_assets_api_v3_assets__identifier__delete",
+    "destination": "/reference/v3/assets/delete-asset",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/assets/delete_assets_subpath_api_v3_assets__identifier___path__delete",
+    "destination": "/reference/v3/assets/delete-asset-field",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/assets/get_assets_api_v3_assets__identifier__get",
+    "destination": "/reference/v3/assets/get-asset",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/assets/get_assets_subpath_api_v3_assets__identifier___path__get",
+    "destination": "/reference/v3/assets/get-asset-field",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/assets/search_assets_api_v3_assets_get",
+    "destination": "/reference/v3/assets/search-assets",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/assets/update_assets_api_v3_assets__identifier__patch",
+    "destination": "/reference/v3/assets/update-asset",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/assets/update_assets_subpath_api_v3_assets__identifier___path__patch",
+    "destination": "/reference/v3/assets/update-asset-field",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/familyattributes/delete_family_attributes_drill_in_api_v3_product_families__product_family_id__attributes__attribute_id___path__delete",
+    "destination": "/reference/v3/family-attributes/delete-family-attribute-field",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/familyattributes/delete_family_attributes_identity_api_v3_product_families__product_family_id__attributes__attribute_id__delete",
+    "destination": "/reference/v3/family-attributes/remove-attribute-from-family",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/familyattributes/get_family_attributes_collection_api_v3_product_families__product_family_id__attributes_get",
+    "destination": "/reference/v3/family-attributes/list-family-attributes",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/familyattributes/get_family_attributes_drill_in_api_v3_product_families__product_family_id__attributes__attribute_id___path__get",
+    "destination": "/reference/v3/family-attributes/get-family-attribute-field",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/familyattributes/get_family_attributes_identity_api_v3_product_families__product_family_id__attributes__attribute_id__get",
+    "destination": "/reference/v3/family-attributes/get-family-attribute",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/familyattributes/patch_family_attributes_drill_in_api_v3_product_families__product_family_id__attributes__attribute_id___path__patch",
+    "destination": "/reference/v3/family-attributes/update-family-attribute-field",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/familyattributes/patch_family_attributes_identity_api_v3_product_families__product_family_id__attributes__attribute_id__patch",
+    "destination": "/reference/v3/family-attributes/update-family-attribute",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/familyattributes/post_family_attributes_collection_api_v3_product_families__product_family_id__attributes_post",
+    "destination": "/reference/v3/family-attributes/add-attribute-to-family",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/familyattributes/post_family_attributes_identity_api_v3_product_families__product_family_id__attributes__attribute_id__post",
+    "destination": "/reference/v3/family-attributes/add-attribute-to-family-by-id",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/familyattributes/search_family_attributes_api_v3_family_attributes_get",
+    "destination": "/reference/v3/family-attributes/search-family-attributes",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/productattributegroups/create_product_attribute_groups_api_v3_product_attribute_groups_post",
+    "destination": "/reference/v3/product-attribute-groups/create-product-attribute-group",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/productattributegroups/delete_product_attribute_groups_api_v3_product_attribute_groups__identifier__delete",
+    "destination": "/reference/v3/product-attribute-groups/delete-product-attribute-group",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/productattributegroups/delete_product_attribute_groups_subpath_api_v3_product_attribute_groups__identifier___path__delete",
+    "destination": "/reference/v3/product-attribute-groups/delete-product-attribute-group-field",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/productattributegroups/get_product_attribute_groups_api_v3_product_attribute_groups__identifier__get",
+    "destination": "/reference/v3/product-attribute-groups/get-product-attribute-group",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/productattributegroups/get_product_attribute_groups_subpath_api_v3_product_attribute_groups__identifier___path__get",
+    "destination": "/reference/v3/product-attribute-groups/get-product-attribute-group-field",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/productattributegroups/search_product_attribute_groups_api_v3_product_attribute_groups_get",
+    "destination": "/reference/v3/product-attribute-groups/search-product-attribute-groups",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/productattributes/create_product_attributes_api_v3_product_attributes_post",
+    "destination": "/reference/v3/product-attributes/create-product-attribute",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/productattributes/delete_product_attributes_api_v3_product_attributes__identifier__delete",
+    "destination": "/reference/v3/product-attributes/delete-product-attribute",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/productattributes/delete_product_attributes_subpath_api_v3_product_attributes__identifier___path__delete",
+    "destination": "/reference/v3/product-attributes/delete-product-attribute-field",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/productattributes/get_product_attributes_api_v3_product_attributes__identifier__get",
+    "destination": "/reference/v3/product-attributes/get-product-attribute",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/productattributes/get_product_attributes_subpath_api_v3_product_attributes__identifier___path__get",
+    "destination": "/reference/v3/product-attributes/get-product-attribute-field",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/productattributes/search_product_attributes_api_v3_product_attributes_get",
+    "destination": "/reference/v3/product-attributes/search-product-attributes",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/productattributes/update_product_attributes_api_v3_product_attributes__identifier__patch",
+    "destination": "/reference/v3/product-attributes/update-product-attribute",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/productattributes/update_product_attributes_subpath_api_v3_product_attributes__identifier___path__patch",
+    "destination": "/reference/v3/product-attributes/update-product-attribute-field",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/productcategories/create_product_categories_api_v3_product_categories_post",
+    "destination": "/reference/v3/product-categories/create-product-category",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/productcategories/delete_product_categories_api_v3_product_categories__identifier__delete",
+    "destination": "/reference/v3/product-categories/delete-product-category",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/productcategories/delete_product_categories_subpath_api_v3_product_categories__identifier___path__delete",
+    "destination": "/reference/v3/product-categories/delete-product-category-field",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/productcategories/get_product_categories_api_v3_product_categories__identifier__get",
+    "destination": "/reference/v3/product-categories/get-product-category",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/productcategories/get_product_categories_subpath_api_v3_product_categories__identifier___path__get",
+    "destination": "/reference/v3/product-categories/get-product-category-field",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/productcategories/search_product_categories_api_v3_product_categories_get",
+    "destination": "/reference/v3/product-categories/search-product-categories",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/productcategories/update_product_categories_api_v3_product_categories__identifier__patch",
+    "destination": "/reference/v3/product-categories/update-product-category",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/productcategories/update_product_categories_subpath_api_v3_product_categories__identifier___path__patch",
+    "destination": "/reference/v3/product-categories/update-product-category-field",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/productfamilies/create_product_families_api_v3_product_families_post",
+    "destination": "/reference/v3/product-families/create-product-family",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/productfamilies/create_product_families_subpath_api_v3_product_families__identifier___path__post",
+    "destination": "/reference/v3/product-families/search-product-families",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/productfamilies/delete_product_families_api_v3_product_families__identifier__delete",
+    "destination": "/reference/v3/product-families/delete-product-family",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/productfamilies/delete_product_families_subpath_api_v3_product_families__identifier___path__delete",
+    "destination": "/reference/v3/product-families/delete-product-family-field",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/productfamilies/get_product_families_api_v3_product_families__identifier__get",
+    "destination": "/reference/v3/product-families/get-product-family",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/productfamilies/get_product_families_subpath_api_v3_product_families__identifier___path__get",
+    "destination": "/reference/v3/product-families/get-product-family-field",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/productfamilies/search_product_families_api_v3_product_families_get",
+    "destination": "/reference/v3/product-families/search-product-families",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/productfamilies/update_product_families_api_v3_product_families__identifier__patch",
+    "destination": "/reference/v3/product-families/update-product-family",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/productfamilies/update_product_families_subpath_api_v3_product_families__identifier___path__patch",
+    "destination": "/reference/v3/product-families/update-product-family-field",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/productrelationships/delete_product_relationships_drill_in_api_v3_products__product_id__relationships__relationship_id___path__delete",
+    "destination": "/reference/v3/product-relationships/search-product-relationships",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/productrelationships/delete_product_relationships_identity_api_v3_products__product_id__relationships__relationship_id__delete",
+    "destination": "/reference/v3/product-relationships/remove-product-relationship",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/productrelationships/get_product_relationships_collection_api_v3_products__product_id__relationships_get",
+    "destination": "/reference/v3/product-relationships/search-product-relationships",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/productrelationships/get_product_relationships_drill_in_api_v3_products__product_id__relationships__relationship_id___path__get",
+    "destination": "/reference/v3/product-relationships/search-product-relationships",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/productrelationships/get_product_relationships_identity_api_v3_products__product_id__relationships__relationship_id__get",
+    "destination": "/reference/v3/product-relationships/get-product-relationship",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/productrelationships/patch_product_relationships_drill_in_api_v3_products__product_id__relationships__relationship_id___path__patch",
+    "destination": "/reference/v3/product-relationships/search-product-relationships",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/productrelationships/patch_product_relationships_identity_api_v3_products__product_id__relationships__relationship_id__patch",
+    "destination": "/reference/v3/product-relationships/search-product-relationships",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/productrelationships/post_product_relationships_collection_api_v3_products__product_id__relationships_post",
+    "destination": "/reference/v3/product-relationships/search-product-relationships",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/productrelationships/post_product_relationships_identity_api_v3_products__product_id__relationships__relationship_id__post",
+    "destination": "/reference/v3/product-relationships/search-product-relationships",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/productrelationships/search_product_relationships_api_v3_product_relationships_get",
+    "destination": "/reference/v3/product-relationships/search-product-relationships",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/products/create_products_api_v3_products_post",
+    "destination": "/reference/v3/products/create-product",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/products/create_products_subpath_api_v3_products__identifier___path__post",
+    "destination": "/reference/v3/products/add-product-field",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/products/delete_products_api_v3_products__identifier__delete",
+    "destination": "/reference/v3/products/delete-product",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/products/delete_products_subpath_api_v3_products__identifier___path__delete",
+    "destination": "/reference/v3/products/delete-product-field",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/products/get_products_api_v3_products__identifier__get",
+    "destination": "/reference/v3/products/get-product",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/products/get_products_subpath_api_v3_products__identifier___path__get",
+    "destination": "/reference/v3/products/get-product-field",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/products/search_products",
+    "destination": "/reference/v3/products/search-products",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/products/update_products_api_v3_products__identifier__patch",
+    "destination": "/reference/v3/products/update-product",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/products/update_products_subpath_api_v3_products__identifier___path__patch",
+    "destination": "/reference/v3/products/update-product-field",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/relatedproducts/get_related_products_collection_api_v3_products__product_id__relationships__relationship_id__related_products_get",
+    "destination": "/reference/v3/related-products/search-related-products",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/relatedproducts/get_related_products_drill_in_api_v3_products__product_id__relationships__relationship_id__related_products__related_product_id___path__get",
+    "destination": "/reference/v3/related-products/search-related-products",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/relatedproducts/get_related_products_identity_api_v3_products__product_id__relationships__relationship_id__related_products__related_product_id__get",
+    "destination": "/reference/v3/related-products/search-related-products",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/relatedproducts/search_related_products_api_v3_related_products_get",
+    "destination": "/reference/v3/related-products/search-related-products",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/relationships/create_relationships_api_v3_relationships_post",
+    "destination": "/reference/v3/relationships/create-relationship",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/relationships/delete_relationships_api_v3_relationships__identifier__delete",
+    "destination": "/reference/v3/relationships/delete-relationship",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/relationships/delete_relationships_subpath_api_v3_relationships__identifier___path__delete",
+    "destination": "/reference/v3/relationships/delete-relationship-field",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/relationships/get_relationships_api_v3_relationships__identifier__get",
+    "destination": "/reference/v3/relationships/get-relationship",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/relationships/get_relationships_subpath_api_v3_relationships__identifier___path__get",
+    "destination": "/reference/v3/relationships/get-relationship-field",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/relationships/search_relationships_api_v3_relationships_get",
+    "destination": "/reference/v3/relationships/search-relationships",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/relationships/update_relationships_api_v3_relationships__identifier__patch",
+    "destination": "/reference/v3/relationships/update-relationship",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/relationships/update_relationships_subpath_api_v3_relationships__identifier___path__patch",
+    "destination": "/reference/v3/relationships/update-relationship-field",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/accounts/apiCredentialSearch_api_v1_accounts_api_credentials_search_post",
+    "destination": "/reference/v1-v2/accounts/search-api-credentials",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/accounts/membershipSearch_api_v1_accounts_memberships_search_post",
+    "destination": "/reference/v1-v2/accounts/search-memberships",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/assets/addNewAssets_api_v1_assets_post",
+    "destination": "/reference/v1-v2/assets/create-asset",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/assets/assetSearch_api_v1_assets_search_post",
+    "destination": "/reference/v1-v2/assets/search-assets",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/assets/getAccountSAsset_api_v1_assets_asset_id_get",
+    "destination": "/reference/v1-v2/assets/get-asset",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/assets/modifySelectedAttributesOfAnAsset_api_v1_assets_asset_id_patch",
+    "destination": "/reference/v1-v2/assets/update-asset",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/assets/removeAssetFromAccount_api_v1_assets_asset_id_delete",
+    "destination": "/reference/v1-v2/assets/delete-asset",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/assets/replaceAssetContent_api_v1_assets_asset_id_content_put",
+    "destination": "/reference/v1-v2/assets/replace-asset-content",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/authentication/retrievesAnAuthenticationToken_auth_api_get_token_post",
+    "destination": "/reference/v1-v2/authentication/get-token",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/available-filters/getAvailableAssetFilters_api_v1_filters_asset_get",
+    "destination": "/reference/v1-v2/available-filters/get-available-asset-filters",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/available-filters/getAvailableProductFilters_api_v1_filters_product_get",
+    "destination": "/reference/v1-v2/available-filters/get-available-product-filters",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/available-filters/getAvailableRelationshipsFilters_api_v1_filters_relationships_get",
+    "destination": "/reference/v1-v2/available-filters/get-available-relationship-filters",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/categories/addNewFileCategory_api_v1_categories_file_post",
+    "destination": "/reference/v1-v2/categories/create-asset-category",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/categories/addNewFileSubcategory_api_v1_categories_file_category_id_post",
+    "destination": "/reference/v1-v2/categories/create-asset-subcategory",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/categories/addNewProductCategory_api_v1_categories_product_post",
+    "destination": "/reference/v1-v2/categories/create-product-category",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/categories/addNewProductSubcategory_api_v1_categories_product_category_id_post",
+    "destination": "/reference/v1-v2/categories/create-product-subcategory",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/categories/assetCategoriesSearch_api_v1_categories_file_search_post",
+    "destination": "/reference/v1-v2/categories/search-asset-categories",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/categories/deleteCategory_api_v1_categories_file_category_id_delete",
+    "destination": "/reference/v1-v2/categories/delete-asset-category",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/categories/deleteCategory_api_v1_categories_product_category_id_delete",
+    "destination": "/reference/v1-v2/categories/delete-product-category",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/categories/modifyCategoryAttributes_api_v1_categories_file_category_id_patch",
+    "destination": "/reference/v1-v2/categories/update-asset-category",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/categories/modifyCategoryAttributes_api_v1_categories_product_category_id_patch",
+    "destination": "/reference/v1-v2/categories/update-product-category",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/categories/productCategoriesSearch_api_v1_categories_product_search_post",
+    "destination": "/reference/v1-v2/categories/search-product-categories",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/product-attribute-groups/addNewProductAttributeGroup_api_v1_attribute_groups_product_post",
+    "destination": "/reference/v1-v2/product-attribute-groups/create-product-attribute-group",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/product-attribute-groups/modifyAttributeGroup_api_v1_attribute_groups_product_attribute_group_id_patch",
+    "destination": "/reference/v1-v2/product-attribute-groups/update-product-attribute-group",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/product-attribute-groups/productAttributeGroupsSearch_api_v1_attribute_groups_product_search_post",
+    "destination": "/reference/v1-v2/product-attribute-groups/search-product-attribute-groups",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/product-attribute-groups/removeGroup_api_v1_attribute_groups_product_attribute_group_id_delete",
+    "destination": "/reference/v1-v2/product-attribute-groups/delete-product-attribute-group",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/product-attributes/addNewProductAttribute_api_v1_attributes_product_post",
+    "destination": "/reference/v1-v2/product-attributes/create-product-attribute",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/product-attributes/deleteProductAttribute_api_v1_attributes_product_product_attribute_id_delete",
+    "destination": "/reference/v1-v2/product-attributes/delete-product-attribute",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/product-attributes/getProductAttribute_api_v1_attributes_product_product_attribute_id_get",
+    "destination": "/reference/v1-v2/product-attributes/get-product-attribute",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/product-attributes/modifyAttribute_api_v1_attributes_product_product_attribute_id_patch",
+    "destination": "/reference/v1-v2/product-attributes/update-product-attribute",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/product-attributes/productAttributeSearch_api_v1_attributes_product_search_post",
+    "destination": "/reference/v1-v2/product-attributes/search-product-attributes",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/product-families/addAttributeToProductFamily_api_v1_product_families_product_family_id_attributes_link_post",
+    "destination": "/reference/v1-v2/product-families/link-family-attribute",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/product-families/addNewFamily_api_v1_product_families_post",
+    "destination": "/reference/v1-v2/product-families/create-product-family",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/product-families/editFamilyName_api_v1_product_families_product_family_id_patch",
+    "destination": "/reference/v1-v2/product-families/rename-product-family",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/product-families/editProductFamilyAttributesIncludingSystemAttributes_api_v1_product_families_product_family_id_all_attributes_edit_post",
+    "destination": "/reference/v1-v2/product-families/edit-all-family-attributes",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/product-families/editProductFamilyAttributesInheritance_api_v1_product_families_product_family_id_attributes_edit_post",
+    "destination": "/reference/v1-v2/product-families/edit-family-attribute-inheritance",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/product-families/getFamilyAttributesIncludingSystemAttributes_api_v1_product_families_product_family_id_all_attributes_get",
+    "destination": "/reference/v1-v2/product-families/list-all-family-attributes",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/product-families/getFamilyAttributes_api_v1_product_families_product_family_id_attributes_get",
+    "destination": "/reference/v1-v2/product-families/list-family-attributes",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/product-families/getFamilyData_api_v1_product_families_product_family_id_get",
+    "destination": "/reference/v1-v2/product-families/get-product-family",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/product-families/removeFamily_api_v1_product_families_product_family_id_delete",
+    "destination": "/reference/v1-v2/product-families/delete-product-family",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/product-families/searchFamilies_api_v1_product_families_search_post",
+    "destination": "/reference/v1-v2/product-families/search-product-families",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/product-families/unlinkAttributeFromProductFamily_api_v1_product_families_product_family_id_attributes_unlink_post",
+    "destination": "/reference/v1-v2/product-families/unlink-family-attribute",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/products/addAVariantOfAProduct_api_v1_products_parent_product_id_variants_post",
+    "destination": "/reference/v1-v2/products/add-variant",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/products/addNewProducts_api_v1_products_post",
+    "destination": "/reference/v1-v2/products/create-product",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/products/assignFamily_api_v1_products_product_id_family_post",
+    "destination": "/reference/v1-v2/products/assign-product-family",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/products/assignProductsToRelationship_api_v1_products_product_id_relationships_relationship_id_post",
+    "destination": "/reference/v1-v2/products/add-related-products",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/products/getACategoryOfThisProduct_api_v1_products_product_id_categories_category_id_get",
+    "destination": "/reference/v1-v2/products/get-product-category",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/products/getAnAssetOfThisProduct_api_v1_products_product_id_assets_asset_id_get",
+    "destination": "/reference/v1-v2/products/get-product-asset",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/products/getProductData_api_v1_products_product_id_get",
+    "destination": "/reference/v1-v2/products/get-product",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/products/getProductSRelatedAssets_api_v1_products_product_id_assets_get",
+    "destination": "/reference/v1-v2/products/list-product-assets",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/products/getProductSRelatedCategories_api_v1_products_product_id_categories_get",
+    "destination": "/reference/v1-v2/products/list-product-categories",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/products/getProductSRelatedVariants_api_v1_products_product_id_variants_get",
+    "destination": "/reference/v1-v2/products/list-product-variants",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/products/linkAnExistingAssetToAProductMediaAttribute_api_v1_products_product_id_assets_post",
+    "destination": "/reference/v1-v2/products/link-product-asset",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/products/linkAnExistingCategoryToProduct_api_v1_products_product_id_categories_post",
+    "destination": "/reference/v1-v2/products/link-product-category",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/products/linkVariantToAProduct_api_v1_products_product_id_variant_variant_id_post",
+    "destination": "/reference/v1-v2/products/link-variant",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/products/modifyRelationshipAttributes_api_v1_products_product_id_relationships_relationship_id_product_related_product_id_patch",
+    "destination": "/reference/v1-v2/products/update-related-product",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/products/modifySelectedAttributesOfAProduct_api_v1_products_product_id_patch",
+    "destination": "/reference/v1-v2/products/update-product",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/products/productSearch_api_v1_products_search_post",
+    "destination": "/reference/v1-v2/products/search-products",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/products/removeProductsFromARelationship_api_v1_products_product_id_relationships_relationship_id_unlink_post",
+    "destination": "/reference/v1-v2/products/remove-related-products",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/products/removesProductFromTheSystem_api_v1_products_product_id_delete",
+    "destination": "/reference/v1-v2/products/delete-product",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/products/resyncVariants_api_v1_products_parent_product_id_variants_resync_post",
+    "destination": "/reference/v1-v2/products/resync-variants",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/products/unbindAssetFromProduct_api_v1_products_product_id_assets_asset_id_delete",
+    "destination": "/reference/v1-v2/products/unlink-product-asset",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/products/unbindCategoryFromProduct_api_v1_products_product_id_categories_category_id_delete",
+    "destination": "/reference/v1-v2/products/unlink-product-category",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/products/unlinkAVariantOfAProduct_api_v1_products_parent_product_id_variant_variant_id_delete",
+    "destination": "/reference/v1-v2/products/unlink-variant",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/products-v2-beta/addAVariantOfAProduct_api_v2_products_parent_product_id_variants_post",
+    "destination": "/reference/v1-v2/products-v2-beta/add-variant",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/products-v2-beta/addNewProducts_api_v2_products_post",
+    "destination": "/reference/v1-v2/products-v2-beta/create-product",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/products-v2-beta/assignFamily_api_v2_products_product_id_family_post",
+    "destination": "/reference/v1-v2/products-v2-beta/assign-product-family",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/products-v2-beta/assignProductsToRelationship_api_v2_products_product_id_relationships_relationship_id_post",
+    "destination": "/reference/v1-v2/products-v2-beta/add-related-products",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/products-v2-beta/getProductData_api_v2_products_product_id_get",
+    "destination": "/reference/v1-v2/products-v2-beta/get-product",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/products-v2-beta/getProductSRelatedAssets_api_v2_products_product_id_assets_get",
+    "destination": "/reference/v1-v2/products-v2-beta/list-product-assets",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/products-v2-beta/getProductSRelatedCategories_api_v2_products_product_id_categories_get",
+    "destination": "/reference/v1-v2/products-v2-beta/list-product-categories",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/products-v2-beta/linkAnExistingAssetToAProductMediaAttribute_api_v2_products_product_id_assets_post",
+    "destination": "/reference/v1-v2/products-v2-beta/link-product-asset",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/products-v2-beta/linkAnExistingCategoryToProduct_api_v2_products_product_id_categories_post",
+    "destination": "/reference/v1-v2/products-v2-beta/link-product-category",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/products-v2-beta/linkVariantToAProduct_api_v2_products_product_id_variant_variant_id_post",
+    "destination": "/reference/v1-v2/products-v2-beta/link-variant",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/products-v2-beta/modifyRelationshipAttributes_api_v2_products_product_id_relationships_relationship_id_patch",
+    "destination": "/reference/v1-v2/products-v2-beta/update-related-products",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/products-v2-beta/modifySelectedAttributesOfAProduct_api_v2_products_product_id_patch",
+    "destination": "/reference/v1-v2/products-v2-beta/update-product",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/products-v2-beta/productSearch_api_v2_products_search_post",
+    "destination": "/reference/v1-v2/products-v2-beta/search-products",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/products-v2-beta/removeProductsFromARelationship_api_v2_products_product_id_relationships_relationship_id_delete",
+    "destination": "/reference/v1-v2/products-v2-beta/remove-related-products",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/products-v2-beta/removesProductFromTheSystem_api_v2_products_product_id_delete",
+    "destination": "/reference/v1-v2/products-v2-beta/delete-product",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/products-v2-beta/resyncVariants_api_v2_products_parent_product_id_variants_resync_post",
+    "destination": "/reference/v1-v2/products-v2-beta/resync-variants",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/products-v2-beta/unbindAssetFromProduct_api_v2_products_product_id_assets_asset_id_delete",
+    "destination": "/reference/v1-v2/products-v2-beta/unlink-product-asset",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/products-v2-beta/unbindCategoryFromProduct_api_v2_products_product_id_categories_category_id_delete",
+    "destination": "/reference/v1-v2/products-v2-beta/unlink-product-category",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/products-v2-beta/unlinkAVariantOfAProduct_api_v2_products_parent_product_id_variant_variant_id_delete",
+    "destination": "/reference/v1-v2/products-v2-beta/unlink-variant",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/relationships/addNewRelationship_api_v1_relationships_post",
+    "destination": "/reference/v1-v2/relationships/create-relationship",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/relationships/getRelationshipData_api_v1_relationships_relationship_id_get",
+    "destination": "/reference/v1-v2/relationships/get-relationship",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/relationships/modifyAttributesOfARelationship_api_v1_relationships_relationship_id_patch",
+    "destination": "/reference/v1-v2/relationships/update-relationship",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/relationships/removeRelationshipsFromAccount_api_v1_relationships_relationship_id_delete",
+    "destination": "/reference/v1-v2/relationships/delete-relationship",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/relationships/searchRelationships_api_v1_relationships_search_post",
+    "destination": "/reference/v1-v2/relationships/search-relationships",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/v3/filtering-query-syntax",
+    "destination": "/reference/v3/filtering-and-search",
+    "permanent": true
+  },
+  {
+    "source": "/reference/v1-v2",
+    "destination": "/reference/v1-v2/api-v1-v2-reference",
+    "permanent": false
+  },
+  {
+    "source": "/docs/reference/legacy",
+    "destination": "/reference/v1-v2/api-v1-v2-reference",
+    "permanent": true
+  },
+  {
+    "source": "/reference/v3/assets/add-asset-to-list",
+    "destination": "/reference/v3/assets/search-assets",
+    "permanent": true
+  },
+  {
+    "source": "/reference/v3/assets/link-asset-category",
+    "destination": "/reference/v3/assets/search-assets",
+    "permanent": true
+  },
+  {
+    "source": "/reference/v3/assets/remove-asset-from-list",
+    "destination": "/reference/v3/assets/search-assets",
+    "permanent": true
+  },
+  {
+    "source": "/reference/v3/assets/unlink-asset-category",
+    "destination": "/reference/v3/assets/search-assets",
+    "permanent": true
+  },
+  {
+    "source": "/reference/v3/product-attributes/add-product-attribute-to-group",
+    "destination": "/reference/v3/product-attributes/search-product-attributes",
+    "permanent": true
+  },
+  {
+    "source": "/reference/v3/product-attributes/remove-product-attribute-from-group",
+    "destination": "/reference/v3/product-attributes/search-product-attributes",
+    "permanent": true
+  },
+  {
+    "source": "/reference/v3/product-families/add-product-family-field",
+    "destination": "/reference/v3/product-families/search-product-families",
+    "permanent": true
+  },
+  {
+    "source": "/reference/v3/product-relationships/add-related-products",
+    "destination": "/reference/v3/product-relationships/search-product-relationships",
+    "permanent": true
+  },
+  {
+    "source": "/reference/v3/product-relationships/add-related-products-to-relationship",
+    "destination": "/reference/v3/product-relationships/search-product-relationships",
+    "permanent": true
+  },
+  {
+    "source": "/reference/v3/product-relationships/delete-product-relationship-field",
+    "destination": "/reference/v3/product-relationships/search-product-relationships",
+    "permanent": true
+  },
+  {
+    "source": "/reference/v3/product-relationships/get-product-relationship-field",
+    "destination": "/reference/v3/product-relationships/search-product-relationships",
+    "permanent": true
+  },
+  {
+    "source": "/reference/v3/product-relationships/list-product-relationships",
+    "destination": "/reference/v3/product-relationships/search-product-relationships",
+    "permanent": true
+  },
+  {
+    "source": "/reference/v3/product-relationships/update-product-relationship",
+    "destination": "/reference/v3/product-relationships/search-product-relationships",
+    "permanent": true
+  },
+  {
+    "source": "/reference/v3/product-relationships/update-product-relationship-field",
+    "destination": "/reference/v3/product-relationships/search-product-relationships",
+    "permanent": true
+  },
+  {
+    "source": "/reference/v3/products/link-product-category",
+    "destination": "/reference/v3/products/search-products",
+    "permanent": true
+  },
+  {
+    "source": "/reference/v3/products/unlink-product-category",
+    "destination": "/reference/v3/products/search-products",
+    "permanent": true
+  },
+  {
+    "source": "/reference/v3/related-products/get-related-product",
+    "destination": "/reference/v3/related-products/search-related-products",
+    "permanent": true
+  },
+  {
+    "source": "/reference/v3/related-products/get-related-product-field",
+    "destination": "/reference/v3/related-products/search-related-products",
+    "permanent": true
+  },
+  {
+    "source": "/reference/v3/related-products/list-related-products",
+    "destination": "/reference/v3/related-products/search-related-products",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/legacy/:path*",
+    "destination": "/reference/v1-v2/:path*",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference",
+    "destination": "/reference",
+    "permanent": true
+  },
+  {
+    "source": "/docs/reference/:path*",
+    "destination": "/reference/:path*",
+    "permanent": true
+  }
+]

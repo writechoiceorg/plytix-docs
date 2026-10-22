@@ -18,7 +18,7 @@ actions:
       description: |-
         Fields to return. Repeat the parameter once per field, for example `_fields=id&_fields=created`. Leave it out to get every field.
 
-        Naming a related record, such as a product's `categories`, returns it expanded in the same response. See [Filtering and query syntax](/docs/reference/v3/filtering-query-syntax#choose-which-fields-come-back).
+        Naming a related record, such as a product's `categories`, returns it expanded in the same response. See [Filtering and search](/reference/v3/filtering-and-search#choose-which-fields-come-back).
 
   - target: $.paths.*.*.parameters[?(@.name=='_page' && @.in=='query')]
     description: Q#8, Q#90, Q#91, Q#92 (still http:// per FB-012, 2026-10-15)
@@ -26,7 +26,7 @@ actions:
       description: |-
         Page to return, starting at `1`. A value below `1` returns `422`.
 
-        Instead of counting pages yourself, follow the `pagination.next_page` link in each response. The link starts with `http://`, so change it to `https://` before you request it. Otherwise the redirect can drop your `Authorization` header. See [Pagination](/docs/reference/v3/pagination).
+        Instead of counting pages yourself, follow the `pagination.next_page` link in each response. The link starts with `http://`, so change it to `https://` before you request it. Otherwise the redirect can drop your `Authorization` header. See [Pagination](/reference/v3/pagination).
 
   - target: $.paths.*.*.parameters[?(@.name=='_page_size' && @.in=='query')]
     description: Q#8, Q#90
@@ -53,7 +53,7 @@ actions:
 
         To match one of several values, repeat the filter with `[in]`: `status[in]=Draft&status[in]=Completed`. A comma-separated list matches nothing.
 
-        `filters` is the name of this group, not a parameter you send. A query parameter literally named `filters` returns `400`. See [Filtering and query syntax](/docs/reference/v3/filtering-query-syntax) for functions, grouping with `_or`, and filters on related entities.
+        `filters` is the name of this group, not a parameter you send. A query parameter literally named `filters` returns `400`. See [Filtering and search](/reference/v3/filtering-and-search) for functions, grouping with `_or`, and filters on related entities.
 
   # --- path parameters -------------------------------------------------------
   - target: $.paths.*.*.parameters[?(@.name=='identifier' && @.in=='path')]
@@ -99,7 +99,7 @@ actions:
     description: 'Live 401 body from the PIM host is {"detail":"Unauthorized"}, not OperationResponse (List Products.bru "401 - Following next_page Verbatim Drops Auth", Q#92, OAS-5)'
     update:
       description: |-
-        The access token is missing, expired, or invalid. Tokens last 15 minutes: get a new one and retry. See [Authentication](/docs/reference/v3/authentication).
+        The access token is missing, expired, or invalid. Tokens last 15 minutes: get a new one and retry. See [Authentication](/reference/v3/authentication).
 
         This response doesn't use the `data`/`errors` envelope. Its body is `{"detail": "Unauthorized"}`.
       content:

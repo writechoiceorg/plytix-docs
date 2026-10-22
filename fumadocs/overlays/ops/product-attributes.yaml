@@ -32,8 +32,8 @@ actions:
         - [The Plytix data model](/docs/guides/data-model#product-attributes)
         - [Sync your ERP](/docs/guides/syncing-your-erp-with-plytix)
         - [Build a marketplace-specific product feed](/docs/guides/building-marketplace-specific-product-feeds)
-        - [Filtering and query syntax](/docs/reference/v3/filtering-query-syntax)
-        - [Pagination](/docs/reference/v3/pagination)
+        - [Filtering and search](/reference/v3/filtering-and-search)
+        - [Pagination](/reference/v3/pagination)
 
   # --- POST /api/v3/product-attributes -------------------------------------------
   - target: $.paths['/api/v3/product-attributes'].post
@@ -78,8 +78,8 @@ actions:
         Related pages:
 
         - [The Plytix data model](/docs/guides/data-model#product-attributes)
-        - [Link an attribute to a product family](/docs/reference/v3/familyattributes/create-family-attribute), so products in a family can hold a value for it
-        - [Update and delete records](/docs/reference/v3/updates-and-deletes)
+        - [Link an attribute to a product family](/reference/v3/family-attributes/add-attribute-to-family), so products in a family can hold a value for it
+        - [Update and delete records](/reference/v3/updates-and-deletes)
 
   - target: $.paths['/api/v3/product-attributes'].post.requestBody.content['application/json']
     description: Create Text Attribute.bru "201 - Full Parameters (TextAttribute)" (2026-09-22, minus group_ids per Q#104), "201 - Success (DropdownAttribute, With Options)" (2026-09-07), Completeness request shape from Q#109
@@ -184,7 +184,7 @@ actions:
 
         `data` holds the attribute itself, with the fields of its `type`. The response schema below has one tab per type.
 
-        To read a single field, such as `options` or `groups`, use [Get a product attribute field](/docs/reference/v3/productattributes/get-product-attribute-field).
+        To read a single field, such as `options` or `groups`, use [Get a product attribute field](/reference/v3/product-attributes/get-product-attribute-field).
 
   - target: $.paths['/api/v3/product-attributes/{identifier}'].get.responses['200'].content['application/json']
     description: Get Product Attribute by ID.bru "200 - Success (BooleanAttribute)" (2026-09-21), sanitized, account_id omitted
@@ -234,9 +234,9 @@ actions:
         - `type` can't be changed.
         - `name` can be changed. Renaming doesn't change `label`.
 
-        Group membership and product family membership aren't changed here. To link the attribute to a product family, use [Link an attribute to a product family](/docs/reference/v3/familyattributes/create-family-attribute).
+        Group membership and product family membership aren't changed here. To link the attribute to a product family, use [Link an attribute to a product family](/reference/v3/family-attributes/add-attribute-to-family).
 
-        See [Update and delete records](/docs/reference/v3/updates-and-deletes) for how PATCH works across the V3 API.
+        See [Update and delete records](/reference/v3/updates-and-deletes) for how PATCH works across the V3 API.
 
   - target: $.paths['/api/v3/product-attributes/{identifier}'].patch.requestBody.content['application/json']
     description: Update and Delete Product Attribute.bru requests "200 - Success (name, description, character_limit)" (2026-09-15) and "200 - Full Parameters (DropdownAttribute)" (2026-09-22)
@@ -286,7 +286,7 @@ actions:
       description: |-
         Deletes one attribute definition. A successful delete returns `204` with an empty body, and a later request for the attribute returns `404`.
 
-        Products key their values by the attribute's `label`, so check which products hold a value before you delete an attribute: filter products with `attributes.<label>[exists]=true`. See [Filtering and query syntax](/docs/reference/v3/filtering-query-syntax) and [Update and delete records](/docs/reference/v3/updates-and-deletes).
+        Products key their values by the attribute's `label`, so check which products hold a value before you delete an attribute: filter products with `attributes.<label>[exists]=true`. See [Filtering and search](/reference/v3/filtering-and-search) and [Update and delete records](/reference/v3/updates-and-deletes).
 
   - target: $.paths['/api/v3/product-attributes/{identifier}'].delete.responses['204']
     update:
@@ -314,7 +314,7 @@ actions:
     update:
       summary: Update a product attribute field
       operationId: update-product-attribute-field
-      description: To change an attribute's settings, use [Update a product attribute](/docs/reference/v3/productattributes/update-product-attribute), which documents the request body.
+      description: To change an attribute's settings, use [Update a product attribute](/reference/v3/product-attributes/update-product-attribute), which documents the request body.
 
   # --- DELETE /api/v3/product-attributes/{identifier}/{path} -----------------------
   - target: $.paths['/api/v3/product-attributes/{identifier}/{path}'].delete
@@ -322,4 +322,4 @@ actions:
     update:
       summary: Delete a product attribute field
       operationId: delete-product-attribute-field
-      description: To delete the attribute itself, use [Delete a product attribute](/docs/reference/v3/productattributes/delete-product-attribute).
+      description: To delete the attribute itself, use [Delete a product attribute](/reference/v3/product-attributes/delete-product-attribute).

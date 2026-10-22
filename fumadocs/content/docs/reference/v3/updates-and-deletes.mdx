@@ -120,17 +120,17 @@ Follow these practices when you write to the API:
 - **Read before you write.** Confirm which records match your filter before applying a change to them.
 - **Test deletes on one record.** Erasure and inheritance interact in ways that are hard to predict from a filter alone.
 - **Don't parse a write response for values.** Read the record back instead.
-- **Pace a long run of writes.** V3 has no bulk write endpoints, so a large change is many single requests. See [Rate limits](/docs/reference/v3/rate-limits).
+- **Pace a long run of writes.** V3 has no bulk write endpoints, so a large change is many single requests. See [Rate limits](/reference/v3/rate-limits).
 
 ## Related resources
 
 Now that you know how V3 handles writes, you can explore these related pages.
 
 <Cards>
-  <Card icon={<WarningRegular />} title="Errors and Status Codes" href="/docs/reference/v3/errors-status-codes">
+  <Card icon={<WarningRegular />} title="Errors and Status Codes" href="/reference/v3/errors-status-codes">
     Read the status codes and error shapes a failed write returns.
   </Card>
-  <Card icon={<BookOpenRegular />} title="Safely remove categories, assets, or relationships" href="/docs/guides/safely-removing-categories-assets-or-relationships">
+  <Card icon={<BookOpenRegular />} title="Unlink categories, assets, or relationships" href="/docs/guides/safely-removing-categories-assets-or-relationships">
     Apply these delete rules to a real cleanup task.
   </Card>
 </Cards>

@@ -1,0 +1,74 @@
+---
+title: "What is the Plytix API?"
+description: "Learn what the Plytix API does and covers, who it's for, how V3 (Beta) and V1/V2 (Legacy) differ, and where to start your integration."
+---
+
+import { ArrowSwapRegular, BookOpenRegular, FlowchartRegular, HistoryRegular, OrganizationRegular, RocketRegular } from '@/components/icons';
+
+The Plytix API lets your own systems read and update the product content you manage in Plytix. This page explains what the API covers, who it's for, and where to start.
+
+## What it is
+
+The Plytix API is a REST API for the product data and assets in your Plytix account. You use it to connect your own systems, such as an ERP, a storefront, or an internal tool, to Plytix, so you can manage that content programmatically instead of only through the dashboard.
+
+Plytix itself is a product content platform with several products that work together, such as Plytix PIM, Plytix DAM, and Plytix Feed Management. The API doesn't expose every part of that platform. It focuses on your catalog: the products, assets, and structure behind them.
+
+## What the API covers
+
+The public API covers your product catalog and the resources that organize it. The table below groups the main resources:
+
+| Area | Resources |
+|---|---|
+| Product data | Products, product attributes, and product families |
+| Catalog structure | Categories and relationships |
+| Assets | Assets, asset categories, and asset lists |
+
+For the full list of resources, see the [V3 API reference](/reference/v3). If a feature you use in Plytix isn't in the reference, it isn't part of the public API yet.
+
+## Who it's for
+
+This documentation is for technical teams that connect Plytix to other systems. It's written for three kinds of readers:
+
+- Integration engineers who connect Plytix to an ERP, storefront, or marketplace
+- Automation builders who script repetitive tasks, such as catalog exports and data quality checks
+- Partner developers who build products that integrate with Plytix for multiple customers
+
+It's separate from the [Plytix Help Center](https://help.plytix.com/en), which covers using the Plytix dashboard itself: managing products by hand, configuring channels, and account administration.
+
+## Where to start
+
+Start with the Quickstart, then learn the data model before you write to Plytix. Follow these steps to go from credentials to a working integration:
+
+<Cards>
+  <Card icon={<RocketRegular />} title="Quickstart" href="/docs/guides/quickstart">
+    Set up authentication and make your first authenticated request.
+  </Card>
+  <Card icon={<OrganizationRegular />} title="Plytix data model" href="/docs/guides/data-model">
+    Learn how products, attributes, product families, categories, assets, and relationships fit together before you write to them.
+  </Card>
+  <Card icon={<FlowchartRegular />} title="Integration guides" href="/docs/guides/syncing-your-erp-with-plytix">
+    Start with syncing your ERP, then pick the guide for your use case, from full catalog exports to marketplace feeds.
+  </Card>
+  <Card icon={<BookOpenRegular />} title="V3 API reference" href="/reference/v3">
+    Find the endpoints you need, with parameters, request bodies, and example responses for every resource.
+  </Card>
+</Cards>
+
+## API versions
+
+This documentation covers two versions of the Plytix API: V3 (Beta) and V1/V2 (Legacy). V3 is the newest version and the one to use for new integrations. It's in beta, so endpoints, fields, and behavior can change before its stable release.
+
+V1/V2 remains available for existing integrations, and a few of its operations have no V3 equivalent yet. If you already have a V1/V2 integration, the Upgrade from V1/V2 guides help you decide what to move and how.
+
+<Cards>
+  <Card icon={<HistoryRegular />} title="V1/V2 API reference" href="/reference/v1-v2/api-v1-v2-reference">
+    Look up V1 endpoints and the V2 (beta) product endpoints that an existing integration depends on.
+  </Card>
+  <Card icon={<ArrowSwapRegular />} title="Migration overview" href="/docs/guides/migrating-to-v3">
+    Decide which parts of a V1/V2 integration move to V3, which stay, and how to convert the parts that move.
+  </Card>
+</Cards>
+
+## Get help
+
+If you can't find what you're looking for, or get stuck partway through your integration, check the [Plytix Help Center](https://help.plytix.com/en).

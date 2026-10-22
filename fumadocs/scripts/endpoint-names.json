@@ -1,0 +1,356 @@
+{
+  "v1-v2": {
+    "POST /auth/api/get-token": {
+      "slug": "get-token",
+      "title": "Get an access token"
+    },
+    "POST /api/v1/accounts/api-credentials/search": {
+      "slug": "search-api-credentials",
+      "title": "Search API credentials"
+    },
+    "POST /api/v1/accounts/memberships/search": {
+      "slug": "search-memberships",
+      "title": "Search memberships"
+    },
+    "POST /api/v1/assets": {
+      "slug": "create-asset",
+      "title": "Create an asset"
+    },
+    "POST /api/v1/assets/search": {
+      "slug": "search-assets",
+      "title": "Search assets"
+    },
+    "GET /api/v1/assets/{asset_id}": {
+      "slug": "get-asset",
+      "title": "Get an asset"
+    },
+    "PATCH /api/v1/assets/{asset_id}": {
+      "slug": "update-asset",
+      "title": "Update an asset"
+    },
+    "DELETE /api/v1/assets/{asset_id}": {
+      "slug": "delete-asset",
+      "title": "Delete an asset"
+    },
+    "PUT /api/v1/assets/{asset_id}/content": {
+      "slug": "replace-asset-content",
+      "title": "Replace an asset's content"
+    },
+    "POST /api/v1/attribute-groups/product": {
+      "slug": "create-product-attribute-group",
+      "title": "Create a product attribute group"
+    },
+    "POST /api/v1/attribute-groups/product/search": {
+      "slug": "search-product-attribute-groups",
+      "title": "Search product attribute groups"
+    },
+    "PATCH /api/v1/attribute-groups/product/{attribute_group_id}": {
+      "slug": "update-product-attribute-group",
+      "title": "Update a product attribute group"
+    },
+    "DELETE /api/v1/attribute-groups/product/{attribute_group_id}": {
+      "slug": "delete-product-attribute-group",
+      "title": "Delete a product attribute group"
+    },
+    "POST /api/v1/attributes/product": {
+      "slug": "create-product-attribute",
+      "title": "Create a product attribute"
+    },
+    "POST /api/v1/attributes/product/search": {
+      "slug": "search-product-attributes",
+      "title": "Search product attributes"
+    },
+    "GET /api/v1/attributes/product/{product_attribute_id}": {
+      "slug": "get-product-attribute",
+      "title": "Get a product attribute"
+    },
+    "PATCH /api/v1/attributes/product/{product_attribute_id}": {
+      "slug": "update-product-attribute",
+      "title": "Update a product attribute"
+    },
+    "DELETE /api/v1/attributes/product/{product_attribute_id}": {
+      "slug": "delete-product-attribute",
+      "title": "Delete a product attribute"
+    },
+    "POST /api/v1/categories/file": {
+      "slug": "create-asset-category",
+      "title": "Create an asset category"
+    },
+    "POST /api/v1/categories/file/search": {
+      "slug": "search-asset-categories",
+      "title": "Search asset categories"
+    },
+    "POST /api/v1/categories/file/{category_id}": {
+      "slug": "create-asset-subcategory",
+      "title": "Create an asset subcategory"
+    },
+    "PATCH /api/v1/categories/file/{category_id}": {
+      "slug": "update-asset-category",
+      "title": "Update an asset category"
+    },
+    "DELETE /api/v1/categories/file/{category_id}": {
+      "slug": "delete-asset-category",
+      "title": "Delete an asset category"
+    },
+    "POST /api/v1/categories/product": {
+      "slug": "create-product-category",
+      "title": "Create a product category"
+    },
+    "POST /api/v1/categories/product/search": {
+      "slug": "search-product-categories",
+      "title": "Search product categories"
+    },
+    "POST /api/v1/categories/product/{category_id}": {
+      "slug": "create-product-subcategory",
+      "title": "Create a product subcategory"
+    },
+    "PATCH /api/v1/categories/product/{category_id}": {
+      "slug": "update-product-category",
+      "title": "Update a product category"
+    },
+    "DELETE /api/v1/categories/product/{category_id}": {
+      "slug": "delete-product-category",
+      "title": "Delete a product category"
+    },
+    "GET /api/v1/filters/asset": {
+      "slug": "get-available-asset-filters",
+      "title": "Get available asset filters"
+    },
+    "GET /api/v1/filters/product": {
+      "slug": "get-available-product-filters",
+      "title": "Get available product filters"
+    },
+    "GET /api/v1/filters/relationships": {
+      "slug": "get-available-relationship-filters",
+      "title": "Get available relationship filters"
+    },
+    "POST /api/v1/product_families": {
+      "slug": "create-product-family",
+      "title": "Create a product family"
+    },
+    "POST /api/v1/product_families/search": {
+      "slug": "search-product-families",
+      "title": "Search product families"
+    },
+    "GET /api/v1/product_families/{product_family_id}": {
+      "slug": "get-product-family",
+      "title": "Get a product family"
+    },
+    "PATCH /api/v1/product_families/{product_family_id}": {
+      "slug": "rename-product-family",
+      "title": "Rename a product family"
+    },
+    "DELETE /api/v1/product_families/{product_family_id}": {
+      "slug": "delete-product-family",
+      "title": "Delete a product family"
+    },
+    "GET /api/v1/product_families/{product_family_id}/attributes": {
+      "slug": "list-family-attributes",
+      "title": "List a family's attributes"
+    },
+    "GET /api/v1/product_families/{product_family_id}/all_attributes": {
+      "slug": "list-all-family-attributes",
+      "title": "List a family's attributes, including system attributes"
+    },
+    "POST /api/v1/product_families/{product_family_id}/attributes/edit": {
+      "slug": "edit-family-attribute-inheritance",
+      "title": "Edit family attribute inheritance"
+    },
+    "POST /api/v1/product_families/{product_family_id}/all_attributes/edit": {
+      "slug": "edit-all-family-attributes",
+      "title": "Edit family attributes, including system attributes"
+    },
+    "POST /api/v1/product_families/{product_family_id}/attributes/link": {
+      "slug": "link-family-attribute",
+      "title": "Link an attribute to a family"
+    },
+    "POST /api/v1/product_families/{product_family_id}/attributes/unlink": {
+      "slug": "unlink-family-attribute",
+      "title": "Unlink an attribute from a family"
+    },
+    "POST /api/v1/products": {
+      "slug": "create-product",
+      "title": "Create a product"
+    },
+    "POST /api/v1/products/search": {
+      "slug": "search-products",
+      "title": "Search products"
+    },
+    "GET /api/v1/products/{product_id}": {
+      "slug": "get-product",
+      "title": "Get a product"
+    },
+    "PATCH /api/v1/products/{product_id}": {
+      "slug": "update-product",
+      "title": "Update a product"
+    },
+    "DELETE /api/v1/products/{product_id}": {
+      "slug": "delete-product",
+      "title": "Delete a product"
+    },
+    "POST /api/v1/products/{parent_product_id}/variants": {
+      "slug": "add-variant",
+      "title": "Add a variant"
+    },
+    "POST /api/v1/products/{parent_product_id}/variants/resync": {
+      "slug": "resync-variants",
+      "title": "Resync variants"
+    },
+    "DELETE /api/v1/products/{parent_product_id}/variant/{variant_id}": {
+      "slug": "unlink-variant",
+      "title": "Unlink a variant"
+    },
+    "POST /api/v1/products/{product_id}/variant/{variant_id}": {
+      "slug": "link-variant",
+      "title": "Link a variant to a product"
+    },
+    "GET /api/v1/products/{product_id}/variants": {
+      "slug": "list-product-variants",
+      "title": "List a product's variants"
+    },
+    "GET /api/v1/products/{product_id}/assets": {
+      "slug": "list-product-assets",
+      "title": "List a product's assets"
+    },
+    "POST /api/v1/products/{product_id}/assets": {
+      "slug": "link-product-asset",
+      "title": "Link an asset to a product"
+    },
+    "GET /api/v1/products/{product_id}/assets/{asset_id}": {
+      "slug": "get-product-asset",
+      "title": "Get a product's asset"
+    },
+    "DELETE /api/v1/products/{product_id}/assets/{asset_id}": {
+      "slug": "unlink-product-asset",
+      "title": "Unlink an asset from a product"
+    },
+    "GET /api/v1/products/{product_id}/categories": {
+      "slug": "list-product-categories",
+      "title": "List a product's categories"
+    },
+    "POST /api/v1/products/{product_id}/categories": {
+      "slug": "link-product-category",
+      "title": "Link a category to a product"
+    },
+    "GET /api/v1/products/{product_id}/categories/{category_id}": {
+      "slug": "get-product-category",
+      "title": "Get a product's category"
+    },
+    "DELETE /api/v1/products/{product_id}/categories/{category_id}": {
+      "slug": "unlink-product-category",
+      "title": "Unlink a category from a product"
+    },
+    "POST /api/v1/products/{product_id}/family": {
+      "slug": "assign-product-family",
+      "title": "Assign a product family"
+    },
+    "POST /api/v1/products/{product_id}/relationships/{relationship_id}": {
+      "slug": "add-related-products",
+      "title": "Add products to a relationship"
+    },
+    "PATCH /api/v1/products/{product_id}/relationships/{relationship_id}/product/{related_product_id}": {
+      "slug": "update-related-product",
+      "title": "Update a related product"
+    },
+    "POST /api/v1/products/{product_id}/relationships/{relationship_id}/unlink": {
+      "slug": "remove-related-products",
+      "title": "Remove products from a relationship"
+    },
+    "POST /api/v2/products": {
+      "slug": "create-product",
+      "title": "Create a product"
+    },
+    "POST /api/v2/products/search": {
+      "slug": "search-products",
+      "title": "Search products"
+    },
+    "GET /api/v2/products/{product_id}": {
+      "slug": "get-product",
+      "title": "Get a product"
+    },
+    "PATCH /api/v2/products/{product_id}": {
+      "slug": "update-product",
+      "title": "Update a product"
+    },
+    "DELETE /api/v2/products/{product_id}": {
+      "slug": "delete-product",
+      "title": "Delete a product"
+    },
+    "POST /api/v2/products/{parent_product_id}/variants": {
+      "slug": "add-variant",
+      "title": "Add a variant"
+    },
+    "POST /api/v2/products/{parent_product_id}/variants/resync": {
+      "slug": "resync-variants",
+      "title": "Resync variants"
+    },
+    "DELETE /api/v2/products/{parent_product_id}/variant/{variant_id}": {
+      "slug": "unlink-variant",
+      "title": "Unlink a variant"
+    },
+    "POST /api/v2/products/{product_id}/variant/{variant_id}": {
+      "slug": "link-variant",
+      "title": "Link a variant to a product"
+    },
+    "GET /api/v2/products/{product_id}/assets": {
+      "slug": "list-product-assets",
+      "title": "List a product's assets"
+    },
+    "POST /api/v2/products/{product_id}/assets": {
+      "slug": "link-product-asset",
+      "title": "Link an asset to a product"
+    },
+    "DELETE /api/v2/products/{product_id}/assets/{asset_id}": {
+      "slug": "unlink-product-asset",
+      "title": "Unlink an asset from a product"
+    },
+    "GET /api/v2/products/{product_id}/categories": {
+      "slug": "list-product-categories",
+      "title": "List a product's categories"
+    },
+    "POST /api/v2/products/{product_id}/categories": {
+      "slug": "link-product-category",
+      "title": "Link a category to a product"
+    },
+    "DELETE /api/v2/products/{product_id}/categories/{category_id}": {
+      "slug": "unlink-product-category",
+      "title": "Unlink a category from a product"
+    },
+    "POST /api/v2/products/{product_id}/family": {
+      "slug": "assign-product-family",
+      "title": "Assign a product family"
+    },
+    "POST /api/v2/products/{product_id}/relationships/{relationship_id}": {
+      "slug": "add-related-products",
+      "title": "Add products to a relationship"
+    },
+    "PATCH /api/v2/products/{product_id}/relationships/{relationship_id}": {
+      "slug": "update-related-products",
+      "title": "Update related products"
+    },
+    "DELETE /api/v2/products/{product_id}/relationships/{relationship_id}": {
+      "slug": "remove-related-products",
+      "title": "Remove products from a relationship"
+    },
+    "POST /api/v1/relationships": {
+      "slug": "create-relationship",
+      "title": "Create a relationship"
+    },
+    "POST /api/v1/relationships/search": {
+      "slug": "search-relationships",
+      "title": "Search relationships"
+    },
+    "GET /api/v1/relationships/{relationship_id}": {
+      "slug": "get-relationship",
+      "title": "Get a relationship"
+    },
+    "PATCH /api/v1/relationships/{relationship_id}": {
+      "slug": "update-relationship",
+      "title": "Update a relationship"
+    },
+    "DELETE /api/v1/relationships/{relationship_id}": {
+      "slug": "delete-relationship",
+      "title": "Delete a relationship"
+    }
+  }
+}

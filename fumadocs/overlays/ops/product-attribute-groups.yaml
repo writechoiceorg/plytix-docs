@@ -27,8 +27,8 @@ actions:
 
         Related pages:
 
-        - [Filtering and query syntax](/docs/reference/v3/filtering-query-syntax)
-        - [Pagination](/docs/reference/v3/pagination)
+        - [Filtering and search](/reference/v3/filtering-and-search)
+        - [Pagination](/reference/v3/pagination)
 
   - target: $.paths['/api/v3/product-attribute-groups'].get.responses['200'].content['application/json']
     description: List Product Attribute Groups.bru "200 - Full Parameters" (2026-09-22), sanitized
@@ -53,7 +53,7 @@ actions:
 
         You can't add attributes in the same request: `attribute_labels` returns `422` with "Extra inputs are not permitted".
 
-        See [Update and delete records](/docs/reference/v3/updates-and-deletes).
+        See [Update and delete records](/reference/v3/updates-and-deletes).
 
   - target: $.paths['/api/v3/product-attribute-groups'].post.requestBody.content['application/json']
     description: Create Product Attribute Group.bru request (2026-09-07)
@@ -117,7 +117,7 @@ actions:
       description: |-
         Returns one attribute group by its `id`. An ID that matches nothing returns `404`.
 
-        `attribute_labels` lists the `label` of each attribute in the group. To get an attribute's name and type, search attributes by label with [Search product attributes](/docs/reference/v3/productattributes/search-product-attributes).
+        `attribute_labels` lists the `label` of each attribute in the group. To get an attribute's name and type, search attributes by label with [Search product attributes](/reference/v3/product-attributes/search-product-attributes).
 
   - target: $.paths['/api/v3/product-attribute-groups/{identifier}'].get.responses['200'].content['application/json']
     description: Get Product Attribute Group by ID.bru "200 - Success" (2026-09-21), sanitized, account_id omitted, label list shortened
@@ -163,7 +163,7 @@ actions:
 
         The group's attributes can't be changed here: `attribute_labels` returns `422` with "Extra inputs are not permitted".
 
-        See [Update and delete records](/docs/reference/v3/updates-and-deletes).
+        See [Update and delete records](/reference/v3/updates-and-deletes).
 
   - target: $.paths['/api/v3/product-attribute-groups/{identifier}'].patch.requestBody.content['application/json']
     description: Update Product Attribute Group.bru request (2026-10-13)
@@ -200,7 +200,7 @@ actions:
       description: |-
         Deletes one attribute group. A successful delete returns `204` with an empty body, and a later request for the group returns `404`.
 
-        See [Update and delete records](/docs/reference/v3/updates-and-deletes).
+        See [Update and delete records](/reference/v3/updates-and-deletes).
 
   - target: $.paths['/api/v3/product-attribute-groups/{identifier}'].delete.responses['204']
     update:
@@ -229,7 +229,7 @@ actions:
       description: |-
         Renames an attribute group through its `name` field. Set `path` to `name` and send the new name on its own as the request body: `"Technical details"`, not `{"name": "Technical details"}`. A successful update returns `204` with an empty body.
 
-        See [Update and delete records](/docs/reference/v3/updates-and-deletes).
+        See [Update and delete records](/reference/v3/updates-and-deletes).
 
   - target: $.paths['/api/v3/product-attribute-groups/{identifier}/{path}'].patch.parameters[?(@.name=='path' && @.in=='path')]
     description: Q#108
@@ -247,4 +247,4 @@ actions:
     update:
       summary: Delete a product attribute group field
       operationId: delete-product-attribute-group-field
-      description: To delete the group itself, use [Delete a product attribute group](/docs/reference/v3/productattributegroups/delete-product-attribute-group).
+      description: To delete the group itself, use [Delete a product attribute group](/reference/v3/product-attribute-groups/delete-product-attribute-group).

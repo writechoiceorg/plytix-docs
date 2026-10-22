@@ -1,4 +1,4 @@
-// Reference page URLs are /docs/reference/v3/<tag>/<operationId>. When an
+// Reference page URLs are /reference/v3/<tag folder>/<operationId>. When an
 // operation keeps its path+method but its URL changes (we set a cleaner
 // operationId, upstream renamed the FastAPI function, or it moved tag), add a
 // permanent redirect from the old URL. The map accumulates across builds and

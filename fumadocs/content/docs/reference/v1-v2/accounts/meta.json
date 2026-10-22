@@ -1,0 +1,8 @@
+{
+  "title": "Accounts",
+  "pages": [
+    "search-api-credentials",
+    "search-memberships"
+  ],
+  "icon": "User"
+}

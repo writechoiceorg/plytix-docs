@@ -1,0 +1,9 @@
+{
+  "title": "Product Relationships",
+  "pages": [
+    "search-product-relationships",
+    "get-product-relationship",
+    "remove-product-relationship"
+  ],
+  "icon": "Link"
+}
