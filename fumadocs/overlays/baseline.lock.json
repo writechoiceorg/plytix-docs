@@ -9212,6 +9212,18 @@
         }
       }
     },
+    "ops/asset-categories.yaml::$.paths['/api/v3/asset-categories/{identifier}/{path}'].get.responses['200'].content['application/json']": {
+      "nodes": {
+        "$.paths./api/v3/asset-categories/{identifier}/{path}.get.responses.200.content.application/json": {
+          "sig": {},
+          "upstream": {
+            "examples": {
+              "$absent": true
+            }
+          }
+        }
+      }
+    },
     "ops/asset-categories.yaml::$.paths['/api/v3/asset-categories/{identifier}/{path}'].get.responses['400'].content['application/json']": {
       "nodes": {
         "$.paths./api/v3/asset-categories/{identifier}/{path}.get.responses.400.content.application/json": {
@@ -9647,6 +9659,18 @@
           },
           "upstream": {
             "description": {
+              "$absent": true
+            }
+          }
+        }
+      }
+    },
+    "ops/asset-lists.yaml::$.paths['/api/v3/asset-lists/{identifier}/{path}'].get.responses['200'].content['application/json']": {
+      "nodes": {
+        "$.paths./api/v3/asset-lists/{identifier}/{path}.get.responses.200.content.application/json": {
+          "sig": {},
+          "upstream": {
+            "examples": {
               "$absent": true
             }
           }
@@ -10180,6 +10204,20 @@
         }
       }
     },
+    "ops/family-attributes.yaml::$.paths['/api/v3/family-attributes'].get.responses['200'].content['application/json']": {
+      "nodes": {
+        "$.paths./api/v3/family-attributes.get.responses.200.content.application/json": {
+          "sig": {
+            "$ref": "#/components/schemas/SearchFamily-attributesResponse"
+          },
+          "upstream": {
+            "examples": {
+              "$absent": true
+            }
+          }
+        }
+      }
+    },
     "ops/family-attributes.yaml::$.paths['/api/v3/product-families/{product_family_id}/attributes'].get": {
       "nodes": {
         "$.paths./api/v3/product-families/{product_family_id}/attributes.get": {
@@ -10299,6 +10337,18 @@
         }
       }
     },
+    "ops/family-attributes.yaml::$.paths['/api/v3/product-families/{product_family_id}/attributes/{attribute_id}'].get.responses['200'].content['application/json']": {
+      "nodes": {
+        "$.paths./api/v3/product-families/{product_family_id}/attributes/{attribute_id}.get.responses.200.content.application/json": {
+          "sig": {},
+          "upstream": {
+            "examples": {
+              "$absent": true
+            }
+          }
+        }
+      }
+    },
     "ops/family-attributes.yaml::$.paths['/api/v3/product-families/{product_family_id}/attributes/{attribute_id}'].get.responses['404'].content['application/json']": {
       "nodes": {
         "$.paths./api/v3/product-families/{product_family_id}/attributes/{attribute_id}.get.responses.404.content.application/json": {
@@ -10361,6 +10411,18 @@
             "summary": "Post-Family-Attributes Identity",
             "operationId": "post_family_attributes_identity_api_v3_product_families__product_family_id__attributes__attribute_id__post",
             "description": {
+              "$absent": true
+            }
+          }
+        }
+      }
+    },
+    "ops/family-attributes.yaml::$.paths['/api/v3/product-families/{product_family_id}/attributes/{attribute_id}'].post.responses['201'].content['application/json']": {
+      "nodes": {
+        "$.paths./api/v3/product-families/{product_family_id}/attributes/{attribute_id}.post.responses.201.content.application/json": {
+          "sig": {},
+          "upstream": {
+            "examples": {
               "$absent": true
             }
           }
@@ -10430,6 +10492,18 @@
           "sig": null,
           "upstream": {
             "description": {
+              "$absent": true
+            }
+          }
+        }
+      }
+    },
+    "ops/family-attributes.yaml::$.paths['/api/v3/product-families/{product_family_id}/attributes/{attribute_id}/{path}'].get.responses['200'].content['application/json']": {
+      "nodes": {
+        "$.paths./api/v3/product-families/{product_family_id}/attributes/{attribute_id}/{path}.get.responses.200.content.application/json": {
+          "sig": {},
+          "upstream": {
+            "examples": {
               "$absent": true
             }
           }
@@ -10728,6 +10802,18 @@
         }
       }
     },
+    "ops/product-attribute-groups.yaml::$.paths['/api/v3/product-attribute-groups/{identifier}/{path}'].get.responses['200'].content['application/json']": {
+      "nodes": {
+        "$.paths./api/v3/product-attribute-groups/{identifier}/{path}.get.responses.200.content.application/json": {
+          "sig": {},
+          "upstream": {
+            "examples": {
+              "$absent": true
+            }
+          }
+        }
+      }
+    },
     "ops/product-attribute-groups.yaml::$.paths['/api/v3/product-attribute-groups/{identifier}/{path}'].patch": {
       "nodes": {
         "$.paths./api/v3/product-attribute-groups/{identifier}/{path}.patch": {
@@ -10778,6 +10864,20 @@
             "summary": "Search-Product-Attributes",
             "operationId": "search_product_attributes_api_v3_product_attributes_get",
             "description": "Any other query parameter is a filter on a field:\n\n* `field=value` or `field[op]=value`. Operators: `eq`, `null`, `exists`, `contains`, `contains:ignorecase`, `in`, `includes`, `intersects`, `gt`, `gte`, `lt`, `lte`, `!eq`, `!null`, `!exists`, `!contains`, `!contains:ignorecase`, `!in`, `!includes`, `!intersects`, `!gt`, `!gte`, `!lt`, `!lte`.\n* `field[func:param][op]=value` applies a function first; omitting `[op]` uses `eq`.\n  Functions: `upper`, `lower`, `trim`, `length`, `len`, `days_passed`, `year`, `month`, `day`, `dayofweek`, `abs`, `ceil`, `floor`, `round`.\n* `_or[N]field[op]=value` groups filters sharing index `N`; `_and`, `_exists` and the negated `_!or`,\n  `_!and` and `_!exists` work the same way."
+          }
+        }
+      }
+    },
+    "ops/product-attributes.yaml::$.paths['/api/v3/product-attributes'].get.responses['200'].content['application/json']": {
+      "nodes": {
+        "$.paths./api/v3/product-attributes.get.responses.200.content.application/json": {
+          "sig": {
+            "$ref": "#/components/schemas/SearchProduct-attributesResponse"
+          },
+          "upstream": {
+            "examples": {
+              "$absent": true
+            }
           }
         }
       }
@@ -11069,6 +11169,18 @@
           },
           "upstream": {
             "description": {
+              "$absent": true
+            }
+          }
+        }
+      }
+    },
+    "ops/product-attributes.yaml::$.paths['/api/v3/product-attributes/{identifier}/{path}'].get.responses['200'].content['application/json']": {
+      "nodes": {
+        "$.paths./api/v3/product-attributes/{identifier}/{path}.get.responses.200.content.application/json": {
+          "sig": {},
+          "upstream": {
+            "examples": {
               "$absent": true
             }
           }
@@ -11470,6 +11582,18 @@
         }
       }
     },
+    "ops/product-categories.yaml::$.paths['/api/v3/product-categories/{identifier}/{path}'].get.responses['200'].content['application/json']": {
+      "nodes": {
+        "$.paths./api/v3/product-categories/{identifier}/{path}.get.responses.200.content.application/json": {
+          "sig": {},
+          "upstream": {
+            "examples": {
+              "$absent": true
+            }
+          }
+        }
+      }
+    },
     "ops/product-categories.yaml::$.paths['/api/v3/product-categories/{identifier}/{path}'].get.responses['400'].content['application/json']": {
       "nodes": {
         "$.paths./api/v3/product-categories/{identifier}/{path}.get.responses.400.content.application/json": {
@@ -11852,6 +11976,18 @@
           },
           "upstream": {
             "description": {
+              "$absent": true
+            }
+          }
+        }
+      }
+    },
+    "ops/product-families.yaml::$.paths['/api/v3/product-families/{identifier}/{path}'].get.responses['200'].content['application/json']": {
+      "nodes": {
+        "$.paths./api/v3/product-families/{identifier}/{path}.get.responses.200.content.application/json": {
+          "sig": {},
+          "upstream": {
+            "examples": {
               "$absent": true
             }
           }
@@ -13019,6 +13155,18 @@
           },
           "upstream": {
             "description": {
+              "$absent": true
+            }
+          }
+        }
+      }
+    },
+    "ops/relationships.yaml::$.paths['/api/v3/relationships/{identifier}/{path}'].get.responses['200'].content['application/json']": {
+      "nodes": {
+        "$.paths./api/v3/relationships/{identifier}/{path}.get.responses.200.content.application/json": {
+          "sig": {},
+          "upstream": {
+            "examples": {
               "$absent": true
             }
           }

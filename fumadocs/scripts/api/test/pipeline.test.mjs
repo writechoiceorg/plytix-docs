@@ -12,6 +12,8 @@ import path from 'node:path';
 import YAML from 'yaml';
 import { runBuild } from '../lib/pipeline.mjs';
 import { SITE_ROOT, readJson, readYaml } from '../lib/util.mjs';
+import { trimResponses } from '../lib/responses.mjs';
+import { checkContent } from '../lib/validate.mjs';
 
 const NESTED = '/api/v3/products/{product_id}/relationships/{relationship_id}';
 
@@ -107,6 +109,8 @@ const build = (dir, extra = {}) =>
     tmpDir: path.join(dir, 'tmp'),
     generate: false,
     lint: false,
+    // The fixture overlays describe only a few operations.
+    contentChecks: false,
     ...extra,
   });
 
@@ -262,4 +266,60 @@ test('links to a reference page this spec will not generate fail, even if a stal
   const result = await build(dir);
   assert.equal(result.ok, false);
   assert.ok(result.errors.some((e) => e.includes('broken internal link') && e.includes('/products/search-products')));
+});
+
+test('each operation keeps its success response and its most specific error', () => {
+  const json = (media) => ({ 'application/json': media });
+  const shared = { $ref: '#/components/schemas/OperationResponse' };
+  const ex = (value) => json({ schema: shared, examples: { a: { value }, b: { value } } });
+  const generic = (description) => ({ description, content: json({ schema: shared }) });
+  const spec = {
+    paths: {
+      '/x': {
+        post: {
+          responses: {
+            201: { description: 'created' },
+            400: generic('bad'),
+            401: { description: 'auth', content: ex({ errors: ['auth'] }) },
+            404: { description: 'missing', content: ex({ errors: ['missing'] }) },
+            409: { description: 'duplicate', content: ex({ errors: ['duplicate'] }) },
+            422: generic('invalid'),
+            500: generic('server'),
+          },
+        },
+        get: { responses: { 200: { description: 'ok' }, 400: generic('bad'), 401: generic('auth'), 422: generic('invalid') } },
+      },
+    },
+  };
+  trimResponses(spec);
+  const { post, get } = spec.paths['/x'];
+  assert.deepEqual(Object.keys(post.responses), ['201', '409'], 'a specific error with an example wins over shared and generic ones');
+  assert.deepEqual(Object.keys(post.responses[409].content['application/json'].examples), ['a'], 'a repeated example is dropped');
+  assert.deepEqual(Object.keys(get.responses), ['200', '422'], 'without a specific example, 422 is the fallback');
+});
+
+test('content checks: missing descriptions, lost upstream descriptions, and null success bodies', () => {
+  const base = {
+    paths: { '/x': { get: { parameters: [{ name: 'q', in: 'query', description: 'Upstream text.' }] } } },
+    components: { schemas: { S: { properties: { a: { description: 'Field text.' }, gone: { description: 'x' } } } } },
+  };
+  const spec = {
+    paths: {
+      '/x': {
+        get: {
+          description: ' ',
+          parameters: [{ name: 'q', in: 'query' }],
+          responses: { 200: { content: { 'application/json': { schema: {} } } }, 204: { description: 'done' } },
+        },
+      },
+    },
+    components: { schemas: { S: { properties: { a: {} } } } },
+  };
+  const { errors } = checkContent(spec, base);
+  assert.ok(errors.some((e) => e.includes('GET /x: no description')));
+  assert.ok(errors.some((e) => e.includes('query:q lost its upstream description')));
+  assert.ok(errors.some((e) => e.includes('GET /x 200') && e.includes('renders as null')));
+  assert.ok(errors.some((e) => e.includes('S.a lost its upstream description')));
+  assert.ok(!errors.some((e) => e.includes('S.gone')), 'a removed field is not reported');
+  assert.equal(errors.length, 4);
 });

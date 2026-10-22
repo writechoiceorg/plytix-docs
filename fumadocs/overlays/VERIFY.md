@@ -73,3 +73,14 @@ These operations are `on-hold` in `upstream/visibility.yaml` because the live AP
 | Relationship types: `PATCH` returns `204`; `label` derivation for multi-word names; field routes; delete with product links; `DELETED` in search | `ops/relationships.yaml` | REL-20 to REL-22 |
 | Product families and relationship types: rename to an existing name (`409` declared, untested); `id` (not `_id`) on families embedded in products and family attributes; `_fields=family_attributes.*` | `ops/product-families.yaml`, `ops/relationships.yaml`, `00-fixes.yaml` | FAM-22, FAM-23 |
 | Product attributes: `id` (not `_id`) on every attribute type in create and get responses | `00-fixes.yaml` | ATTR-28 |
+
+## Success examples written without a capture (2026-10-22)
+
+These responses had `schema: {}` and no example, so the reference showed `null`. The examples follow the shape of the captured product field routes and use the IDs and values of each resource's GET example. Replace each one with a real capture.
+
+| Check | Overlay | Closes |
+|---|---|---|
+| `GET .../{identifier}/{path}` 200 body for one field (`name`, `label`, `query`, `attribute_labels`): is `data` the bare value, with no `pagination`? Product categories: does `parent` match the example? | `ops/product-categories.yaml`, `asset-categories.yaml`, `asset-lists.yaml`, `relationships.yaml`, `product-families.yaml`, `product-attributes.yaml`, `product-attribute-groups.yaml` | |
+| `GET /product-families/{id}/attributes/{attribute_id}/level` 200 body | `ops/family-attributes.yaml` | FAM-3 |
+| `POST /product-families/{id}/attributes/{attribute_id}` 201 body and default `level` | `ops/family-attributes.yaml` | FAM-2 |
+| `GET /product-attributes` 200 page (example ported from the pre-overlay staging spec) | `ops/product-attributes.yaml` | ATTR-20 |

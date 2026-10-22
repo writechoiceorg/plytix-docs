@@ -77,7 +77,8 @@ Use the `writer` and `reviewer` skills for these, and the `feedback-corrector` s
 
 ## 6. Smaller follow-ups
 
-- Response examples cover the main cases (170 of 792 responses). Shared errors such as `402`, `500`, and `502` have no examples, because no bodies were ever captured (OAS-8).
+- Since 2026-10-22 each reference page shows one success response and one error (see `README.md`, "Responses on the page"). The shared errors (`401`, `402`, `500`, `502`) now appear only on `content/docs/reference/v3/errors-status-codes.mdx`, so fixing that page (section 5: old `422` format, `NOT_FOUND` name) matters more than before. No bodies were ever captured for `402`, `500`, or `502` (OAS-8).
+- Ten success examples (the `GET .../{path}` field routes, the family-attribute link routes) and the `GET /product-attributes` page were written without a capture so they don't render as `null`. They're listed in `VERIFY.md`. `GET /product-relationships` still has no example: its shape changed on 2026-10-15 (FB-024) and wasn't captured.
 - Timestamps without a timezone offset in search responses fail `date-time` validation (OAS-9). Redocly reports these as warnings.
 - The `AssetCreateInputDto` `oneOf` overlap warning is upstream; it goes away if Plytix tightens the branches.
 - Commit the work: everything from phases 0 to 3 is still uncommitted on the `api-overlays` branch.

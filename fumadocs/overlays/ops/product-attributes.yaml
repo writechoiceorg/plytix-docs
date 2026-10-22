@@ -36,6 +36,36 @@ actions:
         - [Pagination](/reference/v3/pagination)
 
   # --- POST /api/v3/product-attributes -------------------------------------------
+  - target: $.paths['/api/v3/product-attributes'].get.responses['200'].content['application/json']
+    description: "Unverified: no 200 captured (VERIFY.md, ATTR-20). Ported from the pre-overlay staging spec, sanitized to the Get a product attribute example's IDs and timestamp format"
+    update:
+      examples:
+        firstPage:
+          summary: First page
+          description: '`GET /api/v3/product-attributes?_page_size=2`'
+          value:
+            data:
+              - id: 6a1f0c2e9b3d4a5f8c7e1e12
+                name: Includes Zipper
+                label: zippered
+                description: null
+                status: ACTIVE
+                created: '2026-06-22T08:45:07.391000'
+                modified: '2026-06-22T08:45:07.391000'
+                type: BooleanAttribute
+              - id: 6a1f0c2e9b3d4a5f8c7e1e13
+                name: Short Description
+                label: short_description
+                description: One- or two-sentence summary used on product cards and marketplace listings.
+                status: ACTIVE
+                created: '2026-06-22T08:45:07.402000'
+                modified: '2026-06-22T08:45:07.402000'
+                type: TextAttribute
+                character_limit: 250
+            errors: []
+            pagination:
+              next_page: http://<api-host>/api/v3/product-attributes?_page=2&_page_size=2
+
   - target: $.paths['/api/v3/product-attributes'].post
     description: Q#22, Q#25a, Q#30, Q#66, Q#104, Q#109, Q#110, Q#116, Q#117, FB-006, FB-007, FB-032, ATTR-1, ATTR-3, ATTR-4, Create Text Attribute.bru (2026-09-07/22), Link and Unlink Attribute Group.bru (2026-10-13)
     update:
@@ -302,6 +332,17 @@ actions:
         Returns the value of one field of an attribute without the rest of the record. Set `path` to the field, for example `label` or `options`.
 
         `groups` returns the attribute groups the attribute belongs to. A field the attribute doesn't have returns `400`, and the message lists the fields you can ask for.
+
+  - target: $.paths['/api/v3/product-attributes/{identifier}/{path}'].get.responses['200'].content['application/json']
+    description: "Sanitized, unverified: the 200 body for a field wasn't captured (VERIFY.md). Shape follows the products field route captures; values come from this resource's GET example"
+    update:
+      examples:
+        label:
+          summary: One field
+          description: '`GET /api/v3/product-attributes/{identifier}/label`'
+          value:
+            data: zippered
+            errors: []
 
   - target: $.paths['/api/v3/product-attributes/{identifier}/{path}'].get.parameters[?(@.name=='path' && @.in=='path')]
     description: Get Product Attribute by ID.bru, Link and Unlink Attribute Group.bru

@@ -2,7 +2,8 @@
 //
 //   1. filter     keep `public` operations, prune unreachable components
 //   2. normalize  tags ["v3", "product-categories"] -> ["productcategories"]
-//   3. overlays   apply our edits, then check them for drift against the baseline
+//   3. overlays   apply our edits, then check them for drift against the baseline;
+//                 keep one success and one error response per operation (responses.mjs)
 //   4. validate   Redocly lint + internal link check on a temp copy
 //   5. write      openapi.json, redirects.v3.json, overlays/baseline.lock.json
 //   6. generate   MDX pages (scripts/generate-docs.mjs), unless disabled
@@ -18,7 +19,8 @@ import { filterSpec } from './filter.mjs';
 import { normalizeSpec } from './normalize.mjs';
 import { applyOverlays, loadOverlays } from './overlay.mjs';
 import { checkDrift } from './drift.mjs';
-import { checkSpec, redoclyLint } from './validate.mjs';
+import { checkContent, checkSpec, redoclyLint } from './validate.mjs';
+import { trimResponses } from './responses.mjs';
 import { computeCoverage, renderCoverage } from './coverage.mjs';
 import { updateRedirects } from './redirects.mjs';
 import { renderReport } from './report.mjs';
@@ -39,6 +41,7 @@ export const defaults = () => ({
   strictCoverage: false,
   generate: true,
   lint: true,
+  contentChecks: true,
 });
 
 const OP_KEY_ORDER = ['tags', 'summary', 'description', 'operationId', 'parameters', 'requestBody', 'responses'];
@@ -97,6 +100,7 @@ export async function runBuild(options = {}) {
   result.drift = drift;
   result.notices.push(...drift.notices);
 
+  trimResponses(spec);
   spec = tidy(spec);
 
   // 4. validate
@@ -109,6 +113,7 @@ export async function runBuild(options = {}) {
     result.warnings.push(...lint.warnings.map((w) => `lint: ${w}`));
   }
   result.errors.push(...checkSpec(spec, { contentDir: o.contentDir }).errors);
+  if (o.contentChecks) result.errors.push(...checkContent(spec, base).errors.map((e) => `content: ${e}`));
 
   const coverage = computeCoverage(spec, records);
   result.coverage = coverage;

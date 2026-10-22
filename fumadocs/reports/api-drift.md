@@ -4,9 +4,9 @@ Source: `upstream/openapi-v3.json` · Result: **PASS**
 
 Visibility: 87 public operations published; excluded 11 on-hold, 16 pending, 8 removed, 43 internal; 0 unclassified. Pruned 147 unreachable components.
 
-Coverage: 87/87 operations edited, 87/87 described, 87/87 clean operationIds, 188/188 params described, 170/792 responses with examples. Details: `reports/api-coverage.md`.
+Coverage: 87/87 operations edited, 87/87 described, 87/87 clean operationIds, 188/188 params described, 85/133 responses with examples. Details: `reports/api-coverage.md`.
 
-## Warnings (162)
+## Warnings (175)
 
 - lint: info-license: Info object should contain `license` field. (#/info)
 - lint: tag-description: Tag object should contain `description` field. (#/tags/0/description)
@@ -58,7 +58,7 @@ Coverage: 87/87 operations edited, 87/87 described, 87/87 clean operationIds, 18
 - lint: no-invalid-media-type-examples: Example value must conform to the schema: `modified` property must match a schema in anyOf. (#/paths/~1api~1v3~1product-categories/get/responses/200/content/application~1json/examples/firstPage/value/data/0/modified)
 - lint: no-invalid-media-type-examples: Example value must conform to the schema: `created` property must match format "date-time". (#/paths/~1api~1v3~1product-categories/get/responses/200/content/application~1json/examples/firstPage/value/data/1/created)
 - lint: no-invalid-media-type-examples: Example value must conform to the schema: `created` property type must be null. (#/paths/~1api~1v3~1product-categories/get/responses/200/content/application~1json/examples/firstPage/value/data/1/created)
-- …and 112 more
+- …and 125 more
 
 ## Notices (1)
 

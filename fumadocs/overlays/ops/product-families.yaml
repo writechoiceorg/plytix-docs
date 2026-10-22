@@ -282,6 +282,17 @@ actions:
 
         A field the family doesn't have returns `400`. The error lists the fields you can ask for.
 
+  - target: $.paths['/api/v3/product-families/{identifier}/{path}'].get.responses['200'].content['application/json']
+    description: "Sanitized, unverified: the 200 body for a field wasn't captured (VERIFY.md). Shape follows the products field route captures; values come from this resource's GET example"
+    update:
+      examples:
+        name:
+          summary: One field
+          description: '`GET /api/v3/product-families/{identifier}/name`'
+          value:
+            data: Accessories
+            errors: []
+
   - target: $.paths['/api/v3/product-families/{identifier}/{path}'].get.responses['400'].content['application/json']
     description: Q#15 message format; field list from Get Product Family by ID.bru subpath discovery (2026-09-08/21)
     update:

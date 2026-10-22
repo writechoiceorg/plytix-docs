@@ -249,6 +249,17 @@ actions:
 
         A field the category doesn't have returns `400`, and the message lists the category's fields.
 
+  - target: $.paths['/api/v3/asset-categories/{identifier}/{path}'].get.responses['200'].content['application/json']
+    description: "Sanitized, unverified: the 200 body for a field wasn't captured (VERIFY.md). Shape follows the products field route captures; values come from this resource's GET example"
+    update:
+      examples:
+        name:
+          summary: One field
+          description: '`GET /api/v3/asset-categories/{identifier}/name`'
+          value:
+            data: Packshots
+            errors: []
+
   - target: $.paths['/api/v3/asset-categories/{identifier}/{path}'].get.parameters[?(@.name=='path' && @.in=='path')]
     description: Fields from Get Asset Category by ID.bru
     update:

@@ -215,6 +215,22 @@ actions:
       description: |-
         Returns the value of one field of an attribute group, such as `name` or `attribute_labels`, without the rest of the record. A field the group doesn't have returns `400`, and the message lists the fields you can ask for.
 
+  - target: $.paths['/api/v3/product-attribute-groups/{identifier}/{path}'].get.responses['200'].content['application/json']
+    description: "Sanitized, unverified: the 200 body for a field wasn't captured (VERIFY.md). Shape follows the products field route captures; values come from this resource's GET example"
+    update:
+      examples:
+        attributeLabels:
+          summary: The group's attributes
+          description: '`GET /api/v3/product-attribute-groups/{identifier}/attribute_labels`'
+          value:
+            data:
+              - condition
+              - vendor
+              - country_of_origin
+              - amazon_product_title
+              - amazon_ready
+            errors: []
+
   - target: $.paths['/api/v3/product-attribute-groups/{identifier}/{path}'].get.parameters[?(@.name=='path' && @.in=='path')]
     description: Get Product Attribute Group by ID.bru field list
     update:

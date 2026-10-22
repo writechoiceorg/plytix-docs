@@ -279,6 +279,33 @@ actions:
 
         A field the category doesn't have returns `400`, and the message lists the fields you can ask for. A category ID that doesn't exist returns `404`.
 
+  - target: $.paths['/api/v3/product-categories/{identifier}/{path}'].get.responses['200'].content['application/json']
+    description: "Sanitized, unverified: the 200 body for a field wasn't captured (VERIFY.md). Shape follows the products field route captures; values come from this resource's GET example; `parent` returning the full parent object is confirmed in Get Product Category by ID.bru (2026-09-07)"
+    update:
+      examples:
+        name:
+          summary: One field
+          description: '`GET /api/v3/product-categories/{identifier}/name`'
+          value:
+            data: Bags
+            errors: []
+        parent:
+          summary: Parent of a subcategory
+          description: '`GET /api/v3/product-categories/{identifier}/parent` on a subcategory'
+          value:
+            data:
+              id: 6a1f0c2e9b3d4a5f8c7e1c01
+              name: Bags
+              parent_id: null
+              path:
+                - Bags
+              slug: bags
+              order: 1
+              n_children: 2
+              created: '2026-06-22T08:44:08.293000'
+              modified: '2026-06-22T08:44:08.293000'
+            errors: []
+
   - target: $.paths['/api/v3/product-categories/{identifier}/{path}'].get.parameters[?(@.name=='path' && @.in=='path')]
     description: Get Product Category by ID.bru (field list, parent subpath)
     update:

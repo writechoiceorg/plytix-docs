@@ -217,6 +217,17 @@ actions:
 
         A field the relationship type doesn't have returns `400`. The error lists the fields you can ask for.
 
+  - target: $.paths['/api/v3/relationships/{identifier}/{path}'].get.responses['200'].content['application/json']
+    description: "Sanitized, unverified: the 200 body for a field wasn't captured (VERIFY.md). Shape follows the products field route captures; values come from this resource's GET example"
+    update:
+      examples:
+        label:
+          summary: One field
+          description: '`GET /api/v3/relationships/{identifier}/label`'
+          value:
+            data: accessories
+            errors: []
+
   - target: $.paths['/api/v3/relationships/{identifier}/{path}'].get.responses['400'].content['application/json']
     description: Q#15 message format; field list from Get Relationship by ID.bru subpath discovery (2026-09-08/21)
     update:

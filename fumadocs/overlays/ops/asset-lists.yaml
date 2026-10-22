@@ -276,6 +276,22 @@ actions:
 
         A field the list doesn't have returns `400`, and the message lists the fields you can ask for.
 
+  - target: $.paths['/api/v3/asset-lists/{identifier}/{path}'].get.responses['200'].content['application/json']
+    description: "Sanitized, unverified: the 200 body for a field wasn't captured (VERIFY.md). Shape follows the products field route captures; values come from this resource's GET example"
+    update:
+      examples:
+        query:
+          summary: The list's query
+          description: '`GET /api/v3/asset-lists/{identifier}/query`'
+          value:
+            data:
+              - - operator: in
+                  field: static_lists
+                  value:
+                    - 6a1f0c2e9b3d4a5f8c7e1301
+                  field_type: null
+            errors: []
+
   - target: $.paths['/api/v3/asset-lists/{identifier}/{path}'].get.parameters[?(@.name=='path' && @.in=='path')]
     description: Get Asset List by ID.bru field list (2026-09-08)
     update:

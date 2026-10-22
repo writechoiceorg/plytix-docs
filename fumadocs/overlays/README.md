@@ -79,11 +79,15 @@ Fields we never touched aren't recorded, so upstream changes to them flow straig
 | Command | Does |
 |---|---|
 | `npm run api:intake -- <file>` | Copies a new Plytix spec to `upstream/openapi-v3.json`, records it in `upstream/SOURCE.json`, lists added/removed operations and visibility gaps. |
-| `npm run api:build` | Filter → normalize → overlays + drift → validate → write `openapi.json` → regenerate MDX. Writes nothing unless every check passes. |
+| `npm run api:build` | Filter → normalize → overlays + drift → keep one success and one error response per operation → validate → write `openapi.json` → regenerate MDX. Writes nothing unless every check passes, including the content checks: every operation has a description, upstream parameter and field descriptions survive, and no success body renders as `null`. |
 | `npm run api:accept` | Same, accepting reviewed `TYPE_CHANGED` / `UPSTREAM_CHANGED` items into the baseline. |
 | `npm run api:check` | CI: build, then fail if any generated file differs from what's committed. |
 | `npm run api:crosscheck` | Applies the same overlays with openapi-format and confirms identical output (proves the files stay standard). |
 | `npm run api:test` | Pipeline tests, including simulated renames and upstream fixes. |
+
+## Responses on the page
+
+The build keeps two responses per operation (`scripts/api/lib/responses.mjs`): its success response, and one error. The error is the one with an example written for that operation (ties: `409`, `405`, `400`, `404`, `403`, `422`), or `422`, then `400`, when none has one. The errors every operation shares (`401`, `402`, `500`, `502`) never show; the Errors and status codes page covers them. Overlay edits to the other codes stay in the files and in drift detection, but don't reach the page. To show a different error on one operation, give it an example.
 
 ## Writing descriptions
 
