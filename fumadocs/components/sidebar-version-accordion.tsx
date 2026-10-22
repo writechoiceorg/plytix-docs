@@ -4,10 +4,10 @@ import { useEffect } from 'react';
 
 const SIDEBAR_SELECTOR = '#nd-sidebar, #nd-sidebar-mobile';
 // In the API Reference tab, the only top-level folders are the API versions.
-const REFERENCE_PREFIX = '/docs/reference';
+const REFERENCE_PREFIX = '/reference';
 
 /**
- * Makes the API version folders (V3, Legacy) an accordion: opening one closes
+ * Makes the API version folders (V3, V1/V2) an accordion: opening one closes
  * the other. Closing goes through the folder's own trigger, so Fumadocs keeps
  * its open state (and chevron) in sync.
  */

@@ -1,0 +1,16 @@
+{
+  "title": "Product Attributes",
+  "pages": [
+    "search-product-attributes",
+    "create-product-attribute",
+    "get-product-attribute",
+    "update-product-attribute",
+    "delete-product-attribute",
+    "add-product-attribute-to-group",
+    "remove-product-attribute-from-group",
+    "get-product-attribute-field",
+    "update-product-attribute-field",
+    "delete-product-attribute-field"
+  ],
+  "icon": "Tags"
+}

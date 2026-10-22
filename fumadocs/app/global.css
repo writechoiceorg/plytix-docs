@@ -2,7 +2,6 @@
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
 @import 'fumadocs-openapi/css/preset.css';
-@import '@fluentui/react-icons/headless/styles.css';
 
 /*
  * Plytix design system (materials/visual-design/*.svg).
@@ -258,6 +257,13 @@ html > body[data-scroll-locked] {
 
 [data-search-full] {
   border-radius: 9999px !important;
+}
+
+/* Jumping to a heading must land below everything sticky: the header and,
+   below xl, the "On this page" bar (--fd-docs-row-3 covers both). Fumadocs'
+   fixed scroll-m-28 left headings hidden behind that bar. */
+#nd-page [id] {
+  scroll-margin-top: calc(var(--fd-docs-row-3) + 1rem);
 }
 
 /* ---------- Footer ---------- */

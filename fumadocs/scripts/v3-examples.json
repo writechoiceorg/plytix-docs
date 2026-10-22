@@ -1,0 +1,1088 @@
+{
+  "GET /api/v3/products": {
+    "parameters": {
+      "filters": {
+        "status[eq]": "Completed",
+        "label[contains:ignorecase]": "daypack"
+      }
+    },
+    "responses": {
+      "200": {
+        "data": [
+          {
+            "id": "69b285837d3e19b4c23a1ec4",
+            "account_id": "69085c1e2b4a7f13d90c5e21",
+            "sku": "BAG-20314",
+            "label": "Trailhead 28L Daypack",
+            "gtin": null,
+            "status": "Completed",
+            "thumbnail_id": "69b169287d3e19b4c23a1e7f",
+            "attributes": {
+              "short_description": "A 28-liter daypack with a ventilated back panel, hip-belt pockets and a hydration sleeve.",
+              "price_usd": 89.95,
+              "material": [
+                "Recycled Nylon"
+              ],
+              "capacity_liters": 28,
+              "website_ready": 100
+            },
+            "parent_id": null,
+            "num_variations": 2,
+            "product_level": 1,
+            "product_family_id": "6984b7bd7d3e19b4c23a1d99",
+            "overwritten_attributes": [],
+            "created": "2026-03-12T09:21:07.512000+00:00",
+            "modified": "2026-09-29T16:04:51.233000+00:00"
+          },
+          {
+            "id": "69b285837d3e19b4c23a1edb",
+            "account_id": "69085c1e2b4a7f13d90c5e21",
+            "sku": "BAG-20314-SLT",
+            "label": "Trailhead 28L Daypack - Slate Blue",
+            "gtin": "0850046213014",
+            "status": "Completed",
+            "thumbnail_id": "69b169287d3e19b4c23a1e96",
+            "attributes": {
+              "color": "Slate Blue",
+              "price_usd": 89.95,
+              "website_ready": 85.71
+            },
+            "parent_id": "69b285837d3e19b4c23a1ec4",
+            "num_variations": 0,
+            "product_level": 2,
+            "product_family_id": "6984b7bd7d3e19b4c23a1d99",
+            "overwritten_attributes": [],
+            "created": "2026-03-12T09:21:07.874000+00:00",
+            "modified": "2026-09-29T16:05:12.018000+00:00"
+          }
+        ],
+        "errors": [],
+        "pagination": {
+          "next_page": "http://pim.plytix.com/api/v3/products?_page=2&_page_size=2"
+        }
+      }
+    }
+  },
+  "POST /api/v3/products": {
+    "request": {
+      "sku": "TENT-2P-GRN",
+      "label": "Ridgeline 2-Person Backpacking Tent - Forest Green",
+      "gtin": "0850046221071",
+      "status": "Draft",
+      "product_family_id": "6984b7bd7d3e19b4c23a1d99",
+      "thumbnail_id": "6ac506727d3e19b4c23a1ead",
+      "attributes": {
+        "short_description": "Freestanding 2-person tent with two doors, two vestibules and a 1.9 kg packed weight.",
+        "price_usd": "349.95",
+        "material": [
+          "Polyester"
+        ]
+      }
+    },
+    "responses": {
+      "201": {
+        "data": {
+          "id": "6ac506727d3e19b4c23a1f20",
+          "account_id": "69085c1e2b4a7f13d90c5e21",
+          "sku": "TENT-2P-GRN",
+          "label": "Ridgeline 2-Person Backpacking Tent - Forest Green",
+          "gtin": "0850046221071",
+          "status": "Draft",
+          "thumbnail_id": "6ac506727d3e19b4c23a1ead",
+          "attributes": {
+            "short_description": "Freestanding 2-person tent with two doors, two vestibules and a 1.9 kg packed weight.",
+            "price_usd": 349.95,
+            "material": [
+              "Polyester"
+            ],
+            "website_ready": 57.14
+          },
+          "parent_id": null,
+          "num_variations": 0,
+          "product_level": 0,
+          "product_family_id": "6984b7bd7d3e19b4c23a1d99",
+          "overwritten_attributes": [],
+          "created": "2026-10-06T14:32:18.412000+00:00",
+          "modified": "2026-10-06T14:32:18.412000+00:00"
+        },
+        "errors": []
+      }
+    }
+  },
+  "GET /api/v3/products/{identifier}": {
+    "responses": {
+      "200": {
+        "data": {
+          "id": "69b285837d3e19b4c23a1ec4",
+          "account_id": "69085c1e2b4a7f13d90c5e21",
+          "sku": "BAG-20314",
+          "label": "Trailhead 28L Daypack",
+          "gtin": null,
+          "status": "Completed",
+          "thumbnail_id": "69b169287d3e19b4c23a1e7f",
+          "attributes": {
+            "short_description": "A 28-liter daypack with a ventilated back panel, hip-belt pockets and a hydration sleeve.",
+            "price_usd": 89.95,
+            "material": [
+              "Recycled Nylon"
+            ],
+            "capacity_liters": 28,
+            "website_ready": 100
+          },
+          "parent_id": null,
+          "num_variations": 2,
+          "product_level": 1,
+          "product_family_id": "6984b7bd7d3e19b4c23a1d99",
+          "overwritten_attributes": [],
+          "created": "2026-03-12T09:21:07.512000+00:00",
+          "modified": "2026-09-29T16:04:51.233000+00:00",
+          "product_relationships": [
+            {
+              "relationship_id": "6984bf247d3e19b4c23a1dde",
+              "relationship_label": "frequently_bought_together"
+            }
+          ]
+        },
+        "errors": []
+      }
+    }
+  },
+  "PATCH /api/v3/products/{identifier}": {
+    "request": {
+      "label": "Trailhead 28L Daypack - Black",
+      "gtin": "0850046213021",
+      "status": "Completed",
+      "thumbnail_id": "69b169287d3e19b4c23a1e96"
+    }
+  },
+  "GET /api/v3/product-relationships": {
+    "parameters": {
+      "filters": {
+        "product_id[eq]": "69b285837d3e19b4c23a1ec4"
+      }
+    },
+    "responses": {
+      "200": {
+        "data": [
+          {
+            "from_product_id": "69b285837d3e19b4c23a1ec4",
+            "to_product_id": "69b285837d3e19b4c23a1f09",
+            "product_relationship_type_id": "6984bf247d3e19b4c23a1dde",
+            "properties": {
+              "quantity": 1
+            }
+          },
+          {
+            "from_product_id": "69b285837d3e19b4c23a1edb",
+            "to_product_id": "69b285837d3e19b4c23a1f09",
+            "product_relationship_type_id": "6984bf247d3e19b4c23a1dde",
+            "properties": {
+              "quantity": 1
+            }
+          }
+        ],
+        "errors": [],
+        "pagination": {}
+      }
+    }
+  },
+  "GET /api/v3/related-products": {
+    "parameters": {
+      "filters": {
+        "product_id[eq]": "69b285837d3e19b4c23a1ec4"
+      }
+    },
+    "responses": {
+      "200": {
+        "data": [
+          {
+            "product_id": "69b285837d3e19b4c23a1ec4",
+            "related_product_id": "69b285837d3e19b4c23a1f09",
+            "quantity": 1,
+            "last_modified": "2026-03-12T09:40:33.905000+00:00"
+          }
+        ],
+        "errors": [],
+        "pagination": {}
+      }
+    }
+  },
+  "GET /api/v3/assets": {
+    "parameters": {
+      "filters": {
+        "file_type[eq]": "IMAGES",
+        "filename[contains:ignorecase]": "daypack"
+      }
+    },
+    "responses": {
+      "200": {
+        "data": [
+          {
+            "id": "69b169287d3e19b4c23a1e7f",
+            "account_id": "69085c1e2b4a7f13d90c5e21",
+            "assigned": true,
+            "content_type": "image/jpeg",
+            "extension": "jpg",
+            "file_size": 482113,
+            "file_type": "IMAGES",
+            "file_modified": "2026-03-11T00:00:00.000000+00:00",
+            "filename": "trailhead-28l-daypack-front.jpg",
+            "path": "public_files/pim/assets/1e/5c/08/69/69085c1e2b4a7f13d90c5e21/images/28/69/b1/69/69b169287d3e19b4c23a1e7f/trailhead-28l-daypack-front.jpg",
+            "n_catalogs": 0,
+            "n_products": 2,
+            "alt_text": "Trailhead 28L Daypack in Slate Blue, front view",
+            "status": "ACTIVE",
+            "created": "2026-03-11T13:07:52.611000+00:00",
+            "modified": "2026-03-11T13:07:52.648000+00:00"
+          },
+          {
+            "id": "69b169287d3e19b4c23a1e96",
+            "account_id": "69085c1e2b4a7f13d90c5e21",
+            "assigned": true,
+            "content_type": "image/jpeg",
+            "extension": "jpg",
+            "file_size": 437906,
+            "file_type": "IMAGES",
+            "file_modified": "2026-03-11T00:00:00.000000+00:00",
+            "filename": "trailhead-28l-daypack-side.jpg",
+            "path": "public_files/pim/assets/1e/5c/08/69/69085c1e2b4a7f13d90c5e21/images/28/69/b1/69/69b169287d3e19b4c23a1e96/trailhead-28l-daypack-side.jpg",
+            "n_catalogs": 0,
+            "n_products": 1,
+            "alt_text": "Trailhead 28L Daypack in Slate Blue, side view showing hip-belt pocket",
+            "status": "ACTIVE",
+            "created": "2026-03-11T13:07:52.611000+00:00",
+            "modified": "2026-03-11T13:07:52.648000+00:00"
+          }
+        ],
+        "errors": [],
+        "pagination": {
+          "next_page": "http://pim.plytix.com/api/v3/assets?_page=2&_page_size=2"
+        }
+      }
+    }
+  },
+  "POST /api/v3/assets": {
+    "request": {
+      "url": "https://cdn.northpeak-outfitters.com/media/products/tents/ridgeline-2p-tent-forest-green.jpg",
+      "filename": "ridgeline-2p-tent-forest-green.jpg",
+      "alt_text": "Ridgeline 2-person tent in Forest Green, pitched with both doors open"
+    },
+    "responses": {
+      "201": {
+        "data": {
+          "id": "6ac506727d3e19b4c23a1ead",
+          "assigned": false,
+          "content_type": "image/jpeg",
+          "extension": "jpg",
+          "file_size": 512774,
+          "file_type": "IMAGES",
+          "file_modified": "2026-10-06T00:00:00.000000+00:00",
+          "filename": "ridgeline-2p-tent-forest-green.jpg",
+          "n_catalogs": 0,
+          "n_products": 0,
+          "alt_text": "Ridgeline 2-person tent in Forest Green, pitched with both doors open",
+          "status": "ACTIVE"
+        },
+        "errors": []
+      }
+    }
+  },
+  "GET /api/v3/assets/{identifier}": {
+    "responses": {
+      "200": {
+        "data": {
+          "id": "69b169287d3e19b4c23a1e7f",
+          "account_id": "69085c1e2b4a7f13d90c5e21",
+          "assigned": true,
+          "content_type": "image/jpeg",
+          "extension": "jpg",
+          "file_size": 482113,
+          "file_type": "IMAGES",
+          "file_modified": "2026-03-11T00:00:00.000000+00:00",
+          "filename": "trailhead-28l-daypack-front.jpg",
+          "path": "public_files/pim/assets/1e/5c/08/69/69085c1e2b4a7f13d90c5e21/images/28/69/b1/69/69b169287d3e19b4c23a1e7f/trailhead-28l-daypack-front.jpg",
+          "n_catalogs": 0,
+          "n_products": 2,
+          "alt_text": "Trailhead 28L Daypack in Slate Blue, front view",
+          "status": "ACTIVE",
+          "created": "2026-03-11T13:07:52.611000+00:00",
+          "modified": "2026-03-11T13:07:52.648000+00:00",
+          "categories": [
+            {
+              "id": "6981cbd57d3e19b4c23a1cca",
+              "name": "Packshots"
+            }
+          ]
+        },
+        "errors": []
+      }
+    }
+  },
+  "PATCH /api/v3/assets/{identifier}": {
+    "request": {
+      "filename": "trailhead-28l-daypack-slate-blue-front.jpg",
+      "alt_text": "Trailhead 28L Daypack in Slate Blue, front view with sternum strap fastened"
+    }
+  },
+  "GET /api/v3/product-categories": {
+    "parameters": {
+      "filters": {
+        "name[contains:ignorecase]": "bags"
+      }
+    },
+    "responses": {
+      "200": {
+        "data": [
+          {
+            "id": "6981ca7e7d3e19b4c23a1c57",
+            "account_id": "69085c1e2b4a7f13d90c5e21",
+            "name": "Bags & Packs",
+            "parent_id": null,
+            "path": [
+              "Bags & Packs"
+            ],
+            "slug": "bags-packs",
+            "order": 1,
+            "n_children": 2,
+            "created": "2026-02-03T10:14:22.214000+00:00",
+            "modified": "2026-02-03T10:14:22.214000+00:00"
+          },
+          {
+            "id": "6981ca7e7d3e19b4c23a1c6e",
+            "account_id": "69085c1e2b4a7f13d90c5e21",
+            "name": "Daypacks",
+            "parent_id": "6981ca7e7d3e19b4c23a1c57",
+            "path": [
+              "Bags & Packs",
+              "Daypacks"
+            ],
+            "slug": "daypacks",
+            "order": 1,
+            "n_children": 0,
+            "created": "2026-02-03T10:14:22.214000+00:00",
+            "modified": "2026-02-03T10:14:22.214000+00:00"
+          }
+        ],
+        "errors": [],
+        "pagination": {}
+      }
+    }
+  },
+  "POST /api/v3/product-categories": {
+    "request": {
+      "name": "Hydration Packs",
+      "parent_id": "6981ca7e7d3e19b4c23a1c57"
+    },
+    "responses": {
+      "201": {
+        "data": {
+          "id": "6ac506727d3e19b4c23a1c9c",
+          "name": "Hydration Packs",
+          "parent_id": "6981ca7e7d3e19b4c23a1c57",
+          "path": [
+            "Bags & Packs",
+            "Hydration Packs"
+          ],
+          "slug": "hydration-packs",
+          "order": 3,
+          "n_children": 0
+        },
+        "errors": []
+      }
+    }
+  },
+  "GET /api/v3/product-categories/{identifier}": {
+    "responses": {
+      "200": {
+        "data": {
+          "id": "6981ca7e7d3e19b4c23a1c6e",
+          "account_id": "69085c1e2b4a7f13d90c5e21",
+          "name": "Daypacks",
+          "parent_id": "6981ca7e7d3e19b4c23a1c57",
+          "path": [
+            "Bags & Packs",
+            "Daypacks"
+          ],
+          "slug": "daypacks",
+          "order": 1,
+          "n_children": 0,
+          "created": "2026-02-03T10:14:22.214000+00:00",
+          "modified": "2026-02-03T10:14:22.214000+00:00"
+        },
+        "errors": []
+      }
+    }
+  },
+  "PATCH /api/v3/product-categories/{identifier}": {
+    "request": {
+      "name": "Daypacks & Commuter Bags"
+    }
+  },
+  "GET /api/v3/asset-categories": {
+    "parameters": {
+      "filters": {
+        "name[contains:ignorecase]": "photography"
+      }
+    },
+    "responses": {
+      "200": {
+        "data": [
+          {
+            "id": "6981cbd57d3e19b4c23a1cb3",
+            "account_id": "69085c1e2b4a7f13d90c5e21",
+            "name": "Product Photography",
+            "parent_id": null,
+            "path": [
+              "Product Photography"
+            ],
+            "slug": "product-photography",
+            "order": 1,
+            "n_children": 2,
+            "created": "2026-02-03T10:20:05.214000+00:00",
+            "modified": "2026-02-03T10:20:05.214000+00:00"
+          },
+          {
+            "id": "6981cbd57d3e19b4c23a1cca",
+            "account_id": "69085c1e2b4a7f13d90c5e21",
+            "name": "Packshots",
+            "parent_id": "6981cbd57d3e19b4c23a1cb3",
+            "path": [
+              "Product Photography",
+              "Packshots"
+            ],
+            "slug": "packshots",
+            "order": 1,
+            "n_children": 0,
+            "created": "2026-02-03T10:20:05.214000+00:00",
+            "modified": "2026-02-03T10:20:05.214000+00:00"
+          }
+        ],
+        "errors": [],
+        "pagination": {}
+      }
+    }
+  },
+  "POST /api/v3/asset-categories": {
+    "request": {
+      "name": "Lifestyle Shots",
+      "parent_id": "6981cbd57d3e19b4c23a1cb3"
+    },
+    "responses": {
+      "201": {
+        "data": {
+          "id": "6ac506727d3e19b4c23a1ce1",
+          "name": "Lifestyle Shots",
+          "parent_id": "6981cbd57d3e19b4c23a1cb3",
+          "path": [
+            "Product Photography",
+            "Lifestyle Shots"
+          ],
+          "slug": "lifestyle-shots",
+          "order": 3,
+          "n_children": 0
+        },
+        "errors": []
+      }
+    }
+  },
+  "GET /api/v3/asset-categories/{identifier}": {
+    "responses": {
+      "200": {
+        "data": {
+          "id": "6981cbd57d3e19b4c23a1cca",
+          "account_id": "69085c1e2b4a7f13d90c5e21",
+          "name": "Packshots",
+          "parent_id": "6981cbd57d3e19b4c23a1cb3",
+          "path": [
+            "Product Photography",
+            "Packshots"
+          ],
+          "slug": "packshots",
+          "order": 1,
+          "n_children": 0,
+          "created": "2026-02-03T10:20:05.214000+00:00",
+          "modified": "2026-02-03T10:20:05.214000+00:00"
+        },
+        "errors": []
+      }
+    }
+  },
+  "PATCH /api/v3/asset-categories/{identifier}": {
+    "request": {
+      "name": "Packshots (White Background)"
+    }
+  },
+  "GET /api/v3/asset-lists": {
+    "parameters": {
+      "filters": {
+        "type[eq]": "Smart"
+      }
+    },
+    "responses": {
+      "200": {
+        "data": [
+          {
+            "id": "6985aa2a7d3e19b4c23a1e51",
+            "account_id": "69085c1e2b4a7f13d90c5e21",
+            "name": "JPGs Missing Alt Text",
+            "type": "Smart",
+            "query": [
+              [
+                {
+                  "operator": "eq",
+                  "field": "extension",
+                  "value": "jpg",
+                  "field_type": null
+                },
+                {
+                  "operator": "!exists",
+                  "field": "alt_text",
+                  "value": true,
+                  "field_type": null
+                }
+              ]
+            ],
+            "created": "2026-02-06T08:45:30.377000+00:00",
+            "modified": "2026-02-06T08:45:30.391000+00:00"
+          }
+        ],
+        "errors": [],
+        "pagination": {}
+      }
+    }
+  },
+  "POST /api/v3/asset-lists": {
+    "request": {
+      "name": "Tent Packshots",
+      "type": "Smart",
+      "query": [
+        [
+          {
+            "operator": "like",
+            "field": "filename",
+            "value": "ridgeline-"
+          },
+          {
+            "operator": "eq",
+            "field": "extension",
+            "value": "jpg"
+          }
+        ]
+      ]
+    },
+    "responses": {
+      "201": {
+        "data": {
+          "id": "6ac506727d3e19b4c23a1e68",
+          "account_id": "69085c1e2b4a7f13d90c5e21",
+          "name": "Tent Packshots",
+          "query": [
+            [
+              {
+                "operator": "like",
+                "field": "filename",
+                "value": "ridgeline-",
+                "field_type": null
+              },
+              {
+                "operator": "eq",
+                "field": "extension",
+                "value": "jpg",
+                "field_type": null
+              }
+            ]
+          ],
+          "created": "2026-10-06T14:32:18.493688+00:00",
+          "modified": "2026-10-06T14:32:18.506896+00:00",
+          "type": "Smart"
+        },
+        "errors": []
+      }
+    }
+  },
+  "GET /api/v3/asset-lists/{identifier}": {
+    "responses": {
+      "200": {
+        "data": {
+          "id": "6985aa2a7d3e19b4c23a1e51",
+          "account_id": "69085c1e2b4a7f13d90c5e21",
+          "name": "JPGs Missing Alt Text",
+          "type": "Smart",
+          "query": [
+            [
+              {
+                "operator": "eq",
+                "field": "extension",
+                "value": "jpg",
+                "field_type": null
+              },
+              {
+                "operator": "!exists",
+                "field": "alt_text",
+                "value": true,
+                "field_type": null
+              }
+            ]
+          ],
+          "created": "2026-02-06T08:45:30.377000+00:00",
+          "modified": "2026-02-06T08:45:30.391000+00:00"
+        },
+        "errors": []
+      }
+    }
+  },
+  "PATCH /api/v3/asset-lists/{identifier}": {
+    "request": {
+      "name": "Images Missing Alt Text",
+      "query": [
+        [
+          {
+            "operator": "!exists",
+            "field": "alt_text",
+            "value": true
+          }
+        ]
+      ]
+    }
+  },
+  "GET /api/v3/relationships": {
+    "parameters": {
+      "filters": {
+        "label[eq]": "frequently_bought_together"
+      }
+    },
+    "responses": {
+      "200": {
+        "data": [
+          {
+            "id": "6984bf247d3e19b4c23a1dde",
+            "account_id": "69085c1e2b4a7f13d90c5e21",
+            "name": "Frequently Bought Together",
+            "label": "frequently_bought_together",
+            "status": "ACTIVE",
+            "created": "2026-02-05T16:02:44.283000+00:00",
+            "modified": "2026-02-05T16:02:44.284000+00:00"
+          },
+          {
+            "id": "6984bf247d3e19b4c23a2079",
+            "account_id": "69085c1e2b4a7f13d90c5e21",
+            "name": "Replacement Parts",
+            "label": "replacement_parts",
+            "status": "ACTIVE",
+            "created": "2026-02-05T16:02:44.719000+00:00",
+            "modified": "2026-02-05T16:02:44.719000+00:00"
+          }
+        ],
+        "errors": [],
+        "pagination": {}
+      }
+    }
+  },
+  "POST /api/v3/relationships": {
+    "request": {
+      "name": "Compatible Accessories"
+    },
+    "responses": {
+      "201": {
+        "data": {
+          "id": "6ac506727d3e19b4c23a1df5",
+          "account_id": "69085c1e2b4a7f13d90c5e21",
+          "name": "Compatible Accessories",
+          "label": "compatible_accessories",
+          "status": "ACTIVE",
+          "created": "2026-10-06T14:32:18.283000+00:00",
+          "modified": "2026-10-06T14:32:18.284000+00:00"
+        },
+        "errors": []
+      }
+    }
+  },
+  "GET /api/v3/relationships/{identifier}": {
+    "responses": {
+      "200": {
+        "data": {
+          "id": "6984bf247d3e19b4c23a1dde",
+          "account_id": "69085c1e2b4a7f13d90c5e21",
+          "name": "Frequently Bought Together",
+          "label": "frequently_bought_together",
+          "status": "ACTIVE",
+          "created": "2026-02-05T16:02:44.283000+00:00",
+          "modified": "2026-02-05T16:02:44.284000+00:00"
+        },
+        "errors": []
+      }
+    }
+  },
+  "PATCH /api/v3/relationships/{identifier}": {
+    "request": {
+      "name": "Bought Together"
+    }
+  },
+  "GET /api/v3/product-families": {
+    "parameters": {
+      "filters": {
+        "name[contains:ignorecase]": "backpacks"
+      }
+    },
+    "responses": {
+      "200": {
+        "data": [
+          {
+            "id": "6984b7bd7d3e19b4c23a1d99",
+            "account_id": "69085c1e2b4a7f13d90c5e21",
+            "name": "Backpacks & Bags",
+            "total_products": 14,
+            "total_attributes": 18,
+            "total_models": 1,
+            "created": "2026-02-05T15:31:09.740000+00:00",
+            "modified": "2026-02-05T15:31:09.740000+00:00"
+          },
+          {
+            "id": "6984b7bd7d3e19b4c23a2090",
+            "account_id": "69085c1e2b4a7f13d90c5e21",
+            "name": "Tents & Shelters",
+            "total_products": 9,
+            "total_attributes": 16,
+            "total_models": 1,
+            "created": "2026-02-05T15:31:09.752000+00:00",
+            "modified": "2026-02-05T15:31:09.752000+00:00"
+          }
+        ],
+        "errors": [],
+        "pagination": {}
+      }
+    }
+  },
+  "POST /api/v3/product-families": {
+    "request": {
+      "name": "Sleeping Bags",
+      "attributes": [
+        {
+          "id": "69830b317d3e19b4c23a1d26",
+          "label": "short_description"
+        },
+        {
+          "id": "69830b317d3e19b4c23a1d3d",
+          "label": "price_usd"
+        }
+      ]
+    },
+    "responses": {
+      "201": {
+        "data": {
+          "id": "6ac506727d3e19b4c23a1db0",
+          "name": "Sleeping Bags",
+          "total_products": 0,
+          "total_attributes": 6,
+          "total_models": 1,
+          "created": "2026-10-06T14:32:18.683000+00:00",
+          "modified": "2026-10-06T14:32:18.797000+00:00"
+        },
+        "errors": []
+      }
+    }
+  },
+  "GET /api/v3/product-families/{identifier}": {
+    "responses": {
+      "200": {
+        "data": {
+          "id": "6984b7bd7d3e19b4c23a1d99",
+          "account_id": "69085c1e2b4a7f13d90c5e21",
+          "name": "Backpacks & Bags",
+          "total_products": 14,
+          "total_attributes": 18,
+          "total_models": 1,
+          "created": "2026-02-05T15:31:09.740000+00:00",
+          "modified": "2026-02-05T15:31:09.740000+00:00"
+        },
+        "errors": []
+      }
+    }
+  },
+  "PATCH /api/v3/product-families/{identifier}": {
+    "request": {
+      "name": "Backpacks, Bags & Luggage"
+    }
+  },
+  "GET /api/v3/product-families/{product_family_id}/attributes": {
+    "responses": {
+      "200": {
+        "data": [
+          {
+            "level": "no_level",
+            "product_family_id": "6984b7bd7d3e19b4c23a1d99",
+            "attribute_id": "69830b317d3e19b4c23a1d26"
+          },
+          {
+            "level": "parent_level",
+            "product_family_id": "6984b7bd7d3e19b4c23a1d99",
+            "attribute_id": "69830b317d3e19b4c23a1d54"
+          }
+        ],
+        "errors": []
+      }
+    }
+  },
+  "POST /api/v3/product-families/{product_family_id}/attributes": {
+    "responses": {
+      "201": {
+        "data": {
+          "account_id": "69085c1e2b4a7f13d90c5e21",
+          "product_family_id": "6984b7bd7d3e19b4c23a1d99",
+          "attribute_id": "69830b317d3e19b4c23a1d6b",
+          "level": "no_level"
+        },
+        "errors": []
+      }
+    }
+  },
+  "GET /api/v3/product-families/{product_family_id}/attributes/{attribute_id}": {
+    "responses": {
+      "200": {
+        "data": {
+          "account_id": "69085c1e2b4a7f13d90c5e21",
+          "level": "parent_level",
+          "product_family_id": "6984b7bd7d3e19b4c23a1d99",
+          "attribute_id": "69830b317d3e19b4c23a1d54"
+        },
+        "errors": []
+      }
+    }
+  },
+  "GET /api/v3/family-attributes": {
+    "parameters": {
+      "filters": {
+        "account_id[eq]": "69085c1e2b4a7f13d90c5e21",
+        "product_family_id[eq]": "6984b7bd7d3e19b4c23a1d99"
+      }
+    },
+    "responses": {
+      "200": {
+        "data": [
+          {
+            "level": "no_level",
+            "product_family_id": "6984b7bd7d3e19b4c23a1d99",
+            "attribute_id": "69830b317d3e19b4c23a1d26"
+          },
+          {
+            "level": "parent_level",
+            "product_family_id": "6984b7bd7d3e19b4c23a1d99",
+            "attribute_id": "69830b317d3e19b4c23a1d54"
+          }
+        ],
+        "errors": [],
+        "pagination": {
+          "next_page": "http://pim.plytix.com/api/v3/family-attributes?_page=2&_page_size=2"
+        }
+      }
+    }
+  },
+  "GET /api/v3/product-attributes": {
+    "parameters": {
+      "filters": {
+        "type[eq]": "TextAttribute"
+      }
+    },
+    "responses": {
+      "200": {
+        "data": [
+          {
+            "id": "69830b317d3e19b4c23a1d26",
+            "name": "Short Description",
+            "label": "short_description",
+            "description": "One- or two-sentence summary used on product cards and marketplace listings.",
+            "status": "ACTIVE",
+            "created": "2026-02-04T09:02:41.391000+00:00",
+            "modified": "2026-02-04T09:02:41.391000+00:00",
+            "account_id": "69085c1e2b4a7f13d90c5e21",
+            "type": "TextAttribute",
+            "character_limit": 250
+          },
+          {
+            "id": "69830b317d3e19b4c23a1d3d",
+            "name": "Price (USD)",
+            "label": "price_usd",
+            "description": "Manufacturer suggested retail price in US dollars.",
+            "status": "ACTIVE",
+            "created": "2026-02-04T09:02:41.402000+00:00",
+            "modified": "2026-02-04T09:02:41.402000+00:00",
+            "account_id": "69085c1e2b4a7f13d90c5e21",
+            "type": "DecimalAttribute"
+          }
+        ],
+        "errors": [],
+        "pagination": {
+          "next_page": "http://pim.plytix.com/api/v3/product-attributes?_page=2&_page_size=2"
+        }
+      }
+    }
+  },
+  "POST /api/v3/product-attributes": {
+    "request": {
+      "name": "Care Instructions",
+      "label": "care_instructions",
+      "description": "Cleaning and storage guidance printed on the hang tag.",
+      "type": "TextAttribute",
+      "character_limit": 500
+    },
+    "responses": {
+      "201": {
+        "data": {
+          "id": "6ac506727d3e19b4c23a1d82",
+          "name": "Care Instructions",
+          "label": "care_instructions",
+          "description": "Cleaning and storage guidance printed on the hang tag.",
+          "status": "ACTIVE",
+          "created": "2026-10-06T14:32:18.615000+00:00",
+          "modified": "2026-10-06T14:32:18.615000+00:00",
+          "type": "TextAttribute",
+          "character_limit": 500
+        },
+        "errors": []
+      }
+    }
+  },
+  "GET /api/v3/product-attributes/{identifier}": {
+    "responses": {
+      "200": {
+        "data": {
+          "id": "69830b317d3e19b4c23a1d54",
+          "name": "Material",
+          "label": "material",
+          "description": "Main shell fabrics.",
+          "status": "ACTIVE",
+          "created": "2026-02-04T09:02:41.415000+00:00",
+          "modified": "2026-02-04T09:02:41.415000+00:00",
+          "account_id": "69085c1e2b4a7f13d90c5e21",
+          "type": "MultiSelectAttribute",
+          "options": [
+            "Canvas",
+            "Polyester",
+            "Recycled Nylon"
+          ],
+          "manual_sorting": false,
+          "sort_ascending": true,
+          "restricted": true
+        },
+        "errors": []
+      }
+    }
+  },
+  "PATCH /api/v3/product-attributes/{identifier}": {
+    "request": {
+      "name": "Care & Storage Instructions",
+      "description": "Cleaning, drying and long-term storage guidance.",
+      "character_limit": 750
+    }
+  },
+  "GET /api/v3/product-attribute-groups": {
+    "parameters": {
+      "filters": {
+        "name[eq]": "Marketing Copy"
+      }
+    },
+    "responses": {
+      "200": {
+        "data": [
+          {
+            "id": "69830b317d3e19b4c23a20a7",
+            "account_id": "69085c1e2b4a7f13d90c5e21",
+            "name": "Marketing Copy",
+            "order": 1,
+            "attribute_labels": [
+              "short_description",
+              "care_instructions"
+            ],
+            "created": "2026-02-04T09:02:41.021000+00:00",
+            "modified": "2026-02-04T09:02:41.021000+00:00"
+          },
+          {
+            "id": "69830b317d3e19b4c23a1cf8",
+            "account_id": "69085c1e2b4a7f13d90c5e21",
+            "name": "Technical Specs",
+            "order": 2,
+            "attribute_labels": [
+              "material",
+              "capacity_liters",
+              "weight_grams"
+            ],
+            "created": "2026-02-04T09:02:41.035000+00:00",
+            "modified": "2026-02-04T09:02:41.035000+00:00"
+          }
+        ],
+        "errors": [],
+        "pagination": {}
+      }
+    }
+  },
+  "POST /api/v3/product-attribute-groups": {
+    "request": {
+      "name": "Sustainability"
+    },
+    "responses": {
+      "201": {
+        "data": {
+          "id": "6ac506727d3e19b4c23a1d0f",
+          "name": "Sustainability",
+          "order": 3,
+          "attribute_labels": []
+        },
+        "errors": []
+      }
+    }
+  },
+  "GET /api/v3/product-attribute-groups/{identifier}": {
+    "responses": {
+      "200": {
+        "data": {
+          "id": "69830b317d3e19b4c23a1cf8",
+          "account_id": "69085c1e2b4a7f13d90c5e21",
+          "name": "Technical Specs",
+          "order": 2,
+          "attribute_labels": [
+            "material",
+            "capacity_liters",
+            "weight_grams"
+          ],
+          "created": "2026-02-04T09:02:41.035000+00:00",
+          "modified": "2026-02-04T09:02:41.035000+00:00"
+        },
+        "errors": []
+      }
+    }
+  },
+  "POST /api/v3/products/{identifier}/categories": {
+    "request": {
+      "id": "6981ca7e7d3e19b4c23a1c57"
+    },
+    "responses": {
+      "201": {
+        "data": {
+          "id": "6981ca7e7d3e19b4c23a1c57"
+        },
+        "errors": []
+      }
+    }
+  },
+  "POST /api/v3/assets/{identifier}/categories": {
+    "request": {
+      "id": "6981cbd57d3e19b4c23a1cb3"
+    }
+  },
+  "POST /api/v3/assets/{identifier}/static_lists": {
+    "request": {
+      "id": "6985ab427d3e19b4c23a1e5c"
+    }
+  },
+  "POST /api/v3/product-attributes/{identifier}/groups": {
+    "request": {
+      "id": "69830b317d3e19b4c23a20a7"
+    }
+  },
+  "PATCH /api/v3/product-attribute-groups/{identifier}": {
+    "request": {
+      "name": "Marketing Copy",
+      "order": 2
+    }
+  }
+}

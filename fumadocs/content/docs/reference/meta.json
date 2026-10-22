@@ -3,5 +3,5 @@
   "root": true,
   "icon": "Code",
   "pagesIndex": "index",
-  "pages": ["v3", "legacy"]
+  "pages": ["v3", "v1-v2"]
 }

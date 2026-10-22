@@ -1,0 +1,10 @@
+{
+  "title": "Product Attribute Groups",
+  "pages": [
+    "create-product-attribute-group",
+    "search-product-attribute-groups",
+    "update-product-attribute-group",
+    "delete-product-attribute-group"
+  ],
+  "icon": "Group"
+}

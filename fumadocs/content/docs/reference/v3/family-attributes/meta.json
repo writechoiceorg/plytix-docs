@@ -1,0 +1,16 @@
+{
+  "title": "Family Attributes",
+  "pages": [
+    "search-family-attributes",
+    "list-family-attributes",
+    "add-attribute-to-family",
+    "get-family-attribute",
+    "add-attribute-to-family-by-id",
+    "update-family-attribute",
+    "remove-attribute-from-family",
+    "get-family-attribute-field",
+    "update-family-attribute-field",
+    "delete-family-attribute-field"
+  ],
+  "icon": "ListTree"
+}

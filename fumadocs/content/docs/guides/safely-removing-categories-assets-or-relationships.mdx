@@ -1,5 +1,5 @@
 ---
-title: Safely remove categories, assets, or relationships
+title: Unlink categories, assets, or relationships
 description: Remove a category or a relationship link from a product, or change its thumbnail, through the V3 API while keeping the product's other links.
 ---
 
@@ -11,7 +11,7 @@ Remove one category from a product, or remove a product's link to one relationsh
 
 Before you start, make sure you have the following:
 
-- A bearer token. See [Authentication](/docs/reference/v3/authentication), or the [Quickstart](/docs/guides/quickstart) for a first walkthrough.
+- A bearer token. See [Authentication](/reference/v3/authentication), or the [Quickstart](/docs/guides/quickstart) for a first walkthrough.
 - The product's ID, and the ID of the category or relationship you want to remove.
 
 ## Remove a category from a product
@@ -37,6 +37,10 @@ Follow the steps below to read a product's current categories, remove one of the
    ```
 
    This removes only the category you name. The product keeps its other categories and its other data. A successful unlink returns `204` with an empty body.
+
+   <Callout type="warn" title="Unlink the category, don't delete it">
+     `DELETE /api/v3/product-categories/<category_id>` deletes the category itself, not one product's link to it. In Plytix's controlled Dev test (October 2026), deleting a parent category also deleted its child and grandchild categories, and the test product lost its associations with them. The product itself stayed. The effect on many products, and on production, hasn't been tested yet.
+   </Callout>
 
 3. **Link a category, if you're moving a product rather than only removing it.**
 
@@ -147,7 +151,7 @@ Check the problems below if you run into issues while following this guide.
 
 <Accordions type="multiple">
   <Accordion title={<><code>PATCH /products/&lt;id&gt;</code> returns 422 on <code>category_ids</code></>} value="patch-category-ids-422">
-    If the response says `"category_ids: Extra inputs are not permitted"`, you're using the older array-based approach. Plytix now rejects these array fields, and the same applies to `static_list_ids`, `channel_ids`, `ecatalog_ids`, and `product_data_sheet_ids`. Switch to `POST /products/{id}/categories` and `DELETE /products/{id}/categories/{category_id}`.
+    If the response says `"category_ids: Extra inputs are not permitted"`, you're using the older array-based approach. Plytix now rejects these array fields, and the same applies to the product's other `*_ids` link arrays. Switch to `POST /products/{id}/categories` and `DELETE /products/{id}/categories/{category_id}`.
   </Accordion>
   <Accordion title={<><code>DELETE /products/&lt;id&gt;/categories</code> returns 405</>} value="delete-categories-405">
     The unlink endpoint needs to know which link to remove, so the category ID is part of the path, not optional. The error message spells out the shape it wants: `DELETE /products/{id}/categories/{linked_id}`. Add the category ID and the request succeeds.
@@ -171,10 +175,10 @@ Check the problems below if you run into issues while following this guide.
 Now that you know how to unlink data from a product, you can explore these related pages.
 
 <Cards>
-  <Card icon={<ArrowClockwiseRegular />} title="Sync your ERP" href="/docs/guides/syncing-your-erp-with-plytix">
+  <Card icon={<ArrowClockwiseRegular />} title="Sync your ERP with Plytix" href="/docs/guides/syncing-your-erp-with-plytix">
     The broader pattern for reading and writing product data safely.
   </Card>
-  <Card icon={<DocumentEditRegular />} title="Update and delete records" href="/docs/reference/v3/updates-and-deletes">
+  <Card icon={<DocumentEditRegular />} title="Update and delete records" href="/reference/v3/updates-and-deletes">
     Read the full V3 rules for what DELETE and PATCH remove.
   </Card>
 </Cards>

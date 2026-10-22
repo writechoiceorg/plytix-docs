@@ -1,0 +1,25 @@
+{
+  "title": "V1/V2 (Legacy)",
+  "icon": "Archive",
+  "pages": [
+    "---[BookOpen]Core concepts---",
+    "api-v1-v2-reference",
+    "token-authentication",
+    "errors-status-codes",
+    "rate-limits",
+    "filtering-and-search",
+    "pagination",
+    "---[Webhook]Endpoints---",
+    "accounts",
+    "assets",
+    "product-attribute-groups",
+    "product-attributes",
+    "categories",
+    "available-filters",
+    "product-families",
+    "products",
+    "relationships",
+    "products-v2-beta",
+    "authentication"
+  ]
+}

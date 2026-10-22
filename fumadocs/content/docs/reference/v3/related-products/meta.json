@@ -1,0 +1,10 @@
+{
+  "title": "Related Products",
+  "pages": [
+    "search-related-products",
+    "list-related-products",
+    "get-related-product",
+    "get-related-product-field"
+  ],
+  "icon": "Link2"
+}

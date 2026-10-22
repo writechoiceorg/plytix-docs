@@ -1,6 +1,6 @@
 // Markdown rendering of OpenAPI operation pages, for llms.txt / MCP `get_page`.
 //
-// Generated endpoint pages (content/docs/reference/{v3,legacy}) have no
+// Generated endpoint pages (content/docs/reference/{v3,v1-v2}) have no
 // Markdown body: their content is drawn at request time by <OpenAPIPage />,
 // so `getText('processed')` only yields an empty string. This renders the
 // same operation (parameters, request body, responses) straight from the spec.
@@ -19,8 +19,26 @@ const documents: Record<string, Json> = {
 const MAX_DEPTH = 6;
 
 interface OpenAPIPageLike {
-  slugs: string[];
-  data: { _openapi?: { preload?: string[]; method?: string } };
+  data: { _openapi?: { preload?: string[]; method?: string; path?: string } };
+}
+
+/**
+ * Finds the spec operation a generated endpoint page documents, or `undefined`
+ * if the page isn't one. The generators record the operation's `method` and
+ * `path` in the page's `_openapi` frontmatter (page filenames come from
+ * scripts/endpoint-names.json, so they can't be matched to an operationId).
+ */
+export function getPageOperation(page: OpenAPIPageLike) {
+  const meta = page.data._openapi;
+  const docId = meta?.preload?.[0];
+  const doc = docId ? documents[docId] : undefined;
+  if (!doc || !meta?.method || !meta.path) return;
+
+  const method = meta.method.toLowerCase();
+  const pathItem = doc.paths?.[meta.path];
+  const operation = pathItem?.[method];
+  if (!operation) return;
+  return { doc, path: meta.path, method, pathItem, operation };
 }
 
 /**
@@ -28,24 +46,10 @@ interface OpenAPIPageLike {
  * generated OpenAPI operation page.
  */
 export function renderOpenAPIPageMarkdown(page: OpenAPIPageLike): string | undefined {
-  const meta = page.data._openapi;
-  const docId = meta?.preload?.[0];
-  const doc = docId ? documents[docId] : undefined;
-  if (!doc || !meta?.method) return;
-
-  // `generateFiles({ per: 'operation' })` names each file after its operationId.
-  const operationId = page.slugs.at(-1);
-  const found = findOperation(doc, operationId, meta.method.toLowerCase());
+  const found = getPageOperation(page);
   if (!found) return;
 
-  return renderOperation(doc, found.path, found.method, found.pathItem, found.operation);
-}
-
-function findOperation(doc: Json, operationId: string | undefined, method: string) {
-  for (const [path, pathItem] of Object.entries<Json>(doc.paths ?? {})) {
-    const operation = pathItem?.[method];
-    if (operation?.operationId === operationId) return { path, method, pathItem, operation };
-  }
+  return renderOperation(found.doc, found.path, found.method, found.pathItem, found.operation);
 }
 
 function renderOperation(doc: Json, path: string, method: string, pathItem: Json, op: Json) {

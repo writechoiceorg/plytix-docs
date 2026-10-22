@@ -46,7 +46,7 @@ The API returns the following standard HTTP status codes, grouped by class:
 
 ## Error response format
 
-Response bodies depend on the operation. A `204 No Content` response has no body and must not be parsed as JSON. Use each operation's documented success and error schema in the [API reference](/docs/reference/v3).
+Response bodies depend on the operation. A `204 No Content` response has no body and must not be parsed as JSON. Use each operation's documented success and error schema in the [API reference](/reference/v3).
 
 Many responses carry a `data` field and an `errors` array, and search responses also include a `pagination` object with `next_page` and `previous_page`. A `422` uses a `detail` array instead, as shown below.
 
@@ -103,10 +103,10 @@ Open the entries below for the shape of each error object.
 ## Related resources
 
 <Cards>
-  <Card icon={<BookOpenRegular />} title="API Overview" href="/docs/reference/v3">
+  <Card icon={<BookOpenRegular />} title="API Overview" href="/reference/v3">
     What the Plytix API is for, the resources it exposes, and the response conventions this page builds on.
   </Card>
-  <Card icon={<DocumentEditRegular />} title="Update and delete records" href="/docs/reference/v3/updates-and-deletes">
+  <Card icon={<DocumentEditRegular />} title="Update and delete records" href="/reference/v3/updates-and-deletes">
     See which status each write returns and when a response has no body.
   </Card>
 </Cards>

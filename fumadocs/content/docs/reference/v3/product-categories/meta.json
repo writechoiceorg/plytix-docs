@@ -1,0 +1,14 @@
+{
+  "title": "Product Categories",
+  "pages": [
+    "search-product-categories",
+    "create-product-category",
+    "get-product-category",
+    "update-product-category",
+    "delete-product-category",
+    "get-product-category-field",
+    "update-product-category-field",
+    "delete-product-category-field"
+  ],
+  "icon": "FolderTree"
+}

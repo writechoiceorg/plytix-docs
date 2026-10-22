@@ -1,0 +1,15 @@
+{
+  "title": "Product Families",
+  "pages": [
+    "search-product-families",
+    "create-product-family",
+    "get-product-family",
+    "update-product-family",
+    "delete-product-family",
+    "get-product-family-field",
+    "add-product-family-field",
+    "update-product-family-field",
+    "delete-product-family-field"
+  ],
+  "icon": "Layers"
+}

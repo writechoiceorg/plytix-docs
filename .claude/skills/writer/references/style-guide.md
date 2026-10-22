@@ -113,7 +113,7 @@ Decided 2026-10-06, revised 2026-10-08. Never title a procedure section "Steps",
 
 **Split when a guide covers more than one task.** If the procedure contains two or more things a reader would come looking for separately, give each its own H2 rather than numbering them all under one heading. "Safely remove categories, assets, or relationships" splits into `## Remove a category from a product`, `## Remove a relationship from a product`, and `## Change or clear a product's thumbnail`. Each H2 then answers one question, which also satisfies the answer-first H2 rule under "Answer-engine formatting".
 
-Guide titles themselves drop "with Plytix" style suffixes when the product is already obvious (e.g. "Sync your ERP", not "Sync your ERP with Plytix").
+Guide titles themselves drop "with Plytix" style suffixes when the product is already obvious (e.g. "Sync your ERP", not "Sync your ERP with Plytix"). Exception (2026-10-21): Plytix's marketing/design feedback (item 8) set the guide titles explicitly, including "Sync your ERP with Plytix"; keep the titles in `guides/meta.json` order as Plytix listed them.
 
 > `syncing-your-erp-with-plytix.mdx` still uses `## Sync your ERP`, the old title-echo form. Leave it or rename it to something like `## Keep both systems in sync` next time the page is touched; it is not worth a standalone edit.
 
@@ -185,7 +185,7 @@ For long articles with a main H2 heading followed by many H3 subheadings, add a 
 
 ### Access token step in integration guides
 
-Decided 2026-10-06. In any integration guide or how-to that is not itself about authentication or the quickstart, do not show the token request. When the first step is "Get an access token," make it a short sentence that links to where the reader learns it: [Authentication](/docs/reference/v3/authentication) in the API reference, or the [Quickstart](/docs/guides/quickstart). Keep only guide-specific facts, such as the 15-minute expiry and what to do on `401`. Only the Authentication reference and the Quickstart carry the `get-token` request.
+Decided 2026-10-06. In any integration guide or how-to that is not itself about authentication or the quickstart, do not show the token request. When the first step is "Get an access token," make it a short sentence that links to where the reader learns it: [Authentication](/reference/v3/authentication) in the API reference, or the [Quickstart](/docs/guides/quickstart). Keep only guide-specific facts, such as the 15-minute expiry and what to do on `401`. Only the Authentication reference and the Quickstart carry the `get-token` request.
 
 ### Troubleshooting format
 

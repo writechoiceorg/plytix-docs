@@ -1,0 +1,17 @@
+{
+  "title": "Product Families",
+  "pages": [
+    "create-product-family",
+    "search-product-families",
+    "get-product-family",
+    "rename-product-family",
+    "delete-product-family",
+    "list-all-family-attributes",
+    "edit-all-family-attributes",
+    "list-family-attributes",
+    "edit-family-attribute-inheritance",
+    "link-family-attribute",
+    "unlink-family-attribute"
+  ],
+  "icon": "Layers"
+}

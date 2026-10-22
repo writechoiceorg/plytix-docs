@@ -11,7 +11,7 @@
 **Documentation framework:** Fumadocs (`fumadocs-core` 16.x, `fumadocs-ui` via `@fumadocs/base-ui`, `fumadocs-mdx`, `fumadocs-openapi`) on Next.js
 **Platform MCP available:** No
 **Content root:** `fumadocs/content/docs/`
-**Docs base route:** `/docs` (set in `fumadocs/lib/shared.ts`)
+**Docs base route:** `/docs` for guides; the API reference (`content/docs/reference/**`) is served at `/reference/**` (set in `fumadocs/lib/shared.ts`, updated 2026-10-21). Old `/docs/reference/**` URLs redirect via `fumadocs/redirects.json`.
 **Base URL:** `[PENDING]`: production domain not confirmed yet
 
 ---
@@ -79,7 +79,7 @@ Use any icon name from [lucide.dev/icons](https://lucide.dev/icons). Import ever
 
 ### Links
 
-Internal links use absolute paths from the docs route, without the file extension: `/docs/guides/quickstart`, `/docs/reference/v3/pagination`.
+Internal links use absolute paths without the file extension: `/docs/guides/quickstart` for guides, `/reference/v3/pagination` and `/reference/v1-v2/pagination` for the API reference (updated 2026-10-21).
 
 ---
 
@@ -107,7 +107,7 @@ Fumadocs' `Callout` accepts `type`: `info` (default), `warn`, `warning` (alias o
 **Extension:** `.mdx`
 **Example:** `syncing-your-erp-with-plytix.mdx`
 
-Generated endpoint reference pages keep the OpenAPI generator's operation-ID filenames (for example, `search_assets_api_v3_assets_get.mdx`). Don't rename them.
+Generated endpoint reference pages take their filename (and so their URL) and title from `fumadocs/scripts/endpoint-names.json`, keyed by `METHOD /path` (for example, `GET /api/v3/products/{identifier}` is `reference/v3/products/get-product.mdx`, titled "Get a product"). Updated 2026-10-21 for Plytix feedback items 1 and 12. To rename an endpoint page, edit that map and the operation's `summary`, regenerate, and add a redirect to `fumadocs/redirects.json`; never rename the generated file by hand.
 
 ---
 
@@ -117,7 +117,8 @@ Sidebar order and grouping come from a `meta.json` file in each folder, not from
 
 - `"pages"` lists page filenames without the extension, in sidebar order.
 - `"---Group name---"` entries create a sidebar separator (for example, `"---Integration Guides---"`).
-- `"root": true` makes a folder a top-level sidebar root (used by `guides`, `reference`, `reference/v3`, `reference/legacy`).
+- `"root": true` makes a folder a top-level sidebar root (used by `guides`, `reference`, `reference/v3`, `reference/v1-v2`).
+- `"...folder"` lists a folder's pages flat in the parent, with no expandable folder item (used for the "Upgrade from V1/V2" section, so the migration overview isn't both a page and a dropdown).
 
 When you add a page, add it to the right `meta.json` and to `information-architecture.md`.
 

@@ -5,16 +5,16 @@ description: "Reference for every V1/V2 endpoint and its V3 equivalent, resource
 
 import { BookOpenRegular, DocumentEditRegular } from '@/components/icons';
 
-This page maps the V1/V2 endpoints most integrations use to their V3 equivalents, one resource at a time, and ends with the link and unlink endpoints that replaced V1's array fields. The Notes column records where the payload, the scope of the operation, or the response shape changes, because a similar-looking path doesn't always have the same effect. "No V3 equivalent" means V3 can't do the operation, and "No dedicated endpoint" means V3 has no matching endpoint but may cover the operation through another workflow. [Not migrated and new in V3](/docs/guides/migrating-to-v3/not-migrated-and-new-in-v3) collects those in one place. It's part of the reference set for [Migrating to V3](/docs/guides/migrating-to-v3).
+This page maps the V1/V2 endpoints most integrations use to their V3 equivalents, one resource at a time, and ends with the link and unlink endpoints that replaced V1's array fields. The Notes column records where the payload, the scope of the operation, or the response shape changes, because a similar-looking path doesn't always have the same effect. "No V3 equivalent" means V3 can't do the operation, and "No dedicated endpoint" means V3 has no matching endpoint but may cover the operation through another workflow. [What's new and not migrated](/docs/guides/migrating-to-v3/not-migrated-and-new-in-v3) collects those in one place. It's part of the reference set for [Migration overview](/docs/guides/migrating-to-v3).
 
 ## Products
 
-Every V1 endpoint in this table also has a V2 counterpart under `/api/v2`. V2 is a separate products-only beta, so check the [V1/V2 reference](/docs/reference/legacy/api-v1-v2-reference) before treating a V2 path as interchangeable with its V1 version.
+Every V1 endpoint in this table also has a V2 counterpart under `/api/v2`. V2 is a separate products-only beta, so check the [V1/V2 reference](/reference/v1-v2/api-v1-v2-reference) before treating a V2 path as interchangeable with its V1 version.
 
 | V1 | V3 | Notes |
 |---|---|---|
 | `POST /api/v1/products` | `POST /api/v3/products` | |
-| `POST /api/v1/products/search` | `GET /api/v3/products` | The search body becomes query parameters. See [Searching and pagination](/docs/guides/migrating-to-v3/searching-and-pagination). |
+| `POST /api/v1/products/search` | `GET /api/v3/products` | The search body becomes query parameters. See [Search and pagination](/docs/guides/migrating-to-v3/searching-and-pagination). |
 | `GET /api/v1/products/{product_id}` | `GET /api/v3/products/{identifier}` | V3 returns `data` as a single object, not an array. |
 | `PATCH /api/v1/products/{product_id}` | `PATCH /api/v3/products/{identifier}` | |
 | `DELETE /api/v1/products/{product_id}` | `DELETE /api/v3/products/{identifier}` | Deletes the product. To detach a variant from its parent without deleting it, see [Variants](#variants). |
@@ -47,10 +47,10 @@ Every V1 endpoint below except the variant list also has a V2 counterpart under 
 | `GET /api/v1/products/{product_id}/variants` | `GET /api/v3/products?parent_id=<parent_id>` {/* [PENDING] */} | Lists the parent's variants. |
 | `POST /api/v1/products/{parent_product_id}/variants/resync` | No V3 equivalent | |
 
-A product's position in the hierarchy is reported by `product_level`: `0` SINGLE, `1` PARENT, `2` VARIANT, `3` SUB_VARIANT. A standalone product starts at `0` and becomes `1` as soon as another product references it through `parent_id`. See [Reconstruct parent/variant hierarchies](/docs/guides/reconstructing-parent-variant-hierarchies).
+A product's position in the hierarchy is reported by `product_level`: `0` SINGLE, `1` PARENT, `2` VARIANT, `3` SUB_VARIANT. A standalone product starts at `0` and becomes `1` as soon as another product references it through `parent_id`. See [Rebuild parent and variant products](/docs/guides/reconstructing-parent-variant-hierarchies).
 
 {/* FLAG (open):
-  Listing a parent's variants with `?parent_id=<id>` is unconfirmed. It follows from `parent_id` being a real product field, but filtering on it was never tested, and [Reconstruct parent/variant hierarchies](/docs/guides/reconstructing-parent-variant-hierarchies) reads the hierarchy from the parent's own `num_variations` instead. Verify with `endpoint-tester` before publishing, or drop the row and point at the parent-read method.
+  Listing a parent's variants with `?parent_id=<id>` is unconfirmed. It follows from `parent_id` being a real product field, but filtering on it was never tested, and [Rebuild parent and variant products](/docs/guides/reconstructing-parent-variant-hierarchies) reads the hierarchy from the parent's own `num_variations` instead. Verify with `endpoint-tester` before publishing, or drop the row and point at the parent-read method.
 */}
 
 {/* FLAG (open):
@@ -167,7 +167,7 @@ You can create a Product Family, link attributes to it, and rename it through th
 
 ## Linking and unlinking
 
-V1 links through dedicated subpaths. V3 originally accepted `category_ids` and `static_list_ids` arrays on create and update; those fields are no longer accepted, leaving the dedicated link and unlink endpoints as the only route.
+V1 links through dedicated endpoints. V3 originally accepted `category_ids` and `static_list_ids` arrays on create and update; those fields are no longer accepted, leaving the dedicated link and unlink endpoints as the only route.
 
 | Link | V1 | V3 |
 |---|---|---|
@@ -181,7 +181,7 @@ V1 links through dedicated subpaths. V3 originally accepted `category_ids` and `
 | Product from asset | `DELETE /api/v1/products/{product_id}/assets/{asset_id}` | No dedicated endpoint. See [Products](#products) |
 | Product to family | `POST /api/v1/products/{product_id}/family` | `PATCH /api/v3/products/{identifier}` with `product_family_id` |
 
-<Callout type="warn" title="The generic subpath DELETE is not an unlink">
+<Callout type="warn" title="Deleting a product field doesn't unlink a record">
   `DELETE /api/v3/products/{identifier}/{path}` doesn't remove a single linked record. A collection path such as `categories` returns `405`, and an unrecognized path returns `404`. Use the specific unlink endpoints above.
 </Callout>
 
@@ -190,10 +190,10 @@ V1 links through dedicated subpaths. V3 originally accepted `category_ids` and `
 Now that you have the mapping, you can explore these related pages.
 
 <Cards>
-  <Card icon={<DocumentEditRegular />} title="Update and delete records" href="/docs/reference/v3/updates-and-deletes">
+  <Card icon={<DocumentEditRegular />} title="Update and delete records" href="/reference/v3/updates-and-deletes">
     Check what each V3 write returns before you move your update and delete calls.
   </Card>
-  <Card icon={<BookOpenRegular />} title="V3 API reference" href="/docs/reference/v3">
+  <Card icon={<BookOpenRegular />} title="V3 API reference" href="/reference/v3">
     Browse the V3 resources and their parameters in detail.
   </Card>
 </Cards>

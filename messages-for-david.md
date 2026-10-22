@@ -1,6 +1,31 @@
 # Feedback status for David
 
-Updated 2026-10-19.
+Updated 2026-10-21.
+
+---
+
+Page: 19 October marketing and design feedback
+
+We acted on 14 of the 16 items. Items 2 (meta titles and descriptions) and 17 (alternative to the version switcher) are held for a later pass.
+
+Solved:
+- 1, URLs: endpoint pages now use `/reference/<version>/<resource>/<action>`, for example `/reference/v3/products/get-product` and `/reference/v1-v2/products/create-product`. Slugs are set per endpoint, so they won't change if a title changes. Every old URL redirects to its new one.
+- 5, platform wording: the homepage, the new Guides introduction, and the site description call Plytix a product content platform with Plytix PIM, Plytix DAM, and Plytix Feed Management, followed by what the API itself covers.
+- 6 and 7, header and footer: yes, both can be replicated, and they're in place. The header has Plytix.com, Login, and a Book a demo button. The footer copies the knowledge base's columns, legal links, and social links, without its API documentation link.
+- 8 and 10, Guides structure: the sidebar now has Get started, Integration guides, How-to guides, AI assistants, and Upgrade from V1/V2, with your titles. The migration pages are a flat list under Upgrade from V1/V2, starting with Migration overview, so nothing is both a page and a dropdown.
+- 9, Overview: replaced by "What is the Plytix API?", covering what the API is for, who it's for, what it covers, and where to start.
+- 12, endpoint titles: all 238 titles are in plain language, for example "Get a product", "Get a product field", and "List a family's attributes". "Subpath" no longer appears in titles or guide text.
+- 13, examples: V3 code samples use `https://pim.plytix.com`, and every V3 request body and the main responses use realistic sample data instead of "string" values. We also repaired 26 invalid JSON samples in the V1/V2 reference. The `http://` `next_page` links in two guides are deliberate: they show what the API returns today, and the pages explain how to handle it.
+- 14, 15, 16, naming: the reference groups are "Core concepts", the V1/V2 concept pages say "V1/V2 authentication", "V1/V2 pagination", and so on, each with a link to the V3 page, and filtering is "Filtering and search" in both versions.
+- 18, table of contents: reproduced below 1280px, where the "On this page" bar covered the heading you'd jumped to. Fixed, and checked from desktop down to phone width.
+- 19, labels: "V3 (Beta)" and "V1/V2 (Legacy)" everywhere, with a beta note on the V3 overview.
+
+Questions:
+- 1: does the `/reference/v3/products/get-product` pattern work for Jessie's SEO plans?
+- 5: is "product content platform" the wording you want, or is there an approved platform line we should use?
+- 7: the knowledge base footer also lists "Our Branding Guidelines" and "Cookie preferences", but neither has a link we could copy. Should we add them, and where should they point?
+- 8: "Get notified about changes" isn't in your proposed structure. Should it go under How-to guides, or stay unpublished?
+- 13: writing the examples showed a few spec gaps. Create endpoints declare `200` but return `201`, and attributes and families declare `_id` but return `id`. Could the spec be corrected? Can you also confirm that decimal attribute values are sent as strings but returned as numbers?
 
 ---
 
