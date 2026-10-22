@@ -60,17 +60,6 @@ Coverage: 87/87 operations edited, 87/87 described, 87/87 clean operationIds, 18
 - lint: no-invalid-media-type-examples: Example value must conform to the schema: `created` property type must be null. (#/paths/~1api~1v3~1product-categories/get/responses/200/content/application~1json/examples/firstPage/value/data/1/created)
 - …and 112 more
 
-## Notices (12)
+## Notices (1)
 
 - on hold: 11 operations left out (22 overlay edits kept, not applied): GET /api/v3/products/{product_id}/relationships/{relationship_id}/related-products/{related_product_id}; GET /api/v3/products/{product_id}/relationships/{relationship_id}/related-products/{related_product_id}/{path}; GET /api/v3/products/{product_id}/relationships/{relationship_id}/related-products; POST /api/v3/products/{product_id}/relationships/{relationship_id}; PATCH /api/v3/products/{product_id}/relationships/{relationship_id}; GET /api/v3/products/{product_id}/relationships/{relationship_id}/{path}; DELETE /api/v3/products/{product_id}/relationships/{relationship_id}/{path}; PATCH /api/v3/products/{product_id}/relationships/{relationship_id}/{path}; GET /api/v3/products/{product_id}/relationships; POST /api/v3/products/{product_id}/relationships; POST /api/v3/product-families/{identifier}/{path}
-- new action baselined: schemas/products.yaml::$.components.schemas.ProductOutputDto.properties.channels
-- new action baselined: schemas/products.yaml::$.components.schemas.ProductOutputDto.properties.ecatalogs
-- new action baselined: schemas/products.yaml::$.components.schemas.ProductOutputDto.properties.product_data_sheets
-- new action baselined: schemas/products.yaml::$.components.schemas.ProductOutputDto.properties.static_lists
-- new action baselined: schemas/products.yaml::$.components.schemas.ProductChannelLinkOutputDto
-- new action baselined: schemas/products.yaml::$.components.schemas.ProductECatalogLinkOutputDto
-- new action baselined: schemas/products.yaml::$.components.schemas.ProductDataSheetLinkOutputDto
-- new action baselined: schemas/products.yaml::$.components.schemas.ProductListOutputDto
-- baseline entry dropped (action removed): schemas/shared.yaml::$.components.schemas.ProductChannelLinkOutputDto
-- baseline entry dropped (action removed): schemas/shared.yaml::$.components.schemas.ProductDataSheetLinkOutputDto
-- baseline entry dropped (action removed): schemas/shared.yaml::$.components.schemas.ProductECatalogLinkOutputDto
