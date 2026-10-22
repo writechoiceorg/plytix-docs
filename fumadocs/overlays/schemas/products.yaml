@@ -13,12 +13,12 @@ actions:
     update:
       description: Your identifier for the product, up to 100 characters. It must be unique in your account. A SKU that already exists returns `409`.
       examples:
-        - BAG-10157
+        - GF-Basket
   - target: $.components.schemas.ProductCreateDto.properties.label
     update:
       description: Product name shown in Plytix.
       examples:
-        - Canvas Backpack
+        - Gift basket
   - target: $.components.schemas.ProductCreateDto.properties.gtin
     update:
       description: Global Trade Item Number (barcode), 8 to 14 characters.
@@ -31,7 +31,7 @@ actions:
     update:
       description: Custom attribute values, keyed by each attribute's `label` (its snake_case name, not the display name).
       examples:
-        - material: Canvas
+        - collection: '2019'
   - target: $.components.schemas.ProductCreateDto.properties.thumbnail_id
     update:
       description: ID of an existing asset to show as the product's thumbnail.

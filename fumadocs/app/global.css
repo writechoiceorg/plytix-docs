@@ -47,6 +47,10 @@
   --plytix-surface-border: #ffffff;
   --plytix-surface-shadow: 0 0 20px rgb(32 26 50 / 0.08);
 
+  /* MDX tabs: the active label is 5.43:1 on the bar (WCAG AA, PM-43). */
+  --plytix-tab-bar: #f0eef6;
+  --plytix-tab-active: #6236f5;
+
   /* Callouts: Warning, Note, Wrong, Information. */
   --callout-warning-bg: #fff5db;
   --callout-warning-icon: #e6a800;
@@ -97,6 +101,15 @@
   --plytix-surface-fill: linear-gradient(rgb(255 255 255 / 0.1), rgb(255 255 255 / 0.05));
   --plytix-surface-border: rgb(255 255 255 / 0.15);
   --plytix-surface-shadow: 0 0 20px rgb(0 0 0 / 0.25);
+
+  /* A darker bar keeps the lilac active label (5.77:1) apart from the
+     near-white inactive ones (9.15:1). */
+  --plytix-tab-bar: #3a3350;
+  --plytix-tab-active: #bda8ff;
+
+  /* github-dark's #6a737d comments are 2.59-3.04:1 on the code surface;
+     this is 5.49-6.46:1 (PM-60). */
+  --plytix-code-comment: #a6adb4;
 
   --callout-warning-bg: rgb(255 245 219 / 0.2);
   --callout-warning-icon: #e6a800;
@@ -432,6 +445,20 @@ figure.shiki {
 figure.shiki pre {
   font-size: 15px;
   line-height: 1.65;
+}
+/* Comments are the only github-dark tokens in #6a737d. The light theme's
+   comments already pass (4.53:1), so only dark mode changes. */
+.dark .shiki code span[style*='--shiki-dark:#6A737D' i] {
+  color: var(--plytix-code-comment);
+}
+
+/* ---------- Tabs ---------- */
+
+.plytix-tabs {
+  background-color: var(--plytix-tab-bar);
+}
+.plytix-tabs [role='tab'][data-active] {
+  color: var(--plytix-tab-active);
 }
 
 /* ---------- Table of contents ---------- */

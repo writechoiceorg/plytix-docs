@@ -30,7 +30,7 @@ actions:
 
         Use it to find a family's `id` before you assign products to the family with `product_family_id`, or before you work with its attributes.
 
-        Filters use the same syntax as every V3 search, for example `name[contains:ignorecase]=apparel`. To sort by name, send `_sort_by=name`.
+        Filters use the same syntax as every V3 search, for example `name[contains:ignorecase]=aprons`. To sort by name, send `_sort_by=name`.
 
         By default, records don't list the family's attributes. To get them, with each attribute's inheritance `level`, use [List a product family's attributes](/reference/v3/family-attributes/list-family-attributes).
 
@@ -40,6 +40,12 @@ actions:
         - [Reconstruct parent/variant hierarchies](/docs/guides/reconstructing-parent-variant-hierarchies)
         - [Filtering and search](/reference/v3/filtering-and-search)
         - [Pagination](/reference/v3/pagination)
+
+  - target: $.paths['/api/v3/product-families'].get.parameters[?(@.name=='filters' && @.in=='query')]
+    description: 'PM-50; matches the example in this operation''s description'
+    update:
+      example:
+        'name[contains:ignorecase]': aprons
 
   - target: $.paths['/api/v3/product-families'].get.parameters[?(@.name=='_fields' && @.in=='query')]
     description: Q#74, List Product Families.bru "200 - Full Parameters" (2026-09-22)
@@ -60,12 +66,12 @@ actions:
           description: '`GET /api/v3/product-families?_fields=id&_fields=name&_fields=total_products&_sort_by=name&_page_size=2`'
           value:
             data:
-              - id: 6a1f0c2e9b3d4a5f8c7e1d01
-                name: Accessories
-                total_products: 7
               - id: 6a1f0c2e9b3d4a5f8c7e1d03
-                name: Apparel
+                name: Aprons
                 total_products: 46
+              - id: 6a1f0c2e9b3d4a5f8c7e1d01
+                name: Gift Baskets
+                total_products: 7
             errors: []
             pagination:
               next_page: http://<api-host>/api/v3/product-families?_fields=id&_fields=name&_fields=total_products&_sort_by=name&_page=2&_page_size=2
@@ -96,18 +102,18 @@ actions:
         nameOnly:
           summary: Name only
           value:
-            name: Bags
+            name: Mugs
         withAttributes:
           summary: Link attributes at no_level
           value:
-            name: Bags
+            name: Mugs
             attributes:
               - id: 6a1f0c2e9b3d4a5f8c7e1e04
-                label: material
+                label: collection
               - id: 6a1f0c2e9b3d4a5f8c7e1e05
-                label: adult
+                label: size
               - id: 6a1f0c2e9b3d4a5f8c7e1e06
-                label: age_group
+                label: color
 
   - target: $.paths['/api/v3/product-families'].post.responses['201']
     description: Create Product Family.bru 201 captures (2026-09-15 name only, total_attributes 4; 2026-09-22 with three attributes, total_attributes 7), sanitized
@@ -121,7 +127,7 @@ actions:
               value:
                 data:
                   id: 6a1f0c2e9b3d4a5f8c7e1d04
-                  name: Bags
+                  name: Mugs
                   total_products: 0
                   total_attributes: 4
                   total_models: 1
@@ -133,7 +139,7 @@ actions:
               value:
                 data:
                   id: 6a1f0c2e9b3d4a5f8c7e1d04
-                  name: Bags
+                  name: Mugs
                   total_products: 0
                   total_attributes: 7
                   total_models: 1
@@ -208,7 +214,7 @@ actions:
           value:
             data:
               id: 6a1f0c2e9b3d4a5f8c7e1d01
-              name: Accessories
+              name: Gift Baskets
               total_products: 7
               total_attributes: 61
               total_models: 1
@@ -248,7 +254,7 @@ actions:
         rename:
           summary: Rename the family
           value:
-            name: Bags and Backpacks
+            name: Mugs and Cups
 
   - target: $.paths['/api/v3/product-families/{identifier}'].patch.responses['204']
     description: Q#84, Q#116
@@ -290,7 +296,7 @@ actions:
           summary: One field
           description: '`GET /api/v3/product-families/{identifier}/name`'
           value:
-            data: Accessories
+            data: Gift Baskets
             errors: []
 
   - target: $.paths['/api/v3/product-families/{identifier}/{path}'].get.responses['400'].content['application/json']
@@ -341,7 +347,7 @@ actions:
       summary: Update a product family field
       operationId: update-product-family-field
       description: |-
-        Changes one field of a product family. `name` is the only field you can change: set `path` to `name` and send the new name on its own as a JSON string, such as `"Bags and Backpacks"`, not an object. A successful update returns `204` with an empty body.
+        Changes one field of a product family. `name` is the only field you can change: set `path` to `name` and send the new name on its own as a JSON string, such as `"Mugs and Cups"`, not an object. A successful update returns `204` with an empty body.
 
         This has the same effect as [Rename a product family](/reference/v3/product-families/update-product-family). See [Update and delete records](/reference/v3/updates-and-deletes).
 

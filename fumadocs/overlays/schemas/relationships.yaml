@@ -19,7 +19,7 @@ actions:
     update:
       description: Name of the relationship type. It must be unique in your account. A name that already exists returns `409`. The `label` is derived from it in snake_case.
       examples:
-        - Spare Parts
+        - Gift pack
 
   - target: $.components.schemas.RelationshipUpdateInputDto
     description: Replaces the migrated upstream docstring. Q#60, Update and Delete Relationship.bru (label unchanged after rename)
@@ -30,7 +30,7 @@ actions:
     update:
       description: New name of the relationship type.
       examples:
-        - Replacement Parts
+        - Gift box
 
   - target: $.components.schemas.RelationshipStatus
     description: Spec enum; ACTIVE on create (Create Relationship.bru); a deleted type returns 404 (REL-21 asks whether DELETED is ever visible)

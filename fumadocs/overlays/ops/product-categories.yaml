@@ -1,19 +1,23 @@
 # Operation edits for the product-categories endpoints.
 # Pilot (Phase 1): DELETE /api/v3/product-categories/{identifier}.
-# What deleting does to subcategories and assigned products isn't verified yet
-# (CAT-1, CAT-2 in overlays/QUESTIONS.md), so the description doesn't claim it.
+# The subtree warning on DELETE rests on Plytix's own Dev reproduction (PM-61 in
+# materials/Plytix - WriteChoice documentation actions _ 19 October 2026.xlsx),
+# so it's dated and scoped to that test. Production behavior and deletes with
+# many products stay open (CAT-1, CAT-2 in overlays/QUESTIONS.md).
 overlay: 1.0.0
 info:
   title: product-categories operations
   version: 1.0.0
 actions:
   - target: $.paths['/api/v3/product-categories/{identifier}'].delete
-    description: Q#20, "Update and Delete Product Category.bru" 204 + follow-up GET 404 (2026-09-15)
+    description: Q#20, "Update and Delete Product Category.bru" 204 + follow-up GET 404 (2026-09-15); PM-61 Dev reproduction (Plytix, evidence 2026-10-16/18)
     update:
       summary: Delete a product category
       operationId: delete-product-category
       description: |-
         Deletes a product category. A successful delete returns `204` with an empty body, and a later request for the same ID returns `404`.
+
+        **Deleting a parent category can also delete the categories below it.** In a Plytix test on a development account (October 2026), deleting a parent category also deleted its child and grandchild categories, and the test product was unlinked from them. The product itself stayed, and an unrelated category wasn't affected. The effect on many products, and on production accounts, hasn't been tested. Before you delete a category, check `n_children` to see whether it has subcategories.
 
         If you only want to take a product out of a category, unlink the product instead. The category and its other products stay as they are. See [Safely remove categories, assets, or relationships](/docs/guides/safely-removing-categories-assets-or-relationships#remove-a-category-from-a-product).
 
@@ -45,12 +49,12 @@ actions:
         Each category carries its place in the tree:
 
         - `parent_id`: the ID of the category above it. In search results, a top-level category has no `parent_id` key.
-        - `path`: the names from the top of the tree down to this category, for example `["Bags", "Backpacks"]`.
+        - `path`: the names from the top of the tree down to this category, for example `["Sample Categories", "Drinkware"]`.
         - `n_children`: how many categories sit directly below it.
 
         Names can repeat in different branches, so check `path` to pick the right one.
 
-        To find the products filed under a category, search products instead, with a filter such as `categories.name=Backpacks`. See [Search products](/reference/v3/products/search-products).
+        To find the products filed under a category, search products instead, with a filter such as `categories.name=Drinkware`. See [Search products](/reference/v3/products/search-products).
 
         Results come back 25 per page by default. Follow `pagination.next_page` to get the next page, and change its `http://` to `https://` first.
 
@@ -59,6 +63,12 @@ actions:
         - [Filtering and search](/reference/v3/filtering-and-search)
         - [Pagination](/reference/v3/pagination)
         - [The Plytix data model](/docs/guides/data-model#product-categories)
+
+  - target: $.paths['/api/v3/product-categories'].get.parameters[?(@.name=='filters' && @.in=='query')]
+    description: 'PM-50; field names from the resource''s response schema, operators per the API-wide grammar (Q#11, Q#99)'
+    update:
+      example:
+        'name[contains:ignorecase]': kettle
 
   - target: $.paths['/api/v3/product-categories'].get.parameters[?(@.name=='_fields' && @.in=='query')]
     description: List Product Categories.bru "200 - Full Parameters" (2026-09-22)
@@ -79,12 +89,12 @@ actions:
           description: '`GET /api/v3/product-categories?_fields=id&_fields=name&_fields=slug&_page_size=2&_sort_by=name`'
           value:
             data:
-              - id: 6a1f0c2e9b3d4a5f8c7e1c04
-                name: Accessories
-                slug: accessories
               - id: 6a1f0c2e9b3d4a5f8c7e1c02
-                name: Backpacks
-                slug: backpacks
+                name: Drinkware
+                slug: drinkware
+              - id: 6a1f0c2e9b3d4a5f8c7e1c04
+                name: Mugs
+                slug: mugs
             errors: []
             pagination:
               next_page: http://<api-host>/api/v3/product-categories?_fields=id&_fields=name&_fields=slug&_page=2&_page_size=2&_sort_by=name
@@ -100,7 +110,7 @@ actions:
 
         Without `parent_id`, the category is created at the top of the tree. To create a subcategory, set `parent_id` to the ID of an existing category. The new category's `path` then lists every name above it, and the parent's `n_children` goes up by one.
 
-        Plytix generates the `slug` from the name, for example `backpacks` for "Backpacks".
+        Plytix generates the `slug` from the name, for example `kitchen-sinks` for "Kitchen Sinks".
 
         A successful create returns `201`. The response holds fewer fields than [Get a product category](/reference/v3/product-categories/get-product-category): it leaves out `created` and `modified`, and on a top-level category, `parent_id`.
 
@@ -115,11 +125,11 @@ actions:
         topLevel:
           summary: Top-level category
           value:
-            name: Bags
+            name: Sample Categories
         subcategory:
           summary: Subcategory
           value:
-            name: Backpacks
+            name: Drinkware
             parent_id: 6a1f0c2e9b3d4a5f8c7e1c01
 
   - target: $.paths['/api/v3/product-categories'].post.responses['201']
@@ -134,10 +144,10 @@ actions:
               value:
                 data:
                   id: 6a1f0c2e9b3d4a5f8c7e1c01
-                  name: Bags
+                  name: Sample Categories
                   path:
-                    - Bags
-                  slug: bags
+                    - Sample Categories
+                  slug: sample-categories
                   order: 1
                   n_children: 0
                 errors: []
@@ -147,12 +157,12 @@ actions:
               value:
                 data:
                   id: 6a1f0c2e9b3d4a5f8c7e1c02
-                  name: Backpacks
+                  name: Drinkware
                   parent_id: 6a1f0c2e9b3d4a5f8c7e1c01
                   path:
-                    - Bags
-                    - Backpacks
-                  slug: backpacks
+                    - Sample Categories
+                    - Drinkware
+                  slug: drinkware
                   order: 1
                   n_children: 0
                 errors: []
@@ -206,11 +216,11 @@ actions:
           value:
             data:
               id: 6a1f0c2e9b3d4a5f8c7e1c01
-              name: Bags
+              name: Sample Categories
               parent_id: null
               path:
-                - Bags
-              slug: bags
+                - Sample Categories
+              slug: sample-categories
               order: 1
               n_children: 2
               created: '2026-06-22T08:44:08.293000'
@@ -254,11 +264,11 @@ actions:
         rename:
           summary: Rename
           value:
-            name: Travel Backpacks
+            name: Espresso Cups
         renameAndMove:
           summary: Rename and move under another parent
           value:
-            name: Travel Backpacks
+            name: Espresso Cups
             parent_id: 6a1f0c2e9b3d4a5f8c7e1c04
 
   - target: $.paths['/api/v3/product-categories/{identifier}'].patch.responses['204']
@@ -287,7 +297,7 @@ actions:
           summary: One field
           description: '`GET /api/v3/product-categories/{identifier}/name`'
           value:
-            data: Bags
+            data: Sample Categories
             errors: []
         parent:
           summary: Parent of a subcategory
@@ -295,11 +305,11 @@ actions:
           value:
             data:
               id: 6a1f0c2e9b3d4a5f8c7e1c01
-              name: Bags
+              name: Sample Categories
               parent_id: null
               path:
-                - Bags
-              slug: bags
+                - Sample Categories
+              slug: sample-categories
               order: 1
               n_children: 2
               created: '2026-06-22T08:44:08.293000'

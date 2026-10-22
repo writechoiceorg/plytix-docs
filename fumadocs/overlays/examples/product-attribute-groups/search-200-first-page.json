@@ -1,14 +1,14 @@
 {
   "data": [
     {
-      "id": "6a1f0c2e9b3d4a5f8c7e1401",
-      "name": "Amazon",
-      "order": 9
-    },
-    {
       "id": "6a1f0c2e9b3d4a5f8c7e1402",
       "name": "Basic Information",
       "order": 0
+    },
+    {
+      "id": "6a1f0c2e9b3d4a5f8c7e1401",
+      "name": "Dimensions",
+      "order": 9
     }
   ],
   "errors": [],

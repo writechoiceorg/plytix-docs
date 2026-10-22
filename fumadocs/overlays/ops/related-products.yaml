@@ -52,6 +52,12 @@ actions:
 
         - [Filtering and search](/reference/v3/filtering-and-search)
         - [Pagination](/reference/v3/pagination)
+
+  - target: $.paths['/api/v3/related-products'].get.parameters[?(@.name=='filters' && @.in=='query')]
+    description: 'PM-50; the byProduct response example below'
+    update:
+      example:
+        product_id: 6a1f0c2e9b3d4a5f8c7e1a01
   - target: $.paths['/api/v3/related-products'].get.responses['200'].content['application/json']
     description: Get Related Products (Top-Level).bru "Full Parameters" (2026-09-22), sanitized
     update:

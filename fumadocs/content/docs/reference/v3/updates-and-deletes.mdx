@@ -55,7 +55,7 @@ A PATCH on a record merges at the top level only. Top-level fields you leave out
 | `attributes` with some keys, to `PATCH /products/<identifier>` | The whole map is replaced; omitted attributes are deleted |
 | A partial map, to `PATCH /products/<identifier>/attributes` | The attributes you send are merged; omitted attributes are kept |
 
-So `{"attributes": {"price": "34.99"}}` sent to the product leaves a product that also has `brand` and `care_instructions` with `price` alone. To change several attributes and keep the rest, send the partial map, `{"price": "34.99"}`, to the product's `attributes` path instead. [Responses and updates](/docs/guides/migrating-to-v3/responses-and-updates#how-patch-treats-the-attributes-map) shows both routes with before and after examples.
+So `{"attributes": {"suggested_retail_price": "34.99"}}` sent to the product leaves a product that also has `brand` and `collection` with `suggested_retail_price` alone. To change several attributes and keep the rest, send the partial map, `{"suggested_retail_price": "34.99"}`, to the product's `attributes` path instead. [Responses and updates](/docs/guides/migrating-to-v3/responses-and-updates#how-patch-treats-the-attributes-map) shows both routes with before and after examples.
 
 To change one attribute, address it through its own path. The body is the bare value, in the format the attribute type takes. A decimal attribute takes its value as a string:
 

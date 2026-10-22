@@ -35,6 +35,12 @@ actions:
         - [Filtering and search](/reference/v3/filtering-and-search)
         - [Pagination](/reference/v3/pagination)
 
+  - target: $.paths['/api/v3/product-attributes'].get.parameters[?(@.name=='filters' && @.in=='query')]
+    description: 'PM-50; matches type=… in this operation''s description'
+    update:
+      example:
+        type: TextAttribute
+
   # --- POST /api/v3/product-attributes -------------------------------------------
   - target: $.paths['/api/v3/product-attributes'].get.responses['200'].content['application/json']
     description: "Unverified: no 200 captured (VERIFY.md, ATTR-20). Ported from the pre-overlay staging spec, sanitized to the Get a product attribute example's IDs and timestamp format"
@@ -46,17 +52,17 @@ actions:
           value:
             data:
               - id: 6a1f0c2e9b3d4a5f8c7e1e12
-                name: Includes Zipper
-                label: zippered
+                name: In Stock
+                label: in_stock
                 description: null
                 status: ACTIVE
                 created: '2026-06-22T08:45:07.391000'
                 modified: '2026-06-22T08:45:07.391000'
                 type: BooleanAttribute
               - id: 6a1f0c2e9b3d4a5f8c7e1e13
-                name: Short Description
-                label: short_description
-                description: One- or two-sentence summary used on product cards and marketplace listings.
+                name: Feature description
+                label: feature_description
+                description: Key product features, shown on marketplace listings.
                 status: ACTIVE
                 created: '2026-06-22T08:45:07.402000'
                 modified: '2026-06-22T08:45:07.402000'
@@ -118,9 +124,9 @@ actions:
         text:
           summary: Text attribute
           value:
-            name: Material
-            label: material
-            description: Main material of the product
+            name: Collection
+            label: collection
+            description: Product collection, such as 2019
             type: TextAttribute
             character_limit: 250
         dropdown:
@@ -137,8 +143,8 @@ actions:
           summary: Completeness attribute
           description: Scores each product on the attributes listed in `attributes`.
           value:
-            name: Catalog ready
-            label: catalog_ready
+            name: Basic Info Complete
+            label: basic_info_complete
             type: CompletenessAttribute
             attributes:
               - id: 6a1f0c2e9b3d4a5f8c7e1e10
@@ -226,8 +232,8 @@ actions:
           value:
             data:
               id: 6a1f0c2e9b3d4a5f8c7e1e12
-              name: Includes Zipper
-              label: zippered
+              name: In Stock
+              label: in_stock
               description: null
               status: ACTIVE
               created: '2026-06-22T08:45:07.391000'
@@ -275,8 +281,8 @@ actions:
         rename:
           summary: Rename and describe a text attribute
           value:
-            name: Material (outer shell)
-            description: Main material of the outer shell
+            name: Collection name
+            description: Collection the product belongs to
             character_limit: 100
         dropdown:
           summary: Change a dropdown's options and sorting
@@ -341,7 +347,7 @@ actions:
           summary: One field
           description: '`GET /api/v3/product-attributes/{identifier}/label`'
           value:
-            data: zippered
+            data: in_stock
             errors: []
 
   - target: $.paths['/api/v3/product-attributes/{identifier}/{path}'].get.parameters[?(@.name=='path' && @.in=='path')]

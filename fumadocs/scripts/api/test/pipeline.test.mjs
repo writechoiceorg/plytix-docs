@@ -232,6 +232,30 @@ test('targets outside the allowed shapes are rejected', async () => {
   assert.ok(result.errors.some((e) => e.includes('not an allowed shape')));
 });
 
+test('an object parameter example is replaced by a shared remove plus a per-operation update', async () => {
+  const filters = "parameters[?(@.name=='filters' && @.in=='query')]";
+  const dir = await workspace(() => {}, {
+    overlay: {
+      ...OVERLAY,
+      actions: [{ target: `$.paths['/api/v3/assets'].get.${filters}`, update: { example: { extension: 'jpg' } } }],
+    },
+  });
+  await writeFile(
+    path.join(dir, 'overlays/10-shared.yaml'),
+    YAML.stringify({
+      overlay: '1.0.0',
+      info: { title: 'shared', version: '1.0.0' },
+      actions: [{ target: `$.paths.*.*.${filters}.example`, remove: true }],
+    }),
+  );
+  const result = await build(dir);
+  assert.equal(result.ok, true, result.report);
+  const out = await readJson(path.join(dir, 'openapi.json'));
+  const param = (p) => out.paths[p].get.parameters.find((x) => x.name === 'filters');
+  assert.deepEqual(param('/api/v3/assets').example, { extension: 'jpg' }, 'nothing merged in from upstream');
+  assert.equal(param('/api/v3/products').example, undefined);
+});
+
 test('on-hold operations are left out, their edits kept and their baseline preserved', async () => {
   const dir = await workspace();
   assert.equal((await build(dir)).ok, true);

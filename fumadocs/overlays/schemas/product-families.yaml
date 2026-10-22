@@ -20,7 +20,7 @@ actions:
     update:
       description: Name of the product family, 1 to 300 characters. It must be unique in your account. A name that already exists returns `409`.
       examples:
-        - Bags
+        - Mugs
 
   - target: $.components.schemas.ProductFamilyCreateInputDto.properties.attributes
     description: Q#73 (always no_level), Create Product Family.bru "201 - Full Parameters"
@@ -28,7 +28,7 @@ actions:
       description: Attributes to link to the family at `no_level`, so their values don't pass down from parents to variants.
       examples:
         - - id: 6a1f0c2e9b3d4a5f8c7e1e04
-            label: material
+            label: collection
 
   - target: $.components.schemas.ProductFamilyCreateInputDto.properties.parent_attributes
     description: Q#73, status-gating #4 (403 without automatic inheritance)
@@ -69,7 +69,7 @@ actions:
     update:
       description: The attribute's `label`, its snake_case name.
       examples:
-        - material
+        - brand
   - target: $.components.schemas.AttributeRefInputDto.properties.id
     update:
       description: The attribute's ID.
@@ -93,4 +93,4 @@ actions:
     update:
       description: New name of the product family, 1 to 300 characters.
       examples:
-        - Bags and Backpacks
+        - Mugs and Cups

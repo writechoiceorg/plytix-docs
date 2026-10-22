@@ -32,6 +32,12 @@ actions:
         - [Pagination](/reference/v3/pagination)
         - [The Plytix data model](/docs/guides/data-model#product-categories)
 
+  - target: $.paths['/api/v3/asset-categories'].get.parameters[?(@.name=='filters' && @.in=='query')]
+    description: 'PM-50; field names from the resource''s response schema, operators per the API-wide grammar (Q#11, Q#99)'
+    update:
+      example:
+        'name[contains:ignorecase]': marketing
+
   - target: $.paths['/api/v3/asset-categories'].get.responses['200'].content['application/json']
     description: List Asset Categories.bru "200 - Full Parameters" (2026-09-22), IDs and host sanitized
     update:
@@ -42,11 +48,11 @@ actions:
           value:
             data:
               - id: 6a1f0c2e9b3d4a5f8c7e1802
-                name: Branding
-                slug: branding
+                name: Marketing Material
+                slug: marketing-material
               - id: 6a1f0c2e9b3d4a5f8c7e1803
-                name: Environmental Photos
-                slug: environmental-photos
+                name: Specifications
+                slug: specifications
             errors: []
             pagination:
               next_page: http://<api-host>/api/v3/asset-categories?_fields=id&_fields=name&_fields=slug&_fields=parent_id&_page=2&_page_size=2&_sort_by=name

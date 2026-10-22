@@ -118,8 +118,8 @@ Every fix in `00-fixes.yaml` cites one of these IDs through `x-plytix-question`.
 
 ### CAT-1
 
-- **Observed:** `DELETE /api/v3/product-categories/{identifier}` returns `204`, and the category then returns `404` (quirk #20). We haven't deleted a category that has subcategories. In V1, deleting a category also deleted all its subcategories. The pre-overlay staging spec said a "controlled Dev test (October 2026)" deleted a parent's child and grandchild categories and unlinked them from a product. No capture or note in this repo backs that, so it isn't published.
-- **Question:** In V3, does deleting a category delete its subcategories? If not, what happens to them (moved up a level, left without a parent)?
+- **Observed:** `DELETE /api/v3/product-categories/{identifier}` returns `204`, and the category then returns `404` (quirk #20). We haven't deleted a category that has subcategories. In V1, deleting a category also deleted all its subcategories. Plytix's feedback sheet (PM-61, `materials/Plytix - WriteChoice documentation actions _ 19 October 2026.xlsx`) records a Dev reproduction: deleting a parent returned `204`, deleted its child and grandchild, left an unrelated category, and kept the product with those category links removed. The delete page now warns about this, dated and scoped to that test.
+- **Question:** Is the subtree delete the intended V3 behavior on production accounts, so the warning can drop its "Dev test" qualification?
 
 | Plytix response |
 | :---- |

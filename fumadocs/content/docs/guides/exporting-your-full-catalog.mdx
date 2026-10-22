@@ -69,9 +69,9 @@ Follow the steps below to request the fields you need, walk the pages until you 
    ```json
    {
      "id": "6a38f614c3d65a5f868b1a06",
-     "sku": "BAG-10157",
-     "categories": [{ "id": "...", "name": "Backpacks", "path": ["Website Taxonomy", "Bags & Luggage", "Backpacks"] }],
-     "assets": [{ "id": "...", "filename": "BAG-10157_10.jpg", "content_type": "image/jpeg", "file_size": 559164, "path": "public_files/pim/assets/..." }]
+     "sku": "Black Kettle",
+     "categories": [{ "id": "...", "name": "Kettles & Teapots", "path": ["Sample Categories", "Kettles & Teapots"] }],
+     "assets": [{ "id": "...", "filename": "kettle_blue.jpg", "content_type": "image/jpeg", "file_size": 559164, "path": "public_files/pim/assets/..." }]
    }
    ```
 
@@ -84,7 +84,7 @@ Follow the steps below to request the fields you need, walk the pages until you 
    ```bash
    curl -G "https://pim.plytix.com/api/v3/products" \
      -H "Authorization: Bearer <access_token>" \
-     --data-urlencode "categories.name=Backpacks" \
+     --data-urlencode "categories.name=Kettles & Teapots" \
      --data-urlencode "_fields=id" \
      --data-urlencode "_fields=sku" \
      --data-urlencode "_sort_by=id"
@@ -139,7 +139,7 @@ import requests
 
 BASE_URL = "https://pim.plytix.com/api/v3/products"
 FIELDS = ["id", "sku", "label", "attributes", "categories", "assets"]
-FILTERS = []                # extra query parameters, such as ("categories.name", "Backpacks")
+FILTERS = []                # extra query parameters, such as ("categories.name", "Kettles & Teapots")
 STATE_DIR = "export"        # one file per page, plus the manifest
 OUTPUT = "products.jsonl"   # the finished export, one product per line
 # This export's share of your account's limits, as (requests, seconds).

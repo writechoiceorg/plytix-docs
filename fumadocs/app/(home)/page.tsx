@@ -54,8 +54,8 @@ export default function HomePage() {
           Build on the Plytix API
         </h1>
         <p className="text-white/90 text-lg sm:text-[20px] leading-[1.4] max-w-[820px] mx-auto mb-10">
-          Plytix is a product content platform, with Plytix PIM, Plytix DAM, and Plytix Feed
-          Management working together. Use the API to connect your ERP, storefront, or internal
+          Plytix is a multi-technology platform for product content, with Plytix PIM, Plytix DAM,
+          and Plytix Feed Management working together. Use the API to connect your ERP, storefront, or internal
           tools and manage your products, assets, and catalog structure programmatically.
         </p>
         <Link

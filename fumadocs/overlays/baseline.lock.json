@@ -3049,6 +3049,142 @@
         }
       }
     },
+    "10-shared.yaml::$.paths.*.*.parameters[?(@.name=='filters' && @.in=='query')].example": {
+      "nodes": {
+        "$.paths./api/v3/asset-categories.get.parameters[filters@query].example": {
+          "sig": null,
+          "upstream": {
+            ".": {
+              "status[eq]": "Draft",
+              "label[lower][contains:ignorecase]": "shirt",
+              "_or[0]sku[eq]": "A1",
+              "_or[0]price[gte]": "100"
+            }
+          }
+        },
+        "$.paths./api/v3/asset-lists.get.parameters[filters@query].example": {
+          "sig": null,
+          "upstream": {
+            ".": {
+              "status[eq]": "Draft",
+              "label[lower][contains:ignorecase]": "shirt",
+              "_or[0]sku[eq]": "A1",
+              "_or[0]price[gte]": "100"
+            }
+          }
+        },
+        "$.paths./api/v3/assets.get.parameters[filters@query].example": {
+          "sig": null,
+          "upstream": {
+            ".": {
+              "status[eq]": "Draft",
+              "label[lower][contains:ignorecase]": "shirt",
+              "_or[0]sku[eq]": "A1",
+              "_or[0]price[gte]": "100"
+            }
+          }
+        },
+        "$.paths./api/v3/family-attributes.get.parameters[filters@query].example": {
+          "sig": null,
+          "upstream": {
+            ".": {
+              "status[eq]": "Draft",
+              "label[lower][contains:ignorecase]": "shirt",
+              "_or[0]sku[eq]": "A1",
+              "_or[0]price[gte]": "100"
+            }
+          }
+        },
+        "$.paths./api/v3/product-attribute-groups.get.parameters[filters@query].example": {
+          "sig": null,
+          "upstream": {
+            ".": {
+              "status[eq]": "Draft",
+              "label[lower][contains:ignorecase]": "shirt",
+              "_or[0]sku[eq]": "A1",
+              "_or[0]price[gte]": "100"
+            }
+          }
+        },
+        "$.paths./api/v3/product-attributes.get.parameters[filters@query].example": {
+          "sig": null,
+          "upstream": {
+            ".": {
+              "status[eq]": "Draft",
+              "label[lower][contains:ignorecase]": "shirt",
+              "_or[0]sku[eq]": "A1",
+              "_or[0]price[gte]": "100"
+            }
+          }
+        },
+        "$.paths./api/v3/product-categories.get.parameters[filters@query].example": {
+          "sig": null,
+          "upstream": {
+            ".": {
+              "status[eq]": "Draft",
+              "label[lower][contains:ignorecase]": "shirt",
+              "_or[0]sku[eq]": "A1",
+              "_or[0]price[gte]": "100"
+            }
+          }
+        },
+        "$.paths./api/v3/product-families.get.parameters[filters@query].example": {
+          "sig": null,
+          "upstream": {
+            ".": {
+              "status[eq]": "Draft",
+              "label[lower][contains:ignorecase]": "shirt",
+              "_or[0]sku[eq]": "A1",
+              "_or[0]price[gte]": "100"
+            }
+          }
+        },
+        "$.paths./api/v3/product-relationships.get.parameters[filters@query].example": {
+          "sig": null,
+          "upstream": {
+            ".": {
+              "status[eq]": "Draft",
+              "label[lower][contains:ignorecase]": "shirt",
+              "_or[0]sku[eq]": "A1",
+              "_or[0]price[gte]": "100"
+            }
+          }
+        },
+        "$.paths./api/v3/products.get.parameters[filters@query].example": {
+          "sig": null,
+          "upstream": {
+            ".": {
+              "status[eq]": "Draft",
+              "label[lower][contains:ignorecase]": "shirt",
+              "_or[0]sku[eq]": "A1",
+              "_or[0]price[gte]": "100"
+            }
+          }
+        },
+        "$.paths./api/v3/related-products.get.parameters[filters@query].example": {
+          "sig": null,
+          "upstream": {
+            ".": {
+              "status[eq]": "Draft",
+              "label[lower][contains:ignorecase]": "shirt",
+              "_or[0]sku[eq]": "A1",
+              "_or[0]price[gte]": "100"
+            }
+          }
+        },
+        "$.paths./api/v3/relationships.get.parameters[filters@query].example": {
+          "sig": null,
+          "upstream": {
+            ".": {
+              "status[eq]": "Draft",
+              "label[lower][contains:ignorecase]": "shirt",
+              "_or[0]sku[eq]": "A1",
+              "_or[0]price[gte]": "100"
+            }
+          }
+        }
+      }
+    },
     "10-shared.yaml::$.paths.*.*.parameters[?(@.name=='identifier' && @.in=='path')]": {
       "nodes": {
         "$.paths./api/v3/asset-categories/{identifier}.delete.parameters[identifier@path]": {
@@ -8903,6 +9039,27 @@
         }
       }
     },
+    "ops/asset-categories.yaml::$.paths['/api/v3/asset-categories'].get.parameters[?(@.name=='filters' && @.in=='query')]": {
+      "nodes": {
+        "$.paths./api/v3/asset-categories.get.parameters[filters@query]": {
+          "sig": {
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "object"
+            }
+          },
+          "upstream": {
+            "example": {
+              "status[eq]": "Draft",
+              "label[lower][contains:ignorecase]": "shirt",
+              "_or[0]sku[eq]": "A1",
+              "_or[0]price[gte]": "100"
+            }
+          }
+        }
+      }
+    },
     "ops/asset-categories.yaml::$.paths['/api/v3/asset-categories'].get.responses['200'].content['application/json']": {
       "nodes": {
         "$.paths./api/v3/asset-categories.get.responses.200.content.application/json": {
@@ -9298,6 +9455,27 @@
           },
           "upstream": {
             "description": "Fields to return. Repeat the parameter for several fields; a relation name expands it."
+          }
+        }
+      }
+    },
+    "ops/asset-lists.yaml::$.paths['/api/v3/asset-lists'].get.parameters[?(@.name=='filters' && @.in=='query')]": {
+      "nodes": {
+        "$.paths./api/v3/asset-lists.get.parameters[filters@query]": {
+          "sig": {
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "object"
+            }
+          },
+          "upstream": {
+            "example": {
+              "status[eq]": "Draft",
+              "label[lower][contains:ignorecase]": "shirt",
+              "_or[0]sku[eq]": "A1",
+              "_or[0]price[gte]": "100"
+            }
           }
         }
       }
@@ -9745,6 +9923,27 @@
             "summary": "Search-Assets",
             "operationId": "search_assets_api_v3_assets_get",
             "description": "Any other query parameter is a filter on a field:\n\n* `field=value` or `field[op]=value`. Operators: `eq`, `null`, `exists`, `contains`, `contains:ignorecase`, `in`, `includes`, `intersects`, `gt`, `gte`, `lt`, `lte`, `!eq`, `!null`, `!exists`, `!contains`, `!contains:ignorecase`, `!in`, `!includes`, `!intersects`, `!gt`, `!gte`, `!lt`, `!lte`.\n* `field[func:param][op]=value` applies a function first; omitting `[op]` uses `eq`.\n  Functions: `upper`, `lower`, `trim`, `length`, `len`, `days_passed`, `year`, `month`, `day`, `dayofweek`, `abs`, `ceil`, `floor`, `round`.\n* `_or[N]field[op]=value` groups filters sharing index `N`; `_and`, `_exists` and the negated `_!or`,\n  `_!and` and `_!exists` work the same way."
+          }
+        }
+      }
+    },
+    "ops/assets.yaml::$.paths['/api/v3/assets'].get.parameters[?(@.name=='filters' && @.in=='query')]": {
+      "nodes": {
+        "$.paths./api/v3/assets.get.parameters[filters@query]": {
+          "sig": {
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "object"
+            }
+          },
+          "upstream": {
+            "example": {
+              "status[eq]": "Draft",
+              "label[lower][contains:ignorecase]": "shirt",
+              "_or[0]sku[eq]": "A1",
+              "_or[0]price[gte]": "100"
+            }
           }
         }
       }
@@ -10204,6 +10403,27 @@
         }
       }
     },
+    "ops/family-attributes.yaml::$.paths['/api/v3/family-attributes'].get.parameters[?(@.name=='filters' && @.in=='query')]": {
+      "nodes": {
+        "$.paths./api/v3/family-attributes.get.parameters[filters@query]": {
+          "sig": {
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "object"
+            }
+          },
+          "upstream": {
+            "example": {
+              "status[eq]": "Draft",
+              "label[lower][contains:ignorecase]": "shirt",
+              "_or[0]sku[eq]": "A1",
+              "_or[0]price[gte]": "100"
+            }
+          }
+        }
+      }
+    },
     "ops/family-attributes.yaml::$.paths['/api/v3/family-attributes'].get.responses['200'].content['application/json']": {
       "nodes": {
         "$.paths./api/v3/family-attributes.get.responses.200.content.application/json": {
@@ -10548,6 +10768,27 @@
         }
       }
     },
+    "ops/product-attribute-groups.yaml::$.paths['/api/v3/product-attribute-groups'].get.parameters[?(@.name=='filters' && @.in=='query')]": {
+      "nodes": {
+        "$.paths./api/v3/product-attribute-groups.get.parameters[filters@query]": {
+          "sig": {
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "object"
+            }
+          },
+          "upstream": {
+            "example": {
+              "status[eq]": "Draft",
+              "label[lower][contains:ignorecase]": "shirt",
+              "_or[0]sku[eq]": "A1",
+              "_or[0]price[gte]": "100"
+            }
+          }
+        }
+      }
+    },
     "ops/product-attribute-groups.yaml::$.paths['/api/v3/product-attribute-groups'].get.responses['200'].content['application/json']": {
       "nodes": {
         "$.paths./api/v3/product-attribute-groups.get.responses.200.content.application/json": {
@@ -10864,6 +11105,27 @@
             "summary": "Search-Product-Attributes",
             "operationId": "search_product_attributes_api_v3_product_attributes_get",
             "description": "Any other query parameter is a filter on a field:\n\n* `field=value` or `field[op]=value`. Operators: `eq`, `null`, `exists`, `contains`, `contains:ignorecase`, `in`, `includes`, `intersects`, `gt`, `gte`, `lt`, `lte`, `!eq`, `!null`, `!exists`, `!contains`, `!contains:ignorecase`, `!in`, `!includes`, `!intersects`, `!gt`, `!gte`, `!lt`, `!lte`.\n* `field[func:param][op]=value` applies a function first; omitting `[op]` uses `eq`.\n  Functions: `upper`, `lower`, `trim`, `length`, `len`, `days_passed`, `year`, `month`, `day`, `dayofweek`, `abs`, `ceil`, `floor`, `round`.\n* `_or[N]field[op]=value` groups filters sharing index `N`; `_and`, `_exists` and the negated `_!or`,\n  `_!and` and `_!exists` work the same way."
+          }
+        }
+      }
+    },
+    "ops/product-attributes.yaml::$.paths['/api/v3/product-attributes'].get.parameters[?(@.name=='filters' && @.in=='query')]": {
+      "nodes": {
+        "$.paths./api/v3/product-attributes.get.parameters[filters@query]": {
+          "sig": {
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "object"
+            }
+          },
+          "upstream": {
+            "example": {
+              "status[eq]": "Draft",
+              "label[lower][contains:ignorecase]": "shirt",
+              "_or[0]sku[eq]": "A1",
+              "_or[0]price[gte]": "100"
+            }
           }
         }
       }
@@ -11229,6 +11491,27 @@
           },
           "upstream": {
             "description": "Fields to return. Repeat the parameter for several fields; a relation name expands it."
+          }
+        }
+      }
+    },
+    "ops/product-categories.yaml::$.paths['/api/v3/product-categories'].get.parameters[?(@.name=='filters' && @.in=='query')]": {
+      "nodes": {
+        "$.paths./api/v3/product-categories.get.parameters[filters@query]": {
+          "sig": {
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "object"
+            }
+          },
+          "upstream": {
+            "example": {
+              "status[eq]": "Draft",
+              "label[lower][contains:ignorecase]": "shirt",
+              "_or[0]sku[eq]": "A1",
+              "_or[0]price[gte]": "100"
+            }
           }
         }
       }
@@ -11689,6 +11972,27 @@
         }
       }
     },
+    "ops/product-families.yaml::$.paths['/api/v3/product-families'].get.parameters[?(@.name=='filters' && @.in=='query')]": {
+      "nodes": {
+        "$.paths./api/v3/product-families.get.parameters[filters@query]": {
+          "sig": {
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "object"
+            }
+          },
+          "upstream": {
+            "example": {
+              "status[eq]": "Draft",
+              "label[lower][contains:ignorecase]": "shirt",
+              "_or[0]sku[eq]": "A1",
+              "_or[0]price[gte]": "100"
+            }
+          }
+        }
+      }
+    },
     "ops/product-families.yaml::$.paths['/api/v3/product-families'].get.responses['200'].content['application/json']": {
       "nodes": {
         "$.paths./api/v3/product-families.get.responses.200.content.application/json": {
@@ -12062,6 +12366,27 @@
         }
       }
     },
+    "ops/product-relationships.yaml::$.paths['/api/v3/product-relationships'].get.parameters[?(@.name=='filters' && @.in=='query')]": {
+      "nodes": {
+        "$.paths./api/v3/product-relationships.get.parameters[filters@query]": {
+          "sig": {
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "object"
+            }
+          },
+          "upstream": {
+            "example": {
+              "status[eq]": "Draft",
+              "label[lower][contains:ignorecase]": "shirt",
+              "_or[0]sku[eq]": "A1",
+              "_or[0]price[gte]": "100"
+            }
+          }
+        }
+      }
+    },
     "ops/product-relationships.yaml::$.paths['/api/v3/products/{product_id}/relationships'].get": {
       "nodes": {
         "$.paths./api/v3/products/{product_id}/relationships.get": {
@@ -12249,6 +12574,27 @@
           },
           "upstream": {
             "description": "Field to sort by. Prefix with `-` for descending."
+          }
+        }
+      }
+    },
+    "ops/products.yaml::$.paths['/api/v3/products'].get.parameters[?(@.name=='filters' && @.in=='query')]": {
+      "nodes": {
+        "$.paths./api/v3/products.get.parameters[filters@query]": {
+          "sig": {
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "object"
+            }
+          },
+          "upstream": {
+            "example": {
+              "status[eq]": "Draft",
+              "label[lower][contains:ignorecase]": "shirt",
+              "_or[0]sku[eq]": "A1",
+              "_or[0]price[gte]": "100"
+            }
           }
         }
       }
@@ -12873,6 +13219,27 @@
         }
       }
     },
+    "ops/related-products.yaml::$.paths['/api/v3/related-products'].get.parameters[?(@.name=='filters' && @.in=='query')]": {
+      "nodes": {
+        "$.paths./api/v3/related-products.get.parameters[filters@query]": {
+          "sig": {
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "object"
+            }
+          },
+          "upstream": {
+            "example": {
+              "status[eq]": "Draft",
+              "label[lower][contains:ignorecase]": "shirt",
+              "_or[0]sku[eq]": "A1",
+              "_or[0]price[gte]": "100"
+            }
+          }
+        }
+      }
+    },
     "ops/related-products.yaml::$.paths['/api/v3/related-products'].get.responses['200'].content['application/json']": {
       "nodes": {
         "$.paths./api/v3/related-products.get.responses.200.content.application/json": {
@@ -12913,6 +13280,27 @@
           },
           "upstream": {
             "description": "Fields to return. Repeat the parameter for several fields; a relation name expands it."
+          }
+        }
+      }
+    },
+    "ops/relationships.yaml::$.paths['/api/v3/relationships'].get.parameters[?(@.name=='filters' && @.in=='query')]": {
+      "nodes": {
+        "$.paths./api/v3/relationships.get.parameters[filters@query]": {
+          "sig": {
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "object"
+            }
+          },
+          "upstream": {
+            "example": {
+              "status[eq]": "Draft",
+              "label[lower][contains:ignorecase]": "shirt",
+              "_or[0]sku[eq]": "A1",
+              "_or[0]price[gte]": "100"
+            }
           }
         }
       }

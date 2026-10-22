@@ -23,7 +23,7 @@ actions:
 
         Filters are query parameters written as `field=value` or `field[operator]=value`. A product must match all of them, unless you group filters with `_or`. Besides the top-level fields, you can filter on:
 
-        - Custom attributes, through `attributes.<label>`, for example `attributes.material=Canvas`
+        - Custom attributes, through `attributes.<label>`, for example `attributes.brand=Plytix`
         - Related records, through dot paths such as `categories.name`
         - A parent's direct variants, through `parent_id=<id>` or `parent.sku=<sku>`
 
@@ -42,6 +42,13 @@ actions:
         - [Pagination](/reference/v3/pagination)
         - [Export your full catalog](/docs/guides/exporting-your-full-catalog)
         - [Audit product data quality with filters](/docs/guides/auditing-product-data-quality-with-filters)
+
+  - target: $.paths['/api/v3/products'].get.parameters[?(@.name=='filters' && @.in=='query')]
+    description: 'PM-50; List Products.bru "200" (status=Draft&created[gt]=…)'
+    update:
+      example:
+        status: Draft
+        'created[gt]': '2026-01-01'
 
   - target: $.paths['/api/v3/products'].get.parameters[?(@.name=='_fields' && @.in=='query')]
     description: Q#10, Q#12, Q#100, Q#113, PROD-3
@@ -118,7 +125,7 @@ actions:
 
         The `sku` must be unique in your account. If a product with that SKU already exists, the request returns `409` and creates nothing. That makes a create safe to retry: if a request times out, sending it again either creates the product or returns `409`, never a duplicate.
 
-        Set custom attribute values in `attributes`, keyed by each attribute's `label` (its snake_case name, not the display name), for example `{"attributes": {"material": "Canvas"}}`. The response also lists the account's completeness attributes, such as `website_ready`, which Plytix calculates for you.
+        Set custom attribute values in `attributes`, keyed by each attribute's `label` (its snake_case name, not the display name), for example `{"attributes": {"collection": "2019"}}`. The response also lists the account's completeness attributes, such as `basic_info_complete`, which Plytix calculates for you.
 
         To create a variant, set `parent_id` to the parent product's ID:
 
@@ -136,25 +143,25 @@ actions:
         standalone:
           summary: Standalone product
           value:
-            sku: BAG-10157
-            label: Canvas Backpack
+            sku: GF-Basket
+            label: Gift basket
             gtin: '4006381333931'
             status: Draft
             product_family_id: 6a1f0c2e9b3d4a5f8c7e1d01
             thumbnail_id: 6a1f0c2e9b3d4a5f8c7e1b01
             attributes:
-              material: Canvas
+              collection: '2019'
         variant:
           summary: Variant of an existing product
           description: The variant joins the parent's product family, so `product_family_id` is left out.
           value:
-            sku: BAG-10157-BLK
-            label: Canvas Backpack, Black
+            sku: GF-Basket-L
+            label: Gift basket, Large
             parent_id: 6a1f0c2e9b3d4a5f8c7e1a01
         minimal:
           summary: Only the required field
           value:
-            sku: BAG-10157
+            sku: GF-Basket
 
   - target: $.paths['/api/v3/products'].post.responses['201']
     description: Q#19, Q#117
@@ -226,7 +233,7 @@ actions:
         The `attributes` map is the exception: it's replaced as a whole. Any custom attribute you leave out of `attributes` is removed from the product. To change custom attributes, do one of the following:
 
         - Send the complete `attributes` map, with the values you want to keep.
-        - Change one attribute at a time with [Update a product field](/reference/v3/products/update-product-field), for example `PATCH /api/v3/products/{identifier}/attributes/material`.
+        - Change one attribute at a time with [Update a product field](/reference/v3/products/update-product-field), for example `PATCH /api/v3/products/{identifier}/attributes/collection`.
 
         Completeness and formula attributes are calculated by Plytix. Values you send for them are ignored.
 
@@ -254,15 +261,15 @@ actions:
         fields:
           summary: Change the label and status
           value:
-            label: Canvas Backpack, 20 L
+            label: Gift basket, deluxe
             status: Completed
         attributes:
           summary: Replace custom attribute values
           description: Send every custom attribute you want to keep. Attributes left out of the map are removed.
           value:
             attributes:
-              material: Canvas
-              color: Black
+              brand: Plytix
+              collection: '2019'
         clearThumbnail:
           summary: Remove the thumbnail
           value:
@@ -317,7 +324,7 @@ actions:
       summary: Get a product
       operationId: get-product
       description: |-
-        Returns one product. You can use the product's `id` or its SKU as the identifier: `GET /api/v3/products/BAG-10157` returns the same record as a request with the product's ID. An identifier that matches nothing returns `404`.
+        Returns one product. You can use the product's `id` or its SKU as the identifier: `GET /api/v3/products/GF-Basket` returns the same record as a request with the product's ID. An identifier that matches nothing returns `404`.
 
         To return only some fields, use `_fields`, for example `_fields=sku&_fields=label`. Without it, you get the full record.
 
@@ -336,10 +343,10 @@ actions:
       examples:
         selectedFields:
           summary: One field, with _fields
-          description: '`GET /api/v3/products/BAG-10157?_fields=sku`'
+          description: '`GET /api/v3/products/GF-Basket?_fields=sku`'
           value:
             data:
-              sku: BAG-10157
+              sku: GF-Basket
             errors: []
 
   - target: $.paths['/api/v3/products/{identifier}'].get.responses['404'].content['application/json']
@@ -394,7 +401,7 @@ actions:
   - target: $.paths['/api/v3/products/{identifier}/{path}'].get.parameters[?(@.name=='path' && @.in=='path')]
     description: Q#16, FB-026
     update:
-      description: The field to read, such as `attributes`, `attributes/material`, or `categories`.
+      description: The field to read, such as `attributes`, `attributes/collection`, or `categories`.
 
   - target: $.paths['/api/v3/products/{identifier}/{path}'].get.responses['200'].content['application/json']
     description: Get Product Subpath - Attributes.bru "200 - Attributes Subpath (Full Map)" (2026-09-07); Unlink Category from Product.bru "Verify After Unlink" (2026-10-08)
@@ -405,16 +412,16 @@ actions:
           description: '`GET /api/v3/products/{identifier}/attributes`'
           value:
             data:
-              material: Canvas
-              color: Black
-              amazon_ready: 85.71
-              website_ready: 100.0
+              brand: Plytix
+              collection: '2019'
+              basic_info_complete: 100.0
+              rich_info_complete: 85.71
             errors: []
         oneAttribute:
           summary: One attribute value
-          description: '`GET /api/v3/products/{identifier}/attributes/material`'
+          description: '`GET /api/v3/products/{identifier}/attributes/collection`'
           value:
-            data: Canvas
+            data: '2019'
             errors: []
         categories:
           summary: Linked categories
@@ -422,12 +429,12 @@ actions:
           value:
             data:
               - id: 6a1f0c2e9b3d4a5f8c7e1c02
-                name: Backpacks
+                name: Drinkware
                 parent_id: 6a1f0c2e9b3d4a5f8c7e1c01
                 path:
-                  - Bags
-                  - Backpacks
-                slug: backpacks
+                  - Sample Categories
+                  - Drinkware
+                slug: drinkware
                 order: 1
                 n_children: 0
             errors: []
@@ -504,7 +511,7 @@ actions:
       summary: Update a product field
       operationId: update-product-field
       description: |-
-        Changes one custom attribute value and leaves the rest of the product as it is. Set `path` to `attributes/<label>` and send the new value on its own as the request body: `"Canvas"`, not `{"value": "Canvas"}`. A successful update returns `204` with an empty body.
+        Changes one custom attribute value and leaves the rest of the product as it is. Set `path` to `attributes/<label>` and send the new value on its own as the request body: `"2019"`, not `{"value": "2019"}`. A successful update returns `204` with an empty body.
 
         Use this to change a single attribute. [Update a product](/reference/v3/products/update-product) replaces the whole `attributes` map, so any attribute you leave out of it is removed.
 
@@ -512,7 +519,7 @@ actions:
 
         - Text: a string. `null` removes the value.
         - Decimal: a string, such as `"12.5"`. A JSON number returns `422`.
-        - Multi-select: an array of the attribute's configured options, such as `["Cotton"]`.
+        - Multi-select: an array of the attribute's configured options, such as `["Blue"]`.
         - Media: one asset ID, as a string.
         - Media gallery: an array of asset IDs.
 
@@ -523,7 +530,7 @@ actions:
   - target: $.paths['/api/v3/products/{identifier}/{path}'].patch.parameters[?(@.name=='path' && @.in=='path')]
     description: Q#87
     update:
-      description: '`attributes/` followed by the attribute''s `label`, for example `attributes/material`.'
+      description: '`attributes/` followed by the attribute''s `label`, for example `attributes/collection`.'
 
   - target: $.paths['/api/v3/products/{identifier}/{path}'].patch.responses['204']
     description: Q#87

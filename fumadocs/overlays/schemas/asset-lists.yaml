@@ -20,7 +20,7 @@ actions:
     update:
       description: List name. It must be unique among your asset lists. A name that's already in use returns `409`.
       examples:
-        - Front Shots
+        - Kettle Images
   - target: $.components.schemas.AssetListCreateInputDto.properties.type
     update:
       description: '`Smart` for a list whose members are the assets that match its `query`. `Static` for a list whose membership is stored on each asset.'
@@ -42,7 +42,7 @@ actions:
     update:
       description: New list name.
       examples:
-        - Lifestyle Photos
+        - Kettle Photos
   - target: $.components.schemas.AssetListUpdateInputDto.properties.query
     update:
       description: New conditions for a `Smart` list. They replace the whole current query, so include every group and condition you want to keep. Don't send it for a `Static` list.

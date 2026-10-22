@@ -12,11 +12,11 @@ _openapi:
     headings: []
     contents:
       - content: |-
-          Creates a relationship type, such as "Spare Parts", and returns it, including its new `id`. `name` is the only field in the body.
+          Creates a relationship type, such as "Gift pack", and returns it, including its new `id`. `name` is the only field in the body.
 
           Plytix sets the other fields for you:
 
-          - `label` is derived from the name in snake_case, so "Spare Parts" gets `spare_parts`. It doesn't change if you rename the type later.
+          - `label` is derived from the name in snake_case, so "Gift pack" gets `gift_pack`. It doesn't change if you rename the type later.
           - `status` starts as `ACTIVE`.
 
           Names are unique in your account. If a relationship type with that name already exists, the request returns `409` and creates nothing.

@@ -12,7 +12,7 @@ Find products that break your own catalog's data rules: a required field that's 
 Before you start, make sure you have the following:
 
 - A bearer token. See [Authentication](/reference/v3/authentication), or the [Quickstart](/docs/guides/quickstart) for a first walkthrough.
-- Familiarity with the query-string filter syntax covered in [Filtering and Query Syntax](/reference/v3/filtering-and-search). This guide assumes you can already build a basic filter like `sku=BAG-10157`.
+- Familiarity with the query-string filter syntax covered in [Filtering and Query Syntax](/reference/v3/filtering-and-search). This guide assumes you can already build a basic filter like `sku=GF-Basket`.
 - The rules your catalog applies: which fields each product needs, based on its family, product level, status, or where you publish it.
 
 ## Find incomplete products
@@ -62,7 +62,7 @@ Follow the steps below to define your rules, check each one with a filter, and c
      --data-urlencode "_fields=gtin"
    ```
 
-   `[null]` takes no value, so it's sent with `--data` as it is. The same pattern works for a custom attribute, such as `attributes.short_description`. Whether V3 treats an empty value as missing for `[!exists]` hasn't been confirmed, so keep all three checks when your audit has to catch every case.
+   `[null]` takes no value, so it's sent with `--data` as it is. The same pattern works for a custom attribute, such as `attributes.feature_description`. Whether V3 treats an empty value as missing for `[!exists]` hasn't been confirmed, so keep all three checks when your audit has to catch every case.
 
 3. **Treat whitespace as empty in your own code.**
 
@@ -83,7 +83,7 @@ Follow the steps below to define your rules, check each one with a filter, and c
    ```bash
    curl -G "https://pim.plytix.com/api/v3/products" \
      -H "Authorization: Bearer <access_token>" \
-     --data-urlencode "attributes.short_description%5Bcontains:ignorecase%5D=waterproof"
+     --data-urlencode "attributes.feature_description%5Bcontains:ignorecase%5D=dishwasher"
    ```
 
    Use `[contains]` when case matters. [Filtering and Query Syntax](/reference/v3/filtering-and-search) lists the supported operators. If you send one Plytix doesn't recognize, the request returns `400` and the error lists the operators it accepts.
@@ -103,7 +103,7 @@ Follow the steps below to define your rules, check each one with a filter, and c
    ```bash
    curl -G "https://pim.plytix.com/api/v3/products" \
      -H "Authorization: Bearer <access_token>" \
-     --data-urlencode "attributes.website_ready%5Blt%5D=90" \
+     --data-urlencode "attributes.rich_info_complete%5Blt%5D=90" \
      --data-urlencode "_fields=id" \
      --data-urlencode "_fields=sku" \
      --data-urlencode "_fields=attributes"
@@ -131,7 +131,7 @@ Follow the steps below to define your rules, check each one with a filter, and c
    ```json
    {
      "6a38f614c3d65a5f868b1a06": {
-       "sku": "BAG-10157",
+       "sku": "GF-Basket",
        "failed_rules": ["gtin_required", "thumbnail_required"]
      }
    }

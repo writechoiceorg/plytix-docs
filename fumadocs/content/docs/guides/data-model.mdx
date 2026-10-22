@@ -22,12 +22,12 @@ In short:
 | Entity | What it is | API resource |
 |---|---|---|
 | Product | A single item in your catalog, identified by its SKU | `/api/v3/products` |
-| Product Attribute | A field definition, such as "Material" or "Care instructions" | `/api/v3/product-attributes` |
+| Product Attribute | A field definition, such as "Brand" or "Collection" | `/api/v3/product-attributes` |
 | Attribute Group | A display grouping for attributes in the dashboard | `/api/v3/product-attribute-groups` |
 | Product Family | The set of attributes that applies to one type of product, plus its inheritance rules | `/api/v3/product-families` |
 | Product Category | A node in a hierarchical tree you file products under | `/api/v3/product-categories` |
 | Asset | A file in Plytix DAM, such as an image, video, or document | `/api/v3/assets` |
-| Relationship | A named type of connection between products, such as "Accessories" | `/api/v3/relationships` |
+| Relationship | A named type of connection between products, such as "Gift basket" | `/api/v3/relationships` |
 | Asset list | A saved set of assets, either Static or Smart | `/api/v3/asset-lists` |
 
 ## Products
@@ -36,23 +36,23 @@ A product is the unit everything else attaches to. It carries two kinds of data,
 
 Everything that isn't a custom attribute value sits at the top level of the product object. That includes system fields (`id`, `sku`, `label`, `gtin`, `status`, `product_level`, `num_variations`), relationship fields (`categories`, `assets`, `product_relationships`), timestamps (`created`, `modified`), and foreign keys that point at other entities (`product_family_id`, `parent_id`, which the dashboard shows as "Variant of", and `thumbnail_id`). The system fields are the System Attributes that ship with every Plytix account. You can't rename or delete them.
 
-Your own attribute values sit inside the `attributes` map, keyed by each attribute's label, its snake-case identifier such as `short_description` (not its display name):
+Your own attribute values sit inside the `attributes` map, keyed by each attribute's label, its snake-case identifier such as `suggested_retail_price` (not its display name):
 
 ```json
 {
   "id": "5f7c8a1b2c3d4e5f6a7b8c9d",
-  "sku": "SHIRT-001",
-  "label": "Classic Cotton T-Shirt",
+  "sku": "1001",
+  "label": "Black Wavy Frost Glass Vessel Bowl",
   "status": "Completed",
   "attributes": {
-    "price": 34.99,
-    "short_description": "Soft combed cotton, regular fit.",
-    "website_ready": 92
+    "suggested_retail_price": 310.24,
+    "collection": "2019",
+    "rich_info_complete": 92
   }
 }
 ```
 
-That split is the most useful detail to remember about the model. When you filter, `sku[eq]=SHIRT-001` targets a system field, while `attributes.price[gt]=30` targets a value inside the map.
+That split is the most useful detail to remember about the model. When you filter, `sku[eq]=1001` targets a system field, while `attributes.suggested_retail_price[gt]=30` targets a value inside the map.
 
 `sku` is the only field required to create a product. It must be unique across your account, it's case sensitive, and it maxes out at 100 characters. Everything else is optional, so Plytix will store a product that is nothing but a SKU.
 
@@ -121,7 +121,7 @@ On the product side, `thumbnail_id` points at the single asset used as the produ
 
 A relationship connects products to other products. Setting one up takes two steps and conflating them is a common source of confusion.
 
-1. The Relationship itself is the named type, such as "Accessories", "Spare parts", or "Bundle contents". It's an account-level entity at `/api/v3/relationships`, and creating one links no products.
+1. The Relationship itself is the named type, such as "Gift basket", "Recommended products", or "Gift pack". It's an account-level entity at `/api/v3/relationships`, and creating one links no products.
 2. Linking products happens through `/api/v3/products/{product_id}/relationships/{relationship_id}`, which attaches specific related products to one product under that relationship type.
 
 Each link can carry a `quantity`, which is what makes relationships usable for bundles and packs rather than only for recommendations.
@@ -145,10 +145,10 @@ Plytix expands related entities for you. Ask for `categories`, `assets`, or `pro
 
 The shape of an expanded field depends on the relation. To-many relations, such as `categories` and `assets`, come back as arrays. To-one relations, such as `thumbnail`, `parent`, and `product_family`, come back as a single object.
 
-Expansion isn't narrowed by your filters. This request finds products in the Backpacks category, but each product still returns all of its categories and assets, not only the matching category:
+Expansion isn't narrowed by your filters. This request finds products in the Drinkware category, but each product still returns all of its categories and assets, not only the matching category:
 
 ```http
-GET /api/v3/products?categories.name[intersects]=Backpacks&_fields=sku&_fields=categories&_fields=assets
+GET /api/v3/products?categories.name[intersects]=Drinkware&_fields=sku&_fields=categories&_fields=assets
 ```
 
 What you can't ask for is the underlying ID array. Every field ending in `_ids` is hidden from responses, so `_fields=category_ids` returns `400` with a `HiddenFieldError`. Use the plural name instead: `categories`, not `category_ids`.

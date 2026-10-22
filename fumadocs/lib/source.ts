@@ -2,14 +2,18 @@ import { llms, loader } from 'fumadocs-core/source';
 import { fluentIconsPlugin } from './fluent-icons-plugin';
 import { docsRoute, getPageUrl } from './shared';
 import { defineDocs } from 'fumadocs-mdx/macro';
+import { applyMdxPreset } from 'fumadocs-mdx/config';
 import { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
 import { openapi } from './openapi';
 import { renderOpenAPIPageMarkdown } from './openapi-markdown';
+import { remarkStructureOptions } from './search-structure';
 
 const docs = defineDocs({
   dir: 'content/docs',
   docs: {
     schema: pageSchema,
+    // The preset keeps Fumadocs' default plugins; only the search index changes.
+    mdxOptions: applyMdxPreset({ remarkStructureOptions }),
     postprocess: {
       includeProcessedMarkdown: true,
     },

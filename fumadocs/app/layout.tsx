@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://docs.plytix.com'),
   title: { default: 'Plytix API Documentation', template: '%s | Plytix API Documentation' },
   description:
-    'Developer docs for the Plytix API. Connect your systems to Plytix, the product content platform, and manage products, assets, and catalog data in code.',
+    'Developer docs for the Plytix API. Connect your systems to Plytix, the multi-technology product content platform, and manage products, assets, and catalog data in code.',
   icons: {
     icon: '/favicon.svg',
   },

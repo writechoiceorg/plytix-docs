@@ -35,6 +35,12 @@ actions:
         - [Filtering and search](/reference/v3/filtering-and-search)
         - [Pagination](/reference/v3/pagination)
 
+  - target: $.paths['/api/v3/asset-lists'].get.parameters[?(@.name=='filters' && @.in=='query')]
+    description: 'PM-50; field names from the resource''s response schema, operators per the API-wide grammar (Q#11, Q#99)'
+    update:
+      example:
+        'name[contains:ignorecase]': summer
+
   - target: $.paths['/api/v3/asset-lists'].get.parameters[?(@.name=='_fields' && @.in=='query')]
     description: Q#77 (2026-09-22, valid _fields list from the 400; revision_id accepted but absent), List Asset Lists.bru
     update:
@@ -98,20 +104,20 @@ actions:
                   value: jpg
         smartGroups:
           summary: Smart list, two groups
-          description: 'Two groups: `filename` `like` `front` and `extension` `eq` `jpg`, or `filename` `eq` `bag-10157-front.jpg`.'
+          description: 'Two groups: `filename` `like` `kettle` and `extension` `eq` `jpg`, or `filename` `eq` `Kettle handle - White.png`.'
           value:
-            name: Front Shots
+            name: Kettle Images
             type: Smart
             query:
               - - field: filename
                   operator: like
-                  value: front
+                  value: kettle
                 - field: extension
                   operator: eq
                   value: jpg
               - - field: filename
                   operator: eq
-                  value: bag-10157-front.jpg
+                  value: 'Kettle handle - White.png'
         static:
           summary: Static list
           value:
@@ -179,7 +185,7 @@ actions:
           value:
             data:
               id: 6a1f0c2e9b3d4a5f8c7e1301
-              name: Brand Logos
+              name: Marketing logos
               type: Static
               query:
                 - - operator: in
@@ -228,7 +234,7 @@ actions:
         rename:
           summary: Rename
           value:
-            name: Lifestyle Photos
+            name: Kettle Photos
         replaceQuery:
           summary: Rename and replace the query
           description: The new query replaces the old one. This list now holds the assets that have no `alt_text`.

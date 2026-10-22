@@ -39,13 +39,15 @@ Anchor every edit to something stable: path + method, a parameter's `name` + `in
 | request body | `$.paths['/api/v3/products'].post.requestBody.content['application/json']` |
 | response | `$.paths['/api/v3/products'].post.responses['201'].content['application/json']` |
 | schema / property | `$.components.schemas.ProductCreateDto.properties.sku` (also `.oneOf[0]`, `.items`) |
+| parameter example | `$.paths['/api/v3/products'].get.parameters[?(@.name=='filters' && @.in=='query')].example` |
 | shared parameter (wildcard) | `$.paths.*.*.parameters[?(@.name=='_page' && @.in=='query')]` |
+| shared parameter example (wildcard) | `$.paths.*.*.parameters[?(@.name=='filters' && @.in=='query')].example` |
 | shared response (wildcard) | `$.paths.*.*.responses['422']` |
 | root | `$` (only in `20-meta.yaml`) |
 
 Paths use the upstream form (`/api/v3/product-categories/{identifier}`). Tags are already normalized when overlays run (`productcategories`). Each target may appear once per file.
 
-`update` follows Overlay 1.0: objects merge, arrays append, anything else is replaced. Use `remove: true` only when you really need to delete something upstream.
+`update` follows Overlay 1.0: objects merge, arrays append, anything else is replaced. Use `remove: true` only when you really need to delete something upstream. Because objects merge, an `update` can't replace an object-valued parameter `example`: remove it with a `.example` target in an earlier file, then set the new one on the parameter.
 
 ## operationIds (page URLs)
 

@@ -12,7 +12,7 @@ Keep product data consistent between your ERP and Plytix with a recurring sync: 
 Before you start, make sure you have the following:
 
 - API access to your Plytix account. How you get a token depends on the API version, as described in the first step of [Run the initial import](#run-the-initial-import).
-- A custom attribute in Plytix for every ERP-owned field you sync, with a type that fits the data. This guide's examples use `price`, a decimal attribute, and `stock`, an integer attribute. Replace them with the attribute names in your account, which you can list with `GET /api/v3/product-attributes`.
+- A custom attribute in Plytix for every ERP-owned field you sync, with a type that fits the data. This guide's examples use `suggested_retail_price`, a decimal attribute, and `stock`, an integer attribute. Replace them with the attribute names in your account, which you can list with `GET /api/v3/product-attributes`.
 - A place in your ERP to store the sync checkpoint, and optionally each product's Plytix `id`.
 
 ## Decide who owns each field
@@ -22,7 +22,7 @@ Give every synced field exactly one owner, and write it only in the owner's dire
 | Field | Owner | Direction |
 |---|---|---|
 | `label`, `status`, and descriptive attributes | Plytix | Plytix to ERP |
-| `price` and `stock` | ERP | ERP to Plytix |
+| `suggested_retail_price` and `stock` | ERP | ERP to Plytix |
 | `sku` | Both, as the shared key | Set once when the product is created, never changed by the sync |
 
 One owner per field isn't enough on its own to stop loops. Your own writes can change a product's `modified` timestamp, so the next pull returns the products you updated. Compare values before you write in either direction, and skip the write when nothing differs.
@@ -115,7 +115,7 @@ Follow the steps below to write ERP-owned fields back to Plytix and create the p
 2. **Update one attribute at a time.**
 
    ```bash
-   curl -X PATCH "https://pim.plytix.com/api/v3/products/<product_id>/attributes/price" \
+   curl -X PATCH "https://pim.plytix.com/api/v3/products/<product_id>/attributes/suggested_retail_price" \
      -H "Authorization: Bearer <access_token>" \
      -H "Content-Type: application/json" \
      -d '34.99'
@@ -128,7 +128,7 @@ Follow the steps below to write ERP-owned fields back to Plytix and create the p
    */}
 
    <Callout type="error" title="Don't send a partial attributes map to the product itself">
-     `PATCH /products/<product_id>` with `{"attributes": {"price": 34.99}}` replaces the entire `attributes` map. In testing, every attribute missing from the payload was removed; see the before-and-after example in [Responses and updates](/docs/guides/migrating-to-v3/responses-and-updates#how-patch-treats-the-attributes-map). Top-level fields such as `label` and `status` are merged, so you can send them on their own. To change several attributes in one request, send a partial map to `PATCH /products/<product_id>/attributes`, which merges it into the existing map. To change one, use the single-attribute path.
+     `PATCH /products/<product_id>` with `{"attributes": {"suggested_retail_price": 34.99}}` replaces the entire `attributes` map. In testing, every attribute missing from the payload was removed; see the before-and-after example in [Responses and updates](/docs/guides/migrating-to-v3/responses-and-updates#how-patch-treats-the-attributes-map). Top-level fields such as `label` and `status` are merged, so you can send them on their own. To change several attributes in one request, send a partial map to `PATCH /products/<product_id>/attributes`, which merges it into the existing map. To change one, use the single-attribute path.
    </Callout>
 
 3. **Create the products Plytix doesn't have yet.**
@@ -137,7 +137,7 @@ Follow the steps below to write ERP-owned fields back to Plytix and create the p
    curl -X POST "https://pim.plytix.com/api/v3/products" \
      -H "Authorization: Bearer <access_token>" \
      -H "Content-Type: application/json" \
-     -d '{"sku": "NEW-SKU-001", "label": "New Product"}'
+     -d '{"sku": "GF-Emmental", "label": "Emmental cheese"}'
    ```
 
    `sku` is the only required field. A successful create returns `201` with the created product, so you can store its `id` from the response. On a create, `data` is a single object; on a search, it's an array, so don't reuse one parser for both. Don't rely on fields you didn't set being absent from the response, because they can also come back as `null`.

@@ -13,6 +13,8 @@ import { createRelativeLink } from 'fumadocs-ui/mdx';
 import { getPageImageUrl, getPageMarkdownUrl, gitConfig, isReferenceSlugs } from '@/lib/shared';
 import { openapi } from '@/lib/openapi';
 import { getPageOperation } from '@/lib/openapi-markdown';
+import { Callout } from '@/components/callout';
+import Link from 'fumadocs-core/link';
 
 /**
  * Renders one content page. Shared by the /docs and /reference routes, which
@@ -38,6 +40,7 @@ export async function DocsPageView({ slugs }: { slugs: string[] }) {
         />
       </div>
       <DocsBody>
+        <LegacyVersionNote slugs={slugs} page={page} />
         <MDX
           components={getMDXComponents({
             // this allows you to link to other pages with relative file paths
@@ -47,6 +50,49 @@ export async function DocsPageView({ slugs }: { slugs: string[] }) {
         />
       </DocsBody>
     </DocsPage>
+  );
+}
+
+const MAPPING = '/docs/guides/migrating-to-v3/endpoint-mapping';
+
+/** Where a V1/V2 endpoint's V3 equivalent is documented, by its path. */
+function v3EquivalentFor(path: string): { href: string; label: string } {
+  const root = path.split('/')[3];
+  const section = (anchor: string, label: string) => ({ href: `${MAPPING}#${anchor}`, label });
+  if (path.startsWith('/auth/')) return { href: '/reference/v3/authentication', label: 'V3 authentication' };
+  if (root === 'accounts' || root === 'filters') {
+    return { href: '/docs/guides/migrating-to-v3/not-migrated-and-new-in-v3', label: "What's new and not migrated" };
+  }
+  if (root === 'products' && path.includes('/variant')) return section('variants', 'Endpoint mapping: Variants');
+  if (root === 'products' && path.includes('/relationships')) {
+    return section('product-relationships', 'Endpoint mapping: Product relationships');
+  }
+  if (root === 'products') return section('products', 'Endpoint mapping: Products');
+  if (root === 'assets') return section('assets', 'Endpoint mapping: Assets');
+  if (root === 'attributes' || root === 'attribute-groups') {
+    return section('attributes-and-attribute-groups', 'Endpoint mapping: Attributes and attribute groups');
+  }
+  if (root === 'categories') return section('categories', 'Endpoint mapping: Categories');
+  if (root === 'product_families') return section('product-families', 'Endpoint mapping: Product families');
+  if (root === 'relationships') return section('relationship-definitions', 'Endpoint mapping: Relationship definitions');
+  return { href: MAPPING, label: 'Endpoint mapping' };
+}
+
+/**
+ * V1/V2 endpoint pages are generated, so their version note is added here
+ * rather than in each file. Concept pages carry the same note in their MDX.
+ */
+function LegacyVersionNote({ slugs, page }: { slugs: string[]; page: NonNullable<ReturnType<typeof source.getPage>> }) {
+  if (!isReferenceSlugs(slugs) || slugs[1] !== 'v1-v2') return null;
+  const found = getPageOperation(page);
+  if (!found) return null;
+
+  const api = found.path.startsWith('/api/v2/') ? 'V2 beta API' : 'V1 API';
+  const target = v3EquivalentFor(found.path);
+  return (
+    <Callout type="info" title="V1/V2 (Legacy)">
+      This endpoint is part of the {api}. For V3 (Beta), see <Link href={target.href}>{target.label}</Link>.
+    </Callout>
   );
 }
 

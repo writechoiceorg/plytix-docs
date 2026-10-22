@@ -34,7 +34,7 @@ One or two sentences: what it is, accepted values or format, default, and what h
 ## Examples
 
 - Use named `examples` on the media type (request bodies and responses), one per scenario, each with a `summary`. Schema-level `example` (singular) isn't rendered; use `examples: [...]` on properties.
-- Base every example on a captured response. Replace IDs with fake 24-character hex IDs (`6a1f0c2e9b3d4a5f8c7e1a01` style), account and user data with realistic placeholders, and hosts with `<api-host>`. Never include tokens.
+- Base every example on a captured response. Replace IDs with fake 24-character hex IDs (`6a1f0c2e9b3d4a5f8c7e1a01` style), account, user, and catalog data with the Kitchen and Home demo account that the V1/V2 reference uses ([sample-data.md](sample-data.md)), and hosts with `<api-host>`. Never include tokens.
 - Large payloads go in `fumadocs/overlays/examples/<tag>/<name>.json`, referenced as `value: { x-example-file: <tag>/<name>.json }`.
 - Every documented error code gets an example of the real body.
 

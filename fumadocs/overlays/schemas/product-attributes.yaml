@@ -18,13 +18,13 @@ actions:
     update:
       description: "Display name of the attribute. It must be unique in your account: a name that already exists returns `409`."
       examples:
-        - Material
+        - Collection
   - target: $.components.schemas.TextAttributeCreateInputDto.properties.label
     description: Q#30, Q#66, Q#109, FB-032, Create Text Attribute.bru (label defaulting)
     update:
       description: Key of the attribute in each product's `attributes` map and in filters (`attributes.<label>`). Lowercase letters, digits, and underscores only, up to 255 characters; anything else returns `422`. It can't be changed after creation. If you leave it out, it's set from `name`, which works only when `name` already matches this pattern.
       examples:
-        - material
+        - collection
   - target: $.components.schemas.TextAttributeCreateInputDto.properties.description
     update:
       description: Description of the attribute, up to 200 characters.
@@ -46,13 +46,13 @@ actions:
     update:
       description: "Display name of the attribute. It must be unique in your account: a name that already exists returns `409`."
       examples:
-        - Includes Zipper
+        - In Stock
   - target: $.components.schemas.BooleanAttributeCreateInputDto.properties.label
     description: Q#30, Q#66, Q#109, FB-032, Create Text Attribute.bru (label defaulting)
     update:
       description: Key of the attribute in each product's `attributes` map and in filters (`attributes.<label>`). Lowercase letters, digits, and underscores only, up to 255 characters; anything else returns `422`. It can't be changed after creation. If you leave it out, it's set from `name`, which works only when `name` already matches this pattern.
       examples:
-        - zippered
+        - in_stock
   - target: $.components.schemas.BooleanAttributeCreateInputDto.properties.description
     update:
       description: Description of the attribute, up to 200 characters.
@@ -69,13 +69,13 @@ actions:
     update:
       description: "Display name of the attribute. It must be unique in your account: a name that already exists returns `409`."
       examples:
-        - Release date
+        - Since
   - target: $.components.schemas.DateAttributeCreateInputDto.properties.label
     description: Q#30, Q#66, Q#109, FB-032, Create Text Attribute.bru (label defaulting)
     update:
       description: Key of the attribute in each product's `attributes` map and in filters (`attributes.<label>`). Lowercase letters, digits, and underscores only, up to 255 characters; anything else returns `422`. It can't be changed after creation. If you leave it out, it's set from `name`, which works only when `name` already matches this pattern.
       examples:
-        - release_date
+        - since
   - target: $.components.schemas.DateAttributeCreateInputDto.properties.description
     update:
       description: Description of the attribute, up to 200 characters.
@@ -96,13 +96,13 @@ actions:
     update:
       description: "Display name of the attribute. It must be unique in your account: a name that already exists returns `409`."
       examples:
-        - Weight (kg)
+        - Product weight (kg)
   - target: $.components.schemas.DecimalAttributeCreateInputDto.properties.label
     description: Q#30, Q#66, Q#109, FB-032, Create Text Attribute.bru (label defaulting)
     update:
       description: Key of the attribute in each product's `attributes` map and in filters (`attributes.<label>`). Lowercase letters, digits, and underscores only, up to 255 characters; anything else returns `422`. It can't be changed after creation. If you leave it out, it's set from `name`, which works only when `name` already matches this pattern.
       examples:
-        - weight_kg
+        - product_weight_kg
   - target: $.components.schemas.DecimalAttributeCreateInputDto.properties.description
     update:
       description: Description of the attribute, up to 200 characters.
@@ -193,13 +193,13 @@ actions:
     update:
       description: "Display name of the attribute. It must be unique in your account: a name that already exists returns `409`."
       examples:
-        - Long description
+        - Description
   - target: $.components.schemas.HtmlAttributeCreateInputDto.properties.label
     description: Q#30, Q#66, Q#109, FB-032, Create Text Attribute.bru (label defaulting)
     update:
       description: Key of the attribute in each product's `attributes` map and in filters (`attributes.<label>`). Lowercase letters, digits, and underscores only, up to 255 characters; anything else returns `422`. It can't be changed after creation. If you leave it out, it's set from `name`, which works only when `name` already matches this pattern.
       examples:
-        - long_description
+        - description
   - target: $.components.schemas.HtmlAttributeCreateInputDto.properties.description
     update:
       description: Description of the attribute, up to 200 characters.
@@ -216,13 +216,13 @@ actions:
     update:
       description: "Display name of the attribute. It must be unique in your account: a name that already exists returns `409`."
       examples:
-        - Stock
+        - Product length (mm)
   - target: $.components.schemas.IntAttributeCreateInputDto.properties.label
     description: Q#30, Q#66, Q#109, FB-032, Create Text Attribute.bru (label defaulting)
     update:
       description: Key of the attribute in each product's `attributes` map and in filters (`attributes.<label>`). Lowercase letters, digits, and underscores only, up to 255 characters; anything else returns `422`. It can't be changed after creation. If you leave it out, it's set from `name`, which works only when `name` already matches this pattern.
       examples:
-        - stock
+        - product_length_mm
   - target: $.components.schemas.IntAttributeCreateInputDto.properties.description
     update:
       description: Description of the attribute, up to 200 characters.
@@ -239,13 +239,13 @@ actions:
     update:
       description: "Display name of the attribute. It must be unique in your account: a name that already exists returns `409`."
       examples:
-        - Packshot
+        - Hero image
   - target: $.components.schemas.MediaAttributeCreateInputDto.properties.label
     description: Q#30, Q#66, Q#109, FB-032, Create Text Attribute.bru (label defaulting)
     update:
       description: Key of the attribute in each product's `attributes` map and in filters (`attributes.<label>`). Lowercase letters, digits, and underscores only, up to 255 characters; anything else returns `422`. It can't be changed after creation. If you leave it out, it's set from `name`, which works only when `name` already matches this pattern.
       examples:
-        - packshot
+        - hero_image
   - target: $.components.schemas.MediaAttributeCreateInputDto.properties.description
     update:
       description: Description of the attribute, up to 200 characters.
@@ -262,13 +262,13 @@ actions:
     update:
       description: "Display name of the attribute. It must be unique in your account: a name that already exists returns `409`."
       examples:
-        - Lifestyle images
+        - Additional Image Gallery
   - target: $.components.schemas.MediaGalleryAttributeCreateInputDto.properties.label
     description: Q#30, Q#66, Q#109, FB-032, Create Text Attribute.bru (label defaulting)
     update:
       description: Key of the attribute in each product's `attributes` map and in filters (`attributes.<label>`). Lowercase letters, digits, and underscores only, up to 255 characters; anything else returns `422`. It can't be changed after creation. If you leave it out, it's set from `name`, which works only when `name` already matches this pattern.
       examples:
-        - lifestyle_images
+        - additional_image_gallery
   - target: $.components.schemas.MediaGalleryAttributeCreateInputDto.properties.description
     update:
       description: Description of the attribute, up to 200 characters.
@@ -285,13 +285,13 @@ actions:
     update:
       description: "Display name of the attribute. It must be unique in your account: a name that already exists returns `409`."
       examples:
-        - Tags
+        - Color
   - target: $.components.schemas.MultiSelectAttributeCreateInputDto.properties.label
     description: Q#30, Q#66, Q#109, FB-032, Create Text Attribute.bru (label defaulting)
     update:
       description: Key of the attribute in each product's `attributes` map and in filters (`attributes.<label>`). Lowercase letters, digits, and underscores only, up to 255 characters; anything else returns `422`. It can't be changed after creation. If you leave it out, it's set from `name`, which works only when `name` already matches this pattern.
       examples:
-        - tags
+        - color
   - target: $.components.schemas.MultiSelectAttributeCreateInputDto.properties.description
     update:
       description: Description of the attribute, up to 200 characters.
@@ -304,9 +304,9 @@ actions:
     update:
       description: The values products can choose from.
       examples:
-        - - Small
-          - Medium
-          - Large
+        - - Blue
+          - Purple
+          - White
   - target: $.components.schemas.MultiSelectAttributeCreateInputDto.properties.manual_sorting
     description: Create Text Attribute.bru "201 - Success (DropdownAttribute, With Options)" defaults (2026-09-07); MultiSelect same per type table
     update:
@@ -328,13 +328,13 @@ actions:
     update:
       description: "Display name of the attribute. It must be unique in your account: a name that already exists returns `409`."
       examples:
-        - Product page
+        - Video URL
   - target: $.components.schemas.UrlAttributeCreateInputDto.properties.label
     description: Q#30, Q#66, Q#109, FB-032, Create Text Attribute.bru (label defaulting)
     update:
       description: Key of the attribute in each product's `attributes` map and in filters (`attributes.<label>`). Lowercase letters, digits, and underscores only, up to 255 characters; anything else returns `422`. It can't be changed after creation. If you leave it out, it's set from `name`, which works only when `name` already matches this pattern.
       examples:
-        - product_page
+        - video_url
   - target: $.components.schemas.UrlAttributeCreateInputDto.properties.description
     update:
       description: Description of the attribute, up to 200 characters.
@@ -351,13 +351,13 @@ actions:
     update:
       description: "Display name of the attribute. It must be unique in your account: a name that already exists returns `409`."
       examples:
-        - Catalog ready
+        - Basic Info Complete
   - target: $.components.schemas.CompletenessAttributeCreateInputDto.properties.label
     description: Q#30, Q#66, Q#109, FB-032, Create Text Attribute.bru (label defaulting)
     update:
       description: Key of the attribute in each product's `attributes` map and in filters (`attributes.<label>`). Lowercase letters, digits, and underscores only, up to 255 characters; anything else returns `422`. It can't be changed after creation. If you leave it out, it's set from `name`, which works only when `name` already matches this pattern.
       examples:
-        - catalog_ready
+        - basic_info_complete
   - target: $.components.schemas.CompletenessAttributeCreateInputDto.properties.description
     update:
       description: Description of the attribute, up to 200 characters.
@@ -489,7 +489,7 @@ actions:
     update:
       description: Display name of the attribute. Renaming doesn't change `label`.
       examples:
-        - Material (outer shell)
+        - Collection name
   - target: $.components.schemas.ProductAttributeUpdateInputDto.properties.description
     update:
       description: Description of the attribute, up to 200 characters.

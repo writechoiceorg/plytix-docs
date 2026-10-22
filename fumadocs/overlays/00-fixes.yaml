@@ -465,14 +465,14 @@ actions:
             examples:
               text:
                 summary: Text attribute
-                value: Canvas
+                value: '2019'
               decimal:
                 summary: Decimal attribute (sent as a string)
                 value: "12.5"
               multiSelect:
                 summary: Multi-select attribute
                 value:
-                  - Cotton
+                  - Blue
               clear:
                 summary: Remove a Text value
                 value: null
@@ -490,7 +490,7 @@ actions:
             examples:
               altText:
                 summary: New alt text (path `alt_text`)
-                value: Canvas backpack, front view
+                value: Adventure mug in blue, front view
   - target: $.paths['/api/v3/product-attribute-groups/{identifier}/{path}'].patch
     description: PATCH /api/v3/product-attribute-groups/{identifier}/{path} declares no request body; PATCH .../name with a bare JSON string returns 204 (Update Product Attribute Group.bru, 2026-10-13, Q#108).
     x-plytix-question: OAS-10, GRP-22
@@ -505,7 +505,7 @@ actions:
             examples:
               name:
                 summary: New name (path `name`)
-                value: Technical details
+                value: Rich Content
   - target: $.paths['/api/v3/product-families/{identifier}/{path}'].patch
     description: PATCH /api/v3/product-families/{identifier}/{path} declares no request body; PATCH .../name with a raw JSON string renamed the family (Update and Delete Product Family.bru, 2026-09-15).
     x-plytix-question: OAS-10, FAM-21
@@ -520,7 +520,7 @@ actions:
             examples:
               name:
                 summary: New name (path `name`)
-                value: Bags and Backpacks
+                value: Mugs and Cups
   - target: $.components.schemas.ProductFamilyOutputDto
     description: ProductFamilyOutputDto declares `_id`, but every live response returns `id` (List Product Families.bru, Get Product Family by ID.bru, Create Product Family.bru).
     x-plytix-question: FAM-22

@@ -106,7 +106,7 @@
 
 **Capitalisation:** Plytix
 **Definition:** The platform brand — the voice and product experience that shows up on the website, in-product, in help content, and in all external conversations with customers, prospects, and partners.
-**Notes:** Always call the platform "Plytix." Avoid "the PIM" or "the system" in customer-facing content — both are vague and can confuse newer readers.
+**Notes:** Always call the platform "Plytix." Avoid "the PIM" or "the system" in customer-facing content — both are vague and can confuse newer readers. When you describe what Plytix is, call it a "multi-technology platform for product content" (Plytix PIM, Plytix DAM, Plytix Feed Management), not only a PIM; in metadata, "the multi-technology product content platform" (Plytix marketing, October 2026). Keep this separate from what the public API covers, which is the catalog.
 
 ---
 

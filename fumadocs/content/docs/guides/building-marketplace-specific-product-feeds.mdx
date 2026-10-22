@@ -28,7 +28,7 @@ Follow the steps below to map the fields, read the products in scope, and turn t
    | `sku` | `sku` |
    | `title` | `label` |
    | `gtin` | `gtin` |
-   | `price` | `attributes.price` |
+   | `price` | `attributes.suggested_retail_price` |
    | `category` | `categories` (each category's `path`) |
 
 2. **Request the products in scope, with only the fields you mapped.**
@@ -74,7 +74,7 @@ Follow the steps below to map the fields, read the products in scope, and turn t
            "sku": product.get("sku"),
            "title": (product.get("label") or "").strip(),
            "gtin": product.get("gtin"),
-           "price": attributes.get("price"),
+           "price": attributes.get("suggested_retail_price"),
            "category": " > ".join(categories[0].get("path") or []) if categories else "",
        }
 

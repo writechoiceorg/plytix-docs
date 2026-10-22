@@ -35,6 +35,12 @@ actions:
         - [Filtering and search](/reference/v3/filtering-and-search)
         - [Pagination](/reference/v3/pagination)
 
+  - target: $.paths['/api/v3/family-attributes'].get.parameters[?(@.name=='filters' && @.in=='query')]
+    description: 'PM-50; field names from the resource''s response schema, operators per the API-wide grammar (Q#11, Q#99)'
+    update:
+      example:
+        product_family_id: 6a1f0c2e9b3d4a5f8c7e1a02
+
   # --- GET /api/v3/product-families/{product_family_id}/attributes ----------------
   - target: $.paths['/api/v3/family-attributes'].get.responses['200'].content['application/json']
     description: "Get Family Attributes (Top-Level).bru \"200 - Filtered by account_id (Safe/Scoped)\" (2026-09-15), sanitized; keys match the GET .../attributes example"

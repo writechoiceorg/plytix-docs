@@ -55,6 +55,13 @@ actions:
 
         `filters` is the name of this group, not a parameter you send. A query parameter literally named `filters` returns `400`. See [Filtering and search](/reference/v3/filtering-and-search) for functions, grouping with `_or`, and filters on related entities.
 
+  # Upstream gives every search the same Products example (sku, price, label),
+  # which fails when copied to other resources. Each ops/<tag>.yaml sets one
+  # built from that resource's own fields.
+  - target: $.paths.*.*.parameters[?(@.name=='filters' && @.in=='query')].example
+    description: PM-50
+    remove: true
+
   # --- path parameters -------------------------------------------------------
   - target: $.paths.*.*.parameters[?(@.name=='identifier' && @.in=='path')]
     description: config "ID prefixes" (24-character hex ObjectIds)

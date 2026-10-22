@@ -1,20 +1,13 @@
 {
   "data": {
     "id": "6a1f0c2e9b3d4a5f8c7e1a03",
-    "sku": "BAG-10157-BLK",
-    "label": "Canvas Backpack, Black",
+    "sku": "GF-Basket-L",
+    "label": "Gift basket, Large",
     "gtin": null,
     "status": null,
     "attributes": {
-      "amazon_ready": 0,
-      "basic_information_completeness": 0,
-      "english_content_completeness": 0,
-      "google_shopping_completeness": 0,
-      "marketing_ready": 0,
-      "product_specifications_completeness": 0,
-      "shopify_ready": 0,
-      "spanish_content_completeness": 0,
-      "website_ready": 0
+      "basic_info_complete": 0,
+      "rich_info_complete": 0
     },
     "thumbnail_id": null,
     "parent_id": "6a1f0c2e9b3d4a5f8c7e1a01",

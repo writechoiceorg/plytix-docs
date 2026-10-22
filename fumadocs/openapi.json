@@ -796,7 +796,7 @@
                     "value": {
                       "data": {
                         "relationship_id": "6a1f0c2e9b3d4a5f8c7e1f01",
-                        "relationship_label": "accessories",
+                        "relationship_label": "gift_basket",
                         "product_id": "6a1f0c2e9b3d4a5f8c7e1a01"
                       },
                       "errors": []
@@ -870,7 +870,7 @@
           "products"
         ],
         "summary": "Search products",
-        "description": "Returns the products in your account that match your filters, one page at a time. With no filters, it returns every product, including archived ones.\n\nUse it to look up products by SKU or any other field, to export your catalog page by page, or to find products that changed after a given date.\n\nFilters are query parameters written as `field=value` or `field[operator]=value`. A product must match all of them, unless you group filters with `_or`. Besides the top-level fields, you can filter on:\n\n- Custom attributes, through `attributes.<label>`, for example `attributes.material=Canvas`\n- Related records, through dot paths such as `categories.name`\n- A parent's direct variants, through `parent_id=<id>` or `parent.sku=<sku>`\n\nA few filter details to plan for:\n\n- For a case-insensitive match, use `contains:ignorecase`. `icontains` isn't an operator and returns `400`.\n- A date filter with an invalid date, such as `modified[gte]=not-a-date`, returns an empty list instead of an error.\n\nResults come back 25 per page by default, up to 1000 with `_page_size`. To get the next page, follow `pagination.next_page`. On the last page that key is left out, not set to `null`. The link starts with `http://`, so change it to `https://` before you follow it. Otherwise the redirect can drop your `Authorization` header. The response doesn't include a total count.\n\nFor a stable order while you page through a large result set, sort by `id`, which follows creation order. Each page is a separate request. See [Rate limits](/reference/v3/rate-limits).\n\nRelated pages:\n\n- [Filtering and search](/reference/v3/filtering-and-search)\n- [Pagination](/reference/v3/pagination)\n- [Export your full catalog](/docs/guides/exporting-your-full-catalog)\n- [Audit product data quality with filters](/docs/guides/auditing-product-data-quality-with-filters)",
+        "description": "Returns the products in your account that match your filters, one page at a time. With no filters, it returns every product, including archived ones.\n\nUse it to look up products by SKU or any other field, to export your catalog page by page, or to find products that changed after a given date.\n\nFilters are query parameters written as `field=value` or `field[operator]=value`. A product must match all of them, unless you group filters with `_or`. Besides the top-level fields, you can filter on:\n\n- Custom attributes, through `attributes.<label>`, for example `attributes.brand=Plytix`\n- Related records, through dot paths such as `categories.name`\n- A parent's direct variants, through `parent_id=<id>` or `parent.sku=<sku>`\n\nA few filter details to plan for:\n\n- For a case-insensitive match, use `contains:ignorecase`. `icontains` isn't an operator and returns `400`.\n- A date filter with an invalid date, such as `modified[gte]=not-a-date`, returns an empty list instead of an error.\n\nResults come back 25 per page by default, up to 1000 with `_page_size`. To get the next page, follow `pagination.next_page`. On the last page that key is left out, not set to `null`. The link starts with `http://`, so change it to `https://` before you follow it. Otherwise the redirect can drop your `Authorization` header. The response doesn't include a total count.\n\nFor a stable order while you page through a large result set, sort by `id`, which follows creation order. Each page is a separate request. See [Rate limits](/reference/v3/rate-limits).\n\nRelated pages:\n\n- [Filtering and search](/reference/v3/filtering-and-search)\n- [Pagination](/reference/v3/pagination)\n- [Export your full catalog](/docs/guides/exporting-your-full-catalog)\n- [Audit product data quality with filters](/docs/guides/auditing-product-data-quality-with-filters)",
         "operationId": "search-products",
         "parameters": [
           {
@@ -958,10 +958,8 @@
               }
             },
             "example": {
-              "status[eq]": "Draft",
-              "label[lower][contains:ignorecase]": "shirt",
-              "_or[0]sku[eq]": "A1",
-              "_or[0]price[gte]": "100"
+              "status": "Draft",
+              "created[gt]": "2026-01-01"
             }
           }
         ],
@@ -981,15 +979,15 @@
                       "data": [
                         {
                           "id": "6a1f0c2e9b3d4a5f8c7e1a01",
-                          "sku": "BAG-10157",
-                          "label": "Canvas Backpack",
+                          "sku": "GF-Basket",
+                          "label": "Gift basket",
                           "status": "Draft",
                           "created": "2026-09-22T22:17:44.776000"
                         },
                         {
                           "id": "6a1f0c2e9b3d4a5f8c7e1a02",
-                          "sku": "BAG-10158",
-                          "label": "Canvas Backpack, Large",
+                          "sku": "GF-Wine",
+                          "label": "Red wine",
                           "status": "Draft",
                           "created": "2026-09-23T09:02:51.408000"
                         }
@@ -1005,12 +1003,12 @@
                       "data": [
                         {
                           "id": "6a1f0c2e9b3d4a5f8c7e1a01",
-                          "sku": "BAG-10157",
+                          "sku": "GF-Basket",
                           "status": "Draft"
                         },
                         {
                           "id": "6a1f0c2e9b3d4a5f8c7e1a02",
-                          "sku": "BAG-10158",
+                          "sku": "GF-Wine",
                           "status": "Draft"
                         }
                       ],
@@ -1027,11 +1025,11 @@
                       "data": [
                         {
                           "id": "6a1f0c2e9b3d4a5f8c7e1a11",
-                          "sku": "TSH-11470-W-M"
+                          "sku": "GF-Basket-M"
                         },
                         {
                           "id": "6a1f0c2e9b3d4a5f8c7e1a12",
-                          "sku": "TSH-11470-W-S"
+                          "sku": "GF-Basket-S"
                         }
                       ],
                       "errors": [],
@@ -1075,7 +1073,7 @@
           "products"
         ],
         "summary": "Create a product",
-        "description": "Creates one product and returns the full record, including its new `id`. Only `sku` is required.\n\nThe `sku` must be unique in your account. If a product with that SKU already exists, the request returns `409` and creates nothing. That makes a create safe to retry: if a request times out, sending it again either creates the product or returns `409`, never a duplicate.\n\nSet custom attribute values in `attributes`, keyed by each attribute's `label` (its snake_case name, not the display name), for example `{\"attributes\": {\"material\": \"Canvas\"}}`. The response also lists the account's completeness attributes, such as `website_ready`, which Plytix calculates for you.\n\nTo create a variant, set `parent_id` to the parent product's ID:\n\n- The variant joins the parent's product family automatically, so you can leave out `product_family_id`. Sending a different family returns `422`.\n- The variant gets `product_level` `2`, and a parent that was standalone becomes `1`. A variant of a variant is `3`.\n\nSee [Reconstruct parent/variant hierarchies](/docs/guides/reconstructing-parent-variant-hierarchies).\n\nThe body accepts only the fields listed below. List fields such as `category_ids` and `static_list_ids` return `422` with \"Extra inputs are not permitted\". Link categories after the product exists, with [Link a record to a product](/reference/v3/products/add-product-field).",
+        "description": "Creates one product and returns the full record, including its new `id`. Only `sku` is required.\n\nThe `sku` must be unique in your account. If a product with that SKU already exists, the request returns `409` and creates nothing. That makes a create safe to retry: if a request times out, sending it again either creates the product or returns `409`, never a duplicate.\n\nSet custom attribute values in `attributes`, keyed by each attribute's `label` (its snake_case name, not the display name), for example `{\"attributes\": {\"collection\": \"2019\"}}`. The response also lists the account's completeness attributes, such as `basic_info_complete`, which Plytix calculates for you.\n\nTo create a variant, set `parent_id` to the parent product's ID:\n\n- The variant joins the parent's product family automatically, so you can leave out `product_family_id`. Sending a different family returns `422`.\n- The variant gets `product_level` `2`, and a parent that was standalone becomes `1`. A variant of a variant is `3`.\n\nSee [Reconstruct parent/variant hierarchies](/docs/guides/reconstructing-parent-variant-hierarchies).\n\nThe body accepts only the fields listed below. List fields such as `category_ids` and `static_list_ids` return `422` with \"Extra inputs are not permitted\". Link categories after the product exists, with [Link a record to a product](/reference/v3/products/add-product-field).",
         "operationId": "create-product",
         "requestBody": {
           "required": true,
@@ -1088,14 +1086,14 @@
                 "standalone": {
                   "summary": "Standalone product",
                   "value": {
-                    "sku": "BAG-10157",
-                    "label": "Canvas Backpack",
+                    "sku": "GF-Basket",
+                    "label": "Gift basket",
                     "gtin": "4006381333931",
                     "status": "Draft",
                     "product_family_id": "6a1f0c2e9b3d4a5f8c7e1d01",
                     "thumbnail_id": "6a1f0c2e9b3d4a5f8c7e1b01",
                     "attributes": {
-                      "material": "Canvas"
+                      "collection": "2019"
                     }
                   }
                 },
@@ -1103,15 +1101,15 @@
                   "summary": "Variant of an existing product",
                   "description": "The variant joins the parent's product family, so `product_family_id` is left out.",
                   "value": {
-                    "sku": "BAG-10157-BLK",
-                    "label": "Canvas Backpack, Black",
+                    "sku": "GF-Basket-L",
+                    "label": "Gift basket, Large",
                     "parent_id": "6a1f0c2e9b3d4a5f8c7e1a01"
                   }
                 },
                 "minimal": {
                   "summary": "Only the required field",
                   "value": {
-                    "sku": "BAG-10157"
+                    "sku": "GF-Basket"
                   }
                 }
               }
@@ -1132,21 +1130,14 @@
                     "value": {
                       "data": {
                         "id": "6a1f0c2e9b3d4a5f8c7e1a01",
-                        "sku": "BAG-10157",
-                        "label": "Canvas Backpack",
+                        "sku": "GF-Basket",
+                        "label": "Gift basket",
                         "gtin": "4006381333931",
                         "status": "Draft",
                         "attributes": {
-                          "amazon_ready": 0,
-                          "basic_information_completeness": 0,
-                          "english_content_completeness": 0,
-                          "google_shopping_completeness": 0,
-                          "marketing_ready": 0,
-                          "product_specifications_completeness": 0,
-                          "shopify_ready": 0,
-                          "spanish_content_completeness": 0,
-                          "website_ready": 21.43,
-                          "material": "Canvas"
+                          "basic_info_complete": 21.43,
+                          "rich_info_complete": 0,
+                          "collection": "2019"
                         },
                         "thumbnail_id": "6a1f0c2e9b3d4a5f8c7e1b01",
                         "parent_id": null,
@@ -1166,20 +1157,13 @@
                     "value": {
                       "data": {
                         "id": "6a1f0c2e9b3d4a5f8c7e1a03",
-                        "sku": "BAG-10157-BLK",
-                        "label": "Canvas Backpack, Black",
+                        "sku": "GF-Basket-L",
+                        "label": "Gift basket, Large",
                         "gtin": null,
                         "status": null,
                         "attributes": {
-                          "amazon_ready": 0,
-                          "basic_information_completeness": 0,
-                          "english_content_completeness": 0,
-                          "google_shopping_completeness": 0,
-                          "marketing_ready": 0,
-                          "product_specifications_completeness": 0,
-                          "shopify_ready": 0,
-                          "spanish_content_completeness": 0,
-                          "website_ready": 0
+                          "basic_info_complete": 0,
+                          "rich_info_complete": 0
                         },
                         "thumbnail_id": null,
                         "parent_id": "6a1f0c2e9b3d4a5f8c7e1a01",
@@ -1355,7 +1339,7 @@
               "type": "string",
               "title": "Path"
             },
-            "description": "The field to read, such as `attributes`, `attributes/material`, or `categories`."
+            "description": "The field to read, such as `attributes`, `attributes/collection`, or `categories`."
           },
           {
             "name": "_fields",
@@ -1385,19 +1369,19 @@
                     "description": "`GET /api/v3/products/{identifier}/attributes`",
                     "value": {
                       "data": {
-                        "material": "Canvas",
-                        "color": "Black",
-                        "amazon_ready": 85.71,
-                        "website_ready": 100
+                        "brand": "Plytix",
+                        "collection": "2019",
+                        "basic_info_complete": 100,
+                        "rich_info_complete": 85.71
                       },
                       "errors": []
                     }
                   },
                   "oneAttribute": {
                     "summary": "One attribute value",
-                    "description": "`GET /api/v3/products/{identifier}/attributes/material`",
+                    "description": "`GET /api/v3/products/{identifier}/attributes/collection`",
                     "value": {
-                      "data": "Canvas",
+                      "data": "2019",
                       "errors": []
                     }
                   },
@@ -1408,13 +1392,13 @@
                       "data": [
                         {
                           "id": "6a1f0c2e9b3d4a5f8c7e1c02",
-                          "name": "Backpacks",
+                          "name": "Drinkware",
                           "parent_id": "6a1f0c2e9b3d4a5f8c7e1c01",
                           "path": [
-                            "Bags",
-                            "Backpacks"
+                            "Sample Categories",
+                            "Drinkware"
                           ],
-                          "slug": "backpacks",
+                          "slug": "drinkware",
                           "order": 1,
                           "n_children": 0
                         }
@@ -1458,7 +1442,7 @@
           "products"
         ],
         "summary": "Update a product field",
-        "description": "Changes one custom attribute value and leaves the rest of the product as it is. Set `path` to `attributes/<label>` and send the new value on its own as the request body: `\"Canvas\"`, not `{\"value\": \"Canvas\"}`. A successful update returns `204` with an empty body.\n\nUse this to change a single attribute. [Update a product](/reference/v3/products/update-product) replaces the whole `attributes` map, so any attribute you leave out of it is removed.\n\nThe value's format depends on the attribute type:\n\n- Text: a string. `null` removes the value.\n- Decimal: a string, such as `\"12.5\"`. A JSON number returns `422`.\n- Multi-select: an array of the attribute's configured options, such as `[\"Cotton\"]`.\n- Media: one asset ID, as a string.\n- Media gallery: an array of asset IDs.\n\nCompleteness and formula attributes are calculated by Plytix, so writing to them returns `422`.\n\nLink collections such as `categories` can't be changed here (`405`). Link and unlink records with [Link a record to a product](/reference/v3/products/add-product-field) and [Delete a product field value or link](/reference/v3/products/delete-product-field). See [Update and delete records](/reference/v3/updates-and-deletes).",
+        "description": "Changes one custom attribute value and leaves the rest of the product as it is. Set `path` to `attributes/<label>` and send the new value on its own as the request body: `\"2019\"`, not `{\"value\": \"2019\"}`. A successful update returns `204` with an empty body.\n\nUse this to change a single attribute. [Update a product](/reference/v3/products/update-product) replaces the whole `attributes` map, so any attribute you leave out of it is removed.\n\nThe value's format depends on the attribute type:\n\n- Text: a string. `null` removes the value.\n- Decimal: a string, such as `\"12.5\"`. A JSON number returns `422`.\n- Multi-select: an array of the attribute's configured options, such as `[\"Blue\"]`.\n- Media: one asset ID, as a string.\n- Media gallery: an array of asset IDs.\n\nCompleteness and formula attributes are calculated by Plytix, so writing to them returns `422`.\n\nLink collections such as `categories` can't be changed here (`405`). Link and unlink records with [Link a record to a product](/reference/v3/products/add-product-field) and [Delete a product field value or link](/reference/v3/products/delete-product-field). See [Update and delete records](/reference/v3/updates-and-deletes).",
         "operationId": "update-product-field",
         "parameters": [
           {
@@ -1479,7 +1463,7 @@
               "type": "string",
               "title": "Path"
             },
-            "description": "`attributes/` followed by the attribute's `label`, for example `attributes/material`."
+            "description": "`attributes/` followed by the attribute's `label`, for example `attributes/collection`."
           }
         ],
         "requestBody": {
@@ -1492,7 +1476,7 @@
               "examples": {
                 "text": {
                   "summary": "Text attribute",
-                  "value": "Canvas"
+                  "value": "2019"
                 },
                 "decimal": {
                   "summary": "Decimal attribute (sent as a string)",
@@ -1501,7 +1485,7 @@
                 "multiSelect": {
                   "summary": "Multi-select attribute",
                   "value": [
-                    "Cotton"
+                    "Blue"
                   ]
                 },
                 "clear": {
@@ -1608,7 +1592,7 @@
           "products"
         ],
         "summary": "Get a product",
-        "description": "Returns one product. You can use the product's `id` or its SKU as the identifier: `GET /api/v3/products/BAG-10157` returns the same record as a request with the product's ID. An identifier that matches nothing returns `404`.\n\nTo return only some fields, use `_fields`, for example `_fields=sku&_fields=label`. Without it, you get the full record.\n\n`data` holds the product object itself, not a list, and the response has no `pagination` key.\n\n`product_relationships` lists only each relationship's ID and label. To get the related products, use [Search related products](/reference/v3/related-products/search-related-products) with `product_id=<id>`.",
+        "description": "Returns one product. You can use the product's `id` or its SKU as the identifier: `GET /api/v3/products/GF-Basket` returns the same record as a request with the product's ID. An identifier that matches nothing returns `404`.\n\nTo return only some fields, use `_fields`, for example `_fields=sku&_fields=label`. Without it, you get the full record.\n\n`data` holds the product object itself, not a list, and the response has no `pagination` key.\n\n`product_relationships` lists only each relationship's ID and label. To get the related products, use [Search related products](/reference/v3/related-products/search-related-products) with `product_id=<id>`.",
         "operationId": "get-product",
         "parameters": [
           {
@@ -1648,10 +1632,10 @@
                 "examples": {
                   "selectedFields": {
                     "summary": "One field, with _fields",
-                    "description": "`GET /api/v3/products/BAG-10157?_fields=sku`",
+                    "description": "`GET /api/v3/products/GF-Basket?_fields=sku`",
                     "value": {
                       "data": {
-                        "sku": "BAG-10157"
+                        "sku": "GF-Basket"
                       },
                       "errors": []
                     }
@@ -1691,7 +1675,7 @@
           "products"
         ],
         "summary": "Update a product",
-        "description": "Changes the fields you send and leaves every other field as it is. A successful update returns `204` with an empty body. To see the result, read the product back.\n\nThe `attributes` map is the exception: it's replaced as a whole. Any custom attribute you leave out of `attributes` is removed from the product. To change custom attributes, do one of the following:\n\n- Send the complete `attributes` map, with the values you want to keep.\n- Change one attribute at a time with [Update a product field](/reference/v3/products/update-product-field), for example `PATCH /api/v3/products/{identifier}/attributes/material`.\n\nCompleteness and formula attributes are calculated by Plytix. Values you send for them are ignored.\n\nSend `null` to clear a field:\n\n- `thumbnail_id: null` removes the thumbnail. If the thumbnail was the asset's only link to the product, the asset also leaves the product's `assets`.\n- `parent_id: null` detaches a variant from its parent. The product goes back to `product_level` `0`, loses the values it inherited, and keeps its product family.\n- `product_family_id: null` removes the product from its product family.\n\n`gtin` can't be cleared with `null`. A GTIN with an invalid check digit returns `422`.\n\nDon't send `product_family_id` in the same request as `parent_id`: sending both returns `422`.\n\nThe body accepts only the fields listed below. You can't change `sku` here, and list fields such as `category_ids` and `static_list_ids` return `422`. See [Update and delete records](/reference/v3/updates-and-deletes) for how PATCH works across the V3 API.",
+        "description": "Changes the fields you send and leaves every other field as it is. A successful update returns `204` with an empty body. To see the result, read the product back.\n\nThe `attributes` map is the exception: it's replaced as a whole. Any custom attribute you leave out of `attributes` is removed from the product. To change custom attributes, do one of the following:\n\n- Send the complete `attributes` map, with the values you want to keep.\n- Change one attribute at a time with [Update a product field](/reference/v3/products/update-product-field), for example `PATCH /api/v3/products/{identifier}/attributes/collection`.\n\nCompleteness and formula attributes are calculated by Plytix. Values you send for them are ignored.\n\nSend `null` to clear a field:\n\n- `thumbnail_id: null` removes the thumbnail. If the thumbnail was the asset's only link to the product, the asset also leaves the product's `assets`.\n- `parent_id: null` detaches a variant from its parent. The product goes back to `product_level` `0`, loses the values it inherited, and keeps its product family.\n- `product_family_id: null` removes the product from its product family.\n\n`gtin` can't be cleared with `null`. A GTIN with an invalid check digit returns `422`.\n\nDon't send `product_family_id` in the same request as `parent_id`: sending both returns `422`.\n\nThe body accepts only the fields listed below. You can't change `sku` here, and list fields such as `category_ids` and `static_list_ids` return `422`. See [Update and delete records](/reference/v3/updates-and-deletes) for how PATCH works across the V3 API.",
         "operationId": "update-product",
         "parameters": [
           {
@@ -1716,7 +1700,7 @@
                 "fields": {
                   "summary": "Change the label and status",
                   "value": {
-                    "label": "Canvas Backpack, 20 L",
+                    "label": "Gift basket, deluxe",
                     "status": "Completed"
                   }
                 },
@@ -1725,8 +1709,8 @@
                   "description": "Send every custom attribute you want to keep. Attributes left out of the map are removed.",
                   "value": {
                     "attributes": {
-                      "material": "Canvas",
-                      "color": "Black"
+                      "brand": "Plytix",
+                      "collection": "2019"
                     }
                   }
                 },
@@ -1930,10 +1914,7 @@
               }
             },
             "example": {
-              "status[eq]": "Draft",
-              "label[lower][contains:ignorecase]": "shirt",
-              "_or[0]sku[eq]": "A1",
-              "_or[0]price[gte]": "100"
+              "product_id": "6a1f0c2e9b3d4a5f8c7e1a01"
             }
           }
         ],
@@ -2055,10 +2036,7 @@
               }
             },
             "example": {
-              "status[eq]": "Draft",
-              "label[lower][contains:ignorecase]": "shirt",
-              "_or[0]sku[eq]": "A1",
-              "_or[0]price[gte]": "100"
+              "product_id": "6a1f0c2e9b3d4a5f8c7e1a01"
             }
           }
         ],
@@ -2200,10 +2178,8 @@
               }
             },
             "example": {
-              "status[eq]": "Draft",
-              "label[lower][contains:ignorecase]": "shirt",
-              "_or[0]sku[eq]": "A1",
-              "_or[0]price[gte]": "100"
+              "extension": "jpg",
+              "created[gt]": "2026-01-01"
             }
           }
         ],
@@ -2228,12 +2204,12 @@
                           "extension": "jpg",
                           "file_size": 559164,
                           "file_type": "IMAGES",
-                          "filename": "bag-10157-side.jpg",
-                          "path": "public_files/pim/assets/.../6a1f0c2e9b3d4a5f8c7e1b03/bag-10157-side.jpg",
-                          "downloaded_from": "https://example.com/images/bag-10157-side.jpg",
+                          "filename": "Enjoy Mug - White.jpg",
+                          "path": "public_files/pim/assets/.../6a1f0c2e9b3d4a5f8c7e1b03/Enjoy Mug - White.jpg",
+                          "downloaded_from": "https://www.plytix.com/hubfs/Kitchen%20and%20Home%20Products/Enjoy%20Mug%20-%20White.jpg",
                           "n_catalogs": 0,
                           "n_products": 1,
-                          "alt_text": "Canvas backpack, side view",
+                          "alt_text": "Adventure mug in white",
                           "status": "ACTIVE",
                           "created": "2026-06-22T08:44:19.008000",
                           "modified": "2026-06-22T08:44:19.046000"
@@ -2245,9 +2221,9 @@
                           "extension": "jpg",
                           "file_size": 798520,
                           "file_type": "IMAGES",
-                          "filename": "bag-10157-back.jpg",
-                          "path": "public_files/pim/assets/.../6a1f0c2e9b3d4a5f8c7e1b02/bag-10157-back.jpg",
-                          "downloaded_from": "https://example.com/images/bag-10157-back.jpg",
+                          "filename": "Enjoy Mug - Blue.jpg",
+                          "path": "public_files/pim/assets/.../6a1f0c2e9b3d4a5f8c7e1b02/Enjoy Mug - Blue.jpg",
+                          "downloaded_from": "https://www.plytix.com/hubfs/Kitchen%20and%20Home%20Products/Enjoy%20Mug%20-%20Blue.jpg",
                           "n_catalogs": 0,
                           "n_products": 1,
                           "alt_text": null,
@@ -2311,9 +2287,9 @@
                 "fromUrl": {
                   "summary": "From a URL",
                   "value": {
-                    "url": "https://example.com/images/bag-10157-front.jpg",
-                    "filename": "bag-10157-front.jpg",
-                    "alt_text": "Canvas backpack, front view"
+                    "url": "https://www.plytix.com/hubfs/Kitchen%20and%20Home%20Products/Enjoy%20Mug%20-%20Blue.jpg",
+                    "filename": "Enjoy Mug - Blue.jpg",
+                    "alt_text": "Adventure mug in blue, front view"
                   }
                 },
                 "fromContent": {
@@ -2349,10 +2325,10 @@
                         "file_size": 25905,
                         "file_type": "IMAGES",
                         "file_modified": "2026-09-22T00:00:00",
-                        "filename": "bag-10157-front.jpg",
+                        "filename": "Enjoy Mug - Blue.jpg",
                         "n_catalogs": 0,
                         "n_products": 0,
-                        "alt_text": "Canvas backpack, front view",
+                        "alt_text": "Adventure mug in blue",
                         "status": "ACTIVE"
                       },
                       "errors": []
@@ -2455,12 +2431,12 @@
                         "extension": "jpg",
                         "file_size": 559164,
                         "file_type": "IMAGES",
-                        "filename": "bag-10157-side.jpg",
-                        "path": "public_files/pim/assets/.../6a1f0c2e9b3d4a5f8c7e1b03/bag-10157-side.jpg",
-                        "downloaded_from": "https://example.com/images/bag-10157-side.jpg",
+                        "filename": "Enjoy Mug - White.jpg",
+                        "path": "public_files/pim/assets/.../6a1f0c2e9b3d4a5f8c7e1b03/Enjoy Mug - White.jpg",
+                        "downloaded_from": "https://www.plytix.com/hubfs/Kitchen%20and%20Home%20Products/Enjoy%20Mug%20-%20White.jpg",
                         "n_catalogs": 0,
                         "n_products": 1,
-                        "alt_text": "Canvas backpack, side view",
+                        "alt_text": "Adventure mug in white",
                         "status": "ACTIVE",
                         "created": "2026-06-22T08:44:19.008000",
                         "modified": "2026-06-22T08:44:19.046000"
@@ -2528,14 +2504,14 @@
                 "both": {
                   "summary": "Rename the file and change the alt text",
                   "value": {
-                    "filename": "bag-10157-front-view.jpg",
-                    "alt_text": "Canvas backpack, front view"
+                    "filename": "adventure-mug-blue.jpg",
+                    "alt_text": "Adventure mug in blue, front view"
                   }
                 },
                 "altText": {
                   "summary": "Change only the alt text",
                   "value": {
-                    "alt_text": "Canvas backpack in black, front view"
+                    "alt_text": "Adventure mug in blue, side view"
                   }
                 }
               }
@@ -2716,7 +2692,7 @@
           "assets"
         ],
         "summary": "Update an asset field",
-        "description": "Changes one field of an asset and leaves the rest as it is. Set `path` to the field, for example `alt_text`, and send the new value on its own as the request body: `\"Canvas backpack, front view\"`, not `{\"alt_text\": \"Canvas backpack, front view\"}`. A successful update returns `204` with an empty body.\n\nThis differs from [Update an asset](/reference/v3/assets/update-asset), which takes an object with the fields to change. See [Update and delete records](/reference/v3/updates-and-deletes#change-a-single-field).",
+        "description": "Changes one field of an asset and leaves the rest as it is. Set `path` to the field, for example `alt_text`, and send the new value on its own as the request body: `\"Adventure mug in blue, front view\"`, not `{\"alt_text\": \"Adventure mug in blue, front view\"}`. A successful update returns `204` with an empty body.\n\nThis differs from [Update an asset](/reference/v3/assets/update-asset), which takes an object with the fields to change. See [Update and delete records](/reference/v3/updates-and-deletes#change-a-single-field).",
         "operationId": "update-asset-field",
         "parameters": [
           {
@@ -2751,7 +2727,7 @@
               "examples": {
                 "altText": {
                   "summary": "New alt text (path `alt_text`)",
-                  "value": "Canvas backpack, front view"
+                  "value": "Adventure mug in blue, front view"
                 }
               }
             }
@@ -2839,7 +2815,7 @@
           "productcategories"
         ],
         "summary": "Search product categories",
-        "description": "Returns the product categories in your account, one page at a time. With no filters, it returns every category at every level of the tree in one flat list.\n\nEach category carries its place in the tree:\n\n- `parent_id`: the ID of the category above it. In search results, a top-level category has no `parent_id` key.\n- `path`: the names from the top of the tree down to this category, for example `[\"Bags\", \"Backpacks\"]`.\n- `n_children`: how many categories sit directly below it.\n\nNames can repeat in different branches, so check `path` to pick the right one.\n\nTo find the products filed under a category, search products instead, with a filter such as `categories.name=Backpacks`. See [Search products](/reference/v3/products/search-products).\n\nResults come back 25 per page by default. Follow `pagination.next_page` to get the next page, and change its `http://` to `https://` first.\n\nRelated pages:\n\n- [Filtering and search](/reference/v3/filtering-and-search)\n- [Pagination](/reference/v3/pagination)\n- [The Plytix data model](/docs/guides/data-model#product-categories)",
+        "description": "Returns the product categories in your account, one page at a time. With no filters, it returns every category at every level of the tree in one flat list.\n\nEach category carries its place in the tree:\n\n- `parent_id`: the ID of the category above it. In search results, a top-level category has no `parent_id` key.\n- `path`: the names from the top of the tree down to this category, for example `[\"Sample Categories\", \"Drinkware\"]`.\n- `n_children`: how many categories sit directly below it.\n\nNames can repeat in different branches, so check `path` to pick the right one.\n\nTo find the products filed under a category, search products instead, with a filter such as `categories.name=Drinkware`. See [Search products](/reference/v3/products/search-products).\n\nResults come back 25 per page by default. Follow `pagination.next_page` to get the next page, and change its `http://` to `https://` first.\n\nRelated pages:\n\n- [Filtering and search](/reference/v3/filtering-and-search)\n- [Pagination](/reference/v3/pagination)\n- [The Plytix data model](/docs/guides/data-model#product-categories)",
         "operationId": "search-product-categories",
         "parameters": [
           {
@@ -2927,10 +2903,7 @@
               }
             },
             "example": {
-              "status[eq]": "Draft",
-              "label[lower][contains:ignorecase]": "shirt",
-              "_or[0]sku[eq]": "A1",
-              "_or[0]price[gte]": "100"
+              "name[contains:ignorecase]": "kettle"
             }
           }
         ],
@@ -2950,11 +2923,11 @@
                       "data": [
                         {
                           "id": "6a1f0c2e9b3d4a5f8c7e1c01",
-                          "name": "Bags",
+                          "name": "Sample Categories",
                           "path": [
-                            "Bags"
+                            "Sample Categories"
                           ],
-                          "slug": "bags",
+                          "slug": "sample-categories",
                           "order": 1,
                           "n_children": 2,
                           "created": "2026-06-22T08:44:08.293000",
@@ -2962,13 +2935,13 @@
                         },
                         {
                           "id": "6a1f0c2e9b3d4a5f8c7e1c02",
-                          "name": "Backpacks",
+                          "name": "Drinkware",
                           "parent_id": "6a1f0c2e9b3d4a5f8c7e1c01",
                           "path": [
-                            "Bags",
-                            "Backpacks"
+                            "Sample Categories",
+                            "Drinkware"
                           ],
-                          "slug": "backpacks",
+                          "slug": "drinkware",
                           "order": 1,
                           "n_children": 0,
                           "created": "2026-06-22T08:44:08.293000",
@@ -2976,13 +2949,13 @@
                         },
                         {
                           "id": "6a1f0c2e9b3d4a5f8c7e1c03",
-                          "name": "Totes",
+                          "name": "Kettles & Teapots",
                           "parent_id": "6a1f0c2e9b3d4a5f8c7e1c01",
                           "path": [
-                            "Bags",
-                            "Totes"
+                            "Sample Categories",
+                            "Kettles & Teapots"
                           ],
-                          "slug": "totes",
+                          "slug": "kettles-teapots",
                           "order": 2,
                           "n_children": 0,
                           "created": "2026-06-22T08:44:08.293000",
@@ -3001,14 +2974,14 @@
                     "value": {
                       "data": [
                         {
-                          "id": "6a1f0c2e9b3d4a5f8c7e1c04",
-                          "name": "Accessories",
-                          "slug": "accessories"
+                          "id": "6a1f0c2e9b3d4a5f8c7e1c02",
+                          "name": "Drinkware",
+                          "slug": "drinkware"
                         },
                         {
-                          "id": "6a1f0c2e9b3d4a5f8c7e1c02",
-                          "name": "Backpacks",
-                          "slug": "backpacks"
+                          "id": "6a1f0c2e9b3d4a5f8c7e1c04",
+                          "name": "Mugs",
+                          "slug": "mugs"
                         }
                       ],
                       "errors": [],
@@ -3038,7 +3011,7 @@
           "productcategories"
         ],
         "summary": "Create a product category",
-        "description": "Creates one product category and returns it, including its new `id`. Only `name` is required, and the body accepts only `name` and `parent_id`.\n\nWithout `parent_id`, the category is created at the top of the tree. To create a subcategory, set `parent_id` to the ID of an existing category. The new category's `path` then lists every name above it, and the parent's `n_children` goes up by one.\n\nPlytix generates the `slug` from the name, for example `backpacks` for \"Backpacks\".\n\nA successful create returns `201`. The response holds fewer fields than [Get a product category](/reference/v3/product-categories/get-product-category): it leaves out `created` and `modified`, and on a top-level category, `parent_id`.\n\nRe-creating a category that already exists, with the same `name` and `parent_id`, returns `409`.\n\nCreating a category doesn't file any products under it. To add a product to a category, use [Link a record to a product](/reference/v3/products/add-product-field). See [The Plytix data model](/docs/guides/data-model#product-categories).",
+        "description": "Creates one product category and returns it, including its new `id`. Only `name` is required, and the body accepts only `name` and `parent_id`.\n\nWithout `parent_id`, the category is created at the top of the tree. To create a subcategory, set `parent_id` to the ID of an existing category. The new category's `path` then lists every name above it, and the parent's `n_children` goes up by one.\n\nPlytix generates the `slug` from the name, for example `kitchen-sinks` for \"Kitchen Sinks\".\n\nA successful create returns `201`. The response holds fewer fields than [Get a product category](/reference/v3/product-categories/get-product-category): it leaves out `created` and `modified`, and on a top-level category, `parent_id`.\n\nRe-creating a category that already exists, with the same `name` and `parent_id`, returns `409`.\n\nCreating a category doesn't file any products under it. To add a product to a category, use [Link a record to a product](/reference/v3/products/add-product-field). See [The Plytix data model](/docs/guides/data-model#product-categories).",
         "operationId": "create-product-category",
         "requestBody": {
           "required": true,
@@ -3051,13 +3024,13 @@
                 "topLevel": {
                   "summary": "Top-level category",
                   "value": {
-                    "name": "Bags"
+                    "name": "Sample Categories"
                   }
                 },
                 "subcategory": {
                   "summary": "Subcategory",
                   "value": {
-                    "name": "Backpacks",
+                    "name": "Drinkware",
                     "parent_id": "6a1f0c2e9b3d4a5f8c7e1c01"
                   }
                 }
@@ -3079,11 +3052,11 @@
                     "value": {
                       "data": {
                         "id": "6a1f0c2e9b3d4a5f8c7e1c01",
-                        "name": "Bags",
+                        "name": "Sample Categories",
                         "path": [
-                          "Bags"
+                          "Sample Categories"
                         ],
-                        "slug": "bags",
+                        "slug": "sample-categories",
                         "order": 1,
                         "n_children": 0
                       },
@@ -3096,13 +3069,13 @@
                     "value": {
                       "data": {
                         "id": "6a1f0c2e9b3d4a5f8c7e1c02",
-                        "name": "Backpacks",
+                        "name": "Drinkware",
                         "parent_id": "6a1f0c2e9b3d4a5f8c7e1c01",
                         "path": [
-                          "Bags",
-                          "Backpacks"
+                          "Sample Categories",
+                          "Drinkware"
                         ],
-                        "slug": "backpacks",
+                        "slug": "drinkware",
                         "order": 1,
                         "n_children": 0
                       },
@@ -3189,12 +3162,12 @@
                     "value": {
                       "data": {
                         "id": "6a1f0c2e9b3d4a5f8c7e1c01",
-                        "name": "Bags",
+                        "name": "Sample Categories",
                         "parent_id": null,
                         "path": [
-                          "Bags"
+                          "Sample Categories"
                         ],
-                        "slug": "bags",
+                        "slug": "sample-categories",
                         "order": 1,
                         "n_children": 2,
                         "created": "2026-06-22T08:44:08.293000",
@@ -3263,13 +3236,13 @@
                 "rename": {
                   "summary": "Rename",
                   "value": {
-                    "name": "Travel Backpacks"
+                    "name": "Espresso Cups"
                   }
                 },
                 "renameAndMove": {
                   "summary": "Rename and move under another parent",
                   "value": {
-                    "name": "Travel Backpacks",
+                    "name": "Espresso Cups",
                     "parent_id": "6a1f0c2e9b3d4a5f8c7e1c04"
                   }
                 }
@@ -3298,7 +3271,7 @@
           "productcategories"
         ],
         "summary": "Delete a product category",
-        "description": "Deletes a product category. A successful delete returns `204` with an empty body, and a later request for the same ID returns `404`.\n\nIf you only want to take a product out of a category, unlink the product instead. The category and its other products stay as they are. See [Safely remove categories, assets, or relationships](/docs/guides/safely-removing-categories-assets-or-relationships#remove-a-category-from-a-product).",
+        "description": "Deletes a product category. A successful delete returns `204` with an empty body, and a later request for the same ID returns `404`.\n\n**Deleting a parent category can also delete the categories below it.** In a Plytix test on a development account (October 2026), deleting a parent category also deleted its child and grandchild categories, and the test product was unlinked from them. The product itself stayed, and an unrelated category wasn't affected. The effect on many products, and on production accounts, hasn't been tested. Before you delete a category, check `n_children` to see whether it has subcategories.\n\nIf you only want to take a product out of a category, unlink the product instead. The category and its other products stay as they are. See [Safely remove categories, assets, or relationships](/docs/guides/safely-removing-categories-assets-or-relationships#remove-a-category-from-a-product).",
         "operationId": "delete-product-category",
         "parameters": [
           {
@@ -3385,7 +3358,7 @@
                     "summary": "One field",
                     "description": "`GET /api/v3/product-categories/{identifier}/name`",
                     "value": {
-                      "data": "Bags",
+                      "data": "Sample Categories",
                       "errors": []
                     }
                   },
@@ -3395,12 +3368,12 @@
                     "value": {
                       "data": {
                         "id": "6a1f0c2e9b3d4a5f8c7e1c01",
-                        "name": "Bags",
+                        "name": "Sample Categories",
                         "parent_id": null,
                         "path": [
-                          "Bags"
+                          "Sample Categories"
                         ],
-                        "slug": "bags",
+                        "slug": "sample-categories",
                         "order": 1,
                         "n_children": 2,
                         "created": "2026-06-22T08:44:08.293000",
@@ -3624,10 +3597,7 @@
               }
             },
             "example": {
-              "status[eq]": "Draft",
-              "label[lower][contains:ignorecase]": "shirt",
-              "_or[0]sku[eq]": "A1",
-              "_or[0]price[gte]": "100"
+              "name[contains:ignorecase]": "marketing"
             }
           }
         ],
@@ -3647,13 +3617,13 @@
                       "data": [
                         {
                           "id": "6a1f0c2e9b3d4a5f8c7e1802",
-                          "name": "Branding",
-                          "slug": "branding"
+                          "name": "Marketing Material",
+                          "slug": "marketing-material"
                         },
                         {
                           "id": "6a1f0c2e9b3d4a5f8c7e1803",
-                          "name": "Environmental Photos",
-                          "slug": "environmental-photos"
+                          "name": "Specifications",
+                          "slug": "specifications"
                         }
                       ],
                       "errors": [],
@@ -4249,10 +4219,7 @@
               }
             },
             "example": {
-              "status[eq]": "Draft",
-              "label[lower][contains:ignorecase]": "shirt",
-              "_or[0]sku[eq]": "A1",
-              "_or[0]price[gte]": "100"
+              "name[contains:ignorecase]": "summer"
             }
           }
         ],
@@ -4272,7 +4239,7 @@
                       "data": [
                         {
                           "id": "6a1f0c2e9b3d4a5f8c7e1301",
-                          "name": "Brand Logos",
+                          "name": "Marketing logos",
                           "query": [
                             [
                               {
@@ -4290,13 +4257,13 @@
                         },
                         {
                           "id": "6a1f0c2e9b3d4a5f8c7e1302",
-                          "name": "Lifestyle Images",
+                          "name": "Mug Images",
                           "query": [
                             [
                               {
                                 "operator": "like",
                                 "field": "filename",
-                                "value": "lifestyle",
+                                "value": "mug",
                                 "field_type": null
                               }
                             ]
@@ -4306,7 +4273,7 @@
                         },
                         {
                           "id": "6a1f0c2e9b3d4a5f8c7e1303",
-                          "name": "Tech Packs",
+                          "name": "Sinks",
                           "query": [
                             [
                               {
@@ -4392,16 +4359,16 @@
                 },
                 "smartGroups": {
                   "summary": "Smart list, two groups",
-                  "description": "Two groups: `filename` `like` `front` and `extension` `eq` `jpg`, or `filename` `eq` `bag-10157-front.jpg`.",
+                  "description": "Two groups: `filename` `like` `kettle` and `extension` `eq` `jpg`, or `filename` `eq` `Kettle handle - White.png`.",
                   "value": {
-                    "name": "Front Shots",
+                    "name": "Kettle Images",
                     "type": "Smart",
                     "query": [
                       [
                         {
                           "field": "filename",
                           "operator": "like",
-                          "value": "front"
+                          "value": "kettle"
                         },
                         {
                           "field": "extension",
@@ -4413,7 +4380,7 @@
                         {
                           "field": "filename",
                           "operator": "eq",
-                          "value": "bag-10157-front.jpg"
+                          "value": "Kettle handle - White.png"
                         }
                       ]
                     ]
@@ -4444,13 +4411,13 @@
                     "value": {
                       "data": {
                         "id": "6a1f0c2e9b3d4a5f8c7e1304",
-                        "name": "Front Shots",
+                        "name": "Kettle Images",
                         "query": [
                           [
                             {
                               "operator": "like",
                               "field": "filename",
-                              "value": "front",
+                              "value": "kettle",
                               "field_type": null
                             },
                             {
@@ -4464,7 +4431,7 @@
                             {
                               "operator": "eq",
                               "field": "filename",
-                              "value": "bag-10157-front.jpg",
+                              "value": "Kettle handle - White.png",
                               "field_type": null
                             }
                           ]
@@ -4560,7 +4527,7 @@
                     "value": {
                       "data": {
                         "id": "6a1f0c2e9b3d4a5f8c7e1301",
-                        "name": "Brand Logos",
+                        "name": "Marketing logos",
                         "type": "Static",
                         "query": [
                           [
@@ -4640,7 +4607,7 @@
                 "rename": {
                   "summary": "Rename",
                   "value": {
-                    "name": "Lifestyle Photos"
+                    "name": "Kettle Photos"
                   }
                 },
                 "replaceQuery": {
@@ -4913,7 +4880,7 @@
           "relationships"
         ],
         "summary": "Search relationships",
-        "description": "Returns the relationship types in your account, such as \"Accessories\" or \"Cross-sell\", one page at a time. A relationship type names a kind of connection between products. It doesn't hold the product links themselves.\n\nEach record holds the type's `id`, its `name`, its `label`, and its `status`. A product's `product_relationships` field names each type it uses by `relationship_id` and `relationship_label`, which match `id` and `label` here. A label doesn't always match the name: in the first example below, the type named \"Cross-sell\" has the label `related_products`.\n\nFilters use the same syntax as every V3 search, for example `status=ACTIVE`. To sort by name, send `_sort_by=name`.\n\nTo see which products are linked under each type, use [Search product relationships](/reference/v3/product-relationships/search-product-relationships). To get the products on the other end of one product's links, use [Search related products](/reference/v3/related-products/search-related-products) with `product_id=<id>`.\n\nRelated pages:\n\n- [The Plytix data model](/docs/guides/data-model#relationships)\n- [Filtering and search](/reference/v3/filtering-and-search)\n- [Pagination](/reference/v3/pagination)",
+        "description": "Returns the relationship types in your account, such as \"Gift basket\" or \"Recommended products\", one page at a time. A relationship type names a kind of connection between products. It doesn't hold the product links themselves.\n\nEach record holds the type's `id`, its `name`, its `label`, and its `status`. A product's `product_relationships` field names each type it uses by `relationship_id` and `relationship_label`, which match `id` and `label` here. A label doesn't always match the name: in the first example below, the type named \"Cross-sell\" has the label `related_products`.\n\nFilters use the same syntax as every V3 search, for example `status=ACTIVE`. To sort by name, send `_sort_by=name`.\n\nTo see which products are linked under each type, use [Search product relationships](/reference/v3/product-relationships/search-product-relationships). To get the products on the other end of one product's links, use [Search related products](/reference/v3/related-products/search-related-products) with `product_id=<id>`.\n\nRelated pages:\n\n- [The Plytix data model](/docs/guides/data-model#relationships)\n- [Filtering and search](/reference/v3/filtering-and-search)\n- [Pagination](/reference/v3/pagination)",
         "operationId": "search-relationships",
         "parameters": [
           {
@@ -5001,10 +4968,7 @@
               }
             },
             "example": {
-              "status[eq]": "Draft",
-              "label[lower][contains:ignorecase]": "shirt",
-              "_or[0]sku[eq]": "A1",
-              "_or[0]price[gte]": "100"
+              "name[contains:ignorecase]": "gift"
             }
           }
         ],
@@ -5024,16 +4988,16 @@
                       "data": [
                         {
                           "id": "6a1f0c2e9b3d4a5f8c7e1f01",
-                          "name": "Accessories",
-                          "label": "accessories",
+                          "name": "Gift basket",
+                          "label": "gift_basket",
                           "status": "ACTIVE",
                           "created": "2026-06-22T08:44:08.719000",
                           "modified": "2026-06-22T08:44:08.719000"
                         },
                         {
                           "id": "6a1f0c2e9b3d4a5f8c7e1f02",
-                          "name": "Cross-sell",
-                          "label": "related_products",
+                          "name": "Recommended products",
+                          "label": "recommended_products",
                           "status": "ACTIVE",
                           "created": "2026-06-22T08:44:08.731000",
                           "modified": "2026-06-22T08:44:08.731000"
@@ -5050,8 +5014,8 @@
                       "data": [
                         {
                           "id": "6a1f0c2e9b3d4a5f8c7e1f01",
-                          "name": "Accessories",
-                          "label": "accessories"
+                          "name": "Gift basket",
+                          "label": "gift_basket"
                         }
                       ],
                       "errors": [],
@@ -5081,7 +5045,7 @@
           "relationships"
         ],
         "summary": "Create a relationship",
-        "description": "Creates a relationship type, such as \"Spare Parts\", and returns it, including its new `id`. `name` is the only field in the body.\n\nPlytix sets the other fields for you:\n\n- `label` is derived from the name in snake_case, so \"Spare Parts\" gets `spare_parts`. It doesn't change if you rename the type later.\n- `status` starts as `ACTIVE`.\n\nNames are unique in your account. If a relationship type with that name already exists, the request returns `409` and creates nothing.\n\nCreating a type doesn't link any products. To see which products use a type, use [Search product relationships](/reference/v3/product-relationships/search-product-relationships). See [The Plytix data model](/docs/guides/data-model#relationships) and [Update and delete records](/reference/v3/updates-and-deletes).",
+        "description": "Creates a relationship type, such as \"Gift pack\", and returns it, including its new `id`. `name` is the only field in the body.\n\nPlytix sets the other fields for you:\n\n- `label` is derived from the name in snake_case, so \"Gift pack\" gets `gift_pack`. It doesn't change if you rename the type later.\n- `status` starts as `ACTIVE`.\n\nNames are unique in your account. If a relationship type with that name already exists, the request returns `409` and creates nothing.\n\nCreating a type doesn't link any products. To see which products use a type, use [Search product relationships](/reference/v3/product-relationships/search-product-relationships). See [The Plytix data model](/docs/guides/data-model#relationships) and [Update and delete records](/reference/v3/updates-and-deletes).",
         "operationId": "create-relationship",
         "requestBody": {
           "required": true,
@@ -5094,7 +5058,7 @@
                 "create": {
                   "summary": "Create a relationship type",
                   "value": {
-                    "name": "Spare Parts"
+                    "name": "Gift pack"
                   }
                 }
               }
@@ -5115,8 +5079,8 @@
                     "value": {
                       "data": {
                         "id": "6a1f0c2e9b3d4a5f8c7e1f03",
-                        "name": "Spare Parts",
-                        "label": "spare_parts",
+                        "name": "Gift pack",
+                        "label": "gift_pack",
                         "status": "ACTIVE",
                         "created": "2026-09-15T17:06:20.283000",
                         "modified": "2026-09-15T17:06:20.284000"
@@ -5204,8 +5168,8 @@
                     "value": {
                       "data": {
                         "id": "6a1f0c2e9b3d4a5f8c7e1f01",
-                        "name": "Accessories",
-                        "label": "accessories",
+                        "name": "Gift basket",
+                        "label": "gift_basket",
                         "status": "ACTIVE",
                         "created": "2026-06-22T08:44:08.719000",
                         "modified": "2026-06-22T08:44:08.719000"
@@ -5248,7 +5212,7 @@
           "relationships"
         ],
         "summary": "Rename a relationship",
-        "description": "Changes a relationship type's name. `name` is the only field you can change here, and other fields return `422`. A successful update returns `204` with an empty body.\n\nThe `label` stays as it was when the type was created, so a type renamed from \"Spare Parts\" to \"Replacement Parts\" keeps the label `spare_parts`. See [Update and delete records](/reference/v3/updates-and-deletes).",
+        "description": "Changes a relationship type's name. `name` is the only field you can change here, and other fields return `422`. A successful update returns `204` with an empty body.\n\nThe `label` stays as it was when the type was created, so a type renamed from \"Gift pack\" to \"Gift box\" keeps the label `gift_pack`. See [Update and delete records](/reference/v3/updates-and-deletes).",
         "operationId": "update-relationship",
         "parameters": [
           {
@@ -5273,7 +5237,7 @@
                 "rename": {
                   "summary": "Rename the relationship type",
                   "value": {
-                    "name": "Replacement Parts"
+                    "name": "Gift box"
                   }
                 }
               }
@@ -5388,7 +5352,7 @@
                     "summary": "One field",
                     "description": "`GET /api/v3/relationships/{identifier}/label`",
                     "value": {
-                      "data": "accessories",
+                      "data": "gift_basket",
                       "errors": []
                     }
                   }
@@ -5519,7 +5483,7 @@
           "productfamilies"
         ],
         "summary": "Search product families",
-        "description": "Returns the product families in your account, one page at a time. Each record holds the family's `id` and `name`, the number of products in it (`total_products`), and the number of attributes linked to it (`total_attributes`).\n\nUse it to find a family's `id` before you assign products to the family with `product_family_id`, or before you work with its attributes.\n\nFilters use the same syntax as every V3 search, for example `name[contains:ignorecase]=apparel`. To sort by name, send `_sort_by=name`.\n\nBy default, records don't list the family's attributes. To get them, with each attribute's inheritance `level`, use [List a product family's attributes](/reference/v3/family-attributes/list-family-attributes).\n\nRelated pages:\n\n- [The Plytix data model](/docs/guides/data-model#product-families-and-variants)\n- [Reconstruct parent/variant hierarchies](/docs/guides/reconstructing-parent-variant-hierarchies)\n- [Filtering and search](/reference/v3/filtering-and-search)\n- [Pagination](/reference/v3/pagination)",
+        "description": "Returns the product families in your account, one page at a time. Each record holds the family's `id` and `name`, the number of products in it (`total_products`), and the number of attributes linked to it (`total_attributes`).\n\nUse it to find a family's `id` before you assign products to the family with `product_family_id`, or before you work with its attributes.\n\nFilters use the same syntax as every V3 search, for example `name[contains:ignorecase]=aprons`. To sort by name, send `_sort_by=name`.\n\nBy default, records don't list the family's attributes. To get them, with each attribute's inheritance `level`, use [List a product family's attributes](/reference/v3/family-attributes/list-family-attributes).\n\nRelated pages:\n\n- [The Plytix data model](/docs/guides/data-model#product-families-and-variants)\n- [Reconstruct parent/variant hierarchies](/docs/guides/reconstructing-parent-variant-hierarchies)\n- [Filtering and search](/reference/v3/filtering-and-search)\n- [Pagination](/reference/v3/pagination)",
         "operationId": "search-product-families",
         "parameters": [
           {
@@ -5607,10 +5571,7 @@
               }
             },
             "example": {
-              "status[eq]": "Draft",
-              "label[lower][contains:ignorecase]": "shirt",
-              "_or[0]sku[eq]": "A1",
-              "_or[0]price[gte]": "100"
+              "name[contains:ignorecase]": "aprons"
             }
           }
         ],
@@ -5630,7 +5591,7 @@
                       "data": [
                         {
                           "id": "6a1f0c2e9b3d4a5f8c7e1d02",
-                          "name": "Office Supplies",
+                          "name": "Kitchen Sinks",
                           "total_products": 3,
                           "total_attributes": 59,
                           "total_models": 1,
@@ -5639,7 +5600,7 @@
                         },
                         {
                           "id": "6a1f0c2e9b3d4a5f8c7e1d01",
-                          "name": "Accessories",
+                          "name": "Gift Baskets",
                           "total_products": 7,
                           "total_attributes": 61,
                           "total_models": 1,
@@ -5648,7 +5609,7 @@
                         },
                         {
                           "id": "6a1f0c2e9b3d4a5f8c7e1d03",
-                          "name": "Apparel",
+                          "name": "Aprons",
                           "total_products": 46,
                           "total_attributes": 62,
                           "total_models": 1,
@@ -5668,14 +5629,14 @@
                     "value": {
                       "data": [
                         {
-                          "id": "6a1f0c2e9b3d4a5f8c7e1d01",
-                          "name": "Accessories",
-                          "total_products": 7
+                          "id": "6a1f0c2e9b3d4a5f8c7e1d03",
+                          "name": "Aprons",
+                          "total_products": 46
                         },
                         {
-                          "id": "6a1f0c2e9b3d4a5f8c7e1d03",
-                          "name": "Apparel",
-                          "total_products": 46
+                          "id": "6a1f0c2e9b3d4a5f8c7e1d01",
+                          "name": "Gift Baskets",
+                          "total_products": 7
                         }
                       ],
                       "errors": [],
@@ -5718,25 +5679,25 @@
                 "nameOnly": {
                   "summary": "Name only",
                   "value": {
-                    "name": "Bags"
+                    "name": "Mugs"
                   }
                 },
                 "withAttributes": {
                   "summary": "Link attributes at no_level",
                   "value": {
-                    "name": "Bags",
+                    "name": "Mugs",
                     "attributes": [
                       {
                         "id": "6a1f0c2e9b3d4a5f8c7e1e04",
-                        "label": "material"
+                        "label": "collection"
                       },
                       {
                         "id": "6a1f0c2e9b3d4a5f8c7e1e05",
-                        "label": "adult"
+                        "label": "size"
                       },
                       {
                         "id": "6a1f0c2e9b3d4a5f8c7e1e06",
-                        "label": "age_group"
+                        "label": "color"
                       }
                     ]
                   }
@@ -5759,7 +5720,7 @@
                     "value": {
                       "data": {
                         "id": "6a1f0c2e9b3d4a5f8c7e1d04",
-                        "name": "Bags",
+                        "name": "Mugs",
                         "total_products": 0,
                         "total_attributes": 4,
                         "total_models": 1,
@@ -5774,7 +5735,7 @@
                     "value": {
                       "data": {
                         "id": "6a1f0c2e9b3d4a5f8c7e1d04",
-                        "name": "Bags",
+                        "name": "Mugs",
                         "total_products": 0,
                         "total_attributes": 7,
                         "total_models": 1,
@@ -5871,7 +5832,7 @@
                     "summary": "One field",
                     "description": "`GET /api/v3/product-families/{identifier}/name`",
                     "value": {
-                      "data": "Accessories",
+                      "data": "Gift Baskets",
                       "errors": []
                     }
                   }
@@ -5910,7 +5871,7 @@
           "productfamilies"
         ],
         "summary": "Update a product family field",
-        "description": "Changes one field of a product family. `name` is the only field you can change: set `path` to `name` and send the new name on its own as a JSON string, such as `\"Bags and Backpacks\"`, not an object. A successful update returns `204` with an empty body.\n\nThis has the same effect as [Rename a product family](/reference/v3/product-families/update-product-family). See [Update and delete records](/reference/v3/updates-and-deletes).",
+        "description": "Changes one field of a product family. `name` is the only field you can change: set `path` to `name` and send the new name on its own as a JSON string, such as `\"Mugs and Cups\"`, not an object. A successful update returns `204` with an empty body.\n\nThis has the same effect as [Rename a product family](/reference/v3/product-families/update-product-family). See [Update and delete records](/reference/v3/updates-and-deletes).",
         "operationId": "update-product-family-field",
         "parameters": [
           {
@@ -5945,7 +5906,7 @@
               "examples": {
                 "name": {
                   "summary": "New name (path `name`)",
-                  "value": "Bags and Backpacks"
+                  "value": "Mugs and Cups"
                 }
               }
             }
@@ -6062,7 +6023,7 @@
                     "value": {
                       "data": {
                         "id": "6a1f0c2e9b3d4a5f8c7e1d01",
-                        "name": "Accessories",
+                        "name": "Gift Baskets",
                         "total_products": 7,
                         "total_attributes": 61,
                         "total_models": 1,
@@ -6132,7 +6093,7 @@
                 "rename": {
                   "summary": "Rename the family",
                   "value": {
-                    "name": "Bags and Backpacks"
+                    "name": "Mugs and Cups"
                   }
                 }
               }
@@ -6285,10 +6246,7 @@
               }
             },
             "example": {
-              "status[eq]": "Draft",
-              "label[lower][contains:ignorecase]": "shirt",
-              "_or[0]sku[eq]": "A1",
-              "_or[0]price[gte]": "100"
+              "product_family_id": "6a1f0c2e9b3d4a5f8c7e1a02"
             }
           }
         ],
@@ -6434,10 +6392,7 @@
               }
             },
             "example": {
-              "status[eq]": "Draft",
-              "label[lower][contains:ignorecase]": "shirt",
-              "_or[0]sku[eq]": "A1",
-              "_or[0]price[gte]": "100"
+              "type": "TextAttribute"
             }
           }
         ],
@@ -6457,8 +6412,8 @@
                       "data": [
                         {
                           "id": "6a1f0c2e9b3d4a5f8c7e1e12",
-                          "name": "Includes Zipper",
-                          "label": "zippered",
+                          "name": "In Stock",
+                          "label": "in_stock",
                           "description": null,
                           "status": "ACTIVE",
                           "created": "2026-06-22T08:45:07.391000",
@@ -6467,9 +6422,9 @@
                         },
                         {
                           "id": "6a1f0c2e9b3d4a5f8c7e1e13",
-                          "name": "Short Description",
-                          "label": "short_description",
-                          "description": "One- or two-sentence summary used on product cards and marketplace listings.",
+                          "name": "Feature description",
+                          "label": "feature_description",
+                          "description": "Key product features, shown on marketplace listings.",
                           "status": "ACTIVE",
                           "created": "2026-06-22T08:45:07.402000",
                           "modified": "2026-06-22T08:45:07.402000",
@@ -6576,9 +6531,9 @@
                 "text": {
                   "summary": "Text attribute",
                   "value": {
-                    "name": "Material",
-                    "label": "material",
-                    "description": "Main material of the product",
+                    "name": "Collection",
+                    "label": "collection",
+                    "description": "Product collection, such as 2019",
                     "type": "TextAttribute",
                     "character_limit": 250
                   }
@@ -6600,8 +6555,8 @@
                   "summary": "Completeness attribute",
                   "description": "Scores each product on the attributes listed in `attributes`.",
                   "value": {
-                    "name": "Catalog ready",
-                    "label": "catalog_ready",
+                    "name": "Basic Info Complete",
+                    "label": "basic_info_complete",
                     "type": "CompletenessAttribute",
                     "attributes": [
                       {
@@ -6631,9 +6586,9 @@
                     "value": {
                       "data": {
                         "id": "6a1f0c2e9b3d4a5f8c7e1e04",
-                        "name": "Material",
-                        "label": "material",
-                        "description": "Main material of the product",
+                        "name": "Collection",
+                        "label": "collection",
+                        "description": "Product collection, such as 2019",
                         "created": "2026-09-22T21:58:36.615000+00:00",
                         "modified": "2026-09-22T21:58:36.615000+00:00",
                         "type": "TextAttribute",
@@ -6746,8 +6701,8 @@
                     "value": {
                       "data": {
                         "id": "6a1f0c2e9b3d4a5f8c7e1e12",
-                        "name": "Includes Zipper",
-                        "label": "zippered",
+                        "name": "In Stock",
+                        "label": "in_stock",
                         "description": null,
                         "status": "ACTIVE",
                         "created": "2026-06-22T08:45:07.391000",
@@ -6817,8 +6772,8 @@
                 "rename": {
                   "summary": "Rename and describe a text attribute",
                   "value": {
-                    "name": "Material (outer shell)",
-                    "description": "Main material of the outer shell",
+                    "name": "Collection name",
+                    "description": "Collection the product belongs to",
                     "character_limit": 100
                   }
                 },
@@ -6962,7 +6917,7 @@
                     "summary": "One field",
                     "description": "`GET /api/v3/product-attributes/{identifier}/label`",
                     "value": {
-                      "data": "zippered",
+                      "data": "in_stock",
                       "errors": []
                     }
                   }
@@ -7167,10 +7122,7 @@
               }
             },
             "example": {
-              "status[eq]": "Draft",
-              "label[lower][contains:ignorecase]": "shirt",
-              "_or[0]sku[eq]": "A1",
-              "_or[0]price[gte]": "100"
+              "name[contains:ignorecase]": "dimensions"
             }
           }
         ],
@@ -7189,14 +7141,14 @@
                     "value": {
                       "data": [
                         {
-                          "id": "6a1f0c2e9b3d4a5f8c7e1401",
-                          "name": "Amazon",
-                          "order": 9
-                        },
-                        {
                           "id": "6a1f0c2e9b3d4a5f8c7e1402",
                           "name": "Basic Information",
                           "order": 0
+                        },
+                        {
+                          "id": "6a1f0c2e9b3d4a5f8c7e1401",
+                          "name": "Dimensions",
+                          "order": 9
                         }
                       ],
                       "errors": [],
@@ -7239,7 +7191,7 @@
                 "name": {
                   "summary": "New group",
                   "value": {
-                    "name": "Technical specifications"
+                    "name": "Rich Information"
                   }
                 }
               }
@@ -7260,7 +7212,7 @@
                     "value": {
                       "data": {
                         "id": "6a1f0c2e9b3d4a5f8c7e1403",
-                        "name": "Technical specifications",
+                        "name": "Rich Information",
                         "order": 12,
                         "attribute_labels": []
                       },
@@ -7347,14 +7299,14 @@
                     "value": {
                       "data": {
                         "id": "6a1f0c2e9b3d4a5f8c7e1401",
-                        "name": "Amazon",
+                        "name": "Dimensions",
                         "order": 9,
                         "attribute_labels": [
-                          "condition",
-                          "vendor",
-                          "country_of_origin",
-                          "amazon_product_title",
-                          "amazon_ready"
+                          "product_weight_kg",
+                          "product_length_mm",
+                          "product_width_mm",
+                          "product_height_mm",
+                          "packed_product_weight_kg"
                         ],
                         "created": "2026-06-22T08:45:07.035000",
                         "modified": "2026-06-22T08:45:07.035000"
@@ -7422,7 +7374,7 @@
                 "rename": {
                   "summary": "Rename the group",
                   "value": {
-                    "name": "Technical details"
+                    "name": "Rich Content"
                   }
                 }
               }
@@ -7552,11 +7504,11 @@
                     "description": "`GET /api/v3/product-attribute-groups/{identifier}/attribute_labels`",
                     "value": {
                       "data": [
-                        "condition",
-                        "vendor",
-                        "country_of_origin",
-                        "amazon_product_title",
-                        "amazon_ready"
+                        "product_weight_kg",
+                        "product_length_mm",
+                        "product_width_mm",
+                        "product_height_mm",
+                        "packed_product_weight_kg"
                       ],
                       "errors": []
                     }
@@ -7617,7 +7569,7 @@
               "examples": {
                 "name": {
                   "summary": "New name (path `name`)",
-                  "value": "Technical details"
+                  "value": "Rich Content"
                 }
               }
             }
@@ -8087,7 +8039,7 @@
             "title": "Url",
             "description": "Address Plytix downloads the file from.",
             "examples": [
-              "https://example.com/images/bag-10157-front.jpg"
+              "https://www.plytix.com/hubfs/Kitchen%20and%20Home%20Products/Enjoy%20Mug%20-%20Blue.jpg"
             ]
           },
           "content": {
@@ -8112,7 +8064,7 @@
               }
             ],
             "title": "Filename",
-            "description": "File name, including the extension, such as `bag-10157-front.jpg`. Required with `content`. Optional with `url`."
+            "description": "File name, including the extension, such as `kettle_blue.jpg`. Required with `content`. Optional with `url`."
           },
           "alt_text": {
             "anyOf": [
@@ -8369,7 +8321,7 @@
             "title": "Name",
             "description": "List name. It must be unique among your asset lists. A name that's already in use returns `409`.",
             "examples": [
-              "Front Shots"
+              "Kettle Images"
             ]
           },
           "type": {
@@ -8644,7 +8596,7 @@
             "title": "Name",
             "description": "New list name.",
             "examples": [
-              "Lifestyle Photos"
+              "Kettle Photos"
             ]
           },
           "query": {
@@ -8951,7 +8903,7 @@
             "title": "Filename",
             "description": "New file name, including the extension. The file's content doesn't change.",
             "examples": [
-              "bag-10157-front-view.jpg"
+              "adventure-mug-blue.jpg"
             ]
           },
           "alt_text": {
@@ -8966,7 +8918,7 @@
             "title": "Alt Text",
             "description": "Text that describes the asset for people who can't see it.",
             "examples": [
-              "Canvas backpack, front view"
+              "Adventure mug in blue, front view"
             ]
           }
         },
@@ -8998,7 +8950,7 @@
             "title": "Label",
             "description": "The attribute's `label`, its snake_case name.",
             "examples": [
-              "material"
+              "brand"
             ]
           }
         },
@@ -9049,7 +9001,7 @@
             "title": "Name",
             "description": "Display name of the attribute. It must be unique in your account: a name that already exists returns `409`.",
             "examples": [
-              "Includes Zipper"
+              "In Stock"
             ]
           },
           "label": {
@@ -9067,7 +9019,7 @@
             "title": "Label",
             "description": "Key of the attribute in each product's `attributes` map and in filters (`attributes.<label>`). Lowercase letters, digits, and underscores only, up to 255 characters; anything else returns `422`. It can't be changed after creation. If you leave it out, it's set from `name`, which works only when `name` already matches this pattern.",
             "examples": [
-              "zippered"
+              "in_stock"
             ]
           },
           "description": {
@@ -9475,7 +9427,7 @@
             "title": "Name",
             "description": "Display name of the attribute. It must be unique in your account: a name that already exists returns `409`.",
             "examples": [
-              "Catalog ready"
+              "Basic Info Complete"
             ]
           },
           "label": {
@@ -9493,7 +9445,7 @@
             "title": "Label",
             "description": "Key of the attribute in each product's `attributes` map and in filters (`attributes.<label>`). Lowercase letters, digits, and underscores only, up to 255 characters; anything else returns `422`. It can't be changed after creation. If you leave it out, it's set from `name`, which works only when `name` already matches this pattern.",
             "examples": [
-              "catalog_ready"
+              "basic_info_complete"
             ]
           },
           "description": {
@@ -10078,7 +10030,7 @@
             "title": "Name",
             "description": "Display name of the attribute. It must be unique in your account: a name that already exists returns `409`.",
             "examples": [
-              "Release date"
+              "Since"
             ]
           },
           "label": {
@@ -10096,7 +10048,7 @@
             "title": "Label",
             "description": "Key of the attribute in each product's `attributes` map and in filters (`attributes.<label>`). Lowercase letters, digits, and underscores only, up to 255 characters; anything else returns `422`. It can't be changed after creation. If you leave it out, it's set from `name`, which works only when `name` already matches this pattern.",
             "examples": [
-              "release_date"
+              "since"
             ]
           },
           "description": {
@@ -10411,7 +10363,7 @@
             "title": "Name",
             "description": "Display name of the attribute. It must be unique in your account: a name that already exists returns `409`.",
             "examples": [
-              "Weight (kg)"
+              "Product weight (kg)"
             ]
           },
           "label": {
@@ -10429,7 +10381,7 @@
             "title": "Label",
             "description": "Key of the attribute in each product's `attributes` map and in filters (`attributes.<label>`). Lowercase letters, digits, and underscores only, up to 255 characters; anything else returns `422`. It can't be changed after creation. If you leave it out, it's set from `name`, which works only when `name` already matches this pattern.",
             "examples": [
-              "weight_kg"
+              "product_weight_kg"
             ]
           },
           "description": {
@@ -11892,7 +11844,7 @@
             "title": "Name",
             "description": "Display name of the attribute. It must be unique in your account: a name that already exists returns `409`.",
             "examples": [
-              "Long description"
+              "Description"
             ]
           },
           "label": {
@@ -11910,7 +11862,7 @@
             "title": "Label",
             "description": "Key of the attribute in each product's `attributes` map and in filters (`attributes.<label>`). Lowercase letters, digits, and underscores only, up to 255 characters; anything else returns `422`. It can't be changed after creation. If you leave it out, it's set from `name`, which works only when `name` already matches this pattern.",
             "examples": [
-              "long_description"
+              "description"
             ]
           },
           "description": {
@@ -12189,7 +12141,7 @@
             "title": "Name",
             "description": "Display name of the attribute. It must be unique in your account: a name that already exists returns `409`.",
             "examples": [
-              "Stock"
+              "Product length (mm)"
             ]
           },
           "label": {
@@ -12207,7 +12159,7 @@
             "title": "Label",
             "description": "Key of the attribute in each product's `attributes` map and in filters (`attributes.<label>`). Lowercase letters, digits, and underscores only, up to 255 characters; anything else returns `422`. It can't be changed after creation. If you leave it out, it's set from `name`, which works only when `name` already matches this pattern.",
             "examples": [
-              "stock"
+              "product_length_mm"
             ]
           },
           "description": {
@@ -12486,7 +12438,7 @@
             "title": "Name",
             "description": "Display name of the attribute. It must be unique in your account: a name that already exists returns `409`.",
             "examples": [
-              "Packshot"
+              "Hero image"
             ]
           },
           "label": {
@@ -12504,7 +12456,7 @@
             "title": "Label",
             "description": "Key of the attribute in each product's `attributes` map and in filters (`attributes.<label>`). Lowercase letters, digits, and underscores only, up to 255 characters; anything else returns `422`. It can't be changed after creation. If you leave it out, it's set from `name`, which works only when `name` already matches this pattern.",
             "examples": [
-              "packshot"
+              "hero_image"
             ]
           },
           "description": {
@@ -12783,7 +12735,7 @@
             "title": "Name",
             "description": "Display name of the attribute. It must be unique in your account: a name that already exists returns `409`.",
             "examples": [
-              "Lifestyle images"
+              "Additional Image Gallery"
             ]
           },
           "label": {
@@ -12801,7 +12753,7 @@
             "title": "Label",
             "description": "Key of the attribute in each product's `attributes` map and in filters (`attributes.<label>`). Lowercase letters, digits, and underscores only, up to 255 characters; anything else returns `422`. It can't be changed after creation. If you leave it out, it's set from `name`, which works only when `name` already matches this pattern.",
             "examples": [
-              "lifestyle_images"
+              "additional_image_gallery"
             ]
           },
           "description": {
@@ -13080,7 +13032,7 @@
             "title": "Name",
             "description": "Display name of the attribute. It must be unique in your account: a name that already exists returns `409`.",
             "examples": [
-              "Tags"
+              "Color"
             ]
           },
           "label": {
@@ -13098,7 +13050,7 @@
             "title": "Label",
             "description": "Key of the attribute in each product's `attributes` map and in filters (`attributes.<label>`). Lowercase letters, digits, and underscores only, up to 255 characters; anything else returns `422`. It can't be changed after creation. If you leave it out, it's set from `name`, which works only when `name` already matches this pattern.",
             "examples": [
-              "tags"
+              "color"
             ]
           },
           "description": {
@@ -13136,9 +13088,9 @@
             "description": "The values products can choose from.",
             "examples": [
               [
-                "Small",
-                "Medium",
-                "Large"
+                "Blue",
+                "Purple",
+                "White"
               ]
             ]
           },
@@ -14265,7 +14217,7 @@
             "title": "Name",
             "description": "Name of the group. It must be unique in your account. A name that already exists returns `409`.",
             "examples": [
-              "Technical specifications"
+              "Rich Information"
             ]
           }
         },
@@ -14473,7 +14425,7 @@
             "title": "Name",
             "description": "New name of the group.",
             "examples": [
-              "Technical details"
+              "Rich Content"
             ]
           },
           "order": {
@@ -14495,7 +14447,7 @@
             "title": "Name",
             "description": "Display name of the attribute. Renaming doesn't change `label`.",
             "examples": [
-              "Material (outer shell)"
+              "Collection name"
             ]
           },
           "description": {
@@ -14598,7 +14550,7 @@
             "title": "Name",
             "description": "Category name. Plytix builds the category's `slug` from it.",
             "examples": [
-              "Backpacks"
+              "Drinkware"
             ]
           },
           "parent_id": {
@@ -14816,8 +14768,8 @@
             "description": "Names from the top of the tree down to this category, ending with its own name.",
             "examples": [
               [
-                "Bags",
-                "Backpacks"
+                "Sample Categories",
+                "Drinkware"
               ]
             ]
           },
@@ -14831,7 +14783,7 @@
               }
             ],
             "title": "Slug",
-            "description": "URL-friendly version of the name, generated by Plytix, such as `backpacks`."
+            "description": "URL-friendly version of the name, generated by Plytix, such as `drinkware`."
           },
           "order": {
             "anyOf": [
@@ -14922,7 +14874,7 @@
             "title": "Name",
             "description": "New category name. The category's `slug` and the last name in its `path` change with it.",
             "examples": [
-              "Travel Backpacks"
+              "Espresso Cups"
             ]
           },
           "parent_id": {
@@ -14959,7 +14911,7 @@
             "title": "Label",
             "description": "Product name shown in Plytix.",
             "examples": [
-              "Canvas Backpack"
+              "Gift basket"
             ]
           },
           "sku": {
@@ -14968,7 +14920,7 @@
             "title": "Sku",
             "description": "Your identifier for the product, up to 100 characters. It must be unique in your account. A SKU that already exists returns `409`.",
             "examples": [
-              "BAG-10157"
+              "GF-Basket"
             ]
           },
           "gtin": {
@@ -15006,7 +14958,7 @@
             "description": "Custom attribute values, keyed by each attribute's `label` (its snake_case name, not the display name).",
             "examples": [
               {
-                "material": "Canvas"
+                "collection": "2019"
               }
             ]
           },
@@ -15247,7 +15199,7 @@
             "title": "Name",
             "description": "Name of the product family, 1 to 300 characters. It must be unique in your account. A name that already exists returns `409`.",
             "examples": [
-              "Bags"
+              "Mugs"
             ]
           },
           "attributes": {
@@ -15276,7 +15228,7 @@
               [
                 {
                   "id": "6a1f0c2e9b3d4a5f8c7e1e04",
-                  "label": "material"
+                  "label": "collection"
                 }
               ]
             ]
@@ -15566,7 +15518,7 @@
             "title": "Name",
             "description": "New name of the product family, 1 to 300 characters.",
             "examples": [
-              "Bags and Backpacks"
+              "Mugs and Cups"
             ]
           }
         },
@@ -16278,7 +16230,7 @@
             "title": "Name",
             "description": "Name of the relationship type. It must be unique in your account. A name that already exists returns `409`. The `label` is derived from it in snake_case.",
             "examples": [
-              "Spare Parts"
+              "Gift pack"
             ]
           }
         },
@@ -16529,7 +16481,7 @@
             "title": "Name",
             "description": "New name of the relationship type.",
             "examples": [
-              "Replacement Parts"
+              "Gift box"
             ]
           }
         },
@@ -16876,7 +16828,7 @@
             "title": "Name",
             "description": "Display name of the attribute. It must be unique in your account: a name that already exists returns `409`.",
             "examples": [
-              "Material"
+              "Collection"
             ]
           },
           "label": {
@@ -16894,7 +16846,7 @@
             "title": "Label",
             "description": "Key of the attribute in each product's `attributes` map and in filters (`attributes.<label>`). Lowercase letters, digits, and underscores only, up to 255 characters; anything else returns `422`. It can't be changed after creation. If you leave it out, it's set from `name`, which works only when `name` already matches this pattern.",
             "examples": [
-              "material"
+              "collection"
             ]
           },
           "description": {
@@ -17213,7 +17165,7 @@
             "title": "Name",
             "description": "Display name of the attribute. It must be unique in your account: a name that already exists returns `409`.",
             "examples": [
-              "Product page"
+              "Video URL"
             ]
           },
           "label": {
@@ -17231,7 +17183,7 @@
             "title": "Label",
             "description": "Key of the attribute in each product's `attributes` map and in filters (`attributes.<label>`). Lowercase letters, digits, and underscores only, up to 255 characters; anything else returns `422`. It can't be changed after creation. If you leave it out, it's set from `name`, which works only when `name` already matches this pattern.",
             "examples": [
-              "product_page"
+              "video_url"
             ]
           },
           "description": {

@@ -74,22 +74,22 @@ Follow the steps below to read your products, group them by parent, and add the 
    ```json
    {
      "id": "<parent_id>",
-     "sku": "BAG-100",
+     "sku": "BAMBOO-APRON",
      "product_family_id": "<family_id>",
      "product_level": 1,
      "variants": [
        {
          "id": "<variant_id>",
-         "sku": "BAG-100-RED",
+         "sku": "BAMBOO-APRON-RED",
          "product_family_id": "<family_id>",
          "product_level": 2,
          "sub_variants": [
-           { "id": "<sub_variant_id>", "sku": "BAG-100-RED-S", "product_family_id": "<family_id>", "product_level": 3 }
+           { "id": "<sub_variant_id>", "sku": "BAMBOO-APRON-RED-S", "product_family_id": "<family_id>", "product_level": 3 }
          ]
        },
        {
          "id": "<variant_id_2>",
-         "sku": "BAG-100-BLUE",
+         "sku": "BAMBOO-APRON-BLUE",
          "product_family_id": "<family_id>",
          "product_level": 2,
          "sub_variants": []
@@ -119,7 +119,7 @@ If your account has no parent and variant products yet, follow the steps below t
    curl -X POST "https://pim.plytix.com/api/v3/product-families" \
      -H "Authorization: Bearer <access_token>" \
      -H "Content-Type: application/json" \
-     -d '{"name": "Backpacks"}'
+     -d '{"name": "Aprons"}'
    ```
 
    You can also link attributes at creation: `attributes` links them at `no_level`. A family's own `PATCH` accepts `name` only, because changing which attributes belong to a family propagates across every product in it.
@@ -147,7 +147,7 @@ If your account has no parent and variant products yet, follow the steps below t
    curl -X POST "https://pim.plytix.com/api/v3/products" \
      -H "Authorization: Bearer <access_token>" \
      -H "Content-Type: application/json" \
-     -d '{"sku": "PARENT-001", "product_family_id": "<family_id>"}'
+     -d '{"sku": "Black Kettle", "product_family_id": "<family_id>"}'
    ```
 
    A successful create returns `201` with the new product in `data`, without expanded relations. Its `product_level` is `0`: putting a product in a family doesn't make it a parent. It becomes one in the next step, when a variant points at it.
@@ -158,7 +158,7 @@ If your account has no parent and variant products yet, follow the steps below t
    curl -X POST "https://pim.plytix.com/api/v3/products" \
      -H "Authorization: Bearer <access_token>" \
      -H "Content-Type: application/json" \
-     -d '{"sku": "VARIANT-001", "parent_id": "<parent_id>"}'
+     -d '{"sku": "Black Kettle_1", "parent_id": "<parent_id>"}'
    ```
 
    Leave `product_family_id` out: the variant takes its family from the parent. If you send it, it must match the parent's family. A different family returns `422` with an error that names no field: `{"name": "ValidationError", "description": "product data validation failed"}`.

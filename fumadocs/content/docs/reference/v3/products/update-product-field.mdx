@@ -14,7 +14,7 @@ _openapi:
       - content: >-
           Changes one custom attribute value and leaves the rest of the product
           as it is. Set `path` to `attributes/<label>` and send the new value on
-          its own as the request body: `"Canvas"`, not `{"value": "Canvas"}`. A
+          its own as the request body: `"2019"`, not `{"value": "2019"}`. A
           successful update returns `204` with an empty body.
 
 
@@ -31,7 +31,7 @@ _openapi:
           - Decimal: a string, such as `"12.5"`. A JSON number returns `422`.
 
           - Multi-select: an array of the attribute's configured options, such
-          as `["Cotton"]`.
+          as `["Blue"]`.
 
           - Media: one asset ID, as a string.
 

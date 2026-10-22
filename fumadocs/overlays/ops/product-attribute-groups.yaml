@@ -30,6 +30,12 @@ actions:
         - [Filtering and search](/reference/v3/filtering-and-search)
         - [Pagination](/reference/v3/pagination)
 
+  - target: $.paths['/api/v3/product-attribute-groups'].get.parameters[?(@.name=='filters' && @.in=='query')]
+    description: 'PM-50; field names from the resource''s response schema, operators per the API-wide grammar (Q#11, Q#99)'
+    update:
+      example:
+        'name[contains:ignorecase]': dimensions
+
   - target: $.paths['/api/v3/product-attribute-groups'].get.responses['200'].content['application/json']
     description: List Product Attribute Groups.bru "200 - Full Parameters" (2026-09-22), sanitized
     update:
@@ -62,7 +68,7 @@ actions:
         name:
           summary: New group
           value:
-            name: Technical specifications
+            name: Rich Information
 
   - target: $.paths['/api/v3/product-attribute-groups'].post.responses['201']
     description: Create Product Attribute Group.bru "201 - Success" (2026-09-07), sanitized, order from the 2026-10-13 capture (Link and Unlink Attribute Group.bru); data is an object (Q#117)
@@ -76,7 +82,7 @@ actions:
               value:
                 data:
                   id: 6a1f0c2e9b3d4a5f8c7e1403
-                  name: Technical specifications
+                  name: Rich Information
                   order: 12
                   attribute_labels: []
                 errors: []
@@ -128,14 +134,14 @@ actions:
           value:
             data:
               id: 6a1f0c2e9b3d4a5f8c7e1401
-              name: Amazon
+              name: Dimensions
               order: 9
               attribute_labels:
-                - condition
-                - vendor
-                - country_of_origin
-                - amazon_product_title
-                - amazon_ready
+                - product_weight_kg
+                - product_length_mm
+                - product_width_mm
+                - product_height_mm
+                - packed_product_weight_kg
               created: '2026-06-22T08:45:07.035000'
               modified: '2026-06-22T08:45:07.035000'
             errors: []
@@ -172,7 +178,7 @@ actions:
         rename:
           summary: Rename the group
           value:
-            name: Technical details
+            name: Rich Content
 
   - target: $.paths['/api/v3/product-attribute-groups/{identifier}'].patch.responses['204']
     description: Update Product Attribute Group.bru (2026-10-13)
@@ -224,11 +230,11 @@ actions:
           description: '`GET /api/v3/product-attribute-groups/{identifier}/attribute_labels`'
           value:
             data:
-              - condition
-              - vendor
-              - country_of_origin
-              - amazon_product_title
-              - amazon_ready
+              - product_weight_kg
+              - product_length_mm
+              - product_width_mm
+              - product_height_mm
+              - packed_product_weight_kg
             errors: []
 
   - target: $.paths['/api/v3/product-attribute-groups/{identifier}/{path}'].get.parameters[?(@.name=='path' && @.in=='path')]

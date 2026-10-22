@@ -30,7 +30,7 @@ A V3 search returns `data` as an array:
 ```json
 {
   "data": [
-    { "id": "6a38f614c3d65a5f868b1a06", "sku": "BAG-10157", "status": "Completed" }
+    { "id": "6a38f614c3d65a5f868b1a06", "sku": "GF-Basket", "status": "Completed" }
   ],
   "errors": [],
   "pagination": { "next_page": "<next_page_url>" }
@@ -43,8 +43,8 @@ A V3 GET on one record returns `data` as an object (abridged):
 {
   "data": {
     "id": "6a38f614c3d65a5f868b1a06",
-    "sku": "BAG-10157",
-    "label": "Bag 10157",
+    "sku": "GF-Basket",
+    "label": "Gift basket",
     "status": "Completed"
   },
   "errors": []
@@ -56,7 +56,7 @@ The V1/V2 GET wraps the same record in an array (abridged):
 ```json
 {
   "data": [
-    { "id": "6a38f614c3d65a5f868b1a06", "sku": "BAG-10157", "label": "Bag 10157" }
+    { "id": "6a38f614c3d65a5f868b1a06", "sku": "GF-Basket", "label": "Gift basket" }
   ]
 }
 ```
@@ -99,7 +99,7 @@ A product PATCH is a partial update at the top level: fields you leave out, such
 The examples below start from the same product, which has two attributes:
 
 ```json
-{ "attributes": { "brand": "Acme", "care_instructions": "Hand wash" } }
+{ "attributes": { "brand": "Plytix Kitchen", "collection": "2019" } }
 ```
 
 ### Replace the whole map
@@ -111,13 +111,13 @@ curl --request PATCH \
   --url 'https://<v3-base-url>/api/v3/products/<identifier>' \
   --header 'Authorization: Bearer <token>' \
   --header 'Content-Type: application/json' \
-  --data '{"attributes": {"brand": "Acme Outdoor"}}'
+  --data '{"attributes": {"brand": "Plytix"}}'
 ```
 
-After the `204`, a GET shows that `care_instructions` is gone:
+After the `204`, a GET shows that `collection` is gone:
 
 ```json
-{ "attributes": { "brand": "Acme Outdoor" } }
+{ "attributes": { "brand": "Plytix" } }
 ```
 
 ### Merge a partial map
@@ -129,13 +129,13 @@ curl --request PATCH \
   --url 'https://<v3-base-url>/api/v3/products/<identifier>/attributes' \
   --header 'Authorization: Bearer <token>' \
   --header 'Content-Type: application/json' \
-  --data '{"brand": "Acme Outdoor"}'
+  --data '{"brand": "Plytix"}'
 ```
 
-A GET afterward shows that `care_instructions` is still there:
+A GET afterward shows that `collection` is still there:
 
 ```json
-{ "attributes": { "brand": "Acme Outdoor", "care_instructions": "Hand wash" } }
+{ "attributes": { "brand": "Plytix", "collection": "2019" } }
 ```
 
 Each value in the partial map takes the same format as on the attribute's own path, such as an array of option labels for a multiselect attribute.
@@ -154,7 +154,7 @@ curl --request PATCH \
   --url 'https://<v3-base-url>/api/v3/products/<identifier>/attributes/brand' \
   --header 'Authorization: Bearer <token>' \
   --header 'Content-Type: application/json' \
-  --data '"Acme Outdoor"'
+  --data '"Plytix"'
 ```
 
 This returns `204` and leaves every other attribute untouched. Prefer it for routine syncs, such as price or stock updates, where each request changes one or two attributes.

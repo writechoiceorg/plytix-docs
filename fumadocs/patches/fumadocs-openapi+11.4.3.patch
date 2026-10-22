@@ -1,0 +1,212 @@
+diff --git a/node_modules/fumadocs-openapi/dist/playground/client.js b/node_modules/fumadocs-openapi/dist/playground/client.js
+index 46f15e7..f747587 100644
+--- a/node_modules/fumadocs-openapi/dist/playground/client.js
++++ b/node_modules/fumadocs-openapi/dist/playground/client.js
+@@ -13,7 +13,7 @@ import { useOperationContext } from "../ui/operation/context.js";
+ import { useAuth } from "./auth.js";
+ import { OAuthDialog, OAuthDialogContent, OAuthDialogTrigger } from "./components/oauth-dialog.js";
+ import { dereferenceShallow } from "@fumadocs/api-docs/schema/dereference";
+-import { Fragment, useEffect, useMemo, useRef, useState } from "react";
++import { Fragment, createContext, use, useEffect, useMemo, useRef, useState } from "react";
+ import { Fragment as Fragment$1, jsx, jsxs } from "react/jsx-runtime";
+ import { ChevronDown, LoaderCircle, PlusIcon } from "lucide-react";
+ import { useTranslations } from "@fuma-translate/react";
+@@ -29,6 +29,17 @@ import { FieldInput, FieldSet, JsonInput, ObjectInput } from "@fumadocs/api-docs
+ import { useOnChange } from "fumadocs-core/utils/use-on-change";
+ import { Spinner } from "@fumadocs/api-docs/components/spinner";
+ //#region src/playground/client.tsx
++// [plytix-docs patch PM-56] required path parameters left empty block "Send"
++const PathParamErrorContext = createContext({
++	errors: [],
++	token: 0
++});
++function getMissingPathParams(parameters, values) {
++	return parameters.filter((p) => p.in === "path" && p.required !== false).map((p) => p.name).filter((name) => {
++		const value = values.path?.[name];
++		return value == null || String(value).trim() === "";
++	});
++}
+ function PlaygroundClient({ route, method, operation, pathItem, writeOnly, readOnly, ...rest }) {
+ 	const t = useTranslations({ note: "playground" });
+ 	const ctx = useRenderContext();
+@@ -92,6 +103,10 @@ function PlaygroundClient({ route, method, operation, pathItem, writeOnly, readO
+ 		}, mediaAdapters, parameters);
+ 		return fetcher.fetch(joinURL(new URL(server ? resolveServerUrl(server.url, server.variables) : "/", window.location.origin).href, pathnameFromRequest(route, encoded)), encoded);
+ 	});
++	const [pathCheck, setPathCheck] = useState({
++		errors: [],
++		token: 0
++	});
+ 	const timerRef = useRef(null);
+ 	const stfSync = useRef(false);
+ 	function triggerExampleUpdate() {
+@@ -105,6 +120,14 @@ function PlaygroundClient({ route, method, operation, pathItem, writeOnly, readO
+ 	useListener({
+ 		stf,
+ 		onUpdate() {
++			if (pathCheck.errors.length > 0) {
++				const missing = getMissingPathParams(parameters, stf.dataEngine.getData());
++				const errors = pathCheck.errors.filter((name) => missing.includes(name));
++				if (errors.length !== pathCheck.errors.length) setPathCheck({
++					errors,
++					token: pathCheck.token
++				});
++			}
+ 			if (!stfSync.current) return;
+ 			if (timerRef.current) window.clearTimeout(timerRef.current);
+ 			timerRef.current = window.setTimeout(triggerExampleUpdate, 400);
+@@ -125,7 +148,9 @@ function PlaygroundClient({ route, method, operation, pathItem, writeOnly, readO
+ 	}, [defaultValues, inputs]);
+ 	return /* @__PURE__ */ jsx(StfProvider, {
+ 		value: stf,
+-		children: /* @__PURE__ */ jsx(SchemaProvider, {
++		children: /* @__PURE__ */ jsx(PathParamErrorContext.Provider, {
++			value: pathCheck,
++			children: /* @__PURE__ */ jsx(SchemaProvider, {
+ 			docRoot: dereferenced,
+ 			writeOnly,
+ 			readOnly,
+@@ -133,8 +158,15 @@ function PlaygroundClient({ route, method, operation, pathItem, writeOnly, readO
+ 				...rest,
+ 				className: cn("not-prose flex flex-col rounded-xl border shadow-md overflow-hidden bg-fd-card text-fd-card-foreground", rest.className),
+ 				onSubmit: (e) => {
+-					testQuery.start(stf.dataEngine.getData());
+ 					e.preventDefault();
++					const values = stf.dataEngine.getData();
++					const missing = getMissingPathParams(parameters, values);
++					setPathCheck((prev) => ({
++						errors: missing,
++						token: missing.length > 0 ? prev.token + 1 : prev.token
++					}));
++					if (missing.length > 0) return;
++					testQuery.start(values);
+ 				},
+ 				children: [
+ 					/* @__PURE__ */ jsx(ServerSelect, { className: "border-b" }),
+@@ -176,6 +208,7 @@ function PlaygroundClient({ route, method, operation, pathItem, writeOnly, readO
+ 				]
+ 			})
+ 		})
++		})
+ 	});
+ }
+ function SecurityRequirements({ securities, setSecurityId, securityId, children }) {
+@@ -260,17 +293,62 @@ const ParamTypes = [
+ ];
+ function ParameterItem({ type, parameters }) {
+ 	const { renderParameterField } = useRenderContext().playground ?? {};
++	const pathCheck = use(PathParamErrorContext);
+ 	return parameters.map((field) => {
+ 		const fieldName = [type, field.name];
+ 		if (renderParameterField) return renderParameterField(fieldName, field);
+ 		const contentTypes = field.content && Object.keys(field.content);
+ 		const schema = field.content && contentTypes && contentTypes.length > 0 ? field.content[contentTypes[0]].schema : field.schema;
+-		return /* @__PURE__ */ jsx(FieldSet, {
++		const id = stringifyFieldKey(fieldName);
++		const hasError = type === "path" && pathCheck.errors.includes(field.name);
++		const errorId = `${id}-error`;
++		return /* @__PURE__ */ jsxs(Fragment, { children: [/* @__PURE__ */ jsx(FieldSet, {
+ 			name: field.name,
+ 			fieldName,
+ 			field: schema ?? anyFields,
+-			isRequired: field.required
+-		}, stringifyFieldKey(fieldName));
++			isRequired: field.required,
++			inputProps: type === "path" ? {
++				"aria-required": field.required !== false ? true : void 0,
++				"aria-invalid": hasError ? true : void 0,
++				"aria-describedby": hasError ? errorId : void 0
++			} : void 0
++		}), hasError && /* @__PURE__ */ jsx(PathParamError, {
++			id: errorId,
++			inputId: id,
++			focus: pathCheck.errors[0] === field.name,
++			token: pathCheck.token,
++			children: `Enter a value for the ${field.name} path parameter before sending the request.`
++		})] }, id);
++	});
++}
++function PathParamError({ id, inputId, focus, token, children }) {
++	// focus only in response to a Send attempt (token change), never while typing
++	const handledToken = useRef(-1);
++	useEffect(() => {
++		if (handledToken.current === token) return;
++		handledToken.current = token;
++		if (focus) document.getElementById(inputId)?.focus();
++	}, [
++		focus,
++		inputId,
++		token
++	]);
++	return /* @__PURE__ */ jsx("p", {
++		id,
++		className: "text-xs text-red-600 dark:text-red-400 -mt-1.5",
++		children
++	});
++}
++function PathParametersPanel({ CollapsiblePanel, ...props }) {
++	const { errors, token } = use(PathParamErrorContext);
++	const [open, setOpen] = useState(false);
++	useOnChange(token, () => {
++		if (errors.length > 0) setOpen(true);
++	});
++	return /* @__PURE__ */ jsx(CollapsiblePanel, {
++		...props,
++		open,
++		onOpenChange: setOpen
+ 	});
+ }
+ function ParametersForm({ parameters }) {
+@@ -285,6 +363,15 @@ function ParametersForm({ parameters }) {
+ 	return ParamTypes.map((type) => {
+ 		const items = parameters.filter((v) => v.in === type);
+ 		if (items.length === 0) return;
++		if (type === "path") return /* @__PURE__ */ jsx(PathParametersPanel, {
++			CollapsiblePanel,
++			"data-type": type,
++			title: displayNames[type],
++			children: /* @__PURE__ */ jsx(ParameterItem, {
++				parameters: items,
++				type
++			})
++		}, type);
+ 		return /* @__PURE__ */ jsx(CollapsiblePanel, {
+ 			"data-type": type,
+ 			title: displayNames[type],
+@@ -299,6 +386,13 @@ function BodyInput({ field: _field }) {
+ 	const field = useResolvedSchema(_field);
+ 	const [isJson, setIsJson] = useState(false);
+ 	const t = useTranslations({ note: "playground" });
++	// [plytix-docs patch PM-58] return focus to "Open JSON Editor" when the editor closes
++	const openJsonRef = useRef(null);
++	const wasJson = useRef(false);
++	useEffect(() => {
++		if (wasJson.current && !isJson) openJsonRef.current?.focus();
++		wasJson.current = isJson;
++	}, [isJson]);
+ 	if (field.format === "binary") return /* @__PURE__ */ jsx(FieldSet, {
+ 		field,
+ 		fieldName: ["body"],
+@@ -320,6 +414,7 @@ function BodyInput({ field: _field }) {
+ 		collapsible: false,
+ 		isRequired: true,
+ 		name: /* @__PURE__ */ jsx("button", {
++			ref: openJsonRef,
+ 			type: "button",
+ 			className: cn(buttonVariants({
+ 				variant: "secondary",
+diff --git a/node_modules/fumadocs-openapi/dist/requests/generators/index.js b/node_modules/fumadocs-openapi/dist/requests/generators/index.js
+index d8af7e3..185dc92 100644
+--- a/node_modules/fumadocs-openapi/dist/requests/generators/index.js
++++ b/node_modules/fumadocs-openapi/dist/requests/generators/index.js
+@@ -3,7 +3,9 @@ import * as Shared from "@fumadocs/api-docs/codegen";
+ function pathnameFromRequest(pathname, { path, query }) {
+ 	for (const key in path) {
+ 		const param = path[key];
+-		pathname = pathname.replace(`{${key}}`, param.value);
++		// [plytix-docs patch PM-56] encode each path value as one URL segment
++		const encoded = encodeURIComponent(param.value);
++		pathname = pathname.replace(`{${key}}`, () => encoded);
+ 	}
+ 	const [pathPart, existingQueryString] = pathname.split("?", 2);
+ 	const searchParams = new URLSearchParams(existingQueryString || "");

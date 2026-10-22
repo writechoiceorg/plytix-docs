@@ -14,6 +14,8 @@ _openapi:
       - content: |-
           Deletes a product category. A successful delete returns `204` with an empty body, and a later request for the same ID returns `404`.
 
+          **Deleting a parent category can also delete the categories below it.** In a Plytix test on a development account (October 2026), deleting a parent category also deleted its child and grandchild categories, and the test product was unlinked from them. The product itself stayed, and an unrelated category wasn't affected. The effect on many products, and on production accounts, hasn't been tested. Before you delete a category, check `n_children` to see whether it has subcategories.
+
           If you only want to take a product out of a category, unlink the product instead. The category and its other products stay as they are. See [Safely remove categories, assets, or relationships](/docs/guides/safely-removing-categories-assets-or-relationships#remove-a-category-from-a-product).
 ---
 

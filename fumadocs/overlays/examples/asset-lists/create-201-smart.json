@@ -1,14 +1,14 @@
 {
   "data": {
     "id": "6a1f0c2e9b3d4a5f8c7e1304",
-    "name": "Front Shots",
+    "name": "Kettle Images",
     "query": [
       [
-        {"operator": "like", "field": "filename", "value": "front", "field_type": null},
+        {"operator": "like", "field": "filename", "value": "kettle", "field_type": null},
         {"operator": "eq", "field": "extension", "value": "jpg", "field_type": null}
       ],
       [
-        {"operator": "eq", "field": "filename", "value": "bag-10157-front.jpg", "field_type": null}
+        {"operator": "eq", "field": "filename", "value": "Kettle handle - White.png", "field_type": null}
       ]
     ],
     "created": "2026-09-22T22:17:25.493688+00:00",

@@ -107,6 +107,12 @@ actions:
 
         - [Filtering and search](/reference/v3/filtering-and-search)
         - [Pagination](/reference/v3/pagination)
+
+  - target: $.paths['/api/v3/product-relationships'].get.parameters[?(@.name=='filters' && @.in=='query')]
+    description: 'PM-50; field names from the resource''s response schema, operators per the API-wide grammar (Q#11, Q#99)'
+    update:
+      example:
+        product_id: 6a1f0c2e9b3d4a5f8c7e1a01
   - target: $.paths['/api/v3/products/{product_id}/relationships/{relationship_id}'].get.responses['200'].content['application/json']
     description: Manage Product Relationship Link.bru GET 200 (2026-09-15), sanitized
     update:
@@ -116,7 +122,7 @@ actions:
           value:
             data:
               relationship_id: 6a1f0c2e9b3d4a5f8c7e1f01
-              relationship_label: accessories
+              relationship_label: gift_basket
               product_id: 6a1f0c2e9b3d4a5f8c7e1a01
             errors: []
   - target: $.paths['/api/v3/products/{product_id}/relationships/{relationship_id}'].delete.responses['204']

@@ -20,13 +20,13 @@ actions:
     update:
       description: Address Plytix downloads the file from.
       examples:
-        - https://example.com/images/bag-10157-front.jpg
+        - https://www.plytix.com/hubfs/Kitchen%20and%20Home%20Products/Enjoy%20Mug%20-%20Blue.jpg
   - target: $.components.schemas.AssetCreateInputDto.properties.content
     update:
       description: The file's bytes, base64-encoded. Requires `filename`.
   - target: $.components.schemas.AssetCreateInputDto.properties.filename
     update:
-      description: File name, including the extension, such as `bag-10157-front.jpg`. Required with `content`. Optional with `url`.
+      description: File name, including the extension, such as `kettle_blue.jpg`. Required with `content`. Optional with `url`.
   - target: $.components.schemas.AssetCreateInputDto.properties.alt_text
     update:
       description: Text that describes the asset for people who can't see it.
@@ -42,13 +42,13 @@ actions:
     update:
       description: New file name, including the extension. The file's content doesn't change.
       examples:
-        - bag-10157-front-view.jpg
+        - adventure-mug-blue.jpg
   - target: $.components.schemas.AssetUpdateInputDto.properties.alt_text
     description: Update Asset.bru (alt_text applied, 2026-09-15); clearing with null is spec-only (VERIFY.md)
     update:
       description: Text that describes the asset for people who can't see it.
       examples:
-        - Canvas backpack, front view
+        - Adventure mug in blue, front view
   - target: $.components.schemas.AssetOutputDto.properties.path
     description: FB-030 (open; 2026-10-15 re-check found path and no url)
     update:

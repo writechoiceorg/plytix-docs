@@ -1,21 +1,14 @@
 {
   "data": {
     "id": "6a1f0c2e9b3d4a5f8c7e1a01",
-    "sku": "BAG-10157",
-    "label": "Canvas Backpack",
+    "sku": "GF-Basket",
+    "label": "Gift basket",
     "gtin": "4006381333931",
     "status": "Draft",
     "attributes": {
-      "amazon_ready": 0,
-      "basic_information_completeness": 0,
-      "english_content_completeness": 0,
-      "google_shopping_completeness": 0,
-      "marketing_ready": 0,
-      "product_specifications_completeness": 0,
-      "shopify_ready": 0,
-      "spanish_content_completeness": 0,
-      "website_ready": 21.43,
-      "material": "Canvas"
+      "basic_info_complete": 21.43,
+      "rich_info_complete": 0,
+      "collection": "2019"
     },
     "thumbnail_id": "6a1f0c2e9b3d4a5f8c7e1b01",
     "parent_id": null,

@@ -16,7 +16,7 @@ actions:
     update:
       description: Name of the group. It must be unique in your account. A name that already exists returns `409`.
       examples:
-        - Technical specifications
+        - Rich Information
 
   - target: $.components.schemas.ProductAttributeGroupUpdateInputDto
     description: Q#108, Update Product Attribute Group.bru (attribute_labels 422); replaces the upstream docstring
@@ -27,7 +27,7 @@ actions:
     update:
       description: New name of the group.
       examples:
-        - Technical details
+        - Rich Content
   - target: $.components.schemas.ProductAttributeGroupUpdateInputDto.properties.order
     description: Spec only; Q#108 says only name is patchable (GRP-20, VERIFY.md)
     update:

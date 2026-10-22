@@ -137,7 +137,7 @@ When you change one related product's quantity with `PATCH`, it isn't confirmed 
 |---|---|---|
 | `POST /api/v1/categories/product` | `POST /api/v3/product-categories` | |
 | `POST /api/v1/categories/product/search` | `GET /api/v3/product-categories` | |
-| `POST /api/v1/categories/product/{category_id}` | `POST /api/v3/product-categories` | Send the V1 path's `category_id` as `parent_id`, for example `{"name": "Kitchen Sinks", "parent_id": "<category_id>"}`. Without `parent_id`, V3 creates a root category. |
+| `POST /api/v1/categories/product/{category_id}` | `POST /api/v3/product-categories` | Send the V1 path's `category_id` as `parent_id`, for example `{"name": "Apron Bamboo", "parent_id": "<category_id>"}`. Without `parent_id`, V3 creates a root category. |
 | `PATCH /api/v1/categories/product/{category_id}` | `PATCH /api/v3/product-categories/{identifier}` | |
 | `DELETE /api/v1/categories/product/{category_id}` | `DELETE /api/v3/product-categories/{identifier}` | |
 | `POST /api/v1/categories/file` | `POST /api/v3/asset-categories` | |

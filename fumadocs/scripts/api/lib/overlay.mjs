@@ -39,10 +39,13 @@ export const TARGET_SHAPES = [
   { name: 'root', re: /^\$$/ },
   { name: 'operation', re: new RegExp(`^${OP}$`) },
   { name: 'parameter', re: new RegExp(`^${OP}${PARAM}$`) },
+  // `update` merges objects, so replacing an object example takes a remove first.
+  { name: 'parameter-example', re: new RegExp(`^${OP}${PARAM}\\.example$`) },
   { name: 'request-body', re: new RegExp(`^${OP}\\.requestBody(?:${MEDIA})?$`) },
   { name: 'response', re: new RegExp(`^${OP}\\.responses${STATUS}(?:${MEDIA})?$`) },
   { name: 'schema', re: new RegExp(`^${SCHEMA}$`) },
   { name: 'shared-parameter', re: new RegExp(`^\\$\\.paths\\.\\*\\.\\*${PARAM}$`), wildcard: true },
+  { name: 'shared-parameter-example', re: new RegExp(`^\\$\\.paths\\.\\*\\.\\*${PARAM}\\.example$`), wildcard: true },
   { name: 'shared-response', re: new RegExp(`^\\$\\.paths\\.\\*\\.\\*\\.responses${STATUS}$`), wildcard: true },
 ];
 

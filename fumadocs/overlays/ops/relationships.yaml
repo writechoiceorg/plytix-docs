@@ -1,5 +1,5 @@
 # Operation edits for the relationships endpoints: relationship TYPES such as
-# "Accessories". Links between products under a type are the product-relationships
+# "Gift basket". Links between products under a type are the product-relationships
 # resource (mostly on hold, REL-2); link only to its published pages.
 #
 # Phase 3 (2026-10-20). Sources: config/api-testing.config.md (Q#60, Q#74,
@@ -23,7 +23,7 @@ actions:
       summary: Search relationships
       operationId: search-relationships
       description: |-
-        Returns the relationship types in your account, such as "Accessories" or "Cross-sell", one page at a time. A relationship type names a kind of connection between products. It doesn't hold the product links themselves.
+        Returns the relationship types in your account, such as "Gift basket" or "Recommended products", one page at a time. A relationship type names a kind of connection between products. It doesn't hold the product links themselves.
 
         Each record holds the type's `id`, its `name`, its `label`, and its `status`. A product's `product_relationships` field names each type it uses by `relationship_id` and `relationship_label`, which match `id` and `label` here. A label doesn't always match the name: in the first example below, the type named "Cross-sell" has the label `related_products`.
 
@@ -36,6 +36,12 @@ actions:
         - [The Plytix data model](/docs/guides/data-model#relationships)
         - [Filtering and search](/reference/v3/filtering-and-search)
         - [Pagination](/reference/v3/pagination)
+
+  - target: $.paths['/api/v3/relationships'].get.parameters[?(@.name=='filters' && @.in=='query')]
+    description: 'PM-50; field names from the resource''s response schema, operators per the API-wide grammar (Q#11, Q#99)'
+    update:
+      example:
+        'name[contains:ignorecase]': gift
 
   - target: $.paths['/api/v3/relationships'].get.parameters[?(@.name=='_fields' && @.in=='query')]
     description: List Relationships.bru "200 - Full Parameters" (2026-09-22, all six fields)
@@ -57,8 +63,8 @@ actions:
           value:
             data:
               - id: 6a1f0c2e9b3d4a5f8c7e1f01
-                name: Accessories
-                label: accessories
+                name: Gift basket
+                label: gift_basket
             errors: []
             pagination:
               next_page: http://<api-host>/api/v3/relationships?_fields=id&_fields=name&_fields=label&_sort_by=name&_page=2&_page_size=1&status=ACTIVE
@@ -70,11 +76,11 @@ actions:
       summary: Create a relationship
       operationId: create-relationship
       description: |-
-        Creates a relationship type, such as "Spare Parts", and returns it, including its new `id`. `name` is the only field in the body.
+        Creates a relationship type, such as "Gift pack", and returns it, including its new `id`. `name` is the only field in the body.
 
         Plytix sets the other fields for you:
 
-        - `label` is derived from the name in snake_case, so "Spare Parts" gets `spare_parts`. It doesn't change if you rename the type later.
+        - `label` is derived from the name in snake_case, so "Gift pack" gets `gift_pack`. It doesn't change if you rename the type later.
         - `status` starts as `ACTIVE`.
 
         Names are unique in your account. If a relationship type with that name already exists, the request returns `409` and creates nothing.
@@ -88,7 +94,7 @@ actions:
         create:
           summary: Create a relationship type
           value:
-            name: Spare Parts
+            name: Gift pack
 
   - target: $.paths['/api/v3/relationships'].post.responses['201']
     description: Create Relationship.bru "201 - Success" (2026-09-15), sanitized, account_id omitted
@@ -102,8 +108,8 @@ actions:
               value:
                 data:
                   id: 6a1f0c2e9b3d4a5f8c7e1f03
-                  name: Spare Parts
-                  label: spare_parts
+                  name: Gift pack
+                  label: gift_pack
                   status: ACTIVE
                   created: '2026-09-15T17:06:20.283000'
                   modified: '2026-09-15T17:06:20.284000'
@@ -146,8 +152,8 @@ actions:
           value:
             data:
               id: 6a1f0c2e9b3d4a5f8c7e1f01
-              name: Accessories
-              label: accessories
+              name: Gift basket
+              label: gift_basket
               status: ACTIVE
               created: '2026-06-22T08:44:08.719000'
               modified: '2026-06-22T08:44:08.719000'
@@ -174,7 +180,7 @@ actions:
       description: |-
         Changes a relationship type's name. `name` is the only field you can change here, and other fields return `422`. A successful update returns `204` with an empty body.
 
-        The `label` stays as it was when the type was created, so a type renamed from "Spare Parts" to "Replacement Parts" keeps the label `spare_parts`. See [Update and delete records](/reference/v3/updates-and-deletes).
+        The `label` stays as it was when the type was created, so a type renamed from "Gift pack" to "Gift box" keeps the label `gift_pack`. See [Update and delete records](/reference/v3/updates-and-deletes).
 
   - target: $.paths['/api/v3/relationships/{identifier}'].patch.requestBody.content['application/json']
     description: Update and Delete Relationship.bru PATCH request (2026-09-15)
@@ -183,7 +189,7 @@ actions:
         rename:
           summary: Rename the relationship type
           value:
-            name: Replacement Parts
+            name: Gift box
 
   - target: $.paths['/api/v3/relationships/{identifier}'].patch.responses['204']
     description: Q#84, Q#116
@@ -225,7 +231,7 @@ actions:
           summary: One field
           description: '`GET /api/v3/relationships/{identifier}/label`'
           value:
-            data: accessories
+            data: gift_basket
             errors: []
 
   - target: $.paths['/api/v3/relationships/{identifier}/{path}'].get.responses['400'].content['application/json']

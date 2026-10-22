@@ -93,7 +93,7 @@ Custom attributes are addressed directly in V3 rather than through a field-name 
 | Target | V1 | V3 |
 |---|---|---|
 | Custom attribute | `{"field": "attributes.name", "operator": "<op>", "value": "<value>"}` | `attributes.name[<op>]=value` |
-| Related entity field | Not possible | `categories.name[<op>]=value`, for example `categories.name=Backpacks` |
+| Related entity field | Not possible | `categories.name[<op>]=value`, for example `categories.name=Drinkware` |
 | Product relationships | `relationship_filters` with nested `product_ids` objects | `product_relationships.relationship_id=<id>&product_relationships.related_products.product_id=<id>` |
 
 {/* FLAG (open):
@@ -106,12 +106,12 @@ The pairs below show the same filter in both versions, using only equality and n
 
 ### A custom attribute
 
-This filter finds products whose `qty` custom attribute is greater than 10. V1/V2 names the attribute with an `attributes.` prefix inside the filter object:
+This filter finds products whose `stock` custom attribute is greater than 10. V1/V2 names the attribute with an `attributes.` prefix inside the filter object:
 
 ```json
 {
   "filters": [
-    [{"field": "attributes.qty", "operator": "gt", "value": 10}]
+    [{"field": "attributes.stock", "operator": "gt", "value": 10}]
   ]
 }
 ```
@@ -119,22 +119,22 @@ This filter finds products whose `qty` custom attribute is greater than 10. V1/V
 V3 uses the same path in the query string:
 
 ```text
-attributes.qty[gt]=10
+attributes.stock[gt]=10
 ```
 
-Both return the products with a `qty` value above 10.
+Both return the products with a `stock` value above 10.
 
 ### A boolean group
 
-This filter finds products that are drafts or were created after January 1, 2026, and that also have a `qty` above 10 or a `price` below 20. V1/V2 expands the two OR groups into every pairing:
+This filter finds products that are drafts or were created after January 1, 2026, and that also have a `stock` above 10 or a `suggested_retail_price` below 20. V1/V2 expands the two OR groups into every pairing:
 
 ```json
 {
   "filters": [
-    [{"field": "status", "operator": "eq", "value": "Draft"}, {"field": "attributes.qty", "operator": "gt", "value": 10}],
-    [{"field": "status", "operator": "eq", "value": "Draft"}, {"field": "attributes.price", "operator": "lt", "value": 20}],
-    [{"field": "created", "operator": "gt", "value": "2026-01-01"}, {"field": "attributes.qty", "operator": "gt", "value": 10}],
-    [{"field": "created", "operator": "gt", "value": "2026-01-01"}, {"field": "attributes.price", "operator": "lt", "value": 20}]
+    [{"field": "status", "operator": "eq", "value": "Draft"}, {"field": "attributes.stock", "operator": "gt", "value": 10}],
+    [{"field": "status", "operator": "eq", "value": "Draft"}, {"field": "attributes.suggested_retail_price", "operator": "lt", "value": 20}],
+    [{"field": "created", "operator": "gt", "value": "2026-01-01"}, {"field": "attributes.stock", "operator": "gt", "value": 10}],
+    [{"field": "created", "operator": "gt", "value": "2026-01-01"}, {"field": "attributes.suggested_retail_price", "operator": "lt", "value": 20}]
   ]
 }
 ```
@@ -142,10 +142,10 @@ This filter finds products that are drafts or were created after January 1, 2026
 V3 writes each OR group once:
 
 ```text
-_or[0]status=Draft&_or[0]created[gt]=2026-01-01&_or[1]attributes.qty[gt]=10&_or[1]attributes.price[lt]=20
+_or[0]status=Draft&_or[0]created[gt]=2026-01-01&_or[1]attributes.stock[gt]=10&_or[1]attributes.suggested_retail_price[lt]=20
 ```
 
-Both return the same products: each is a draft or was created after January 1, 2026, and has a `qty` above 10 or a `price` below 20.
+Both return the same products: each is a draft or was created after January 1, 2026, and has a `stock` above 10 or a `suggested_retail_price` below 20.
 
 ## Related resources
 

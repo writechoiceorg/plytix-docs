@@ -2,21 +2,21 @@
   "data": [
     {
       "id": "6a1f0c2e9b3d4a5f8c7e1301",
-      "name": "Brand Logos",
+      "name": "Marketing logos",
       "query": [[{"operator": "in", "field": "static_lists", "value": ["6a1f0c2e9b3d4a5f8c7e1301"], "field_type": null}]],
       "created": "2026-06-22T08:45:06.848000",
       "modified": "2026-06-22T08:45:06.866000"
     },
     {
       "id": "6a1f0c2e9b3d4a5f8c7e1302",
-      "name": "Lifestyle Images",
-      "query": [[{"operator": "like", "field": "filename", "value": "lifestyle", "field_type": null}]],
+      "name": "Mug Images",
+      "query": [[{"operator": "like", "field": "filename", "value": "mug", "field_type": null}]],
       "created": "2026-06-22T08:45:06.899000",
       "modified": "2026-06-22T08:45:06.907000"
     },
     {
       "id": "6a1f0c2e9b3d4a5f8c7e1303",
-      "name": "Tech Packs",
+      "name": "Sinks",
       "query": [[{"operator": "in", "field": "static_lists", "value": ["6a1f0c2e9b3d4a5f8c7e1303"], "field_type": null}]],
       "created": "2026-06-22T08:45:06.929000",
       "modified": "2026-06-22T08:45:06.936000"
