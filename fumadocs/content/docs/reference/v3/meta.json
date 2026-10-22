@@ -1,7 +1,6 @@
 {
   "title": "V3 (Beta)",
-  "root": true,
-  "icon": "Code",
+  "icon": "Sparkles",
   "pages": [
     "---[BookOpen]Core concepts---",
     "index",

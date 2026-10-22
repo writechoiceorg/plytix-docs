@@ -126,7 +126,7 @@ let referenceMeta;
 try {
   referenceMeta = JSON.parse(await readFile(referenceMetaPath, 'utf-8'));
 } catch {
-  referenceMeta = { title: 'V1/V2 (Legacy)', root: true, pages: [] };
+  referenceMeta = { title: 'V1/V2 (Legacy)', icon: 'Archive', pages: [] };
 }
 const cutIndex = referenceMeta.pages.findIndex(
   (p) => p === '---[Webhook]Endpoints---' || p === '---Endpoints---' || p === 'endpoints',

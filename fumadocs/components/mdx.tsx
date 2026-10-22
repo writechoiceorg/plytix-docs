@@ -6,7 +6,7 @@ import { Card, Cards } from './card';
 import { Callout } from './callout';
 import { Step, Steps } from 'fumadocs-ui/components/steps';
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
-import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
+import { Accordion, Accordions } from './accordion';
 
 export function getMDXComponents(components?: MDXComponents) {
   return {

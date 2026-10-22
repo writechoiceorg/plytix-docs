@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="215" height="781" viewBox="30 118 215 781" preserveAspectRatio="none" fill="none">
+  <!-- Sidebar panel from materials/visual-design/docs_{light,dark}.svg: two
+       blurred ellipses (cyan, then lilac) clipped to the 215x781 panel. Same in
+       both themes; the page background shows through. -->
+  <defs>
+    <filter id="cyan-blur" x="-591.763" y="119.497" width="1148.2" height="865.54" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="150"/>
+    </filter>
+    <filter id="lilac-blur" x="-406.447" y="432.3" width="1049.84" height="680.154" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="100"/>
+    </filter>
+  </defs>
+  <g opacity="0.5" filter="url(#cyan-blur)">
+    <ellipse cx="273.936" cy="133.098" rx="273.936" ry="133.098" transform="matrix(-1 -0.000275237 0.0701674 -0.997535 246.931 685.113)" fill="#47C6FF"/>
+  </g>
+  <g opacity="0.7" filter="url(#lilac-blur)">
+    <ellipse cx="324.795" cy="140.338" rx="324.795" ry="140.338" transform="matrix(-0.99927 -0.0382012 0.10795 -0.994157 427.88 924.302)" fill="#BDA8FF"/>
+  </g>
+</svg>

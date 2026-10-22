@@ -1,8 +1,9 @@
 import { source } from '@/lib/source';
 import { DocsLayout } from 'fumadocs-ui/layouts/notebook';
 import { baseOptions } from '@/lib/layout.shared';
-import { SidebarBanner } from '@/components/reference-version-switcher';
+import { SidebarBanner } from '@/components/sidebar-banner';
 import { SidebarAutoScroll } from '@/components/sidebar-auto-scroll';
+import { SidebarVersionAccordion } from '@/components/sidebar-version-accordion';
 import { SiteFooter } from '@/components/site-footer';
 
 // Shared by /docs (guides) and /reference (API reference), so moving between
@@ -18,21 +19,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         nav={{ ...nav, mode: 'top' }}
         sidebar={{ banner: SidebarBanner, collapsible: false }}
         tabs={{
-          // v3/v1-v2 are their own root folders (so the sidebar shows only the
-          // active version's pages), but the navbar should always show Guides
-          // and API Reference, never the version switch: that's handled by
-          // <ReferenceVersionSwitcher /> in the sidebar instead.
           transform: (option) => {
-            if (
-              option.url.startsWith('/reference/v3') ||
-              option.url.startsWith('/reference/v1-v2')
-            ) {
-              return null;
-            }
             // The "API Reference" tab's own landing page is just plumbing (it
             // gives the reference folder a resolvable url so this tab exists
             // and stays active across every /reference/** page). Send
             // clicks straight to the v3 overview instead of that landing page.
+            // The versions themselves are folders in that tab's sidebar.
             if (option.url === '/reference') {
               option = { ...option, url: '/reference/v3' };
             }
@@ -54,6 +46,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         {...base}
       >
         <SidebarAutoScroll />
+        <SidebarVersionAccordion />
         {children}
       </DocsLayout>
       <SiteFooter />

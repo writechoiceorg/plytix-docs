@@ -4,9 +4,9 @@ import { SiteFooter } from '@/components/site-footer';
 
 export default function Layout({ children }: LayoutProps<'/'>) {
   return (
-    <HomeLayout {...baseOptions()}>
-      {children}
+    <>
+      <HomeLayout {...baseOptions()}>{children}</HomeLayout>
       <SiteFooter />
-    </HomeLayout>
+    </>
   );
 }
