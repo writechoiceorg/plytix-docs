@@ -1,70 +1,145 @@
 ---
 title: Authentication
-description: "Reference for exchanging your API key and password for a bearer token, using it in requests, and how long a token stays valid."
+description: "Reference for creating a V3 access token, choosing its permissions, sending it as a bearer token, and rotating, revoking, or replacing it."
 ---
 
-import { KeyRegular, RocketRegular } from '@/components/icons';
+import { KeyRegular, RocketRegular, WarningRegular } from '@/components/icons';
 
-The Plytix API uses bearer token authentication. Rather than sending your API key and password with every call, you exchange them once for a short-lived access token, then include that token in the `Authorization` header of every subsequent request instead. Your account administrator issues the API key and password from the account's API tab, and the role assigned to that key determines what it can access. This page documents that token exchange and how to use the token you get back.
+The V3 API authenticates requests with access tokens. You create a token in your Plytix account settings, choose what it can access and when it expires, then send it in the `Authorization` header of every request. There's no separate token request and no API key and password exchange: the token you create is the one you send. This page covers creating a token, its permissions, sending it, and managing it over its lifetime.
 
-## Get a bearer token
+<Callout type="info" title="V3 is in beta">
+  To get access to the V3 beta, contact your account manager. Once the beta is enabled for your account, the **API v3** tab appears in your account settings.
+</Callout>
 
-To get a token, send your API key and password as the request body. Both fields are required:
+## Access tokens
 
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `api_key` | string | Yes | The API key generated from your account's API tab. |
-| `api_password` | string | Yes | The API password generated alongside the key. |
+An access token belongs to the user who creates it, and it can never grant more access than that user's role allows. Within that limit, each token has its own permissions and expiration date.
 
-Here's the full request and the response you'll get back:
+V3 access tokens work only with the V3 API. V1/V2 keep their API Key and password flow, described in [V1/V2 authentication](/reference/v1-v2/token-authentication).
 
-<Tabs items={['Request', 'Response']}>
-  <Tab value="Request">
-    ```bash
-    curl --request POST \
-      --url https://auth.plytix.com/auth/api/get-token \
-      --header 'Content-Type: application/json' \
-      --data '{
-        "api_key": "your.api.key",
-        "api_password": "your.secret.api.password"
-      }'
-    ```
-  </Tab>
-  <Tab value="Response">
-    ```json
-    {
-      "data": [
-        {
-          "access_token": "your_access_token"
-        }
-      ]
-    }
-    ```
-  </Tab>
-</Tabs>
+## Create an access token
 
-Use the returned token in the `Authorization` header of every subsequent request, with a space after `Bearer`:
+Follow the steps below to create a token in your account settings.
+
+1. **Open** your account settings and select the **API v3** tab.
+2. **Select** **Create access token**.
+3. **Enter** a name that identifies the token's purpose, such as `ERP product sync`. You can also add a description.
+4. **Choose** an expiration date: 7 days, 1 month, 1 year, or **Custom**.
+5. **Choose** the token's permissions. See [Permissions](#permissions).
+6. **Select** **Create token**.
+7. **Copy** the token and store it securely, then confirm that you've saved it before you close the confirmation window.
+
+<Callout type="warn" title="You can copy the token only once">
+  The token's value is shown only when you create or rotate the token, and you can't retrieve it later. If you lose it, [rotate the token](#rotate-a-token) to get a new value.
+</Callout>
+
+### Permissions
+
+When you create a token, you can choose a preset or set the access for each resource yourself:
+
+| Option | Access granted |
+|---|---|
+| **Full access** | The maximum access your user role allows for each resource. |
+| **Read-only** | Read access to every resource your user role allows you to read. |
+| **Custom** | **None**, **Read**, or **Write** for each resource, within the limits of your user role. |
+
+You can set permissions for products, assets, product categories, asset categories, attributes, product families, and relationships. Each level grants the following:
+
+| Level | The token can |
+|---|---|
+| **None** | Not access the resource. |
+| **Read** | Retrieve data from the resource. |
+| **Write** | Read, create, update, and delete data in the resource. |
+
+For example, an integration that only reads product information needs **Read** on products, and one that creates or updates products needs **Write** on products. Grant only the permissions your integration needs.
+
+You can't change a token's permissions after you create it. To change them, create a new token with the permissions you need and switch your integration to it.
+
+## Send the token
+
+Send the token in the `Authorization` header of every request, with a space after `Bearer`, and ask for JSON with the `Accept` header:
 
 ```
 Authorization: Bearer your_access_token
+Accept: application/json
 ```
 
-Tokens expire after 15 minutes. Once a token expires, requests using it return `401`, and you need to request a new one.
+When a request has a JSON body, also send `Content-Type: application/json`.
 
-## Error responses
+For example, this request reads products:
 
-If the request fails, you'll get one of the following:
+```bash
+curl --request GET \
+  --url 'https://pim.plytix.com/api/v3/products' \
+  --header 'Authorization: Bearer your_access_token' \
+  --header 'Accept: application/json'
+```
 
-| Status code | Response |
-|---|---|
-| 400 BAD REQUEST | Malformed request body. Check the request and try again. |
-| 401 AUTH FAILED | `{"msg": "Bad api_key or api_password"}` |
+The token works until its expiration date, unless you rotate or revoke it first.
+
+## Manage access tokens
+
+The **API v3** tab lists your tokens with their permissions, expiration dates, and status. You can filter the list to show **Active**, **Expired**, or **Revoked** tokens.
+
+### Rotate a token
+
+Rotate a token to replace its value, for example when you've lost it or suspect it's been exposed. Rotation keeps the token's name, permissions, and expiration date. It doesn't extend the token's lifetime.
+
+1. **Find** the token and select **Rotate**.
+2. **Confirm** the rotation.
+3. **Copy** the new value and store it securely.
+4. **Update** every integration that uses the previous value.
+
+<Callout type="warn" title="Rotation invalidates the previous value immediately">
+  Requests that use the previous value stop authenticating as soon as you rotate. Plan the rotation together with the integration update to avoid interruptions.
+</Callout>
+
+### Revoke a token
+
+Revoke a token when an integration no longer needs access, or when you need to stop its access immediately.
+
+1. **Find** the token and select **Revoke**.
+2. **Enter** the token's name when prompted.
+3. **Confirm** the revocation.
+
+<Callout type="error" title="Revocation can't be undone">
+  A revoked token stops working immediately. To restore access, create a new token and update your integration.
+</Callout>
+
+### Replace an expiring token
+
+A token stops authenticating requests when it expires, and rotation doesn't extend it. Before the expiration date, create a replacement token and update your integration to use it.
+
+## Troubleshooting
+
+If a request fails authentication, check the problem that matches the response.
+
+<Accordions type="multiple">
+  <Accordion title={<><code>401 Unauthorized</code></>} value="auth-401">
+    The API couldn't authenticate the token, and the body is `{"detail": "Unauthorized"}`. Check that the token is present, copied in full, and sent with the `Bearer ` prefix. Then check in the **API v3** tab that it hasn't expired, been revoked, or been replaced by a rotation.
+  </Accordion>
+  <Accordion title={<><code>403 Forbidden</code></>} value="auth-403">
+    The token authenticated, but it isn't allowed to do what the request asks. Check that the token has the permission the operation needs, such as **Write** for a create, update, or delete, and that your user role allows that access.
+  </Accordion>
+  <Accordion title="The API v3 tab is missing from your account settings">
+    The V3 beta isn't enabled for your account. Contact your account manager to request access.
+  </Accordion>
+</Accordions>
+
+## Keep your token secure
+
+Treat an access token like a password. Store it in a secret manager or a protected environment variable, and keep it out of source code, public repositories, and logs.
+
+Use a separate token for each integration, so you can set its permissions and revoke its access without affecting the others.
 
 ## Related resources
 
 <Cards>
   <Card icon={<RocketRegular />} title="Get started with the API" href="/docs/guides/quickstart">
-    Walk through generating credentials and making your first request.
+    Create an access token and make your first request.
+  </Card>
+  <Card icon={<WarningRegular />} title="Errors and status codes" href="/reference/v3/errors-status-codes">
+    See every status code the V3 API returns and what it means.
   </Card>
   <Card icon={<KeyRegular />} title="Authentication and base URLs" href="/docs/guides/migrating-to-v3/authentication-and-base-urls">
     See what changes in authentication when you move from V1/V2 to V3.

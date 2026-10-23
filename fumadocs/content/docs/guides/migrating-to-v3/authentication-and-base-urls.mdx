@@ -1,11 +1,11 @@
 ---
 title: "Authentication and base URLs"
-description: "Reference for the V1/V2 base URL, token request, and bearer header, plus the V3 base URL while its new authentication model is pending."
+description: "Reference for the base URLs and authentication of V1/V2 and V3: the V1/V2 token request, and the V3 access tokens you create in your account settings."
 ---
 
 import { KeyRegular } from '@/components/icons';
 
-V1/V2 share one authentication flow, and V3 is moving to a new token-based model whose details aren't published yet. This page lists the base URLs, path prefixes, and authentication details for each. It's part of the reference set for [Migration overview](/docs/guides/migrating-to-v3).
+V1/V2 share one authentication flow, and V3 uses access tokens you create in your account settings. This page lists the base URLs, path prefixes, and authentication details for each. It's part of the reference set for [Migration overview](/docs/guides/migrating-to-v3).
 
 ## V1/V2 base URL and authentication
 
@@ -33,28 +33,36 @@ A token expires after 15 minutes. When it expires, or the API can't verify it, r
 
 ## V3 base URL and authentication
 
-V3 runs on the same base URL as V1/V2, under its own path prefix:
+V3 runs on the same base URL as V1/V2, under its own path prefix, but it authenticates differently. There's no token request: you create an access token in your account settings and send it directly.
 
 | Item | Value |
 |---|---|
 | API base URL | `https://pim.plytix.com` |
 | API path prefix | `/api/v3` |
+| Where the token comes from | The **API v3** tab in your account settings, available once the V3 beta is enabled for your account |
+| Header on every API request | `Authorization: Bearer <access_token>` |
+| Token lifetime | Until the expiration date you choose when you create it, unless you rotate or revoke it first |
 
-{/* FLAG (open):
-  The V3 base URL `https://pim.plytix.com/api/v3` isn't confirmed on production. Live testing confirmed V3 only on `pim.dev.plytix.com` with a dev token. On the production host, V3 returned `401` to a dev token. Re-test with a production credential before relying on this table for V3.
-*/}
+### What changes from V1/V2
 
-<Callout type="info" title="V3 authentication is changing">
-  V3 is moving to a new token-based authentication model, and its details aren't published yet. See [V3 authentication](/reference/v3/authentication) for the model once it's documented.
-</Callout>
+These are the differences that affect integration code moving from V1/V2 to V3:
+
+| | V1/V2 | V3 |
+|---|---|---|
+| How you get a token | `POST` your API Key and password to the token endpoint | Create it in the **API v3** tab, then copy it |
+| Lifetime | 15 minutes | 7 days, 1 month, 1 year, or a custom date |
+| Access | The role assigned to the API Key | Per-resource permissions you set on the token, within your own user role |
+| When it stops working | It expires, and you request a new one with the same credentials | It expires, or you rotate or revoke it, and you update your integration with a new value |
+
+A V3 access token works only with V3, so an integration that keeps some calls on V1/V2 needs both. Because a V3 token doesn't come from a request, your integration can't fetch a new one on `401`. Store the token where you can replace it without a deploy, such as a secret manager, and replace it before its expiration date. See [Authentication](/reference/v3/authentication) for creating, rotating, and revoking tokens.
 
 ## Related resources
 
-Now that you know how V1/V2 requests authenticate, you can explore these related pages.
+Now that you know how each version authenticates, you can explore these related pages.
 
 <Cards>
   <Card icon={<KeyRegular />} title="Authentication" href="/reference/v3/authentication">
-    Read the V3 authentication reference, including token expiry and errors.
+    Create a V3 access token, choose its permissions, and rotate or revoke it.
   </Card>
   <Card icon={<KeyRegular />} title="Authentication" href="/reference/v1-v2/token-authentication">
     Request a V1/V2 bearer token, and see how long it lasts and the errors it can return.

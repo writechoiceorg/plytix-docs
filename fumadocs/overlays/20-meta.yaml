@@ -46,4 +46,4 @@ actions:
           bearerAuth:
             type: http
             scheme: bearer
-            description: "Exchange your API key and password for a short-lived access token, then send it as `Authorization: Bearer <token>`. See [Authentication](/reference/v3/authentication)."
+            description: "Create an access token in the **API v3** tab of your account settings, then send it as `Authorization: Bearer <access_token>`. See [Authentication](/reference/v3/authentication)."

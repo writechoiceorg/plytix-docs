@@ -19,6 +19,7 @@ Every fix in `00-fixes.yaml` cites one of these IDs through `x-plytix-question`.
 
 - **Observed:** The spec has no `servers` entry and no `securitySchemes`. We add bearer auth in our overlay (verified live). We leave `servers` empty because `https://pim.plytix.com/api/v3` isn't confirmed as the production V3 base URL yet (`config/api-testing.config.md` quirk #103, open question #35).
 - **Update (2026-10-23, 2026-10-19 spec):** Unchanged: still no `servers` and no `securitySchemes`.
+- **Update (2026-10-23, V3 auth guide):** Plytix's authentication guide (`materials/api-references/v3-reference/API V3 - Authentication guide (23_10_2026).md`) uses `https://pim.plytix.com/api/v3` in its example, so the docs now state it as the V3 base URL. It's still untested live with a production V3 access token. The guide also confirms the bearer scheme, with tokens created in the **API v3** tab.
 - **Question:** Can the generated spec declare the production server and the bearer security scheme? Which base URL should customers use for V3?
 
 | Plytix response |
@@ -699,6 +700,16 @@ Raised while applying `materials/api-references/endpoint-reviews/Plytix_API_v3_W
 
 - **Observed:** The 2026-10-19 spec drops `account_id` from every output schema, and adds descriptions to the `PATCH .../{identifier}/{path}` routes saying a JSON object body is merged into the field. We already omitted `account_id`, and our field-route pages document only single-value replacement.
 - **Question:** Is the object-merge behavior live for every resource (for example `PATCH /api/v3/products/{id}/attributes` with `{"color": "blue"}`)? Has `account_id` been removed from the responses, or only from the spec?
+
+| Plytix response |
+| :---- |
+
+## 2026-10-23 authentication guide
+
+### AUTH-1
+
+- **Observed:** The V3 authentication guide says V3 uses access tokens created in the **API v3** tab of the account settings, that they "work only with API V3", and that no API key and password exchange is required. Our live V3 testing (`config/api-testing.config.md`) authenticated with a JWT from the V1/V2 `POST https://auth.plytix.com/auth/api/get-token` exchange on `pim.dev.plytix.com`, and that JWT's claims carried the account's rate limits. The docs no longer say a V1/V2 token works on V3, or that the token carries the rate limits.
+- **Question:** Does V3 still accept a token from the V1/V2 `get-token` exchange, and for how long? Do V3 access tokens carry the account's rate limits the way the V1/V2 JWT does? What does the `403` body look like when a token lacks a permission (for example, a **Read** token sending a `PATCH`)? Who can create a V3 access token: any user, or only Owners and Admins?
 
 | Plytix response |
 | :---- |

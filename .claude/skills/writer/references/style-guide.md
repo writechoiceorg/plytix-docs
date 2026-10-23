@@ -185,7 +185,7 @@ For long articles with a main H2 heading followed by many H3 subheadings, add a 
 
 ### Access token step in integration guides
 
-Decided 2026-10-06. In any integration guide or how-to that is not itself about authentication or the quickstart, do not show the token request. When the first step is "Get an access token," make it a short sentence that links to where the reader learns it: [Authentication](/reference/v3/authentication) in the API reference, or the [Quickstart](/docs/guides/quickstart). Keep only guide-specific facts, such as the 15-minute expiry and what to do on `401`. Only the Authentication reference and the Quickstart carry the `get-token` request.
+Decided 2026-10-06. In any integration guide or how-to that is not itself about authentication or the quickstart, do not show the token request. When the first step is "Get an access token," make it a short sentence that links to where the reader learns it: [Authentication](/reference/v3/authentication) in the API reference, or the [Quickstart](/docs/guides/quickstart). Keep only guide-specific facts, such as the permissions the guide needs and what to do on `401`. Only the Authentication reference and the Quickstart carry the token-creation steps. (Updated 2026-10-23: V3 uses access tokens created in the **API v3** tab of the account settings, not the `get-token` exchange, and they don't expire after 15 minutes. The `get-token` request belongs only on the V1/V2 authentication page.)
 
 ### Troubleshooting format
 

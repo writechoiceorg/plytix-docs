@@ -33,7 +33,7 @@ Follow the steps below to authenticate and load every product into your ERP once
 
 1. **Get an access token.**
 
-   How you get a token depends on the API version. V1/V2 exchange your API Key and password for a bearer token, as described in [Authentication](/reference/v1-v2/token-authentication). V3 is moving to a new token-based authentication model whose details aren't published yet; see [Authentication and base URLs](/docs/guides/migrating-to-v3/authentication-and-base-urls). Whichever you use, request a new token when a call returns `401`. The examples below send the token as `Authorization: Bearer <access_token>`.
+   Create a V3 access token in the **API v3** tab of your account settings, as described in [Authentication](/reference/v3/authentication). The sync both reads and updates products, so give it **Write** on products, which includes read access, and only the other permissions your ERP needs, such as **Read** on product categories. A scheduled sync runs until the token's expiration date, so replace the token before then. A `401` partway through a run means the token expired or was rotated or revoked, not that it needs a refresh. The examples below send the token as `Authorization: Bearer <access_token>`.
 
 2. **Record the run boundary.**
 
@@ -174,7 +174,7 @@ A scheduled pull can miss a change, and it never shows a deletion. On a slower s
 
 Design each run so you can repeat it safely. Plan for these failures:
 
-- **Rate limits:** your access token carries your account's limits, as described in [Rate limits](/reference/v3/rate-limits). Pace requests under them. If a request returns `429`, wait before retrying and slow the whole run down. The limits haven't been observed being enforced in testing, so the `429` response hasn't been captured yet.
+- **Rate limits:** your account's plan sets your limits, as described in [Rate limits](/reference/v3/rate-limits). Pace requests under them. If a request returns `429`, wait before retrying and slow the whole run down. The limits haven't been observed being enforced in testing, so the `429` response hasn't been captured yet.
 - **Transient failures:** retry timeouts and `5xx` responses a few times, with an increasing delay between attempts. Don't retry `4xx` responses such as `422` unchanged, because the request itself needs fixing.
 - **Retried writes:** a single-attribute `PATCH` is safe to repeat, because sending the same value twice leaves the same result. A `POST` isn't. Handle a `409` as described in step 3 of [Push ERP changes to Plytix](#push-erp-changes-to-plytix).
 - **Partial runs:** because the checkpoint advances only after the whole window succeeds, a failed run is retried in full on the next schedule. Log the products that failed, so you can find the ones that fail on every run.

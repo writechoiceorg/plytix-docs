@@ -11,7 +11,7 @@ This page covers the V1/V2 APIs. For V3 (Beta), see [V3 Authentication](/referen
 
 The V1/V2 APIs use bearer token authentication. Rather than sending your API key and password with every call, you exchange them once for a short-lived access token, then send that token in the `Authorization` header of every request. Any administrator on your Plytix account can issue the API key and password from the **API** tab in the account's Admin section.
 
-This page documents the token exchange and how to use the token you get back. The flow is the same one V3 uses, so a token from this exchange works against V1/V2 and V3.
+This page documents the token exchange and how to use the token you get back. V3 doesn't use this exchange: it uses access tokens you create in your account settings, described in [V3 Authentication](/reference/v3/authentication).
 
 ## Get a bearer token
 

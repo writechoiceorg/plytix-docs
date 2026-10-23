@@ -1,88 +1,44 @@
 ---
 title: "Quickstart: make your first request"
-description: Create an API key, exchange it for a bearer token, and read your first products from your own catalog with the Plytix API V3 and curl.
+description: Create an access token in your Plytix account and read your first products from your own catalog with the Plytix API V3 and curl.
 ---
 
 import { ArrowClockwiseRegular, TextNumberListLtrRegular } from '@/components/icons';
 
-This tutorial takes you from an empty terminal to a real response from your own catalog. You'll create an API key in the Plytix dashboard, trade it for a bearer token, and use that token to read products out of your account. It's written for anyone starting an integration, whether you're syncing an ERP, building an export, or sizing up what the API returns before you plan anything.
+This tutorial takes you from an empty terminal to a real response from your own catalog. You'll create an access token in your Plytix account settings and use it to read products out of your account. It's written for anyone starting an integration, whether you're syncing an ERP, building an export, or sizing up what the API returns before you plan anything.
 
 **Learning objectives:** By the end of this tutorial, you will be able to:
 
-- Create and manage API credentials in the Plytix dashboard
-- Exchange those credentials for a bearer token, and know when it expires
+- Create a V3 access token with the permissions your integration needs
 - Make an authenticated request and read the search response Plytix returns
 
 ## Before you begin
 
 Make sure you have the following:
 
-- **A Plytix account with Owner or Admin rights.** Only Owners and Admins can create API keys. If you don't have those rights, ask an account Owner or Admin to complete step 1 and send you the credentials.
+- **V3 beta access for your account.** The V3 API is in beta. If the **API v3** tab doesn't appear in your account settings, contact your account manager to request access.
+- **A Plytix user with access to products.** A token can never grant more access than your user role allows, so your role needs to let you read products.
 - **A terminal with `curl`** or any HTTP client you prefer. Every example here is a `curl` command you can paste and run.
 
-You don't need to request API access or wait for approval. Key creation is self-service.
+## Step 1: Create an access token
 
-## Step 1: Create your API credentials
+An access token identifies your integration to the V3 API. You create it once in your account settings, and send it with every request until it expires.
 
-An API key is a key and password pair that identifies your integration to Plytix. You create it once in the dashboard.
+1. **Open** your account settings and select the **API v3** tab.
+2. **Select** **Create access token**.
+3. **Enter** a name, such as `Quickstart`.
+4. **Choose** an expiration date. 7 days is enough for this tutorial.
+5. **Choose** **Read-only** permissions. This tutorial only reads data.
+6. **Select** **Create token**.
+7. **Copy** the token and store it somewhere safe, then confirm that you've saved it.
 
-1. **Sign in** at [accounts.plytix.com](https://accounts.plytix.com).
-2. **Open** the **API** tab.
-3. **Click Create API Key**, then enter a name and choose a role. The role decides what the key can reach, so pick the narrowest one that covers what you're building.
-4. **Copy** the **API key** and the **API password** using the clipboard icon beside each.
-
-Store both somewhere safe before you leave the page. You can rename, re-role, or delete a key later from the same tab, but changing an existing key's role can break whatever is already using it, so prefer creating a new key per integration.
-
-## Step 2: Exchange your credentials for a token
-
-Plytix uses bearer tokens. Rather than sending your key and password on every request, you trade them once for a token and send that instead.
-
-Note the host: tokens come from `auth.plytix.com`, which is a different service from the PIM API you'll call in step 3.
-
-<Tabs items={['Request', 'Response']}>
-  <Tab value="Request">
-    ```bash
-    curl --request POST \
-      --url https://auth.plytix.com/auth/api/get-token \
-      --header 'Content-Type: application/json' \
-      --data '{
-        "api_key": "your.api.key",
-        "api_password": "your.secret.api.password"
-      }'
-    ```
-  </Tab>
-  <Tab value="Response">
-    ```json
-    {
-      "data": [
-        {
-          "access_token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
-          "refresh_token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
-        }
-      ]
-    }
-    ```
-  </Tab>
-</Tabs>
-
-Take `access_token` from `data[0]`. Every request after this needs it in an `Authorization: Bearer <token>` header.
-
-<Callout type="warn" title="Tokens expire after 15 minutes">
-  Request a new token when you get a `401`, and build that refresh into any job that runs longer than a few minutes. The response also includes a `refresh_token`, which this API doesn't document. Request a new token the same way you got the first one.
+<Callout type="warn" title="You can copy the token only once">
+  Plytix shows the token's value only when you create it. If you lose it, rotate the token from the **API v3** tab to get a new value. See [Authentication](/reference/v3/authentication) for rotation, revocation, and the other permission options.
 </Callout>
 
-If the credentials are wrong, you'll get a `401` with the message nested under an `error` key:
+There's no token request to make: the value you copied is the bearer token you send. Every request needs it in an `Authorization: Bearer <access_token>` header.
 
-```json
-{
-  "error": {
-    "msg": "Bad api_key or api_password: Query did not throw any results",
-    "errors": [{ "field": "http_status_code", "msg": 401 }]
-  }
-}
-```
-
-## Step 3: Make your first authenticated request
+## Step 2: Make your first authenticated request
 
 Read some products back to prove the whole chain works.
 
@@ -127,7 +83,7 @@ Read some products back to prove the whole chain works.
   </Tab>
 </Tabs>
 
-The sample response is trimmed for readability. A `200` here confirms the whole setup: your credentials were valid, the token exchange worked, and your headers are right. A `401` with `{"detail": "Unauthorized"}` means the token is missing, malformed, or expired, so go back to step 2.
+The sample response is trimmed for readability. A `200` here confirms the whole setup: your token is valid, it can read products, and your headers are right. A `401` with `{"detail": "Unauthorized"}` means the token is missing, copied incompletely, or no longer valid, so check it against step 1. A `403` means the token authenticated but lacks the permission the request needs.
 
 Three details in that response are worth noticing now, because they shape every integration you build on top of it:
 

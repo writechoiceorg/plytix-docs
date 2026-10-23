@@ -161,7 +161,7 @@ The pagination block carries no counts either. This is a difference from V1, who
 Keep these points in mind when you page through a large result set:
 
 - **Don't assume a total.** The pagination block carries no count, so the only reliable way to know how many records matched is to page to the end and tally as you go. For a set you know is small, `_page_size=1000` gets you everything in one request.
-- **Watch the request rate.** Paging through a large result set is many requests in rapid succession. Rate limits vary by account and are carried in your access token's claims, so pace a long loop and back off on `429`. See [Rate limits](/reference/v3/rate-limits).
+- **Watch the request rate.** Paging through a large result set is many requests in rapid succession. Rate limits vary by account plan, so pace a long loop and back off on `429`. See [Rate limits](/reference/v3/rate-limits).
 - **Ask for fewer fields.** `_fields` narrows each record to what you need, which makes a long paging run noticeably cheaper. See [Filtering and Query Syntax](/reference/v3/filtering-and-search).
 - **Expect the set to shift under you.** Results can change during pagination, and a catalog that changes mid-run can move records between pages. Use a deterministic sort, such as `_sort_by=id`, and a reconciliation pass. A date filter alone doesn't guarantee a point-in-time snapshot.
 

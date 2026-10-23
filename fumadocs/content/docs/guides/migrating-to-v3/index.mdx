@@ -7,7 +7,7 @@ import { BoxDismissRegular, DocumentEditRegular, FilterRegular, KeyRegular, Sear
 
 V3 reorganized the Plytix API rather than replicating it. Most of what a V1/V2 integration does moves across and gets better in the process, but a few operations have no V3 equivalent at all, so a working integration usually ends up calling both versions rather than cutting over wholesale.
 
-This guide covers that split: what moves, what stays, and how to convert the parts that move. V1/V2 keep their current authentication, and V3 is moving to a new model whose details aren't published yet.
+This guide covers that split: what moves, what stays, and how to convert the parts that move. V1/V2 keep their current authentication, and V3 uses access tokens you create in your account settings.
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ Before you start, you need:
 
 - **A working V1/V2 integration**, and access to its source. This guide assumes you're changing existing code, not starting fresh.
 - **A test account or a safe dataset.** Write behavior differs between versions in ways that are hard to spot until something is already deleted.
-- **Your current API credentials** for the calls you keep on V1/V2. V3 authentication is changing; see step 2.
+- **Your current API credentials** for the calls you keep on V1/V2, and **V3 beta access** for the calls that move. V3 uses its own access tokens; see step 2.
 
 ## Migrate your integration
 
@@ -47,12 +47,12 @@ Before you start, you need:
    **Bulk writes aren't in V3 yet.** The current V3 contract has no bulk create, update, or delete endpoints. Bulk endpoints are part of Plytix's V3 design (planned), so a large change is many single requests for now, paced under your [rate limit](/reference/v3/rate-limits).
 
    <Callout type="info" title="Keeping some calls on V1/V2">
-     If your integration keeps some calls on V1/V2, each version authenticates in its own way. V1/V2 keep the current token flow, and V3's new model isn't published yet, so don't assume one token covers both.
+     If your integration keeps some calls on V1/V2, each version authenticates in its own way. V1/V2 keep the current token flow, and V3 uses an access token you create in your account settings. A V3 access token works only with V3, so you need both.
    </Callout>
 
 2. **Plan authentication for each version.**
 
-   V1/V2 keep their current authentication: you exchange your API Key and password for a bearer token and send it in the `Authorization` header. Your credentials, their roles, and your token-refresh logic keep working for those calls. V3 is moving to a new token-based model whose details aren't published yet, so don't build V3 calls on the assumption that the V1/V2 flow carries over. See [Authentication and base URLs](/docs/guides/migrating-to-v3/authentication-and-base-urls) for the V1/V2 flow and the status of V3 authentication.
+   V1/V2 keep their current authentication: you exchange your API Key and password for a bearer token and send it in the `Authorization` header. Your credentials, their roles, and your token-refresh logic keep working for those calls. V3 doesn't use that exchange. You create an access token in the **API v3** tab of your account settings, choose its permissions and expiration date, and send it directly as the bearer token. It lasts until the expiration date you chose rather than 15 minutes, so your V3 calls don't need the token-refresh logic, but your integration does need a way to receive a new token when you rotate or replace it. See [Authentication and base URLs](/docs/guides/migrating-to-v3/authentication-and-base-urls) for both flows side by side.
 
 3. **Convert your searches from a POST body to a GET query.**
 
@@ -220,7 +220,7 @@ Six reference pages sit under this guide and carry the detail the steps above po
 
 <Cards>
   <Card icon={<KeyRegular />} title="Authentication and base URLs" href="/docs/guides/migrating-to-v3/authentication-and-base-urls">
-    The base URLs and path prefixes, the V1/V2 token flow, and the status of V3 authentication.
+    The base URLs and path prefixes, the V1/V2 token flow, and V3 access tokens.
   </Card>
   <Card icon={<SearchRegular />} title="Search and pagination" href="/docs/guides/migrating-to-v3/searching-and-pagination">
     The V1 search body translated into a V3 query string, and how V3 pages.

@@ -97,7 +97,7 @@ actions:
     description: 'Live 401 body from the PIM host is {"detail":"Unauthorized"}, not OperationResponse (List Products.bru "401 - Following next_page Verbatim Drops Auth", Q#92, OAS-5)'
     update:
       description: |-
-        The access token is missing, expired, or invalid. Tokens last 15 minutes: get a new one and retry. See [Authentication](/reference/v3/authentication).
+        The access token is missing, invalid, expired, revoked, or replaced by a rotation. Check the token and its status in the **API v3** tab of your account settings. See [Authentication](/reference/v3/authentication).
 
         This response doesn't use the `data`/`errors` envelope. Its body is `{"detail": "Unauthorized"}`.
       content:
@@ -111,9 +111,9 @@ actions:
                 detail: Unauthorized
 
   - target: $.paths.*.*.responses['403']
-    description: Q#106, status-gating #4
+    description: Q#106, status-gating #4, V3 auth guide (2026-10-23)
     update:
-      description: Your account doesn't have the feature or permission this request needs. `errors` names it.
+      description: Your account doesn't have the feature this request needs, or your access token or user role doesn't have the permission. `errors` names it. See [Authentication](/reference/v3/authentication#permissions).
 
   - target: $.paths.*.*.responses['404']
     description: Q#20, Q#95, Q#105, FB-034 (record missing, field missing, or not linked)

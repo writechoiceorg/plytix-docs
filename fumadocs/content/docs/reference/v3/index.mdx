@@ -9,7 +9,7 @@ import { BoxRegular, EditRegular, FilterRegular, FolderListRegular, GaugeRegular
 API V3 is in beta, so endpoints, fields, and behavior can change before its stable release. The V1/V2 APIs remain available as the legacy API: see the [V1/V2 (Legacy) reference](/reference/v1-v2/api-v1-v2-reference).
 </Callout>
 
-The Plytix API platform provides a suite of functionalities for managing your product content programmatically. It's built on standard REST principles and secured with bearer token authentication.
+The Plytix API platform provides a suite of functionalities for managing your product content programmatically. It's built on standard REST principles and secured with access tokens sent as bearer tokens.
 
 This lets you connect your own systems, such as an ERP or storefront, to your Plytix account, so you can sync, enrich, and distribute product data instead of managing it only through the dashboard.
 
@@ -19,7 +19,7 @@ Before integrating with a specific resource, review these fundamental patterns. 
 
 <Cards>
   <Card icon={<KeyRegular />} title="Authentication" href="/reference/v3/authentication">
-    Get and use a bearer token for every request.
+    Create an access token and send it with every request.
   </Card>
   <Card icon={<WarningRegular />} title="Errors and status codes" href="/reference/v3/errors-status-codes">
     Understand the API's success and error response formats.

@@ -11,8 +11,8 @@ const cards = [
     title: 'Get started',
     icon: RocketRegular,
     description:
-      'Generate an API key, exchange it for a bearer token, and make your first authenticated request against API V3.',
-    bullets: ['Create an API key in your dashboard', 'Exchange it for a bearer token'],
+      'Create an access token in your account settings and make your first authenticated request against API V3.',
+    bullets: ['Create an access token in your account settings', 'Send it as a bearer token'],
     href: '/docs/guides/what-is-the-plytix-api',
     linkLabel: 'Check the guides',
   },
