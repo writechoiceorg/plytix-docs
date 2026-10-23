@@ -3,9 +3,9 @@ title: "Authentication and base URLs"
 description: "Reference for the V1/V2 base URL, token request, and bearer header, plus the V3 base URL while its new authentication model is pending."
 ---
 
-import { KeyRegular, SearchRegular } from '@/components/icons';
+import { KeyRegular } from '@/components/icons';
 
-V1/V2 share one authentication flow, and V3 is moving to a new token-based model whose details aren't published yet. This page lists the base URLs, path prefixes, and authentication details for each. It's part of the reference set for [Migrating to V3](/docs/guides/migrating-to-v3).
+V1/V2 share one authentication flow, and V3 is moving to a new token-based model whose details aren't published yet. This page lists the base URLs, path prefixes, and authentication details for each. It's part of the reference set for [Migration overview](/docs/guides/migrating-to-v3).
 
 ## V1/V2 base URL and authentication
 
@@ -29,7 +29,7 @@ Your API credentials and your bearer token do different jobs. The credentials id
 | Where it comes from | An account administrator issues them from the **API** tab in the account's Admin section | The token endpoint, in exchange for your credentials |
 | Where you send it | Only in the body of the token request | In the `Authorization` header of every V1/V2 request |
 
-A token expires after 15 minutes. When it expires, or the API can't verify it, requests return `401`, and you request a new token with the same credentials. See [Authentication](/docs/reference/legacy/token-authentication) for the full token request, response, and errors.
+A token expires after 15 minutes. When it expires, or the API can't verify it, requests return `401`, and you request a new token with the same credentials. See [Authentication](/reference/v1-v2/token-authentication) for the full token request, response, and errors.
 
 ## V3 base URL and authentication
 
@@ -45,7 +45,7 @@ V3 runs on the same base URL as V1/V2, under its own path prefix:
 */}
 
 <Callout type="info" title="V3 authentication is changing">
-  V3 is moving to a new token-based authentication model, and its details aren't published yet. See [V3 authentication](/docs/reference/v3/authentication) for the model once it's documented.
+  V3 is moving to a new token-based authentication model, and its details aren't published yet. See [V3 authentication](/reference/v3/authentication) for the model once it's documented.
 </Callout>
 
 ## Related resources
@@ -53,10 +53,10 @@ V3 runs on the same base URL as V1/V2, under its own path prefix:
 Now that you know how V1/V2 requests authenticate, you can explore these related pages.
 
 <Cards>
-  <Card icon={<SearchRegular />} title="Searching and pagination" href="/docs/guides/migrating-to-v3/searching-and-pagination">
-    Convert a V1 search body into a V3 query string and page through the results.
+  <Card icon={<KeyRegular />} title="Authentication" href="/reference/v3/authentication">
+    Read the V3 authentication reference, including token expiry and errors.
   </Card>
-  <Card icon={<KeyRegular />} title="Authentication" href="/docs/reference/legacy/token-authentication">
+  <Card icon={<KeyRegular />} title="Authentication" href="/reference/v1-v2/token-authentication">
     Request a V1/V2 bearer token, and see how long it lasts and the errors it can return.
   </Card>
 </Cards>

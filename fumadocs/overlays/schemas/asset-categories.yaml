@@ -1,0 +1,56 @@
+# Schema edits for the asset-categories endpoints (create and update bodies).
+# Sources: spec AssetCategoryCreateInputDto/AssetCategoryUpdateInputDto,
+# Create Asset Category.bru (2026-09-07), Update and Delete Asset Category.bru
+# (2026-09-15, 2026-09-22), GEN-1.
+overlay: 1.0.0
+info:
+  title: asset-categories schemas
+  version: 1.0.0
+actions:
+  # --- create body ---------------------------------------------------------------
+  - target: $.components.schemas.AssetCategoryCreateInputDto
+    description: spec required [name], additionalProperties false
+    update:
+      description: Body for creating an asset category. Only `name` is required.
+  - target: $.components.schemas.AssetCategoryCreateInputDto.properties.name
+    description: spec minLength 1; Create Asset Category.bru 422; GEN-1 (409, VERIFY.md)
+    update:
+      description: Name of the category, at least one character. Re-creating a category with the same `name` under the same parent returns `409`.
+      examples:
+        - Packshots
+  - target: $.components.schemas.AssetCategoryCreateInputDto.properties.parent_id
+    description: Create Asset Category.bru "201 - Success (Child Category)"
+    update:
+      description: ID of the parent asset category. Leave it out to create a top-level category.
+      examples:
+        - 6a1f0c2e9b3d4a5f8c7e1801
+
+  # --- update body ---------------------------------------------------------------
+  - target: $.components.schemas.AssetCategoryUpdateInputDto
+    description: spec additionalProperties false
+    update:
+      description: Fields to change. Send `name`, `parent_id`, or both.
+  - target: $.components.schemas.AssetCategoryUpdateInputDto.properties.name
+    description: Update and Delete Asset Category.bru
+    update:
+      description: New name of the category.
+      examples:
+        - Product Packshots
+  - target: $.components.schemas.AssetCategoryUpdateInputDto.properties.parent_id
+    description: Update and Delete Asset Category.bru "200 - Full Parameters (Rename + Re-Parent)" (2026-09-22); null untested (CAT-42)
+    update:
+      description: ID of the asset category to move this category under.
+      examples:
+        - 6a1f0c2e9b3d4a5f8c7e1801
+  - target: $.components.schemas.AssetCategoryOutputDto.properties.path
+    remove: true
+  - target: $.components.schemas.AssetCategoryOutputDto.properties.slug
+    remove: true
+  - target: $.components.schemas.AssetCategoryOutputDto.properties.n_children
+    remove: true
+  - target: $.components.schemas.AssetCategoryCreateOutputDto.properties.path
+    remove: true
+  - target: $.components.schemas.AssetCategoryCreateOutputDto.properties.slug
+    remove: true
+  - target: $.components.schemas.AssetCategoryCreateOutputDto.properties.n_children
+    remove: true

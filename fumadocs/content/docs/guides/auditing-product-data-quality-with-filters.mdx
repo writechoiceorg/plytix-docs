@@ -1,18 +1,18 @@
 ---
-title: Audit product data quality with filters
+title: Audit product data quality
 description: Learn how to find products that break your own catalog rules, such as a missing GTIN, an empty description, or a low completeness score.
 ---
 
-import { ArrowDownloadRegular, FilterRegular } from '@/components/icons';
+import { FilterRegular, OrganizationRegular } from '@/components/icons';
 
-Find products that break your own catalog's data rules: a required field that's missing or empty, an image your process expects, or a completeness score below your threshold. This guide covers how to define those rules, the filters that check them, and how to collect a full audit result across pages. Passing an audit means products meet the rules you defined, not that a marketplace or channel will accept them. All requests use the V3 API with a bearer token. See [Filtering and Query Syntax](/docs/reference/v3/filtering-query-syntax) and [Pagination](/docs/reference/v3/pagination) for the full rules, and note that a search with no matches returns `data: []`.
+Find products that break your own catalog's data rules: a required field that's missing or empty, an image your process expects, or a completeness score below your threshold. This guide covers how to define those rules, the filters that check them, and how to collect a full audit result across pages. Passing an audit means products meet the rules you defined, not that a marketplace or channel will accept them. All requests use the V3 API with a bearer token. See [Filtering and Query Syntax](/reference/v3/filtering-and-search) and [Pagination](/reference/v3/pagination) for the full rules, and note that a search with no matches returns `data: []`.
 
 ## Prerequisites
 
 Before you start, make sure you have the following:
 
-- A bearer token. See [Authentication](/docs/reference/v3/authentication), or the [Quickstart](/docs/guides/quickstart) for a first walkthrough.
-- Familiarity with the query-string filter syntax covered in [Filtering and Query Syntax](/docs/reference/v3/filtering-query-syntax). This guide assumes you can already build a basic filter like `sku=BAG-10157`.
+- A bearer token. See [Authentication](/reference/v3/authentication), or the [Quickstart](/docs/guides/quickstart) for a first walkthrough.
+- Familiarity with the query-string filter syntax covered in [Filtering and Query Syntax](/reference/v3/filtering-and-search). This guide assumes you can already build a basic filter like `sku=GF-Basket`.
 - The rules your catalog applies: which fields each product needs, based on its family, product level, status, or where you publish it.
 
 ## Find incomplete products
@@ -62,7 +62,7 @@ Follow the steps below to define your rules, check each one with a filter, and c
      --data-urlencode "_fields=gtin"
    ```
 
-   `[null]` takes no value, so it's sent with `--data` as it is. The same pattern works for a custom attribute, such as `attributes.short_description`. Whether V3 treats an empty value as missing for `[!exists]` hasn't been confirmed, so keep all three checks when your audit has to catch every case.
+   `[null]` takes no value, so it's sent with `--data` as it is. The same pattern works for a custom attribute, such as `attributes.feature_description`. Whether V3 treats an empty value as missing for `[!exists]` hasn't been confirmed, so keep all three checks when your audit has to catch every case.
 
 3. **Treat whitespace as empty in your own code.**
 
@@ -83,10 +83,10 @@ Follow the steps below to define your rules, check each one with a filter, and c
    ```bash
    curl -G "https://pim.plytix.com/api/v3/products" \
      -H "Authorization: Bearer <access_token>" \
-     --data-urlencode "attributes.short_description%5Bcontains:ignorecase%5D=waterproof"
+     --data-urlencode "attributes.feature_description%5Bcontains:ignorecase%5D=dishwasher"
    ```
 
-   Use `[contains]` when case matters. [Filtering and Query Syntax](/docs/reference/v3/filtering-query-syntax) lists the supported operators. If you send one Plytix doesn't recognize, the request returns `400` and the error lists the operators it accepts.
+   Use `[contains]` when case matters. [Filtering and Query Syntax](/reference/v3/filtering-and-search) lists the supported operators. If you send one Plytix doesn't recognize, the request returns `400` and the error lists the operators it accepts.
 
 6. **Check completeness scores against your own threshold.**
 
@@ -103,7 +103,7 @@ Follow the steps below to define your rules, check each one with a filter, and c
    ```bash
    curl -G "https://pim.plytix.com/api/v3/products" \
      -H "Authorization: Bearer <access_token>" \
-     --data-urlencode "attributes.website_ready%5Blt%5D=90" \
+     --data-urlencode "attributes.rich_info_complete%5Blt%5D=90" \
      --data-urlencode "_fields=id" \
      --data-urlencode "_fields=sku" \
      --data-urlencode "_fields=attributes"
@@ -122,7 +122,7 @@ Follow the steps below to define your rules, check each one with a filter, and c
      --data-urlencode "_or%5B0%5Dstatus=Draft"
    ```
 
-   See [Filtering and Query Syntax](/docs/reference/v3/filtering-query-syntax) for grouping rules.
+   See [Filtering and Query Syntax](/reference/v3/filtering-and-search) for grouping rules.
 
 8. **Collect every page and record the failed rules per product.**
 
@@ -131,7 +131,7 @@ Follow the steps below to define your rules, check each one with a filter, and c
    ```json
    {
      "6a38f614c3d65a5f868b1a06": {
-       "sku": "BAG-10157",
+       "sku": "GF-Basket",
        "failed_rules": ["gtin_required", "thumbnail_required"]
      }
    }
@@ -139,13 +139,13 @@ Follow the steps below to define your rules, check each one with a filter, and c
 
 ## Related articles
 
-Now that you know how to audit product data, you can explore these related guides.
+Now that you know how to audit product data, you can explore these related pages.
 
 <Cards>
-  <Card icon={<ArrowDownloadRegular />} title="Export your full catalog" href="/docs/guides/exporting-your-full-catalog">
-    Pull the full catalog once you know which products need attention.
+  <Card icon={<OrganizationRegular />} title="Plytix data model" href="/docs/guides/data-model">
+    Understand the attributes, families, and relations that your filters target.
   </Card>
-  <Card icon={<FilterRegular />} title="Filtering and Query Syntax" href="/docs/reference/v3/filtering-query-syntax">
+  <Card icon={<FilterRegular />} title="Filtering and Query Syntax" href="/reference/v3/filtering-and-search">
     Look up every operator and function this guide's checks use.
   </Card>
 </Cards>

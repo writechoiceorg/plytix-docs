@@ -1,0 +1,293 @@
+# Operation edits for the product-families endpoints: the families themselves.
+# The links between a family and its attributes are in ops/family-attributes.yaml.
+#
+# Phase 3 (2026-10-20). Sources: config/api-testing.config.md (Q#60, Q#67,
+# Q#72, Q#73, Q#74, Q#84, Q#91, Q#92, Q#116, status-gating #4),
+# bruno-collection/13-Product-Families/ (captures 2026-09-15 to 2026-09-22),
+# FAM-1 (Plytix answer), PM-25, the data model guide.
+#
+# - PATCH success is documented as 204 from the spec plus Q#84/Q#116; the only
+#   family capture (2026-09-15) predates that change and shows 200 (VERIFY.md).
+# - Per PM-25, never present POST .../attributes at parent_level as a
+#   workaround for the inheritance 403.
+# - POST /{identifier}/{path} returns 405 for every path (Q#67, FAM-1 answer
+#   doesn't change that): recommended for on-hold. Its edits stay here so the
+#   page is correct if it's published anyway.
+# - account_id is left out of examples (sanitization rule).
+# - 2026-10-22, 16 Oct 2026 field-audit handoff: families are created with a
+#   name only (attributes, parent_attributes, variant_attributes excluded, so the
+#   create 403 and the mixed-reference 422 are gone); counters excluded;
+#   family_attributes is expandable with _fields (untested, FAM-23, VERIFY.md).
+overlay: 1.0.0
+info:
+  title: product-families operations
+  version: 1.0.0
+actions:
+  # --- GET /api/v3/product-families --------------------------------------------
+  - target: $.paths['/api/v3/product-families'].get
+    description: Q#74 (_fields, _sort_by=name, paging together), Q#91, Q#11/Q#99 (filter grammar API-wide), List Product Families.bru (2026-09-21/22); 16 Oct handoff (counters excluded, family_attributes expandable)
+    update:
+      summary: Search product families
+      operationId: search-product-families
+      description: |-
+        Returns the product families in your account, one page at a time. Each record holds the family's `id`, its `name`, and its timestamps.
+
+        Use it to find a family's `id` before you assign products to the family with `product_family_id`, or before you work with its attributes.
+
+        Filters use the same syntax as every V3 search, for example `name[contains:ignorecase]=aprons`. To sort by name, send `_sort_by=name`.
+
+        To get each family's attributes, with each attribute's inheritance `level`, add `_fields=family_attributes`. They come back only when you name them in `_fields`. You can also list one family's attributes with [List a product family's attributes](/reference/v3/family-attributes/list-family-attributes).
+
+        Related pages:
+
+        - [The Plytix data model](/docs/guides/data-model#product-families-and-variants)
+        - [Reconstruct parent/variant hierarchies](/docs/guides/reconstructing-parent-variant-hierarchies)
+        - [Filtering and search](/reference/v3/filtering-and-search)
+        - [Pagination](/reference/v3/pagination)
+
+  - target: $.paths['/api/v3/product-families'].get.parameters[?(@.name=='filters' && @.in=='query')]
+    description: 'PM-50; matches the example in this operation''s description'
+    update:
+      example:
+        'name[contains:ignorecase]': aprons
+
+  - target: $.paths['/api/v3/product-families'].get.parameters[?(@.name=='_fields' && @.in=='query')]
+    description: Q#74, List Product Families.bru "200 - Full Parameters" (2026-09-22)
+    update:
+      description: Fields to return for each product family, for example `_fields=id&_fields=name`. Repeat the parameter once per field. Leave it out to get the default fields. The family's attribute links come back only when you name `family_attributes`.
+
+  - target: $.paths['/api/v3/product-families'].get.responses['200'].content['application/json']
+    description: List Product Families.bru (2026-09-21 page 1; 2026-09-22 full parameters, request shown without its name[icontains] filter, which Q#99 later rejected; the filter excluded only "Office Supplies", which sorts after the two results), sanitized, account_id omitted; counters stripped and total_products dropped from selectedFields (16 Oct handoff)
+    update:
+      examples:
+        firstPage:
+          summary: First page of several
+          description: '`GET /api/v3/product-families?_page_size=3`. Only `next_page` is present.'
+          value:
+            x-example-file: product-families/search-200-first-page.json
+        selectedFields:
+          summary: Select fields and sort by name
+          description: '`GET /api/v3/product-families?_fields=id&_fields=name&_sort_by=name&_page_size=2`'
+          value:
+            data:
+              - id: 6a1f0c2e9b3d4a5f8c7e1d03
+                name: Aprons
+              - id: 6a1f0c2e9b3d4a5f8c7e1d01
+                name: Gift Baskets
+            errors: []
+            pagination:
+              next_page: http://<api-host>/api/v3/product-families?_fields=id&_fields=name&_sort_by=name&_page=2&_page_size=2
+
+  # --- POST /api/v3/product-families -------------------------------------------
+  - target: $.paths['/api/v3/product-families'].post
+    description: Q#60, Q#117, Create Product Family.bru (2026-09-15/22), GEN-1, PM-25; 16 Oct handoff (name only; attributes through family attributes)
+    update:
+      summary: Create a product family
+      operationId: create-product-family
+      description: |-
+        Creates a product family and returns it, including its new `id`. `name` is the only field in the body.
+
+        Family names are unique in your account. If a family with that name already exists, the request returns `409` and creates nothing.
+
+        To add attributes to the family, link them after it exists with [Link an attribute to a product family](/reference/v3/family-attributes/add-attribute-to-family). Each link sets the attribute's inheritance `level`.
+
+        See [The Plytix data model](/docs/guides/data-model#product-families-and-variants) for how levels work, and [Update and delete records](/reference/v3/updates-and-deletes).
+
+  - target: $.paths['/api/v3/product-families'].post.requestBody.content['application/json']
+    description: Create Product Family.bru "201 - Success" request (2026-09-22), sanitized; withAttributes dropped (16 Oct handoff)
+    update:
+      examples:
+        nameOnly:
+          summary: Name only
+          value:
+            name: Mugs
+
+  - target: $.paths['/api/v3/product-families'].post.responses['201']
+    description: Create Product Family.bru 201 capture (2026-09-15, name only), sanitized; counters stripped and the withAttributes example dropped (16 Oct handoff)
+    update:
+      description: Created. `data` holds the new product family.
+      content:
+        application/json:
+          examples:
+            nameOnly:
+              summary: Family created with a name only
+              value:
+                data:
+                  id: 6a1f0c2e9b3d4a5f8c7e1d04
+                  name: Mugs
+                  created: '2026-09-15T16:28:02.086000+00:00'
+                  modified: '2026-09-15T16:28:02.090000+00:00'
+                errors: []
+
+  - target: $.paths['/api/v3/product-families'].post.responses['409']
+    description: Create Product Family.bru "409 - Duplicate Name" (2026-09-15), GEN-1
+    update:
+      description: A product family with this name already exists in your account. Nothing was created.
+      content:
+        application/json:
+          examples:
+            duplicateName:
+              summary: Name already exists
+              value:
+                data: []
+                errors:
+                  - name: AlreadyExists
+                    description: A Product family with same name already exists
+
+  # --- GET /api/v3/product-families/{identifier} ----------------------------------
+  - target: $.paths['/api/v3/product-families/{identifier}'].get
+    description: Get Product Family by ID.bru (2026-09-21), Update and Delete Product Family.bru 404 after delete (2026-09-15); 16 Oct handoff (counters excluded, family_attributes expandable, untested FAM-23)
+    update:
+      summary: Get a product family
+      operationId: get-product-family
+      description: |-
+        Returns one product family by its ID, with its name and its timestamps. An ID that matches no family returns `404`.
+
+        To get the family's attributes, with each attribute's inheritance `level`, add `_fields=family_attributes`. They come back only when you name them in `_fields`. You can also use [List a product family's attributes](/reference/v3/family-attributes/list-family-attributes).
+
+  - target: $.paths['/api/v3/product-families/{identifier}'].get.parameters[?(@.name=='identifier' && @.in=='path')]
+    description: config "ID prefixes"; products carry the family ID in product_family_id
+    update:
+      description: ID of the product family, a 24-character hexadecimal string such as `6a1f0c2e9b3d4a5f8c7e1d01`. A product's `product_family_id` holds this ID.
+
+  - target: $.paths['/api/v3/product-families/{identifier}'].get.responses['200'].content['application/json']
+    description: Get Product Family by ID.bru "200 - Success" (2026-09-21), sanitized, account_id omitted; counters stripped (16 Oct handoff)
+    update:
+      examples:
+        family:
+          summary: A product family
+          value:
+            data:
+              id: 6a1f0c2e9b3d4a5f8c7e1d01
+              name: Gift Baskets
+              created: '2026-06-22T08:44:08.740000'
+              modified: '2026-06-22T08:44:08.740000'
+            errors: []
+
+  - target: $.paths['/api/v3/product-families/{identifier}'].get.responses['404'].content['application/json']
+    description: Update and Delete Product Family.bru "404 - After Delete" (2026-09-15)
+    update:
+      examples:
+        notFound:
+          summary: No product family with this ID
+          value:
+            data: []
+            errors:
+              - name: NotFoundError
+                description: Document with id 6a1f0c2e9b3d4a5f8c7e1d99 not found
+
+  # --- PATCH /api/v3/product-families/{identifier} --------------------------------
+  - target: $.paths['/api/v3/product-families/{identifier}'].patch
+    description: Q#60 (name only), Q#84/Q#116 (PATCH 204 API-wide; family capture of 2026-09-15 showed 200, VERIFY.md), spec ProductFamilyUpdateInputDto (additionalProperties false), status-gating #4, PM-25
+    update:
+      summary: Rename a product family
+      operationId: update-product-family
+      description: |-
+        Changes a product family's name. `name` is the only field you can change here. A successful update returns `204` with an empty body.
+
+        Attribute fields such as `attributes` aren't accepted and return `422`, because changing which attributes belong to a family affects every product in it. Manage a family's attributes with [Link an attribute to a product family](/reference/v3/family-attributes/add-attribute-to-family) and [Unlink an attribute from a product family](/reference/v3/family-attributes/remove-attribute-from-family).
+
+        See [Update and delete records](/reference/v3/updates-and-deletes).
+
+  - target: $.paths['/api/v3/product-families/{identifier}'].patch.requestBody.content['application/json']
+    description: Update and Delete Product Family.bru "200 - Success (Root PATCH)" request (2026-09-15)
+    update:
+      examples:
+        rename:
+          summary: Rename the family
+          value:
+            name: Mugs and Cups
+
+  - target: $.paths['/api/v3/product-families/{identifier}'].patch.responses['204']
+    description: Q#84, Q#116
+    update:
+      description: Renamed. The response has no body.
+
+  # --- DELETE /api/v3/product-families/{identifier} -------------------------------
+  - target: $.paths['/api/v3/product-families/{identifier}'].delete
+    description: Q#60, Update and Delete Product Family.bru DELETE 204 + GET 404 (2026-09-15, scratch family with 0 products); effect on products in the family unknown (FAM-20)
+    update:
+      summary: Delete a product family
+      operationId: delete-product-family
+      description: |-
+        Deletes one product family. A successful delete returns `204` with an empty body, and a later request for the family returns `404`.
+
+        To take a single product out of its family without deleting the family, update the product with `product_family_id` set to `null`. See [Update a product](/reference/v3/products/update-product) and [Update and delete records](/reference/v3/updates-and-deletes).
+
+  - target: $.paths['/api/v3/product-families/{identifier}'].delete.responses['204']
+    description: Update and Delete Product Family.bru (2026-09-15)
+    update:
+      description: Deleted. The response has no body.
+
+  # --- GET /api/v3/product-families/{identifier}/{path} -----------------------------
+  - target: $.paths['/api/v3/product-families/{identifier}/{path}'].get
+    description: Q#15 (subpath discovery 400 on every resource), Get Product Family by ID.bru (raw field list 2026-09-08/21); 200 body for a valid path not captured (VERIFY.md)
+    update:
+      summary: Get a product family field
+      operationId: get-product-family-field
+      description: |-
+        Returns the value of one field of a product family, such as `name`, without the rest of the record. `data` holds the field's value.
+
+        A field the family doesn't have returns `400`. The error lists the fields you can ask for.
+
+  - target: $.paths['/api/v3/product-families/{identifier}/{path}'].get.responses['200'].content['application/json']
+    description: "Sanitized, unverified: the 200 body for a field wasn't captured (VERIFY.md). Shape follows the products field route captures; values come from this resource's GET example"
+    update:
+      examples:
+        name:
+          summary: One field
+          description: '`GET /api/v3/product-families/{identifier}/name`'
+          value:
+            data: Gift Baskets
+            errors: []
+
+  - target: $.paths['/api/v3/product-families/{identifier}/{path}'].get.responses['400'].content['application/json']
+    description: Q#15 message format; field list from Get Product Family by ID.bru subpath discovery (2026-09-08/21)
+    update:
+      examples:
+        unknownField:
+          summary: Field the family doesn't have
+          value:
+            data: []
+            errors:
+              - name: ValueError
+                description: "Field 'colour' not found. Available fields: ['id', 'account_id', 'name', 'total_products', 'total_attributes', 'total_models', 'created', 'modified']"
+
+  - target: $.paths['/api/v3/product-families/{identifier}/{path}'].get.parameters[?(@.name=='path' && @.in=='path')]
+    description: Get Product Family by ID.bru raw field list
+    update:
+      description: The field to read, such as `name` or `created`.
+
+  # --- PATCH /api/v3/product-families/{identifier}/{path} ---------------------------
+  - target: $.paths['/api/v3/product-families/{identifier}/{path}'].patch
+    description: Update and Delete Product Family.bru "200 - Success (Generic Subpath /name)" (2026-09-15; status now 204 per Q#84/Q#116, VERIFY.md), Q#60 (name only). Request body not declared upstream (proposed fix FAM-21).
+    update:
+      summary: Update a product family field
+      operationId: update-product-family-field
+      description: |-
+        Changes one field of a product family. `name` is the only field you can change: set `path` to `name` and send the new name on its own as a JSON string, such as `"Mugs and Cups"`, not an object. A successful update returns `204` with an empty body.
+
+        This has the same effect as [Rename a product family](/reference/v3/product-families/update-product-family). See [Update and delete records](/reference/v3/updates-and-deletes).
+
+  - target: $.paths['/api/v3/product-families/{identifier}/{path}'].patch.parameters[?(@.name=='path' && @.in=='path')]
+    description: Q#60
+    update:
+      description: The field to change. Only `name` can be changed.
+
+  - target: $.paths['/api/v3/product-families/{identifier}/{path}'].patch.responses['204']
+    description: Q#84, Q#116
+    update:
+      description: Updated. The response has no body.
+
+  # --- DELETE /api/v3/product-families/{identifier}/{path} --------------------------
+  - target: $.paths['/api/v3/product-families/{identifier}/{path}'].delete
+    description: Never tested (Update and Delete Product Family.bru docs say don't suggest it); FAM-1 answer (DELETE under an instance only for custom attributes and links). Redirect only; consider on-hold.
+    update:
+      summary: Delete a product family field
+      operationId: delete-product-family-field
+      description: To remove an attribute from a product family, use [Unlink an attribute from a product family](/reference/v3/family-attributes/remove-attribute-from-family). To delete the family itself, use [Delete a product family](/reference/v3/product-families/delete-product-family).
+
+  - target: $.paths['/api/v3/product-families/{identifier}/{path}'].delete.parameters[?(@.name=='path' && @.in=='path')]
+    description: Get Product Family by ID.bru raw field list
+    update:
+      description: A field of the product family, such as `name`.

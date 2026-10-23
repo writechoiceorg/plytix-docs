@@ -1,7 +1,26 @@
+// Run by `npm run api:build` after it writes openapi.json; don't run it on a
+// hand-edited spec (see overlays/README.md).
 import { readFile, writeFile, rename, rm } from 'node:fs/promises';
 import path from 'node:path';
 import { generateFiles } from 'fumadocs-openapi';
 import { createOpenAPI } from 'fumadocs-openapi/server';
+import { tagFolder } from './api/lib/util.mjs';
+
+// OneDrive briefly locks freshly-written folders while it syncs them, which
+// makes an immediately-following rename() fail with EPERM on Windows. Retry
+// with backoff instead of failing the whole generation run.
+async function renameWithRetry(from, to, attempts = 8, delayMs = 300) {
+  for (let i = 0; i < attempts; i++) {
+    try {
+      await rename(from, to);
+      return;
+    } catch (err) {
+      if (err.code !== 'EPERM' && err.code !== 'EBUSY') throw err;
+      if (i === attempts - 1) throw err;
+      await new Promise((r) => setTimeout(r, delayMs));
+    }
+  }
+}
 
 const openapi = createOpenAPI({
   input: ['./openapi.json'],
@@ -29,15 +48,6 @@ const TAG_ICONS = {
   familyattributes: "ListTree",
   productattributes: "Tags",
   productattributegroups: "Group",
-  pimproductlists: "ListChecks",
-  channels: "Share2",
-  connections: "Plug",
-  ecatalogs: "BookOpen",
-  importprofiles: "Upload",
-  pdfcatalogs: "FileText",
-  productfamilymodels: "Boxes",
-  probes: "Activity",
-  unknown: "BarChart3"
 };
 
 const TAG_LABELS = {
@@ -50,18 +60,9 @@ const TAG_LABELS = {
   productfamilies: 'Product Families',
   productattributes: 'Product Attributes',
   productattributegroups: 'Product Attribute Groups',
-  pimproductlists: 'PIM Product Lists',
-  channels: 'Channels',
-  connections: 'Connections',
-  ecatalogs: 'eCatalogs',
-  importprofiles: 'Import Profiles',
-  pdfcatalogs: 'PDF Catalogs',
-  productfamilymodels: 'Product Family Models',
   familyattributes: 'Family Attributes',
   productrelationships: 'Product Relationships',
   relatedproducts: 'Related Products',
-  unknown: 'Metrics',
-  probes: 'Probes',
 };
 
 await generateFiles({
@@ -80,6 +81,10 @@ await generateFiles({
         /(<Comp\b[^\n]*?)\s*\/>/g,
         '$1 preloaded={props.preloaded} />',
       );
+      // Record the operation's path next to its method, so code that only has
+      // the page (its metadata, the llms/MCP Markdown export) can find the operation.
+      const operation = file.content.match(/operations=\{\[\{"path":("[^"]+")/);
+      if (operation) file.content = file.content.replace(/^( {2}method: .+)$/m, `$1\n  path: ${operation[1]}`);
     }
   },
 });
@@ -126,10 +131,11 @@ const orderedTags = [
 const tagFolders = [];
 
 for (const tag of orderedTags) {
+  const folder = tagFolder(tag);
   const from = path.join(stagingDir, tag);
-  const to = path.join(referenceDir, tag);
+  const to = path.join(referenceDir, folder);
   await rm(to, { recursive: true, force: true });
-  await rename(from, to);
+  await renameWithRetry(from, to);
 
   const tagMetaPath = path.join(to, 'meta.json');
   const tagMeta = JSON.parse(await readFile(tagMetaPath, 'utf-8'));
@@ -138,7 +144,7 @@ for (const tag of orderedTags) {
   tagMeta.pages = [...tagMeta.pages].sort(comparePages);
   await writeFile(tagMetaPath, JSON.stringify(tagMeta, null, 2) + '\n');
 
-  tagFolders.push(tag);
+  tagFolders.push(folder);
 }
 await rm(stagingDir, { recursive: true, force: true });
 
@@ -150,12 +156,22 @@ let referenceMeta;
 try {
   referenceMeta = JSON.parse(await readFile(referenceMetaPath, 'utf-8'));
 } catch {
-  referenceMeta = { title: 'API Reference', root: true, pages: [] };
+  referenceMeta = { title: 'V3 (Beta)', icon: 'Sparkles', pages: [] };
 }
 const cutIndex = referenceMeta.pages.findIndex(
   (p) => p === '---[Webhook]Endpoints---' || p === '---Endpoints---' || p === 'endpoints',
 );
 const preservedPages = cutIndex === -1 ? referenceMeta.pages : referenceMeta.pages.slice(0, cutIndex);
+
+// Groups generated last time but gone from the spec now (the operations went
+// internal, were removed upstream, or moved tag): delete their folders, or the
+// stale pages would stay routable even though they've left the nav.
+const previousGroups = cutIndex === -1 ? [] : referenceMeta.pages.slice(cutIndex + 1);
+for (const tag of previousGroups) {
+  if (tagFolders.includes(tag) || preservedPages.includes(tag)) continue;
+  await rm(path.join(referenceDir, tag), { recursive: true, force: true });
+  console.log(`Removed stale endpoint group: ${tag}`);
+}
 
 await writeFile(
   referenceMetaPath,

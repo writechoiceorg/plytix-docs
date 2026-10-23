@@ -1,0 +1,119 @@
+# Schema edits for the products endpoints (Phase 1 pilot: create and update bodies).
+# Sources: spec 2026-10-02 constraints, Q#30, Q#46, Q#82, Q#97, Q#98, Q#118, FB-022, FB-032, glossary.
+overlay: 1.0.0
+info:
+  title: products schemas
+  version: 1.0.0
+actions:
+  # --- create body ---------------------------------------------------------------
+  - target: $.components.schemas.ProductCreateDto
+    update:
+      description: Body for creating a product. Only `sku` is required, and fields not listed here return `422`.
+  - target: $.components.schemas.ProductCreateDto.properties.sku
+    update:
+      description: Your identifier for the product, up to 100 characters. It must be unique in your account. A SKU that already exists returns `409`.
+      examples:
+        - GF-Basket
+  - target: $.components.schemas.ProductCreateDto.properties.label
+    update:
+      description: Product name shown in Plytix.
+      examples:
+        - Gift basket
+  - target: $.components.schemas.ProductCreateDto.properties.gtin
+    update:
+      description: Global Trade Item Number (barcode), 8 to 14 characters.
+      examples:
+        - '4006381333931'
+  - target: $.components.schemas.ProductCreateDto.properties.status
+    update:
+      description: Workflow status of the product. Leave it out to create the product without a status.
+  - target: $.components.schemas.ProductCreateDto.properties.attributes
+    update:
+      description: Custom attribute values, keyed by each attribute's `label` (its snake_case name, not the display name).
+      examples:
+        - collection: '2019'
+  - target: $.components.schemas.ProductCreateDto.properties.thumbnail_id
+    update:
+      description: ID of an existing asset to show as the product's thumbnail.
+  - target: $.components.schemas.ProductCreateDto.properties.parent_id
+    update:
+      description: ID of the parent product. Setting it creates the product as a variant of that parent, in the parent's product family.
+  - target: $.components.schemas.ProductCreateDto.properties.product_family_id
+    update:
+      description: ID of the product family to assign. For a variant, leave it out to use the parent's family. A different family than the parent's returns `422`.
+
+  # --- update body ---------------------------------------------------------------
+  - target: $.components.schemas.ProductUpdateInputDto
+    update:
+      description: Fields to change. Send only the fields you want to change. `sku` can't be changed, and fields not listed here return `422`.
+  - target: $.components.schemas.ProductUpdateInputDto.properties.label
+    update:
+      description: Product name shown in Plytix.
+  - target: $.components.schemas.ProductUpdateInputDto.properties.gtin
+    update:
+      description: Global Trade Item Number (barcode), 8 to 14 characters, with a valid check digit. It can't be set to `null`.
+  - target: $.components.schemas.ProductUpdateInputDto.properties.status
+    update:
+      description: Workflow status of the product.
+  - target: $.components.schemas.ProductUpdateInputDto.properties.attributes
+    update:
+      description: Custom attribute values, keyed by attribute `label`. This map replaces the product's current custom attribute values, so include every value you want to keep. Values for completeness and formula attributes are ignored.
+  - target: $.components.schemas.ProductUpdateInputDto.properties.thumbnail_id
+    update:
+      description: ID of an existing asset to show as the product's thumbnail. `null` removes the thumbnail.
+  - target: $.components.schemas.ProductUpdateInputDto.properties.parent_id
+    update:
+      description: ID of a new parent product. `null` detaches the product from its parent, so it goes back to `product_level` `0` and keeps its product family. Don't send `product_family_id` in the same request; sending both returns `422`.
+  - target: $.components.schemas.ProductUpdateInputDto.properties.product_family_id
+    update:
+      description: ID of the product family to assign. `null` removes the product from its current family.
+
+  # --- links to resources that aren't in the public docs ----------------------------
+  # Channels, eCatalogs, PDF catalogs (`product_data_sheets`) and PIM product lists
+  # (`static_lists` on a product) are marked internal in Plytix's endpoint
+  # visibility sheet, so a product's expanded links to them are left out too.
+  # An asset's `static_lists` are asset lists, which are public, so those stay.
+  - target: $.components.schemas.ProductOutputDto.properties.channels
+    remove: true
+  - target: $.components.schemas.ProductOutputDto.properties.ecatalogs
+    remove: true
+  - target: $.components.schemas.ProductOutputDto.properties.product_data_sheets
+    remove: true
+  - target: $.components.schemas.ProductOutputDto.properties.static_lists
+    remove: true
+  - target: $.components.schemas.ProductChannelLinkOutputDto
+    remove: true
+  - target: $.components.schemas.ProductECatalogLinkOutputDto
+    remove: true
+  - target: $.components.schemas.ProductDataSheetLinkOutputDto
+    remove: true
+  - target: $.components.schemas.ProductListOutputDto
+    remove: true
+  - target: $.components.schemas.ProductOutputDto.properties.num_variations
+    remove: true
+  - target: $.components.schemas.ProductOutputDto.properties.overwritten_attributes
+    remove: true
+  - target: $.components.schemas.ProductCreateOutputDto.properties.num_variations
+    remove: true
+  - target: $.components.schemas.ProductCreateOutputDto.properties.overwritten_attributes
+    remove: true
+
+  # --- relations you can expand with _fields (16 Oct handoff) -------------------------
+  # Q#10, Q#113 (categories and assets come back as full objects); FB-004; the
+  # handoff marks assets, thumbnail, categories, parent and product_family as
+  # expandable. thumbnail, parent and product_family expansion untested (VERIFY.md).
+  - target: $.components.schemas.ProductOutputDto.properties.assets
+    update:
+      description: The assets linked to the product, as full asset records. Returned only when you name `assets` in `_fields`.
+  - target: $.components.schemas.ProductOutputDto.properties.thumbnail
+    update:
+      description: The product's thumbnail as a full asset record, or `null` when it has none. Returned only when you name `thumbnail` in `_fields`. `thumbnail_id` holds its ID.
+  - target: $.components.schemas.ProductOutputDto.properties.categories
+    update:
+      description: The product categories the product is filed under, as full category records. Returned only when you name `categories` in `_fields`.
+  - target: $.components.schemas.ProductOutputDto.properties.parent
+    update:
+      description: The parent product as a full product record, for a variant. Returned only when you name `parent` in `_fields`. `parent_id` holds its ID.
+  - target: $.components.schemas.ProductOutputDto.properties.product_family
+    update:
+      description: The product family as a full record. Returned only when you name `product_family` in `_fields`. `product_family_id` holds its ID.

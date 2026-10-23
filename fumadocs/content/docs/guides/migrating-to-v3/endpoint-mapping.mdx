@@ -3,24 +3,24 @@ title: "Endpoint mapping"
 description: "Reference for every V1/V2 endpoint and its V3 equivalent, resource by resource, including the dedicated link and unlink endpoints."
 ---
 
-import { BookOpenRegular, ProhibitedRegular } from '@/components/icons';
+import { BookOpenRegular, DocumentEditRegular } from '@/components/icons';
 
-This page maps the V1/V2 endpoints most integrations use to their V3 equivalents, one resource at a time, and ends with the link and unlink endpoints that replaced V1's array fields. The Notes column records where the payload, the scope of the operation, or the response shape changes, because a similar-looking path doesn't always have the same effect. "No V3 equivalent" means V3 can't do the operation, and "No dedicated endpoint" means V3 has no matching endpoint but may cover the operation through another workflow. [Not migrated and new in V3](/docs/guides/migrating-to-v3/not-migrated-and-new-in-v3) collects those in one place. It's part of the reference set for [Migrating to V3](/docs/guides/migrating-to-v3).
+This page maps the V1/V2 endpoints most integrations use to their V3 equivalents, one resource at a time, and ends with the link and unlink endpoints that replaced V1's array fields. The Notes column records where the payload, the scope of the operation, or the response shape changes, because a similar-looking path doesn't always have the same effect. "No V3 equivalent" means V3 can't do the operation, and "No dedicated endpoint" means V3 has no matching endpoint but may cover the operation through another workflow. [What's new and not migrated](/docs/guides/migrating-to-v3/not-migrated-and-new-in-v3) collects those in one place. It's part of the reference set for [Migration overview](/docs/guides/migrating-to-v3).
 
 ## Products
 
-Every V1 endpoint in this table also has a V2 counterpart under `/api/v2`. V2 is a separate products-only beta, so check the [V1/V2 reference](/docs/reference/legacy/api-v1-v2-reference) before treating a V2 path as interchangeable with its V1 version.
+Every V1 endpoint in this table also has a V2 counterpart under `/api/v2`. V2 is a separate products-only beta, so check the [V1/V2 reference](/reference/v1-v2/api-v1-v2-reference) before treating a V2 path as interchangeable with its V1 version.
 
 | V1 | V3 | Notes |
 |---|---|---|
 | `POST /api/v1/products` | `POST /api/v3/products` | |
-| `POST /api/v1/products/search` | `GET /api/v3/products` | The search body becomes query parameters. See [Searching and pagination](/docs/guides/migrating-to-v3/searching-and-pagination). |
+| `POST /api/v1/products/search` | `GET /api/v3/products` | The search body becomes query parameters. See [Search and pagination](/docs/guides/migrating-to-v3/searching-and-pagination). |
 | `GET /api/v1/products/{product_id}` | `GET /api/v3/products/{identifier}` | V3 returns `data` as a single object, not an array. |
 | `PATCH /api/v1/products/{product_id}` | `PATCH /api/v3/products/{identifier}` | |
 | `DELETE /api/v1/products/{product_id}` | `DELETE /api/v3/products/{identifier}` | Deletes the product. To detach a variant from its parent without deleting it, see [Variants](#variants). |
 | `GET /api/v1/products/{product_id}/assets` | `GET /api/v3/products/{identifier}/assets` | Returns the product's assets as an array. To read assets along with other fields, use `GET /api/v3/products?sku=<sku>&_fields=assets` and filter to the one product. |
-| `POST /api/v1/products/{product_id}/assets` | `PATCH /api/v3/products/{identifier}/attributes/{label}` | No dedicated endpoint. Set a media or media gallery attribute to the asset ID: a media attribute takes the ID as a bare string, a media gallery attribute takes an array of IDs, and the other shape returns `422`. The asset then appears in the product's `assets`. For the main image, set `thumbnail_id` instead. |
-| `DELETE /api/v1/products/{product_id}/assets/{asset_id}` | `DELETE /api/v3/products/{identifier}/attributes/{label}` | Clears the media attribute's value, and the asset leaves the product's `assets` unless a thumbnail or another media attribute still uses it. |
+| `POST /api/v1/products/{product_id}/assets` | `PATCH /api/v3/products/{identifier}/attributes/{label}` | No dedicated endpoint. Set a media or media gallery attribute to the asset ID: a media attribute takes the ID as a bare string, a media gallery attribute takes an array of IDs, and the other shape returns `422`. Objects such as `{"id": "<asset_id>"}` are rejected too. The asset then appears in the product's `assets`, and reads return it as an expanded object. For the main image, set `thumbnail_id` instead. |
+| `DELETE /api/v1/products/{product_id}/assets/{asset_id}` | `DELETE /api/v3/products/{identifier}/attributes/{label}` | Clears the media attribute's value, and the asset leaves the product's `assets` unless a thumbnail or another media attribute still uses it. The asset itself isn't deleted. |
 | `GET /api/v1/products/{product_id}/categories` | `GET /api/v3/products/{identifier}/categories` | Returns the product's categories as an array. The filtered search shown for assets works here too. |
 | `POST /api/v1/products/{product_id}/categories` | `POST /api/v3/products/{identifier}/categories` | Body: `{"id": "<category_id>"}`, one category per call. |
 | `DELETE /api/v1/products/{product_id}/categories/{category_id}` | `DELETE /api/v3/products/{identifier}/categories/{id}` | Removes only that category link. |
@@ -44,14 +44,10 @@ Every V1 endpoint below except the variant list also has a V2 counterpart under 
 | `POST /api/v1/products/{parent_product_id}/variants` | `POST /api/v3/products` with `parent_id` | Creates a new product as a variant. It inherits the parent's `product_family_id`, and sending a different family returns `422`. |
 | `POST /api/v1/products/{product_id}/variant/{variant_id}` | `PATCH /api/v3/products/{variant_id}` with `{"parent_id": "<product_id>"}` | Links an existing product as a variant. Don't send `product_family_id` in the same request. |
 | `DELETE /api/v1/products/{parent_product_id}/variant/{variant_id}` | `PATCH /api/v3/products/{variant_id}` with `{"parent_id": null}` | Unlinks the variant, which becomes a standalone product. This doesn't delete it. |
-| `GET /api/v1/products/{product_id}/variants` | `GET /api/v3/products?parent_id=<parent_id>` {/* [PENDING] */} | Lists the parent's variants. |
+| `GET /api/v1/products/{product_id}/variants` | `GET /api/v3/products?parent_id=<parent_id>` | Lists the parent's direct variants. To filter by the parent's SKU instead, use `parent.sku=<sku>`. |
 | `POST /api/v1/products/{parent_product_id}/variants/resync` | No V3 equivalent | |
 
-A product's position in the hierarchy is reported by `product_level`: `0` SINGLE, `1` PARENT, `2` VARIANT, `3` SUB_VARIANT. A standalone product starts at `0` and becomes `1` as soon as another product references it through `parent_id`. See [Reconstruct parent/variant hierarchies](/docs/guides/reconstructing-parent-variant-hierarchies).
-
-{/* FLAG (open):
-  Listing a parent's variants with `?parent_id=<id>` is unconfirmed. It follows from `parent_id` being a real product field, but filtering on it was never tested, and [Reconstruct parent/variant hierarchies](/docs/guides/reconstructing-parent-variant-hierarchies) reads the hierarchy from the parent's own `num_variations` instead. Verify with `endpoint-tester` before publishing, or drop the row and point at the parent-read method.
-*/}
+A product's position in the hierarchy is reported by `product_level`: `0` SINGLE, `1` PARENT, `2` VARIANT, `3` SUB_VARIANT. A standalone product starts at `0` and becomes `1` as soon as another product references it through `parent_id`. See [Rebuild parent and variant products](/docs/guides/reconstructing-parent-variant-hierarchies).
 
 {/* FLAG (open):
   Linking with `parent_id` on PATCH and unlinking with `"parent_id": null` follow the 2026-10-02 spec (`ProductUpdateInputDto.parent_id`: "null detaches the product from its current parent") and the October 13 spec cited in the review, but neither is tested live. V1 warns that unlinking "might cause data loss". What V3 does to the variant's attribute values is unconfirmed (FB-022). Test with `endpoint-tester` before publishing.
@@ -59,52 +55,34 @@ A product's position in the hierarchy is reported by `product_level`: `0` SINGLE
 
 ## Product relationships
 
-V1 and V2 handle related products differently, so each legacy row names its version. V3's `DELETE` on a relationship removes every related product under it at once, which is not what the legacy calls that remove only the products you name do.
+V3's relationship endpoints are being redesigned, so there's no V3 equivalent to map these calls to yet. Keep your V1 and V2 calls for relationships and related products until the new endpoints are documented here.
 
-| Legacy endpoint | V3 | Notes |
-|---|---|---|
-| `POST /api/v1/products/{product_id}/relationships/{relationship_id}` | `POST /api/v3/products/{product_id}/relationships` | Body: `{"relationship_id": "<id>", "related_products": [{"product_id": "<id>", "quantity": 1}]}`. V1 names the list `product_relationships` and takes the relationship ID in the path. |
-| `POST /api/v2/products/{product_id}/relationships/{relationship_id}` | `POST /api/v3/products/{product_id}/relationships` | Same as the row above. |
-| `PATCH /api/v1/products/{product_id}/relationships/{relationship_id}/product/{related_product_id}` | `PATCH /api/v3/products/{product_id}/relationships/{relationship_id}` | Body: `{"related_products": [{"product_id": "<related_product_id>", "quantity": 5}]}`. V1 sends `{"quantity": 5}` on the related product's own path. |
-| `PATCH /api/v2/products/{product_id}/relationships/{relationship_id}` | `PATCH /api/v3/products/{product_id}/relationships/{relationship_id}` | V2 names the list `product_relationships`. |
-| `POST /api/v1/products/{product_id}/relationships/{relationship_id}/unlink` | No dedicated endpoint | V1 removes only the products listed in the body. See the V3 `DELETE` row for the difference. |
-| `DELETE /api/v2/products/{product_id}/relationships/{relationship_id}` | No dedicated endpoint | V2 removes only the product IDs listed in the body. See the V3 `DELETE` row for the difference. |
-| Not available | `DELETE /api/v3/products/{product_id}/relationships/{relationship_id}` | Removes the whole association: every related product under that relationship, for this product. The product itself stays. |
-| Not available | `GET /api/v3/products/{product_id}/relationships` | Lists the product's relationships. |
-| Not available | `GET /api/v3/products/{product_id}/relationships/{relationship_id}/related-products` {/* [PENDING] */} | |
-| Not available | `GET /api/v3/product-relationships` | Filter by `product_id`. |
-| Not available | `GET /api/v3/related-products` | Filter by `product_id`. |
-
-When you change one related product's quantity with `PATCH`, it isn't confirmed yet whether related products left out of `related_products` are kept. Until it is, send every related product you want to keep, with its current quantity.
-
-<Callout type="warn" title="Relationship writes failed in our latest test">
-  The spec declares `POST` and `PATCH` on `/api/v3/products/{product_id}/relationships`, but when we tried them on October 15, 2026, `POST` returned `405 Method Not Allowed` and `PATCH` returned `422` with "relationships: Extra inputs are not permitted". Reading relationships through `GET /api/v3/product-relationships` still works. Test a write against your account before you move a relationship workflow to V3.
-</Callout>
+| Legacy endpoint | V3 |
+|---|---|
+| `POST /api/v1/products/{product_id}/relationships/{relationship_id}` | Not available yet |
+| `POST /api/v2/products/{product_id}/relationships/{relationship_id}` | Not available yet |
+| `PATCH /api/v1/products/{product_id}/relationships/{relationship_id}/product/{related_product_id}` | Not available yet |
+| `PATCH /api/v2/products/{product_id}/relationships/{relationship_id}` | Not available yet |
+| `POST /api/v1/products/{product_id}/relationships/{relationship_id}/unlink` | Not available yet |
+| `DELETE /api/v2/products/{product_id}/relationships/{relationship_id}` | Not available yet |
 
 {/* FLAG (open):
-  Live relationship writes on the development account contradict the spec and our own 2026-09-15 results (FB-024). Both routes the spec declares for `POST` returned `405`, and `GET /products/{id}/relationships` returned `404 Field 'relationships' does not exist`. Remove the callout once Plytix confirms the current contract. */}
-
-<Callout type="info" title="Narrow the account-wide association endpoints">
-  `GET /api/v3/product-relationships`, `GET /api/v3/related-products`, and `GET /api/v3/family-attributes` return every matching record in your account when called with no filter. Add a filter to read only the records you need: `product_id` on the two relationship endpoints, and `product_family_id` on family attributes.
-</Callout>
-
-{/* FLAG (open):
-  `GET /products/{id}/relationships/{relationship_id}/related-products[/{related_product_id}]` is unconfirmed. It returned empty or `404` for a link confirmed to exist by three other means. Ask Plytix whether it is unfinished before documenting it as usable.
+  REL-23. The 2026-10-19 spec removes `/api/v3/relationships`, `/api/v3/related-products` and every `/api/v3/products/{product_id}/relationships` route, and adds `/api/v3/product-relationship-types` plus `/api/v3/products/{product_identifier}/product_relationship_types` (link, update, unlink). The new operations are `pending` in visibility.yaml. Once Plytix classifies them, map the legacy rows above and the relationship-definition rows below to them. Supersedes REL-2 and FB-024.
 */}
 
-{/* FLAG (open):
-  The V1 unlink method and path spelling follow the V1 Postman request definitions (`POST .../unlink`, `PATCH .../product/{related_product_id}`). The collection's own overview table lists `PATCH` for `/unlink` and `/products/` for the related-product path (FB-023). Whether a V3 PATCH keeps related products left out of the array, and how to remove one related product in V3, are unconfirmed (FB-024).
-*/}
+<Callout type="info" title="Narrow the account-wide association endpoint">
+  `GET /api/v3/family-attributes` returns every matching record in your account when called with no filter. Add `product_family_id` to read only one family's attributes.
+</Callout>
 
 ## Relationship definitions
 
-| V1 | V3 | Notes |
-|---|---|---|
-| `POST /api/v1/relationships` | `POST /api/v3/relationships` | |
-| `POST /api/v1/relationships/search` | `GET /api/v3/relationships` | |
-| `GET /api/v1/relationships/{relationship_id}` | `GET /api/v3/relationships/{identifier}` | |
-| `PATCH /api/v1/relationships/{relationship_id}` | `PATCH /api/v3/relationships/{identifier}` | Only `name` can be changed. |
-| `DELETE /api/v1/relationships/{relationship_id}` | `DELETE /api/v3/relationships/{identifier}` | |
+| V1 | V3 |
+|---|---|
+| `POST /api/v1/relationships` | Not available yet |
+| `POST /api/v1/relationships/search` | Not available yet |
+| `GET /api/v1/relationships/{relationship_id}` | Not available yet |
+| `PATCH /api/v1/relationships/{relationship_id}` | Not available yet |
+| `DELETE /api/v1/relationships/{relationship_id}` | Not available yet |
 
 ## Assets
 
@@ -137,7 +115,7 @@ When you change one related product's quantity with `PATCH`, it isn't confirmed 
 |---|---|---|
 | `POST /api/v1/categories/product` | `POST /api/v3/product-categories` | |
 | `POST /api/v1/categories/product/search` | `GET /api/v3/product-categories` | |
-| `POST /api/v1/categories/product/{category_id}` | `POST /api/v3/product-categories` | Send the V1 path's `category_id` as `parent_id`, for example `{"name": "Kitchen Sinks", "parent_id": "<category_id>"}`. Without `parent_id`, V3 creates a root category. |
+| `POST /api/v1/categories/product/{category_id}` | `POST /api/v3/product-categories` | Send the V1 path's `category_id` as `parent_id`, for example `{"name": "Apron Bamboo", "parent_id": "<category_id>"}`. Without `parent_id`, V3 creates a root category. |
 | `PATCH /api/v1/categories/product/{category_id}` | `PATCH /api/v3/product-categories/{identifier}` | |
 | `DELETE /api/v1/categories/product/{category_id}` | `DELETE /api/v3/product-categories/{identifier}` | |
 | `POST /api/v1/categories/file` | `POST /api/v3/asset-categories` | |
@@ -152,7 +130,7 @@ File categories are called asset categories in V3.
 
 | V1 | V3 | Notes |
 |---|---|---|
-| `POST /api/v1/product_families` | `POST /api/v3/product-families` | |
+| `POST /api/v1/product_families` | `POST /api/v3/product-families` | V3 creates the family from its `name` only. Link attributes afterward with `POST /api/v3/product-families/{product_family_id}/attributes`. |
 | `POST /api/v1/product_families/search` | `GET /api/v3/product-families` | |
 | `GET /api/v1/product_families/{product_family_id}` | `GET /api/v3/product-families/{identifier}` | |
 | `PATCH /api/v1/product_families/{product_family_id}` | `PATCH /api/v3/product-families/{identifier}` | |
@@ -167,21 +145,21 @@ You can create a Product Family, link attributes to it, and rename it through th
 
 ## Linking and unlinking
 
-V1 links through dedicated subpaths. V3 originally accepted `category_ids` and `static_list_ids` arrays on create and update; those fields are no longer accepted, leaving the dedicated link and unlink endpoints as the only route.
+V1 links through dedicated endpoints. V3 originally accepted `category_ids` and `static_list_ids` arrays on create and update; those fields are no longer accepted, leaving the dedicated link and unlink endpoints as the only route.
 
 | Link | V1 | V3 |
 |---|---|---|
-| Product to category | `POST /api/v1/products/{product_id}/categories` | `POST /api/v3/products/{identifier}/categories` |
-| Product from category | `DELETE /api/v1/products/{product_id}/categories/{category_id}` | `DELETE /api/v3/products/{identifier}/categories/{id}` |
+| Product to category | `POST /api/v1/products/{product_id}/categories` | [`POST /api/v3/products/{identifier}/categories`](/reference/v3/products/link-product-category) |
+| Product from category | `DELETE /api/v1/products/{product_id}/categories/{category_id}` | [`DELETE /api/v3/products/{identifier}/categories/{id}`](/reference/v3/products/delete-product-category-link) |
 | Asset to category | Through `categories` on the asset | `POST /api/v3/assets/{identifier}/categories` |
 | Asset from category | Through `categories` on the asset | `DELETE /api/v3/assets/{identifier}/categories/{id}` |
-| Attribute to group | `attribute_labels` on `POST /api/v1/attribute-groups/product`, or the full `attribute_labels` list on `PATCH /api/v1/attribute-groups/product/{attribute_group_id}` | `POST /api/v3/product-attributes/{identifier}/groups` |
-| Attribute from group | The `attribute_labels` list without that attribute, on `PATCH /api/v1/attribute-groups/product/{attribute_group_id}` | `DELETE /api/v3/product-attributes/{identifier}/groups/{id}` |
+| Attribute to group | `attribute_labels` on `POST /api/v1/attribute-groups/product`, or the full `attribute_labels` list on `PATCH /api/v1/attribute-groups/product/{attribute_group_id}` | [`POST /api/v3/product-attributes/{identifier}/groups`](/reference/v3/product-attributes/link-product-attribute-group) |
+| Attribute from group | The `attribute_labels` list without that attribute, on `PATCH /api/v1/attribute-groups/product/{attribute_group_id}` | [`DELETE /api/v3/product-attributes/{identifier}/groups/{id}`](/reference/v3/product-attributes/delete-product-attribute-group-link) |
 | Product to asset | `POST /api/v1/products/{product_id}/assets` | No dedicated endpoint. See [Products](#products) |
 | Product from asset | `DELETE /api/v1/products/{product_id}/assets/{asset_id}` | No dedicated endpoint. See [Products](#products) |
 | Product to family | `POST /api/v1/products/{product_id}/family` | `PATCH /api/v3/products/{identifier}` with `product_family_id` |
 
-<Callout type="warn" title="The generic subpath DELETE is not an unlink">
+<Callout type="warn" title="Deleting a product field doesn't unlink a record">
   `DELETE /api/v3/products/{identifier}/{path}` doesn't remove a single linked record. A collection path such as `categories` returns `405`, and an unrecognized path returns `404`. Use the specific unlink endpoints above.
 </Callout>
 
@@ -190,10 +168,10 @@ V1 links through dedicated subpaths. V3 originally accepted `category_ids` and `
 Now that you have the mapping, you can explore these related pages.
 
 <Cards>
-  <Card icon={<ProhibitedRegular />} title="Not migrated and new in V3" href="/docs/guides/migrating-to-v3/not-migrated-and-new-in-v3">
-    See which V1 calls have no V3 counterpart and which resources are new.
+  <Card icon={<DocumentEditRegular />} title="Update and delete records" href="/reference/v3/updates-and-deletes">
+    Check what each V3 write returns before you move your update and delete calls.
   </Card>
-  <Card icon={<BookOpenRegular />} title="V3 API reference" href="/docs/reference/v3">
+  <Card icon={<BookOpenRegular />} title="V3 API reference" href="/reference/v3">
     Browse the V3 resources and their parameters in detail.
   </Card>
 </Cards>

@@ -90,7 +90,7 @@ Pick your client below. In every case you're registering a single HTTP endpoint 
 
 1. **List the connected servers** in your client. In Claude Code, run `/mcp`. In Cursor and VS Code, open the MCP section of settings. You should see `plytix-docs` connected, exposing three tools.
 
-2. **Ask a question that needs the docs.** For example: "Using the Plytix Documentation MCP, explain V3 product filtering and cite the relevant page." An answer that names a docs page, such as [Filtering and query syntax](/docs/reference/v3/filtering-query-syntax), shows the assistant used the server. An answer with no page cited may come from the model's own knowledge instead.
+2. **Ask a question that needs the docs.** For example: "Using the Plytix Documentation MCP, explain V3 product filtering and cite the relevant page." An answer that names a docs page, such as [Filtering and search](/reference/v3/filtering-and-search), shows the assistant used the server. An answer with no page cited may come from the model's own knowledge instead.
 
 3. **Check reachability directly** if the client reports an error. This request confirms the endpoint exists and responds over JSON-RPC:
 
@@ -154,10 +154,10 @@ Check the problems below if you run into issues while connecting.
 Now that your assistant can read the Plytix documentation, you can explore these related guides.
 
 <Cards>
-  <Card icon={<KeyRegular />} title="Authentication" href="/docs/reference/v3/authentication">
+  <Card icon={<KeyRegular />} title="Authentication" href="/reference/v3/authentication">
     Learn how to exchange API credentials for a bearer token when you call the API.
   </Card>
-  <Card icon={<BookOpenRegular />} title="API Reference" href="/docs/reference/v3">
+  <Card icon={<BookOpenRegular />} title="API Reference" href="/reference/v3">
     Browse the resources and endpoints your assistant will be reading about.
   </Card>
 </Cards>

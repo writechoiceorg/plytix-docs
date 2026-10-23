@@ -2,7 +2,6 @@
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
 @import 'fumadocs-openapi/css/preset.css';
-@import '@fluentui/react-icons/headless/styles.css';
 
 /*
  * Plytix design system (materials/visual-design/*.svg).
@@ -33,10 +32,24 @@
   --plytix-link: #7a52ff;
   --plytix-subtle: #77708c;
 
+  /* Header Login / Book a demo, and the footer (Knowledge Base colors). */
+  --plytix-header-action: #595369;
+  --plytix-footer-bg: #201a32;
+
+  /* Content tables (the Knowledge Base's --grey-250). */
+  --plytix-table-border: #dbd6e9;
+
+  /* Sidebar panel shadow: the Knowledge Base's .shadow-box-light-lg. */
+  --plytix-sidebar-shadow: 0 10px 15px rgb(236 235 239 / 0.8);
+
   /* Cards, code blocks, playground. */
   --plytix-surface-fill: linear-gradient(rgb(255 255 255 / 0.1), rgb(255 255 255 / 0.05));
   --plytix-surface-border: #ffffff;
   --plytix-surface-shadow: 0 0 20px rgb(32 26 50 / 0.08);
+
+  /* MDX tabs: the active label is 5.43:1 on the bar (WCAG AA, PM-43). */
+  --plytix-tab-bar: #f0eef6;
+  --plytix-tab-active: #6236f5;
 
   /* Callouts: Warning, Note, Wrong, Information. */
   --callout-warning-bg: #fff5db;
@@ -47,12 +60,6 @@
   --callout-error-icon: #d33e36;
   --callout-info-bg: #d6f2ff;
   --callout-info-icon: #47c6ff;
-
-  /* Decorative sidebar panel: lilac + cyan glows fading in from the top. */
-  --plytix-sidebar-glow:
-    radial-gradient(120% 45% at 30% 100%, rgb(189 168 255 / 0.75), transparent 70%),
-    radial-gradient(110% 40% at 60% 62%, rgb(71 198 255 / 0.28), transparent 70%),
-    linear-gradient(#f8f8f8 10%, transparent 40%);
 }
 
 .dark {
@@ -80,9 +87,29 @@
   --plytix-link: #bda8ff;
   --plytix-subtle: #b9b3cc;
 
+  /* The page is already ink in dark mode, so the footer goes a step darker. */
+  --plytix-header-action: #f4f3f8;
+  --plytix-footer-bg: #161424;
+
+  --plytix-table-border: #918ba6;
+
+  /* The Knowledge Base's .shadow-box-dark-lg, its shadow for dark surfaces. */
+  --plytix-sidebar-shadow:
+    0 10px 15px -3px rgb(89 83 105 / 0.8),
+    0 4px 6px -4px rgb(89 83 105 / 0.8);
+
   --plytix-surface-fill: linear-gradient(rgb(255 255 255 / 0.1), rgb(255 255 255 / 0.05));
   --plytix-surface-border: rgb(255 255 255 / 0.15);
   --plytix-surface-shadow: 0 0 20px rgb(0 0 0 / 0.25);
+
+  /* A darker bar keeps the lilac active label (5.77:1) apart from the
+     near-white inactive ones (9.15:1). */
+  --plytix-tab-bar: #3a3350;
+  --plytix-tab-active: #bda8ff;
+
+  /* github-dark's #6a737d comments are 2.59-3.04:1 on the code surface;
+     this is 5.49-6.46:1 (PM-60). */
+  --plytix-code-comment: #a6adb4;
 
   --callout-warning-bg: rgb(255 245 219 / 0.2);
   --callout-warning-icon: #e6a800;
@@ -92,11 +119,6 @@
   --callout-error-icon: #ef6d66;
   --callout-info-bg: rgb(214 242 255 / 0.2);
   --callout-info-icon: #47c6ff;
-
-  --plytix-sidebar-glow:
-    radial-gradient(120% 45% at 30% 100%, rgb(189 168 255 / 0.55), transparent 70%),
-    radial-gradient(110% 40% at 40% 62%, rgb(71 198 255 / 0.22), transparent 70%),
-    linear-gradient(#201a32 10%, transparent 40%);
 }
 
 /* The neutral preset re-tints the dark sidebar; keep our tokens instead. */
@@ -179,11 +201,25 @@ html > body[data-scroll-locked] {
   border-color: var(--plytix-header-border);
 }
 
+/* The footer sits below the docs grid, so the sticky sidebar (z-20) scrolls up
+   with the end of the grid when it comes into view. Keep it under the header. */
+#nd-subnav {
+  z-index: 30;
+}
+
 #nd-subnav [data-header-tabs] {
   border-color: var(--plytix-header-border);
   height: 3rem;
   align-items: stretch;
   gap: 0.5rem;
+}
+
+/* The tabs row above is 3rem (Fumadocs assumes 2.5rem), so tell the layout the
+   header is 6.5rem tall; otherwise the sticky sidebar and TOC tuck 8px under it. */
+@media (min-width: 1024px) {
+  #nd-notebook-layout:has(#nd-subnav [data-header-tabs]) {
+    --fd-header-height: 6.5rem;
+  }
 }
 
 /* Guides / API Reference tabs: the active tab is a filled block. */
@@ -216,8 +252,46 @@ html > body[data-scroll-locked] {
   }
 }
 
+/* Login / Book a demo sit at the right end of the tabs row, as in the Knowledge
+   Base. Fumadocs has no slot in that row, so they're rendered with the navbar
+   links in the top row and positioned onto the tabs row from here; their
+   wrapper drops out of the top row's flex layout so it leaves no gap there. */
+@media (min-width: 1024px) {
+  #nd-subnav [data-header-body] div:has(> [data-header-actions]) {
+    display: contents;
+  }
+  #nd-subnav [data-header-actions] {
+    position: absolute;
+    top: 3.5rem;
+    right: 1.5rem;
+    height: calc(3rem - 1px);
+  }
+}
+
 [data-search-full] {
   border-radius: 9999px !important;
+}
+
+/* Jumping to a heading must land below everything sticky: the header and,
+   below xl, the "On this page" bar (--fd-docs-row-3 covers both). Fumadocs'
+   fixed scroll-m-28 left headings hidden behind that bar. */
+#nd-page [id] {
+  scroll-margin-top: calc(var(--fd-docs-row-3) + 1rem);
+}
+
+/* ---------- Footer ---------- */
+
+/* Fluid spacing and type scale copied from the Knowledge Base, so the footer
+   lines up with knowledge.plytix.com at every width. */
+.plytix-footer {
+  --footer-space-1: clamp(0.25rem, calc(0.0037 * (100vw - 22.5rem) + 0.25rem), 0.5rem);
+  --footer-space-2: clamp(0.38rem, calc(0.00548 * (100vw - 22.5rem) + 0.38rem), 0.75rem);
+  --footer-space-3: clamp(0.56rem, calc(0.00844 * (100vw - 22.5rem) + 0.56rem), 1.13rem);
+  --footer-space-4: clamp(0.84rem, calc(0.01259 * (100vw - 22.5rem) + 0.84rem), 1.69rem);
+  --footer-space-5: clamp(1.27rem, calc(0.01867 * (100vw - 22.5rem) + 1.27rem), 2.53rem);
+  --footer-space-6: clamp(1.9rem, calc(0.02815 * (100vw - 22.5rem) + 1.9rem), 3.8rem);
+  --footer-heading-size: clamp(1.4rem, 3.5vw, 1.8rem);
+  --footer-text-s: clamp(0.85rem, calc(0.00074 * (100vw - 22.5rem) + 0.85rem), 0.9rem);
 }
 
 /* ---------- Sidebar ---------- */
@@ -228,15 +302,21 @@ html > body[data-scroll-locked] {
   #nd-sidebar {
     isolation: isolate;
   }
+  /* Decorative panel: the design's cyan + lilac blurred glows (same art in both
+     themes, the page background shows through), stretched to the panel. */
   #nd-sidebar::before {
     content: '';
     position: absolute;
-    /* #nd-sidebar spans the full width and right-aligns its column, so start
-       from the column's edge plus the navbar's 24px inset (aligned with the
-       logo and tabs at any viewport width). */
-    inset: 1.5rem 1rem 0 calc(100% - var(--fd-sidebar-width) + 1.5rem);
+    /* #nd-sidebar spans from the screen's left edge to the end of its column,
+       so the panel runs from the screen edge out to the sidebar's 6px
+       scrollbar on the right. 8px below the header, as in the design. */
+    inset: 0.5rem 0.375rem 0 0;
     z-index: -1;
-    background: var(--plytix-sidebar-glow);
+    background: url('/sidebar-glow.svg') 0 0 / 100% 100% no-repeat;
+    box-shadow: var(--plytix-sidebar-shadow);
+    /* Keep the shadow on the sides only: below the panel it would spill onto
+       the footer once the page is scrolled to the end. */
+    clip-path: inset(-2rem -2rem 0 -2rem);
     pointer-events: none;
   }
   /* Keep the items (and the version switcher) inside the panel. */
@@ -326,6 +406,34 @@ html > body[data-scroll-locked] {
   color: var(--plytix-subtle);
 }
 
+/* Tables, as on the Knowledge Base: a rounded outer border and row separators
+   only (no header fill, no column lines), with roomy cells. */
+.prose table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid var(--plytix-table-border);
+  border-radius: 8px;
+  overflow: hidden;
+  font-size: 15px;
+  line-height: 1.2;
+}
+.prose :is(th, td) {
+  padding: 16px 24px;
+  border: 0;
+  border-bottom: 1px solid var(--plytix-table-border);
+  background: none;
+  color: var(--color-fd-foreground);
+  text-align: left;
+  vertical-align: top;
+}
+.prose th {
+  font-weight: 700;
+}
+.prose tbody tr:last-child td {
+  border-bottom: 0;
+}
+
 /* ---------- Code blocks ---------- */
 
 figure.shiki {
@@ -337,6 +445,20 @@ figure.shiki {
 figure.shiki pre {
   font-size: 15px;
   line-height: 1.65;
+}
+/* Comments are the only github-dark tokens in #6a737d. The light theme's
+   comments already pass (4.53:1), so only dark mode changes. */
+.dark .shiki code span[style*='--shiki-dark:#6A737D' i] {
+  color: var(--plytix-code-comment);
+}
+
+/* ---------- Tabs ---------- */
+
+.plytix-tabs {
+  background-color: var(--plytix-tab-bar);
+}
+.plytix-tabs [role='tab'][data-active] {
+  color: var(--plytix-tab-active);
 }
 
 /* ---------- Table of contents ---------- */

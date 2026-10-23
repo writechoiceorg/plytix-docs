@@ -1,0 +1,14 @@
+{
+  "title": "Asset Categories",
+  "pages": [
+    "search-asset-categories",
+    "create-asset-category",
+    "get-asset-category",
+    "update-asset-category",
+    "delete-asset-category",
+    "get-asset-category-field",
+    "update-asset-category-field",
+    "delete-asset-category-field"
+  ],
+  "icon": "FolderTree"
+}

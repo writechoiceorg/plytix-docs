@@ -29,3 +29,6 @@ next-env.d.ts
 .open-next
 .wrangler
 cloudflare-env.d.ts
+# V3 spec pipeline (scripts/api): scratch files and per-run reports
+/.api-build
+/reports

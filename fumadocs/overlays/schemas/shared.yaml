@@ -1,0 +1,17 @@
+# Schemas used across resources whose upstream docstrings are written for
+# Plytix's developers. Replaced with reader-facing text (same facts).
+overlay: 1.0.0
+info:
+  title: shared schemas
+  version: 1.0.0
+actions:
+  - target: $.components.schemas.OperationResponse
+    description: spec docstring ("Failure -> errors is set, data is an empty list"), Q#18
+    update:
+      description: The response envelope. On success, `data` holds the result (a list for searches). On failure, `errors` lists what went wrong and `data` is an empty list.
+  - target: $.components.schemas.CategoryBaseOutputDto.properties.path
+    remove: true
+  - target: $.components.schemas.CategoryBaseOutputDto.properties.slug
+    remove: true
+  - target: $.components.schemas.CategoryBaseOutputDto.properties.n_children
+    remove: true

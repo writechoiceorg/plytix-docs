@@ -38,6 +38,7 @@ const iconNames: Record<string, ComponentType> = {
   User: Icons.PersonRegular,
   Webhook: Icons.ServerLinkRegular,
   Workflow: Icons.FlowchartRegular,
+  Wrench: Icons.WrenchRegular,
 };
 
 /**

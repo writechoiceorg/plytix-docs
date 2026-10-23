@@ -1,0 +1,26 @@
+{
+  "data": [
+    {
+      "id": "6a1f0c2e9b3d4a5f8c7e1d02",
+      "name": "Kitchen Sinks",
+      "created": "2026-06-22T08:44:08.740000",
+      "modified": "2026-06-22T08:44:08.740000"
+    },
+    {
+      "id": "6a1f0c2e9b3d4a5f8c7e1d01",
+      "name": "Gift Baskets",
+      "created": "2026-06-22T08:44:08.740000",
+      "modified": "2026-06-22T08:44:08.740000"
+    },
+    {
+      "id": "6a1f0c2e9b3d4a5f8c7e1d03",
+      "name": "Aprons",
+      "created": "2026-06-22T08:44:08.740000",
+      "modified": "2026-06-22T08:44:08.740000"
+    }
+  ],
+  "errors": [],
+  "pagination": {
+    "next_page": "http://<api-host>/api/v3/product-families?_page_size=3&_page=2"
+  }
+}

@@ -1,0 +1,297 @@
+# Operation edits for the asset-categories endpoints: the category tree for assets,
+# separate from the product category tree.
+#
+# Phase 3 (2026-10-20). Sources: config/api-testing.config.md (Q#), Plytix answers
+# CAT-1 (201) and GEN-1 (409 for duplicates), bruno-collection/04-Asset-Categories/.
+# PATCH status 204 comes from Q#84 (confirmed on product categories), ASSET-3 and
+# the spec; asset-category PATCH hasn't been replayed since (VERIFY.md). What a
+# delete does to subcategories and linked assets is unknown (CAT-40, CAT-41).
+overlay: 1.0.0
+info:
+  title: asset-categories operations
+  version: 1.0.0
+actions:
+  # --- GET /api/v3/asset-categories ------------------------------------------------
+  - target: $.paths['/api/v3/asset-categories'].get
+    description: List Asset Categories.bru "200 - Full Parameters" (2026-09-22), Q#91, Q#92, FB-012, Q#116; 16 Oct handoff (path, slug, n_children excluded; parent and parents expandable; expansions and the parent_id filter untested, VERIFY.md)
+    update:
+      summary: Search asset categories
+      operationId: search-asset-categories
+      description: |-
+        Returns the asset categories in your account that match your filters, one page at a time.
+
+        Asset categories organize assets in their own tree, separate from product categories. Each category has a `name` and a `parent_id`, the ID of the category directly above it. In search results, a top-level category has no `parent_id` key. To list the subcategories of a category, filter by `parent_id=<id>`.
+
+        To get the parent as an object, add `_fields=parent`. To get every category above it, add `_fields=parents`. These relations come back only when you name them in `_fields`.
+
+        Filters are query parameters written as `field=value` or `field[operator]=value`. A category must match all of them, unless you group filters with `_or`.
+
+        Results come back 25 per page by default, up to 1000 with `_page_size`. To get the next page, follow `pagination.next_page`. On the last page that key is left out, not set to `null`. The link starts with `http://`, so change it to `https://` before you follow it. Otherwise the redirect can drop your `Authorization` header. The response doesn't include a total count.
+
+        Related pages:
+
+        - [Filtering and search](/reference/v3/filtering-and-search)
+        - [Pagination](/reference/v3/pagination)
+        - [The Plytix data model](/docs/guides/data-model#product-categories)
+
+  - target: $.paths['/api/v3/asset-categories'].get.parameters[?(@.name=='filters' && @.in=='query')]
+    description: 'PM-50; field names from the resource''s response schema, operators per the API-wide grammar (Q#11, Q#99)'
+    update:
+      example:
+        'name[contains:ignorecase]': marketing
+
+  - target: $.paths['/api/v3/asset-categories'].get.responses['200'].content['application/json']
+    description: List Asset Categories.bru "200 - Full Parameters" (2026-09-22), IDs and host sanitized; slug dropped from _fields, the records and next_page (16 Oct handoff)
+    update:
+      examples:
+        firstPage:
+          summary: Selected fields, sorted by name
+          description: '`GET /api/v3/asset-categories?_fields=id&_fields=name&_fields=parent_id&_page_size=2&_sort_by=name`. Both are top-level categories, so `parent_id` is left out. Only `next_page` is present.'
+          value:
+            data:
+              - id: 6a1f0c2e9b3d4a5f8c7e1802
+                name: Marketing Material
+              - id: 6a1f0c2e9b3d4a5f8c7e1803
+                name: Specifications
+            errors: []
+            pagination:
+              next_page: http://<api-host>/api/v3/asset-categories?_fields=id&_fields=name&_fields=parent_id&_page=2&_page_size=2&_sort_by=name
+
+  # --- POST /api/v3/asset-categories -----------------------------------------------
+  - target: $.paths['/api/v3/asset-categories'].post
+    description: Create Asset Category.bru (201 root + child, 422 missing name; 2026-09-07), Q#19, Q#117, CAT-1, GEN-1 (duplicates now 409; was 422 per Q#25a, VERIFY.md)
+    update:
+      summary: Create an asset category
+      operationId: create-asset-category
+      description: |-
+        Creates one asset category and returns it, including its new `id`. Only `name` is required.
+
+        To create a subcategory, set `parent_id` to the ID of the parent asset category. Leave it out to create a top-level category.
+
+        A successful create returns `201`. `data` holds the new category's `id`, `name`, and `order`, plus `parent_id` for a subcategory. To get `created` and `modified`, read the category back.
+
+        Re-creating an asset category that already exists, with the same `name` and `parent_id`, returns `409`.
+
+  - target: $.paths['/api/v3/asset-categories'].post.requestBody.content['application/json']
+    description: Create Asset Category.bru request bodies (2026-09-07)
+    update:
+      examples:
+        topLevel:
+          summary: Top-level category
+          value:
+            name: Packshots
+        subcategory:
+          summary: Subcategory
+          value:
+            name: Studio Shots
+            parent_id: 6a1f0c2e9b3d4a5f8c7e1801
+
+  - target: $.paths['/api/v3/asset-categories'].post.responses['201']
+    description: Create Asset Category.bru "201 - Success (Root Category)" and "(Child Category)" (2026-09-07), sanitized; path, slug, n_children stripped (16 Oct handoff)
+    update:
+      description: Created. `data` holds the new category.
+      content:
+        application/json:
+          examples:
+            topLevel:
+              summary: Top-level category
+              value:
+                data:
+                  id: 6a1f0c2e9b3d4a5f8c7e1801
+                  name: Packshots
+                  order: 1
+                errors: []
+            subcategory:
+              summary: Subcategory
+              description: '`parent_id` is the ID of the category above it.'
+              value:
+                data:
+                  id: 6a1f0c2e9b3d4a5f8c7e1804
+                  name: Studio Shots
+                  parent_id: 6a1f0c2e9b3d4a5f8c7e1801
+                  order: 1
+                errors: []
+
+  - target: $.paths['/api/v3/asset-categories'].post.responses['409']
+    description: GEN-1 (Plytix answer, duplicate conflicts unified to 409), Q#25a (only re-creating the same category tested), CAT-20; no 409 body captured for categories (VERIFY.md)
+    update:
+      description: An asset category with this `name` already exists under the same parent. Nothing was created.
+
+  - target: $.paths['/api/v3/asset-categories'].post.responses['422'].content['application/json']
+    description: Create Asset Category.bru "422 - Missing Name" (2026-09-07)
+    update:
+      examples:
+        missingName:
+          summary: Missing name
+          value:
+            data: []
+            errors:
+              - name: InputDTOValidationError
+                description: 'name: Field required'
+
+  # --- GET /api/v3/asset-categories/{identifier} -------------------------------------
+  - target: $.paths['/api/v3/asset-categories/{identifier}'].get
+    description: Get Asset Category by ID.bru "200 - Success" (2026-09-21), Update and Delete Asset Category.bru 404 (2026-09-15); 16 Oct handoff (parent, parents expandable; untested, VERIFY.md)
+    update:
+      summary: Get an asset category
+      operationId: get-asset-category
+      description: |-
+        Returns one asset category, identified by its ID. An ID that matches no category returns `404`.
+
+        `data` holds the category object itself, not a list. A top-level category has `parent_id` set to `null`.
+
+        To get the parent category as an object, add `_fields=parent`. To get every category above it, add `_fields=parents`. These relations come back only when you name them in `_fields`.
+
+  - target: $.paths['/api/v3/asset-categories/{identifier}'].get.parameters[?(@.name=='identifier' && @.in=='path')]
+    description: config "ID prefixes"; category name as identifier untested
+    update:
+      description: ID of the asset category, a 24-character hexadecimal string such as `6a1f0c2e9b3d4a5f8c7e1801`.
+
+  - target: $.paths['/api/v3/asset-categories/{identifier}'].get.responses['200'].content['application/json']
+    description: Get Asset Category by ID.bru "200 - Success" (2026-09-21), account_id removed; path, slug, n_children stripped (16 Oct handoff)
+    update:
+      examples:
+        topLevel:
+          summary: Top-level category
+          value:
+            data:
+              id: 6a1f0c2e9b3d4a5f8c7e1801
+              name: Packshots
+              parent_id: null
+              order: 1
+              created: '2026-06-22T08:44:08.235000'
+              modified: '2026-06-22T08:44:08.235000'
+            errors: []
+
+  - target: $.paths['/api/v3/asset-categories/{identifier}'].get.responses['404'].content['application/json']
+    description: Update and Delete Asset Category.bru "404 - Not Found After Delete" (2026-09-15)
+    update:
+      examples:
+        notFound:
+          summary: No asset category with this ID
+          value:
+            data: []
+            errors:
+              - name: NotFoundError
+                description: Document with id 6a1f0c2e9b3d4a5f8c7e1899 not found
+
+  # --- PATCH /api/v3/asset-categories/{identifier} -----------------------------------
+  - target: $.paths['/api/v3/asset-categories/{identifier}'].patch
+    description: Update and Delete Asset Category.bru (rename 2026-09-15, rename + re-parent 2026-09-22; slug and path recalculated), Q#84, Q#116, ASSET-3, spec AssetCategoryUpdateInputDto (additionalProperties false)
+    update:
+      summary: Update an asset category
+      operationId: update-asset-category
+      description: |-
+        Renames an asset category, moves it under another parent, or both. Send `name`, `parent_id`, or both, and leave out what you don't want to change. A successful update returns `204` with an empty body. To see the result, read the category back.
+
+        The body accepts only `name` and `parent_id`. See [Update and delete records](/reference/v3/updates-and-deletes).
+
+  - target: $.paths['/api/v3/asset-categories/{identifier}'].patch.parameters[?(@.name=='identifier' && @.in=='path')]
+    description: config "ID prefixes"
+    update:
+      description: ID of the asset category to update, a 24-character hexadecimal string such as `6a1f0c2e9b3d4a5f8c7e1801`.
+
+  - target: $.paths['/api/v3/asset-categories/{identifier}'].patch.requestBody.content['application/json']
+    description: Update and Delete Asset Category.bru request bodies (2026-09-15, 2026-09-22)
+    update:
+      examples:
+        rename:
+          summary: Rename
+          value:
+            name: Product Packshots
+        renameAndMove:
+          summary: Rename and move under another category
+          value:
+            name: Studio Shots
+            parent_id: 6a1f0c2e9b3d4a5f8c7e1801
+
+  - target: $.paths['/api/v3/asset-categories/{identifier}'].patch.responses['204']
+    description: Q#84, ASSET-3, Q#116
+    update:
+      description: Updated. The response has no body. Read the category to see the new values.
+
+  # --- DELETE /api/v3/asset-categories/{identifier} ----------------------------------
+  - target: $.paths['/api/v3/asset-categories/{identifier}'].delete
+    description: Update and Delete Asset Category.bru "204 - Success" + follow-up GET 404 (2026-09-15); subcategories and linked assets untested (CAT-40, CAT-41)
+    update:
+      summary: Delete an asset category
+      operationId: delete-asset-category
+      description: |-
+        Deletes an asset category. A successful delete returns `204` with an empty body, and a later request for the same ID returns `404`.
+
+        If you only want to take an asset out of a category, unlink the asset instead with [Unlink a category from an asset](/reference/v3/assets/delete-asset-field). The category and its other assets stay as they are. See [Update and delete records](/reference/v3/updates-and-deletes).
+
+  - target: $.paths['/api/v3/asset-categories/{identifier}'].delete.parameters[?(@.name=='identifier' && @.in=='path')]
+    description: config "ID prefixes"
+    update:
+      description: ID of the asset category to delete, a 24-character hexadecimal string such as `6a1f0c2e9b3d4a5f8c7e1801`.
+
+  - target: $.paths['/api/v3/asset-categories/{identifier}'].delete.responses['204']
+    description: Update and Delete Asset Category.bru (2026-09-15)
+    update:
+      description: Deleted. The response has no body.
+
+  # --- GET /api/v3/asset-categories/{identifier}/{path} -------------------------------
+  - target: $.paths['/api/v3/asset-categories/{identifier}/{path}'].get
+    description: Q#15 (400 lists fields; discovery confirmed on asset categories, Get Asset Category by ID.bru 2026-09-07); success on a field is spec-only (VERIFY.md)
+    update:
+      summary: Get an asset category field
+      operationId: get-asset-category-field
+      description: |-
+        Returns one field of an asset category, such as `name` or `parent_id`, without the rest of the record.
+
+        A field the category doesn't have returns `400`, and the message lists the category's fields.
+
+  - target: $.paths['/api/v3/asset-categories/{identifier}/{path}'].get.responses['200'].content['application/json']
+    description: "Sanitized, unverified: the 200 body for a field wasn't captured (VERIFY.md). Shape follows the products field route captures; values come from this resource's GET example"
+    update:
+      examples:
+        name:
+          summary: One field
+          description: '`GET /api/v3/asset-categories/{identifier}/name`'
+          value:
+            data: Packshots
+            errors: []
+
+  - target: $.paths['/api/v3/asset-categories/{identifier}/{path}'].get.parameters[?(@.name=='path' && @.in=='path')]
+    description: Fields from Get Asset Category by ID.bru
+    update:
+      description: A field of the category, such as `name` or `parent_id`.
+
+  - target: $.paths['/api/v3/asset-categories/{identifier}/{path}'].get.responses['400'].content['application/json']
+    description: Q#15 error template applied; field list from Get Asset Category by ID.bru discovery (2026-09-07)
+    update:
+      examples:
+        unknownField:
+          summary: Field the category doesn't have
+          value:
+            data: []
+            errors:
+              - name: ValueError
+                description: "Field 'assets' not found. Available fields: ['id', 'account_id', 'name', 'parent_id', 'path', 'slug', 'order', 'n_children', 'created', 'modified']"
+
+  # --- PATCH /api/v3/asset-categories/{identifier}/{path} -----------------------------
+  - target: $.paths['/api/v3/asset-categories/{identifier}/{path}'].patch
+    description: Spec only; no live capture (VERIFY.md). No request body declared upstream (proposed fix in the Phase 3 report).
+    update:
+      summary: Update an asset category field
+      operationId: update-asset-category-field
+      description: To rename an asset category or move it under another parent, use [Update an asset category](/reference/v3/asset-categories/update-asset-category), which documents the request body and what changes.
+
+  - target: $.paths['/api/v3/asset-categories/{identifier}/{path}'].patch.parameters[?(@.name=='path' && @.in=='path')]
+    description: Fields from Get Asset Category by ID.bru
+    update:
+      description: A field of the category, such as `name` or `parent_id`.
+
+  # --- DELETE /api/v3/asset-categories/{identifier}/{path} ----------------------------
+  - target: $.paths['/api/v3/asset-categories/{identifier}/{path}'].delete
+    description: Spec only; no live capture (VERIFY.md)
+    update:
+      summary: Delete an asset category field
+      operationId: delete-asset-category-field
+      description: To delete an asset category, use [Delete an asset category](/reference/v3/asset-categories/delete-asset-category). To take an asset out of a category, use [Unlink a category from an asset](/reference/v3/assets/delete-asset-field).
+
+  - target: $.paths['/api/v3/asset-categories/{identifier}/{path}'].delete.parameters[?(@.name=='path' && @.in=='path')]
+    description: Fields from Get Asset Category by ID.bru
+    update:
+      description: A field of the category, such as `name` or `parent_id`.

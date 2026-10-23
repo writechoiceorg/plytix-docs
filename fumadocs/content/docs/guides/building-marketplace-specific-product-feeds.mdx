@@ -1,19 +1,19 @@
 ---
-title: Build a marketplace-specific product feed
+title: Build a marketplace feed
 description: Learn how to read a filtered product set from the V3 API and turn it into a marketplace feed file that your own integration builds and delivers.
 ---
 
-import { ArrowDownloadRegular, SearchRegular } from '@/components/icons';
+import { ArrowDownloadRegular, FilterRegular } from '@/components/icons';
 
-Produce a feed for one marketplace or retailer, for example a UK-only product file, by reading a filtered product set from Plytix and shaping it in your own integration. This guide covers mapping the marketplace's fields to Plytix fields, requesting and paging through the products in scope, transforming them into feed rows, and delivering the file on your schedule. Your integration builds and delivers the feed: this guide doesn't create or configure a Plytix channel. If you'd rather have Plytix build and publish the feed, set up a channel in Plytix instead, as described in [Creating a channel](https://help.plytix.com/en/creating-a-channel) and [Managing channels](https://help.plytix.com/en/managing-channels) in the Help Center. All requests use the V3 API at `https://pim.plytix.com/api/v3`. See [Filtering and Query Syntax](/docs/reference/v3/filtering-query-syntax) for the filter rules and [Pagination](/docs/reference/v3/pagination) for paging.
+Produce a feed for one marketplace or retailer, for example a UK-only product file, by reading a filtered product set from Plytix and shaping it in your own integration. This guide covers mapping the marketplace's fields to Plytix fields, requesting and paging through the products in scope, transforming them into feed rows, and delivering the file on your schedule. Your integration builds and delivers the feed: this guide doesn't create or configure a Plytix channel. If you'd rather have Plytix build and publish the feed, set up a channel in Plytix instead, as described in [Creating a channel](https://help.plytix.com/en/creating-a-channel) and [Managing channels](https://help.plytix.com/en/managing-channels) in the Help Center. All requests use the V3 API at `https://pim.plytix.com/api/v3`. See [Filtering and Query Syntax](/reference/v3/filtering-and-search) for the filter rules and [Pagination](/reference/v3/pagination) for paging.
 
 ## Prerequisites
 
 Before you start, make sure you have the following:
 
-- API access to your Plytix account. How you get a token depends on the API version: V1/V2 exchange your API Key and password for a bearer token, as described in [Authentication](/docs/reference/legacy/token-authentication). V3 is moving to a new token-based authentication model whose details aren't published yet; see [Authentication and base URLs](/docs/guides/migrating-to-v3/authentication-and-base-urls). The examples below send the token as `Authorization: Bearer <access_token>`.
+- API access to your Plytix account. How you get a token depends on the API version: V1/V2 exchange your API Key and password for a bearer token, as described in [Authentication](/reference/v1-v2/token-authentication). V3 is moving to a new token-based authentication model whose details aren't published yet; see [Authentication and base URLs](/docs/guides/migrating-to-v3/authentication-and-base-urls). The examples below send the token as `Authorization: Bearer <access_token>`.
 - The marketplace's feed specification: the fields it requires, their formats, and the file type it accepts.
-- The attribute or category that defines which products belong in the feed. See [Filtering and Query Syntax](/docs/reference/v3/filtering-query-syntax).
+- The attribute or category that defines which products belong in the feed. See [Filtering and Query Syntax](/reference/v3/filtering-and-search).
 
 ## Generate the feed from product data
 
@@ -28,8 +28,8 @@ Follow the steps below to map the fields, read the products in scope, and turn t
    | `sku` | `sku` |
    | `title` | `label` |
    | `gtin` | `gtin` |
-   | `price` | `attributes.price` |
-   | `category` | `categories` (each category's `path`) |
+   | `price` | `attributes.suggested_retail_price` |
+   | `category` | `categories`, with each category's ancestors from the category tree |
 
 2. **Request the products in scope, with only the fields you mapped.**
 
@@ -47,20 +47,64 @@ Follow the steps below to map the fields, read the products in scope, and turn t
      --data-urlencode "_page_size=100"
    ```
 
-   `attributes.market=UK` is an example audience filter on a custom attribute. Filter on whatever defines your audience, such as a category with `categories.name=<category_name>`. `categories` returns each category fully expanded, including its `path`.
+   `attributes.market=UK` is an example audience filter on a custom attribute. Filter on whatever defines your audience, such as a category with `categories.name=<category_name>`. `categories` returns each category fully expanded, with its `id` and `name`. A marketplace category path also needs the categories above it, which you read in step 4.
 
 3. **Read every page and save the products.**
 
-   Follow `pagination.next_page` while it holds a usable URL, and rewrite `http://` to `https://` before you request it. The script in [Keep a long export resumable](/docs/guides/exporting-your-full-catalog#keep-a-long-export-resumable) does this and saves each product as a line in `products.jsonl`. Add your audience filter to its parameters, for example `("attributes.market", "UK")`, and set `FIELDS` to the fields you mapped.
+   Follow `pagination.next_page` while it holds a usable URL, rewrite `http://` to `https://`, and check that its host and path match your search before you request it. The script in [Keep a long export resumable](/docs/guides/exporting-your-full-catalog#keep-a-long-export-resumable) does this and saves each product as a line in `products.jsonl`. Add your audience filter to its `FILTERS` list, for example `("attributes.market", "UK")`, and set `FIELDS` to the fields you mapped.
 
-4. **Transform each product into a feed row, and skip the ones that can't be listed.**
+4. **Read the category tree once, so you can build each category's path.**
+
+   Request every product category with its ancestors. `_fields=parents` expands them into a list of category objects, each with its `name`:
+
+   ```bash
+   curl -G "https://pim.plytix.com/api/v3/product-categories" \
+     -H "Authorization: Bearer <access_token>" \
+     --data-urlencode "_fields=id" \
+     --data-urlencode "_fields=name" \
+     --data-urlencode "_fields=parents" \
+     --data-urlencode "_sort_by=id" \
+     --data-urlencode "_page_size=100"
+   ```
+
+   To save every page, run the same export script a second time with `BASE_URL = "https://pim.plytix.com/api/v3/product-categories"`, `FIELDS = ["id", "name", "parents"]`, `STATE_DIR = "export-categories"`, and `OUTPUT = "categories.jsonl"`. Its summary line still says "products", but the file holds one category per line.
+
+   {/* FLAG (open): `_fields=parents` on product categories comes from the spec and Plytix's 16 Oct handoff ("parent and ancestors are expandable") and hasn't been tested live. The code below assumes `parents` lists the ancestors from the top of the tree down and doesn't include the category itself. `_sort_by=id` on product categories is also untested. Verify both before publishing (log in VERIFY.md while the Dev key is down). */}
+
+5. **Transform each product into a feed row, and skip the ones that can't be listed.**
 
    ```python title="build_feed.py"
    import csv
    import json
+   import os
 
+   SOURCE = "products.jsonl"
+   CATEGORIES = "categories.jsonl"
+   FEED = "uk_feed.csv"
+   SKIPPED = "skipped.jsonl"
    COLUMNS = ["sku", "title", "gtin", "price", "category"]
    REQUIRED = ["sku", "title", "gtin", "price"]
+
+
+   def load_breadcrumbs(path):
+       """Map each category id to its breadcrumb, such as "Sample Categories > Kettles & Teapots"."""
+       breadcrumbs = {}
+       with open(path, encoding="utf-8") as source:
+           for line in source:
+               if not line.strip():
+                   continue
+               category = json.loads(line)
+               names = [parent.get("name") for parent in category.get("parents") or []]
+               names.append(category.get("name"))
+               breadcrumbs[category["id"]] = " > ".join(name for name in names if name)
+       return breadcrumbs
+
+
+   BREADCRUMBS = load_breadcrumbs(CATEGORIES)
+
+
+   def category_path(category):
+       return BREADCRUMBS.get(category.get("id")) or category.get("name") or ""
 
 
    def to_row(product):
@@ -70,43 +114,57 @@ Follow the steps below to map the fields, read the products in scope, and turn t
            "sku": product.get("sku"),
            "title": (product.get("label") or "").strip(),
            "gtin": product.get("gtin"),
-           "price": attributes.get("price"),
-           "category": " > ".join(categories[0].get("path") or []) if categories else "",
+           "price": attributes.get("suggested_retail_price"),
+           "category": category_path(categories[0]) if categories else "",
        }
 
 
-   with open("products.jsonl") as source, \
-           open("uk_feed.csv", "w", newline="") as feed, \
-           open("skipped.jsonl", "w") as skipped:
-       writer = csv.DictWriter(feed, fieldnames=COLUMNS)
-       writer.writeheader()
+   # A resumed export can save the same product more than once. Keep the last saved
+   # copy of each product, so the feed has one row per product id.
+   rows, skipped = {}, {}
+   with open(SOURCE, encoding="utf-8") as source:
        for line in source:
+           if not line.strip():
+               continue
            product = json.loads(line)
            row = to_row(product)
+           rows.pop(product["id"], None)
+           skipped.pop(product["id"], None)
            missing = [name for name in REQUIRED if row[name] in (None, "")]
            if missing:
-               skipped.write(json.dumps({"id": product["id"], "sku": row["sku"], "missing": missing}) + "\n")
-               continue
-           writer.writerow(row)
+               skipped[product["id"]] = {"id": product["id"], "sku": row["sku"], "missing": missing}
+           else:
+               rows[product["id"]] = row
+
+   # Write to temporary files, then replace the old feed in one step.
+   with open(FEED + ".tmp", "w", newline="", encoding="utf-8") as feed:
+       writer = csv.DictWriter(feed, fieldnames=COLUMNS)
+       writer.writeheader()
+       writer.writerows(rows.values())
+   with open(SKIPPED + ".tmp", "w", encoding="utf-8") as out:
+       out.writelines(json.dumps(entry) + "\n" for entry in skipped.values())
+   os.replace(FEED + ".tmp", FEED)
+   os.replace(SKIPPED + ".tmp", SKIPPED)
+   print(f"Wrote {len(rows)} rows to {FEED} and skipped {len(skipped)} products.")
    ```
 
-   The script writes one CSV row per product and records every product it skips, with the fields it was missing, so you can fix them in Plytix. [Audit product data quality with filters](/docs/guides/auditing-product-data-quality-with-filters) shows how to find those products before you build the feed.
+   The script builds each product's category path from the first category in its `categories` list and the ancestors saved in `categories.jsonl`. A category missing from that file falls back to its own name. The script keeps the last saved copy of each product `id`, so a product that a resumed export saved twice still gets one row. It records every product it skips, with the fields it was missing, so you can fix them in Plytix. It writes both files under temporary names and replaces `uk_feed.csv` and `skipped.jsonl` only once they're complete, so a failed run leaves the previous feed in place. [Audit product data quality](/docs/guides/auditing-product-data-quality-with-filters) shows how to find those products before you build the feed.
 
-   If the marketplace needs image links, plan for them separately. The `assets` field returns each asset's metadata, including a `path` where Plytix stores the file, but `path` isn't a download URL.
+   If the marketplace needs image links, plan for them separately. The `assets` field returns each asset's record, such as its file name and alt text, but asset records don't currently include a download URL.
 
-5. **Deliver the file and refresh it on your schedule.**
+6. **Deliver the file and refresh it on your schedule.**
 
-   Upload or host the file the way the marketplace's specification requires. To keep the feed current, run steps 2 to 4 again on a schedule. Rebuilding the whole file each time is the simplest approach. To read only what changed, filter on `modified` as described in [Sync your ERP](/docs/guides/syncing-your-erp-with-plytix), and still rebuild in full from time to time, because a deleted product doesn't appear in a search.
+   Upload or host the file the way the marketplace's specification requires. To keep the feed current, run steps 2 to 5 again on a schedule. Rebuilding the whole file each time is the simplest approach. To read only what changed, filter on `modified` as described in [Sync your ERP with Plytix](/docs/guides/syncing-your-erp-with-plytix), and still rebuild in full from time to time, because a deleted product doesn't appear in a search.
 
 ## Related articles
 
-Now that you know how to build a marketplace feed from product data, you can explore these related guides.
+Now that you know how to build a marketplace feed from product data, you can explore these related pages.
 
 <Cards>
   <Card icon={<ArrowDownloadRegular />} title="Export your full catalog" href="/docs/guides/exporting-your-full-catalog">
     Page through every product with the fields your feed needs.
   </Card>
-  <Card icon={<SearchRegular />} title="Audit product data quality with filters" href="/docs/guides/auditing-product-data-quality-with-filters">
-    Find products that miss the marketplace's required fields before you build the feed.
+  <Card icon={<FilterRegular />} title="Filtering and search" href="/reference/v3/filtering-and-search">
+    Choose the products and fields that go into each feed.
   </Card>
 </Cards>

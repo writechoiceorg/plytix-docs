@@ -1,0 +1,42 @@
+# Schema edits for the product-attribute-groups endpoints (Phase 3, 2026-10-20).
+# Sources: spec 2026-10-02, Q#25a, Q#104, Q#108, Create/Update Product Attribute
+# Group.bru. `order` on the update body: spec says patchable, Q#108 says only
+# `name` is (GRP-20), so its description stays neutral.
+overlay: 1.0.0
+info:
+  title: product-attribute-groups schemas
+  version: 1.0.0
+actions:
+  - target: $.components.schemas.ProductAttributeGroupCreateInputDto
+    description: Q#104 (attribute_labels removed, 422)
+    update:
+      description: Body for creating an attribute group. `name` is the only field, and fields not listed here return `422`. To add attributes to the group, use [Link an attribute to a group](/reference/v3/product-attributes/link-product-attribute-group).
+  - target: $.components.schemas.ProductAttributeGroupCreateInputDto.properties.name
+    description: Q#25a, Create Product Attribute Group.bru 409
+    update:
+      description: Name of the group. It must be unique in your account. A name that already exists returns `409`.
+      examples:
+        - Rich Information
+
+  - target: $.components.schemas.ProductAttributeGroupUpdateInputDto
+    description: Q#108, Update Product Attribute Group.bru (attribute_labels 422); replaces the upstream docstring
+    update:
+      description: Body for renaming an attribute group. Send `name`. Fields not listed here return `422`.
+  - target: $.components.schemas.ProductAttributeGroupUpdateInputDto.properties.name
+    description: Update Product Attribute Group.bru (2026-10-13)
+    update:
+      description: New name of the group.
+      examples:
+        - Rich Content
+  - target: $.components.schemas.ProductAttributeGroupUpdateInputDto.properties.order
+    description: Spec only; Q#108 says only name is patchable (GRP-20, VERIFY.md)
+    update:
+      description: Display position of the group. Changing `order` through this operation isn't confirmed yet.
+
+  - target: $.components.schemas.ProductAttributeGroupOutputDto.properties.order
+    update:
+      description: Display position of the group among your attribute groups.
+  - target: $.components.schemas.ProductAttributeGroupOutputDto.properties.attribute_labels
+    remove: true
+  - target: $.components.schemas.ProductAttributeGroupCreateOutputDto.properties.attribute_labels
+    remove: true

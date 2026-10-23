@@ -5,8 +5,14 @@ import { ComingSoon } from './coming-soon';
 import { Card, Cards } from './card';
 import { Callout } from './callout';
 import { Step, Steps } from 'fumadocs-ui/components/steps';
-import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
-import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
+import { Tab, Tabs as BaseTabs } from 'fumadocs-ui/components/tabs';
+import type { ComponentProps } from 'react';
+import { Accordion, Accordions } from './accordion';
+
+// Hook for the tab colors in global.css (PM-43).
+function Tabs(props: ComponentProps<typeof BaseTabs>) {
+  return <BaseTabs {...props} className="plytix-tabs" />;
+}
 
 export function getMDXComponents(components?: MDXComponents) {
   return {

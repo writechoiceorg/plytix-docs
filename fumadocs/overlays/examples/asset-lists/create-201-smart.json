@@ -1,0 +1,19 @@
+{
+  "data": {
+    "id": "6a1f0c2e9b3d4a5f8c7e1304",
+    "name": "Kettle Images",
+    "query": [
+      [
+        {"operator": "like", "field": "filename", "value": "kettle", "field_type": null},
+        {"operator": "like", "field": "filename", "value": ".jpg", "field_type": null}
+      ],
+      [
+        {"operator": "eq", "field": "filename", "value": "Kettle handle - White.png", "field_type": null}
+      ]
+    ],
+    "created": "2026-09-22T22:17:25.493688+00:00",
+    "modified": "2026-09-22T22:17:25.506896+00:00",
+    "type": "Smart"
+  },
+  "errors": []
+}

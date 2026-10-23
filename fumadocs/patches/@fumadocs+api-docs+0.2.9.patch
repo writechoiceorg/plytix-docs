@@ -1,0 +1,202 @@
+diff --git a/node_modules/@fumadocs/api-docs/dist/components/playground/inputs.js b/node_modules/@fumadocs/api-docs/dist/components/playground/inputs.js
+index 28e59f1..a058f42 100644
+--- a/node_modules/@fumadocs/api-docs/dist/components/playground/inputs.js
++++ b/node_modules/@fumadocs/api-docs/dist/components/playground/inputs.js
+@@ -4,7 +4,7 @@ import { Input, labelVariants } from "../input.js";
+ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../select.js";
+ import "../../schema/to-string.js";
+ import { anyFields, useFieldInfo, useResolvedSchema, useSchemaContext, useSchemaUtils } from "./schema.js";
+-import { useState } from "react";
++import { useId, useState } from "react";
+ import { Fragment as Fragment$1, jsx, jsxs } from "react/jsx-runtime";
+ import { ChevronRight, Plus, Trash2, X } from "lucide-react";
+ import { buttonVariants } from "fumadocs-ui/components/ui/button";
+@@ -107,10 +107,17 @@ function JsonInput({ fieldName }) {
+ 	const engine = useDataEngine();
+ 	const [error, setError] = useState(null);
+ 	const [value, setValue] = useState(() => JSON.stringify(engine.init(fieldName, {}), null, 2));
++	// [plytix-docs patch PM-58] accessible name + error association
++	const errorId = `${useId()}-json-error`;
+ 	return /* @__PURE__ */ jsxs("div", {
+ 		className: "flex flex-col bg-fd-secondary text-fd-secondary-foreground overflow-hidden border rounded-lg",
+ 		children: [/* @__PURE__ */ jsx("textarea", {
+ 			value,
++			"aria-label": "Request body (JSON)",
++			"aria-invalid": error ? true : void 0,
++			"aria-describedby": error ? errorId : void 0,
++			autoFocus: true,
++			spellCheck: false,
+ 			className: "p-2 h-[240px] text-sm font-mono resize-none focus-visible:outline-none",
+ 			onChange: (v) => {
+ 				setValue(v.target.value);
+@@ -122,12 +129,13 @@ function JsonInput({ fieldName }) {
+ 				}
+ 			}
+ 		}), /* @__PURE__ */ jsx("p", {
++			id: errorId,
+ 			className: "p-2 text-xs font-mono border-t text-red-400 empty:hidden",
+ 			children: error
+ 		})]
+ 	});
+ }
+-function FieldInput({ field, fieldName, isRequired, ...props }) {
++function FieldInput({ field, fieldName, isRequired, inputProps, ...props }) {
+ 	const [value, setValue] = useFieldValue(fieldName);
+ 	const id = stringifyFieldKey(fieldName);
+ 	const t = useTranslations({ note: "playground" });
+@@ -149,6 +157,7 @@ function FieldInput({ field, fieldName, isRequired, ...props }) {
+ 			children: t("Upload")
+ 		})
+ 	}), /* @__PURE__ */ jsx("input", {
++		...inputProps,
+ 		id,
+ 		type: "file",
+ 		multiple: false,
+@@ -175,6 +184,7 @@ function FieldInput({ field, fieldName, isRequired, ...props }) {
+ 			value: idx === -1 && isRequired ? "" : String(idx),
+ 			onValueChange: (v) => setValue(field.enum[Number(v)]),
+ 			children: [/* @__PURE__ */ jsx(SelectTrigger, {
++				...inputProps,
+ 				id,
+ 				...props,
+ 				children: /* @__PURE__ */ jsx(SelectValue, { placeholder: t("Select") })
+@@ -207,6 +217,7 @@ function FieldInput({ field, fieldName, isRequired, ...props }) {
+ 			value: value === void 0 && isRequired ? "" : String(value),
+ 			onValueChange: (value) => setValue(value === "undefined" ? void 0 : value === "true"),
+ 			children: [/* @__PURE__ */ jsx(SelectTrigger, {
++				...inputProps,
+ 				id,
+ 				...props,
+ 				children: /* @__PURE__ */ jsx(SelectValue, {})
+@@ -218,6 +229,7 @@ function FieldInput({ field, fieldName, isRequired, ...props }) {
+ 	}
+ 	const isNumber = field.type === "integer" || field.type === "number";
+ 	return /* @__PURE__ */ jsx(Input, {
++		...inputProps,
+ 		id,
+ 		placeholder: t("Enter value"),
+ 		type: isNumber ? "number" : "text",
+@@ -229,7 +241,7 @@ function FieldInput({ field, fieldName, isRequired, ...props }) {
+ 		}
+ 	});
+ }
+-function FieldSet({ field: _field, fieldName, toolbar, name, isRequired, depth = 0, slotType, collapsible = true, ...props }) {
++function FieldSet({ field: _field, fieldName, toolbar, name, isRequired, depth = 0, slotType, collapsible = true, inputProps, ...props }) {
+ 	const { readOnly, writeOnly } = useSchemaContext();
+ 	const { generateDefault, schemaToString } = useSchemaUtils();
+ 	const field = useResolvedSchema(_field);
+@@ -273,8 +285,11 @@ function FieldSet({ field: _field, fieldName, toolbar, name, isRequired, depth =
+ 		});
+ 	}
+ 	function renderUnsetButton() {
++		// [plytix-docs patch PM-40] accessible name for the icon-only unset button
+ 		return /* @__PURE__ */ jsx("button", {
+ 			type: "button",
++			"aria-label": `Unset field ${String(fieldName.at(-1) ?? "")}`,
++			title: "Unset field",
+ 			onClick: () => dataEngine.delete(fieldName),
+ 			className: "text-fd-muted-foreground hover:text-fd-accent-foreground",
+ 			children: /* @__PURE__ */ jsx(X, { className: "size-3.5" })
+@@ -288,6 +303,7 @@ function FieldSet({ field: _field, fieldName, toolbar, name, isRequired, depth =
+ 			name,
+ 			fieldName,
+ 			isRequired,
++			inputProps,
+ 			field: union[info.oneOf],
+ 			depth: depth + 1,
+ 			slotType: showSelect ? false : slotType,
+@@ -313,6 +329,7 @@ function FieldSet({ field: _field, fieldName, toolbar, name, isRequired, depth =
+ 			name,
+ 			fieldName,
+ 			isRequired,
++			inputProps,
+ 			field: {
+ 				...field,
+ 				type: info.selectedType
+@@ -385,7 +402,8 @@ function FieldSet({ field: _field, fieldName, toolbar, name, isRequired, depth =
+ 		}), /* @__PURE__ */ jsx(FieldInput, {
+ 			field,
+ 			fieldName,
+-			isRequired
++			isRequired,
++			inputProps
+ 		})]
+ 	});
+ }
+diff --git a/node_modules/@fumadocs/api-docs/dist/components/playground/schema.js b/node_modules/@fumadocs/api-docs/dist/components/playground/schema.js
+index 19e9716..0c6088d 100644
+--- a/node_modules/@fumadocs/api-docs/dist/components/playground/schema.js
++++ b/node_modules/@fumadocs/api-docs/dist/components/playground/schema.js
+@@ -3,7 +3,7 @@ import { matchesSchema, typeMatches } from "../../schema/match.js";
+ import { mergeAllOf } from "../../schema/merge.js";
+ import { sample } from "../../schema/sample.js";
+ import { schemaToString } from "../../schema/to-string.js";
+-import { createContext, use, useMemo } from "react";
++import { createContext, use, useEffect, useMemo, useRef } from "react";
+ import { jsx } from "react/jsx-runtime";
+ import { useDataEngine, useFieldValue, useNamespace } from "@fumari/stf";
+ import { stringifyFieldKey } from "@fumari/stf/lib/utils";
+@@ -67,6 +67,37 @@ function useFieldInfo(fieldName, schema, depth = 0) {
+ 		}
+ 	});
+ 	const [info, setInfo] = useFieldValue([], { stf: fieldData });
++	// [plytix-docs patch PM-59] when the value changes from outside the selector
++	// (e.g. JSON editor import), re-select the oneOf/anyOf member or type that
++	// matches it. Only the selection changes; the value itself is not rewritten.
++	// only fields with a choice subscribe (avoids re-rendering every object field on each keystroke)
++	const hasChoice = getUnion(schema) !== void 0 || Array.isArray(schema.type);
++	const [currentValue] = useFieldValue(fieldName, { compute: (v) => hasChoice ? v : void 0 });
++	const selectedDefault = useRef(void 0);
++	useEffect(() => {
++		if (currentValue === void 0 || currentValue === selectedDefault.current) return;
++		let next;
++		const union = getUnion(schema);
++		if (union && info.unionField) {
++			const [members] = union;
++			const selected = members[info.oneOf];
++			if (!(typeof selected === "object" && matchesSchema(selected, currentValue))) {
++				const idx = members.findIndex((item) => typeof item === "object" && matchesSchema(item, currentValue));
++				if (idx !== -1 && idx !== info.oneOf) next = {
++					...info,
++					oneOf: idx
++				};
++			}
++		}
++		if (Array.isArray(schema.type) && info.selectedType && !typeMatches(currentValue, info.selectedType)) {
++			const type = schema.type.find((type) => typeMatches(currentValue, type));
++			if (type && type !== info.selectedType) next = {
++				...next ?? info,
++				selectedType: type
++			};
++		}
++		if (next) setInfo(next);
++	}, [currentValue, schema]);
+ 	return {
+ 		info,
+ 		schema,
+@@ -84,7 +115,9 @@ function useFieldInfo(fieldName, schema, depth = 0) {
+ 				type: updated.selectedType,
+ 				examples: void 0
+ 			};
+-			engine.update(fieldName, generateDefault(valueSchema));
++			const generated = generateDefault(valueSchema);
++			selectedDefault.current = generated;
++			engine.update(fieldName, generated);
+ 		}
+ 	};
+ }
+diff --git a/node_modules/@fumadocs/api-docs/dist/components/schema/client.js b/node_modules/@fumadocs/api-docs/dist/components/schema/client.js
+index 1deaf19..0070493 100644
+--- a/node_modules/@fumadocs/api-docs/dist/components/schema/client.js
++++ b/node_modules/@fumadocs/api-docs/dist/components/schema/client.js
+@@ -161,6 +161,10 @@ function ObjectProperty({ name, $type, required, parentPathIndex, ...props }) {
+ 					children: t("Deprecated")
+ 				}),
+ 				/* @__PURE__ */ jsx("button", {
++					type: "button",
++					// [plytix-docs patch PM-40] the button copies a link that highlights this field
++					"aria-label": `Copy link to field ${name}`,
++					title: isChecked ? "Link copied" : "Copy link to field",
+ 					className: cn(buttonVariants({
+ 						size: "icon-xs",
+ 						variant: "ghost"

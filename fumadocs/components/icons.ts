@@ -23,6 +23,7 @@ export { BoxRegular } from '@fluentui/react-icons/headless/svg/box';
 export { BuildingRegular } from '@fluentui/react-icons/headless/svg/building';
 export { CheckmarkRegular } from '@fluentui/react-icons/headless/svg/checkmark';
 export { ChevronDownRegular } from '@fluentui/react-icons/headless/svg/chevron-down';
+export { ChevronRightRegular } from '@fluentui/react-icons/headless/svg/chevron-right';
 export { ChevronUpDownRegular } from '@fluentui/react-icons/headless/svg/chevron-up-down';
 export { CodeRegular } from '@fluentui/react-icons/headless/svg/code';
 export { CopyRegular } from '@fluentui/react-icons/headless/svg/copy';

@@ -1,0 +1,16 @@
+{
+  "data": [
+    {
+      "id": "6a1f0c2e9b3d4a5f8c7e1a11",
+      "sku": "GF-Basket-M"
+    },
+    {
+      "id": "6a1f0c2e9b3d4a5f8c7e1a12",
+      "sku": "GF-Basket-S"
+    }
+  ],
+  "errors": [],
+  "pagination": {
+    "previous_page": "http://<api-host>/api/v3/products?_fields=sku&_page_size=20&_page=4"
+  }
+}

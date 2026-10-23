@@ -1,0 +1,367 @@
+# Operation edits for the assets endpoints.
+# Pilot (Phase 1): POST /api/v3/assets.
+# Sources: Q#28, Q#32, Q#104, Q#117, Create Asset.bru (2026-09-22), 09-Assets/README.md,
+# FB-006, ASSET-1/2. The base64 `content` path is spec-only (not yet tested live): ASSET-5.
+overlay: 1.0.0
+info:
+  title: assets operations
+  version: 1.0.0
+actions:
+  - target: $.paths['/api/v3/assets'].post
+    description: "Q#28, Q#32, Q#104, Q#117, 09-Assets/README.md (no dedup), FB-006, spec oneOf (content path untested: ASSET-5)"
+    update:
+      summary: Create an asset
+      operationId: create-asset
+      description: |-
+        Adds a file to Plytix DAM as an asset and returns the new asset, including its `id`. Send the file in one of two ways:
+
+        - `url`: Plytix downloads the file from that address when you create the asset.
+        - `content` and `filename`: the file's bytes, base64-encoded, plus its file name.
+
+        Send exactly one of `url` or `content`. A body with neither returns `422`. With `url`, you can also send `filename` to name the stored file.
+
+        Plytix doesn't check for duplicates, so each request creates a new asset, even for a URL you've used before. Before you retry a request that timed out, search your assets to check whether the first request went through.
+
+        Creating an asset doesn't attach it to a product. To use the asset on a product, set it as the product's `thumbnail_id`, or as a value of a media or media gallery attribute. See [Safely remove categories, assets, or relationships](/docs/guides/safely-removing-categories-assets-or-relationships#connect-other-assets-to-a-product).
+
+        The body accepts only the fields listed below. `category_ids` returns `422` with "Extra inputs are not permitted": link categories with a separate request after the asset exists.
+
+  - target: $.paths['/api/v3/assets'].post.requestBody.content['application/json']
+    description: "Create Asset.bru \"201 - Full Parameters\" request (2026-09-22) minus category_ids; content example from the spec shape"
+    update:
+      examples:
+        fromUrl:
+          summary: From a URL
+          value:
+            url: https://www.plytix.com/hubfs/Kitchen%20and%20Home%20Products/Enjoy%20Mug%20-%20Blue.jpg
+            filename: 'Enjoy Mug - Blue.jpg'
+            alt_text: Adventure mug in blue, front view
+        fromContent:
+          summary: From file content (base64)
+          description: '`content` holds the file''s bytes, base64-encoded. This example is a 1x1 pixel PNG.'
+          value:
+            content: iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==
+            filename: pixel.png
+            alt_text: Placeholder pixel
+
+  - target: $.paths['/api/v3/assets'].post.responses['201']
+    description: "Create Asset.bru \"201 - Full Parameters\" response (2026-09-22), sanitized; file metadata, counters and status stripped (16 Oct handoff)"
+    update:
+      description: Created. `data` holds the new asset.
+      content:
+        application/json:
+          examples:
+            fromUrl:
+              summary: Asset created from a URL
+              value:
+                x-example-file: assets/create-201-url.json
+
+  - target: $.paths['/api/v3/assets'].post.responses['422'].content['application/json']
+    description: "Create Asset.bru empty-body 422 (Q#32), Q#104"
+    update:
+      examples:
+        noSource:
+          summary: Neither url nor content
+          value:
+            data: []
+            errors:
+              - name: InputDTOValidationError
+                description: "Value error, Either 'url' or 'content' must be provided"
+        unsupportedField:
+          summary: Field the body doesn't accept
+          value:
+            data: []
+            errors:
+              - name: InputDTOValidationError
+                description: 'category_ids: Extra inputs are not permitted'
+
+  # --- Phase 3 (2026-10-20): search, get, update, delete, field routes ----------
+  # Sources: Q#15, Q#17, Q#29, Q#49, Q#84, Q#89, Q#91, Q#104, Q#105, Q#116, FB-030,
+  # ASSET-3, ASSET-4, 09-Assets/*.bru. PATCH status 204 comes from ASSET-3 and the
+  # spec; asset PATCH hasn't been replayed live since the change (VERIFY.md).
+
+  # --- GET /api/v3/assets ---------------------------------------------------------
+  - target: $.paths['/api/v3/assets'].get
+    description: Q#89 and Q#91 (both confirmed on /assets), Q#92 and FB-012 (http:// links), Q#116, FB-030 (2026-10-15, no url); 16 Oct handoff (file metadata, counters, status, path, downloaded_from excluded; categories expandable, untested, VERIFY.md)
+    update:
+      summary: Search assets
+      operationId: search-assets
+      description: |-
+        Returns the assets in your Plytix DAM that match your filters, one page at a time.
+
+        Use it to find an asset's `id` before you read, update, or delete it, or to list the files in your account page by page.
+
+        Filters are query parameters written as `field=value` or `field[operator]=value`. An asset must match all of them, unless you group filters with `_or`.
+
+        Each asset holds its `filename`, its `alt_text`, whether it's `assigned`, and its timestamps. Asset records don't currently include a download URL.
+
+        To get the asset categories each asset belongs to, add `_fields=categories`. They come back only when you name them in `_fields`.
+
+        Results come back 25 per page by default, up to 1000 with `_page_size`. To get the next page, follow `pagination.next_page`. On the last page that key is left out, not set to `null`. The link starts with `http://`, so change it to `https://` before you follow it. Otherwise the redirect can drop your `Authorization` header. The response doesn't include a total count.
+
+        Related pages:
+
+        - [Filtering and search](/reference/v3/filtering-and-search)
+        - [Pagination](/reference/v3/pagination)
+        - [The Plytix data model](/docs/guides/data-model#assets)
+
+  - target: $.paths['/api/v3/assets'].get.parameters[?(@.name=='filters' && @.in=='query')]
+    description: 'PM-50; field names from the resource''s response schema, operators per the API-wide grammar (Q#11, Q#99); extension replaced with filename (excluded by the 16 Oct handoff)'
+    update:
+      example:
+        'filename[contains:ignorecase]': mug
+        'created[gt]': '2026-01-01'
+
+  - target: $.paths['/api/v3/assets'].get.responses['200'].content['application/json']
+    description: "Built from the asset records captured in 02-Products-v3/List Products.bru \"200 - Full Parameters (Relationship Fields Expanded)\" (2026-09-23), account_id removed; fields the 16 Oct handoff excludes stripped (2026-10-22); categories and static_lists left out as not seen on GET /assets; pagination shape per Q#91 and Q#92. No direct GET /assets capture exists (VERIFY.md)."
+    update:
+      examples:
+        firstPage:
+          summary: First page of several
+          description: '`GET /api/v3/assets?_page_size=2`. Only `next_page` is present.'
+          value:
+            x-example-file: assets/search-200-first-page.json
+
+  - target: $.paths['/api/v3/assets'].get.responses['400'].content['application/json']
+    description: Q#89 (_total_count on /assets returns 400 InvalidFieldError)
+    update:
+      examples:
+        unknownParameter:
+          summary: Parameter that doesn't exist
+          description: '`GET /api/v3/assets?_total_count=true`. The V3 API has no count parameter.'
+          value:
+            data: []
+            errors:
+              - name: InvalidFieldError
+                description: Field '_total_count' does not exist.
+
+  # --- GET /api/v3/assets/{identifier} ----------------------------------------------
+  - target: $.paths['/api/v3/assets/{identifier}'].get
+    description: Delete Asset.bru 404 (2026-09-15), static_lists removed until LIST-20/OAS-4 (Q#105 confirms it), FB-030 (2026-10-15, no url), Asset Subpaths.bru, spec GetAssetsResponse; 16 Oct handoff (categories expandable, untested, VERIFY.md)
+    update:
+      summary: Get an asset
+      operationId: get-asset
+      description: |-
+        Returns one asset, identified by its ID. An ID that matches no asset returns `404`.
+
+        `data` holds the asset object itself, not a list. Asset records don't currently include a download URL.
+
+        To see which asset categories the asset belongs to, add `_fields=categories`, or use [Get an asset field](/reference/v3/assets/get-asset-field) with `categories`.
+
+  - target: $.paths['/api/v3/assets/{identifier}'].get.parameters[?(@.name=='identifier' && @.in=='path')]
+    description: config "ID prefixes"; only the ID has been tested on assets
+    update:
+      description: ID of the asset, a 24-character hexadecimal string such as `6a1f0c2e9b3d4a5f8c7e1b01`. Search assets to find an ID.
+
+  - target: $.paths['/api/v3/assets/{identifier}'].get.responses['200'].content['application/json']
+    description: Asset record shape from 02-Products-v3/List Products.bru (2026-09-23), account_id removed; fields the 16 Oct handoff excludes stripped (2026-10-22)
+    update:
+      examples:
+        asset:
+          summary: One asset
+          value:
+            x-example-file: assets/get-200.json
+
+  - target: $.paths['/api/v3/assets/{identifier}'].get.responses['404'].content['application/json']
+    description: Delete Asset.bru "404 - Not Found After Delete" (2026-09-15)
+    update:
+      examples:
+        notFound:
+          summary: No asset with this ID
+          value:
+            data: []
+            errors:
+              - name: NotFoundError
+                description: Document with id 6a1f0c2e9b3d4a5f8c7e1b99 not found
+
+  # --- PATCH /api/v3/assets/{identifier} ------------------------------------------
+  - target: $.paths['/api/v3/assets/{identifier}'].patch
+    description: ASSET-3 (204, spec 30/09/2026), Q#84, Q#116, Q#104 (static_list_ids also rejected; omitted until LIST-20), Update Asset.bru (alt_text/filename applied), spec AssetUpdateInputDto
+    update:
+      summary: Update an asset
+      operationId: update-asset
+      description: |-
+        Changes an asset's `filename` or `alt_text` and leaves every other field as it is. A successful update returns `204` with an empty body. To see the result, read the asset back.
+
+        Only `filename` and `alt_text` can be changed. You can't replace the file itself: to use a different file, create a new asset.
+
+        The body accepts only these two fields. `category_ids` returns `422` with "Extra inputs are not permitted". To take an asset out of a category, use [Unlink a category from an asset](/reference/v3/assets/delete-asset-field).
+
+        To change one field, you can also use [Update an asset field](/reference/v3/assets/update-asset-field). See [Update and delete records](/reference/v3/updates-and-deletes).
+
+  - target: $.paths['/api/v3/assets/{identifier}'].patch.parameters[?(@.name=='identifier' && @.in=='path')]
+    description: config "ID prefixes"
+    update:
+      description: ID of the asset to update, a 24-character hexadecimal string such as `6a1f0c2e9b3d4a5f8c7e1b01`.
+
+  - target: $.paths['/api/v3/assets/{identifier}'].patch.requestBody.content['application/json']
+    description: Update Asset.bru "200 - Success (alt_text / filename)" request (2026-09-15)
+    update:
+      examples:
+        both:
+          summary: Rename the file and change the alt text
+          value:
+            filename: adventure-mug-blue.jpg
+            alt_text: Adventure mug in blue, front view
+        altText:
+          summary: Change only the alt text
+          value:
+            alt_text: Adventure mug in blue, side view
+
+  - target: $.paths['/api/v3/assets/{identifier}'].patch.responses['204']
+    description: ASSET-3, Q#84, Q#116
+    update:
+      description: Updated. The response has no body. Read the asset to see the new values.
+
+  - target: $.paths['/api/v3/assets/{identifier}'].patch.responses['422'].content['application/json']
+    description: Q#104 (2026-10-13, category_ids rejected on PATCH /assets)
+    update:
+      examples:
+        unsupportedField:
+          summary: Field the body doesn't accept
+          value:
+            data: []
+            errors:
+              - name: InputDTOValidationError
+                description: 'category_ids: Extra inputs are not permitted'
+
+  # --- DELETE /api/v3/assets/{identifier} -----------------------------------------
+  - target: $.paths['/api/v3/assets/{identifier}'].delete
+    description: Delete Asset.bru "204 - Success" + follow-up GET 404 (2026-09-15); effect on products untested (ASSET-22); counters excluded by the 16 Oct handoff, so no counter advice
+    update:
+      summary: Delete an asset
+      operationId: delete-asset
+      description: |-
+        Deletes one asset from your account. A successful delete returns `204` with an empty body, and a later request for the asset returns `404`.
+
+        Before you delete an asset, check that no product uses it as its thumbnail (`thumbnail_id`) or as a value of a media or media gallery attribute.
+
+        To take an asset out of an asset category without deleting it, use [Unlink a category from an asset](/reference/v3/assets/delete-asset-field). To detach an asset from a product, change the product instead: see [Safely remove categories, assets, or relationships](/docs/guides/safely-removing-categories-assets-or-relationships#connect-other-assets-to-a-product) and [Update and delete records](/reference/v3/updates-and-deletes).
+
+  - target: $.paths['/api/v3/assets/{identifier}'].delete.parameters[?(@.name=='identifier' && @.in=='path')]
+    description: config "ID prefixes"
+    update:
+      description: ID of the asset to delete, a 24-character hexadecimal string such as `6a1f0c2e9b3d4a5f8c7e1b01`.
+
+  - target: $.paths['/api/v3/assets/{identifier}'].delete.responses['204']
+    description: Delete Asset.bru (2026-09-15)
+    update:
+      description: Deleted. The response has no body.
+
+  # --- GET /api/v3/assets/{identifier}/{path} -----------------------------------------
+  - target: $.paths['/api/v3/assets/{identifier}/{path}'].get
+    description: Q#15, Q#17, Q#105 (static_lists also works; omitted until LIST-20/OAS-4), Asset Subpaths.bru (2026-09-08, 2026-09-21), Link and Unlink Asset Relations.bru (2026-10-13)
+    update:
+      summary: Get an asset field
+      operationId: get-asset-field
+      description: |-
+        Returns part of an asset without the rest of the record. Set `path` to `categories` to get the asset categories the asset belongs to.
+
+        `data` is a list, empty when the asset belongs to no category. Changes to these links show up right away.
+
+        A field the asset doesn't have returns `400`, and the message lists the asset's fields. Assets have no `attributes`, `relationships`, or `products` field, so those return `400` too.
+
+  - target: $.paths['/api/v3/assets/{identifier}/{path}'].get.parameters[?(@.name=='path' && @.in=='path')]
+    description: Q#17, Q#105 (static_lists omitted until LIST-20)
+    update:
+      description: The collection to read, `categories`.
+
+  - target: $.paths['/api/v3/assets/{identifier}/{path}'].get.responses['200'].content['application/json']
+    description: Asset Subpaths.bru "200 - Categories Subpath (Linked)" (2026-09-08, account_id removed) and "(Empty)" (2026-09-21)
+    update:
+      examples:
+        categories:
+          summary: Linked asset categories
+          description: '`GET /api/v3/assets/{identifier}/categories`'
+          value:
+            data:
+              - id: 6a1f0c2e9b3d4a5f8c7e1801
+                name: Packshots
+            errors: []
+        none:
+          summary: Asset in no category
+          description: '`GET /api/v3/assets/{identifier}/categories`'
+          value:
+            data: []
+            errors: []
+
+  - target: $.paths['/api/v3/assets/{identifier}/{path}'].get.responses['404']
+    description: Q#15, Q#20 (unknown field is 400; missing record is 404)
+    update:
+      description: No asset has this ID. A field the asset doesn't have returns `400` instead.
+
+  - target: $.paths['/api/v3/assets/{identifier}/{path}'].get.responses['400'].content['application/json']
+    description: Q#15 error format; field list from Asset Subpaths.bru discovery (2026-09-08)
+    update:
+      examples:
+        unknownField:
+          summary: Field the asset doesn't have
+          value:
+            data: []
+            errors:
+              - name: ValueError
+                description: "Field 'products' not found. Available fields: ['id', 'account_id', 'assigned', 'content_type', 'checksum', 'extension', 'file_size', 'file_type', 'file_modified', 'filename', 'path', 'downloaded_from', 'n_catalogs', 'n_products', 'public', 'alt_text', 'status', 'created', 'modified']"
+
+  # --- PATCH /api/v3/assets/{identifier}/{path} --------------------------------------
+  # The spec declares no request body here (proposed fix in the Phase 3 report, OAS-10).
+  - target: $.paths['/api/v3/assets/{identifier}/{path}'].patch
+    description: Q#29, ASSET-4 (bare value), ASSET-3 (204), Asset Subpaths.bru "200 - alt_text Subpath" request (2026-09-08; only alt_text tested, filename untested), Q#49, spec AssetUpdateInputDto
+    update:
+      summary: Update an asset field
+      operationId: update-asset-field
+      description: |-
+        Changes one field of an asset and leaves the rest as it is. Set `path` to the field, for example `alt_text`, and send the new value on its own as the request body: `"Adventure mug in blue, front view"`, not `{"alt_text": "Adventure mug in blue, front view"}`. A successful update returns `204` with an empty body.
+
+        This differs from [Update an asset](/reference/v3/assets/update-asset), which takes an object with the fields to change. See [Update and delete records](/reference/v3/updates-and-deletes#change-a-single-field).
+
+  - target: $.paths['/api/v3/assets/{identifier}/{path}'].patch.parameters[?(@.name=='path' && @.in=='path')]
+    description: Q#29 (alt_text tested; filename untested), spec AssetUpdateInputDto
+    update:
+      description: The field to change, for example `alt_text`.
+
+  - target: $.paths['/api/v3/assets/{identifier}/{path}'].patch.responses['204']
+    description: ASSET-3, Q#116
+    update:
+      description: Updated. The response has no body.
+
+  # --- DELETE /api/v3/assets/{identifier}/{path} -------------------------------------
+  - target: $.paths['/api/v3/assets/{identifier}/{path}'].delete
+    description: Q#105 (2026-10-13), Link and Unlink Asset Relations.bru (204 scoped, bare collection 405; static_lists/<id> also works, omitted until LIST-20/OAS-4); scalar-field DELETE untested (VERIFY.md)
+    update:
+      summary: Unlink a category from an asset
+      operationId: delete-asset-field
+      description: |-
+        Removes one link from an asset. `categories/<category_id>` takes the asset out of that asset category.
+
+        A successful call returns `204` with an empty body. Only that one link is removed: the asset, the category, and the asset's other links stay as they are.
+
+        A collection without an ID, such as `categories` on its own, returns `405`. An ID that isn't linked to the asset returns `404`.
+
+        To delete the asset itself, use [Delete an asset](/reference/v3/assets/delete-asset). See [Update and delete records](/reference/v3/updates-and-deletes).
+
+  - target: $.paths['/api/v3/assets/{identifier}/{path}'].delete.parameters[?(@.name=='path' && @.in=='path')]
+    description: Q#105 (static_lists/<id> omitted until LIST-20)
+    update:
+      description: '`categories/<category_id>`, for example `categories/6a1f0c2e9b3d4a5f8c7e1801`.'
+
+  - target: $.paths['/api/v3/assets/{identifier}/{path}'].delete.responses['204']
+    description: Link and Unlink Asset Relations.bru "Unlink Asset Static List - 204" (2026-10-13)
+    update:
+      description: Unlinked. The response has no body.
+
+  - target: $.paths['/api/v3/assets/{identifier}/{path}'].delete.responses['404'].content['application/json']
+    description: Q#105 message template ("... is not linked to <resource> <id> through '<relation>'"), applied to assets
+    update:
+      examples:
+        notLinked:
+          summary: Category isn't linked to the asset
+          value:
+            data: []
+            errors:
+              - name: NotFoundError
+                description: "'6a1f0c2e9b3d4a5f8c7e1801' is not linked to assets 6a1f0c2e9b3d4a5f8c7e1b01 through 'categories'"
+
+  - target: $.paths['/api/v3/assets/{identifier}/{path}'].delete.responses['405']
+    description: Q#105, Link and Unlink Asset Relations.bru (bare DELETE /assets/{id}/categories -> 405 "requires exactly one linked id"); full asset message not captured, so no example
+    update:
+      description: The path is a collection without an ID. Add the ID of the category to unlink.

@@ -1,0 +1,80 @@
+---
+title: "V1/V2 API reference overview"
+description: "Reference for the V1 and V2 (beta) APIs for teams not yet on V3: core concepts, every resource, and guidance on moving to V3."
+---
+
+import { BeakerRegular, BoxRegular, BuildingRegular, FilterRegular, FolderListRegular, GaugeRegular, ImageRegular, KeyRegular, LayerRegular, LinkRegular, SearchRegular, TagMultipleRegular, TagRegular, TextNumberListLtrRegular, WarningRegular } from '@/components/icons';
+
+<Callout type="info" title="V1/V2 (Legacy)">
+This page covers the V1/V2 APIs. For V3 (Beta), see [the V3 API reference overview](/reference/v3).
+</Callout>
+
+This is the reference for Plytix's V1 API, plus the small set of V2 (beta) endpoints that mirror some V1 product operations with a slightly different shape. New integrations should use [V3 (Beta) API reference](/reference/v3); see [Migration overview](/docs/guides/migrating-to-v3) for what's different and how to migrate.
+
+Every request here uses the same bearer-token authentication as V3: get a token from [`POST /auth/api/get-token`](/reference/v1-v2/authentication/get-token) and send it as `Authorization: Bearer <token>`.
+
+## Core concepts
+
+Before integrating with a specific resource, review these fundamental patterns. They apply to every V1/V2 endpoint, and several differ from V3.
+
+<Cards>
+  <Card icon={<KeyRegular />} title="Authentication" href="/reference/v1-v2/token-authentication">
+    Get and use a bearer token for every request.
+  </Card>
+  <Card icon={<WarningRegular />} title="Errors and status codes" href="/reference/v1-v2/errors-status-codes">
+    Understand the success and error response formats.
+  </Card>
+  <Card icon={<GaugeRegular />} title="Rate limits" href="/reference/v1-v2/rate-limits">
+    See how request limits work and what a 429 means.
+  </Card>
+  <Card icon={<SearchRegular />} title="Filtering and search" href="/reference/v1-v2/filtering-and-search">
+    Write search bodies with filters, operators, and relationship filters.
+  </Card>
+  <Card icon={<TextNumberListLtrRegular />} title="Pagination" href="/reference/v1-v2/pagination">
+    Page through results and read the counts a search returns.
+  </Card>
+</Cards>
+
+## Available services
+
+Each resource below links to its endpoints, with request and response schemas and examples.
+
+<Cards>
+  <Card icon={<KeyRegular />} title="Authentication" href="/reference/v1-v2/authentication/get-token">
+    Get a bearer token from the V1 auth endpoint.
+  </Card>
+  <Card icon={<BuildingRegular />} title="Accounts" href="/reference/v1-v2/accounts/search-api-credentials">
+    Search account memberships and API credentials.
+  </Card>
+  <Card icon={<ImageRegular />} title="Assets" href="/reference/v1-v2/assets/create-asset">
+    Upload, search, update, and delete digital assets.
+  </Card>
+  <Card icon={<FolderListRegular />} title="Categories" href="/reference/v1-v2/categories/create-asset-category">
+    Manage both asset and product category trees.
+  </Card>
+  <Card icon={<BoxRegular />} title="Products (V1)" href="/reference/v1-v2/products/create-product">
+    Create, update, delete, and search products, plus their variants, assets, categories, and relationships.
+  </Card>
+  <Card icon={<BeakerRegular />} title="Products (V2 beta)" href="/reference/v1-v2/products-v2-beta/create-product">
+    The same product operations under `/api/v2`, with minor request/response differences from V1.
+  </Card>
+  <Card icon={<LinkRegular />} title="Relationships" href="/reference/v1-v2/relationships/create-relationship">
+    Create and manage relationships between products.
+  </Card>
+  <Card icon={<LayerRegular />} title="Product Families" href="/reference/v1-v2/product-families/create-product-family">
+    Manage product families and the attributes linked to them.
+  </Card>
+  <Card icon={<TagRegular />} title="Product Attributes" href="/reference/v1-v2/product-attributes/create-product-attribute">
+    Create and manage custom product attributes.
+  </Card>
+  <Card icon={<TagMultipleRegular />} title="Product Attribute Groups" href="/reference/v1-v2/product-attribute-groups/create-product-attribute-group">
+    Organize product attributes into groups.
+  </Card>
+  <Card icon={<FilterRegular />} title="Available Filters" href="/reference/v1-v2/available-filters/get-available-asset-filters">
+    Look up which fields are filterable for assets, products, and relationships.
+  </Card>
+</Cards>
+
+## About this reference
+
+This reference was generated from Plytix's internal V1 Postman collection, not from a machine-readable spec, so request/response schemas and examples are inferred from that collection's saved examples rather than a live source of truth. Cross-check against the live API with a real request before relying on an exact field name or type.

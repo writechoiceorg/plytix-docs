@@ -1,5 +1,5 @@
 ---
-title: "The Plytix data model"
+title: "Plytix data model"
 description: "Learn how products, attributes, product families, categories, assets, and relationships fit together, and which parts the API can change."
 ---
 
@@ -14,46 +14,47 @@ In short:
 - The product is the center of the model. Everything else describes it, groups it, or links it to something.
 - Your custom attribute values live in the product's `attributes` map. System fields, relationship fields, timestamps, and foreign keys sit at the top level of the product.
 - A product family controls which attributes apply to a product and how values flow from a parent down to its variants.
-- Categories, assets, relationships, and lists are separate entities. Ask for one by name and Plytix returns the full object, already expanded.
-- Products, attributes, families, categories, relationships, and lists are writable through the API. A product's main image is set through `thumbnail_id`, and other assets connect to it through media attributes. There's no separate endpoint for linking an asset to a product. Inheritance between family levels is an account-level feature that isn't available on every account.
+- Categories, assets, relationships, and asset lists are separate entities. Ask for one by name and Plytix returns the full object, already expanded.
+- Products, attributes, families, categories, relationship types, and asset lists are writable through the API. Linking products to each other under a relationship type isn't available through V3 yet. A product's main image is set through `thumbnail_id`, and other assets connect to it through media attributes. There's no separate endpoint for linking an asset to a product. Inheritance between family levels is an account-level feature that isn't available on every account.
 
 ## The core entities
 
 | Entity | What it is | API resource |
 |---|---|---|
 | Product | A single item in your catalog, identified by its SKU | `/api/v3/products` |
-| Product Attribute | A field definition, such as "Material" or "Care instructions" | `/api/v3/product-attributes` |
+| Product Attribute | A field definition, such as "Brand" or "Collection" | `/api/v3/product-attributes` |
 | Attribute Group | A display grouping for attributes in the dashboard | `/api/v3/product-attribute-groups` |
 | Product Family | The set of attributes that applies to one type of product, plus its inheritance rules | `/api/v3/product-families` |
 | Product Category | A node in a hierarchical tree you file products under | `/api/v3/product-categories` |
 | Asset | A file in Plytix DAM, such as an image, video, or document | `/api/v3/assets` |
-| Relationship | A named type of connection between products, such as "Accessories" | `/api/v3/relationships` |
-| Product list | A saved set of products, either Static or Smart | `/api/v3/pim-product-lists` |
-| Asset list | The same idea, for assets | `/api/v3/asset-lists` |
+| Relationship | A named type of connection between products, such as "Gift basket" | Being redesigned; see [Relationships](#relationships) |
+| Asset list | A saved set of assets, either Static or Smart | `/api/v3/asset-lists` |
 
 ## Products
 
 A product is the unit everything else attaches to. It carries two kinds of data, and the difference matters when you write queries.
 
-Everything that isn't a custom attribute value sits at the top level of the product object. That includes system fields (`id`, `sku`, `label`, `gtin`, `status`, `product_level`, `num_variations`), relationship fields (`categories`, `assets`, `product_relationships`, `static_lists`), timestamps (`created`, `modified`), and foreign keys that point at other entities (`product_family_id`, `parent_id`, which the dashboard shows as "Variant of", and `thumbnail_id`). The system fields are the System Attributes that ship with every Plytix account. You can't rename or delete them.
+Everything that isn't a custom attribute value sits at the top level of the product object. That includes system fields (`id`, `sku`, `label`, `gtin`, `status`, `product_level`), relationship fields (`categories`, `assets`), timestamps (`created`, `modified`), and foreign keys that point at other entities (`product_family_id`, `parent_id`, which the dashboard shows as "Variant of", and `thumbnail_id`). The system fields are the System Attributes that ship with every Plytix account. You can't rename or delete them.
 
-Your own attribute values sit inside the `attributes` map, keyed by each attribute's label, its snake-case identifier such as `short_description` (not its display name):
+Your own attribute values sit inside the `attributes` map, keyed by each attribute's label, its snake-case identifier such as `suggested_retail_price` (not its display name):
 
 ```json
 {
   "id": "5f7c8a1b2c3d4e5f6a7b8c9d",
-  "sku": "SHIRT-001",
-  "label": "Classic Cotton T-Shirt",
+  "sku": "1001",
+  "label": "Black Wavy Frost Glass Vessel Bowl",
   "status": "Completed",
   "attributes": {
-    "price": 34.99,
-    "short_description": "Soft combed cotton, regular fit.",
-    "website_ready": 92
+    "suggested_retail_price": 310.24,
+    "collection": "2019",
+    "rich_info_complete": 92
   }
 }
 ```
 
-That split is the most useful detail to remember about the model. When you filter, `sku[eq]=SHIRT-001` targets a system field, while `attributes.price[gt]=30` targets a value inside the map.
+That split is the most useful detail to remember about the model. When you filter, `sku[eq]=1001` targets a system field, while `attributes.suggested_retail_price[gt]=30` targets a value inside the map.
+
+Reads return each product's resolved values. A value a variant inherits from its parent, the result of a formula, and a completeness score all come back in the `attributes` map as plain values, the same way as a value you set yourself.
 
 `sku` is the only field required to create a product. It must be unique across your account, it's case sensitive, and it maxes out at 100 characters. Everything else is optional, so Plytix will store a product that is nothing but a SKU.
 
@@ -85,28 +86,28 @@ A product's `product_level` field holds one of four values. `0` marks a standalo
 | `2` | A variant of a parent |
 | `3` | A sub-variant |
 
-A product becomes a variant when you set its `parent_id`. The parent's own `product_level` shifts from `0` to `1` automatically, and its `num_variations` increases.
+A product becomes a variant when you set its `parent_id`. The parent's own `product_level` shifts from `0` to `1` automatically. To list a parent's direct variants, search products with `parent_id=<parent_id>`.
 
-Inheritance is configured per attribute inside the family. Turning inheritance on at Level 1 pushes a parent's values down to its variants and sub-variants; turning it on at Level 2 pushes a variant's values down to its sub-variants. A variant follows its parent's value until it overrides it. When a variant overrides an inherited value, the attribute appears in that product's `overwritten_attributes` array as `attributes.<label>`, for example `attributes.brand`, and the variant stops following later changes to the parent. Deleting the override leaves the variant with no value, and the attribute stays in the array.
+Inheritance is configured per attribute inside the family. Turning inheritance on at Level 1 pushes a parent's values down to its variants and sub-variants; turning it on at Level 2 pushes a variant's values down to its sub-variants. A variant follows its parent's value until it overrides it. Once a variant overrides an inherited value, it stops following later changes to the parent. Deleting the override leaves the variant with no value for that attribute; it doesn't bring back the parent's value.
 
-A family's structure lives in its family attributes: one row per attribute linked to the family, each with the linked `attribute` and a `level` of `parent_level`, `variant_level`, or `no_level`. Read them with `GET /api/v3/product-families/{product_family_id}/attributes`, or request `_fields=family_attributes.*` on `/api/v3/product-families`.
+A family's structure lives in its family attributes: one row per attribute linked to the family, each with the linked `attribute` and a `level` of `parent_level`, `variant_level`, or `no_level`. Read them with `GET /api/v3/product-families/{product_family_id}/attributes`, or expand them on the family by requesting `_fields=family_attributes.*` on `/api/v3/product-families`.
 
-You can build a family through the API. `POST /api/v3/product-families` creates one, `POST /api/v3/product-families/{product_family_id}/attributes` adds an attribute to it, and `PATCH` on the family renames it. Assigning a product into a family still works the way you'd expect, through `product_family_id`.
+You can build a family through the API. `POST /api/v3/product-families` creates one from a `name`, `POST /api/v3/product-families/{product_family_id}/attributes` links an attribute to it, and `PATCH` on the family renames it. Assigning a product into a family still works the way you'd expect, through `product_family_id`.
 
 <Callout type="warn" title="Inheritance levels depend on your account">
-  Creating a family and choosing its attributes both work through the API. Two calls return `403 Automatic inheritance is not available for this account` unless inheritance is available for your account: changing an existing link's `level` with `PATCH`, and sending `parent_attributes` or `variant_attributes` when you create a family. Linking an attribute with `"level": "parent_level"` through `POST /api/v3/product-families/{product_family_id}/attributes` worked in testing, and variants then inherited the value. A family's own `PATCH` accepts `name` only, because changing which attributes belong to a family propagates across every product in it.
+  Creating a family and linking attributes to it both work through the API. Changing an existing link's `level` with `PATCH` returns `403 Automatic inheritance is not available for this account` unless inheritance is available for your account. If that call returns `403`, ask your Plytix contact whether inheritance is available for your account. A family's own `PATCH` accepts `name` only, because changing which attributes belong to a family propagates across every product in it.
 </Callout>
 
 {/* FLAG (open):
-  The `POST` link at `parent_level` succeeded on an account where the other two calls return `403` (FB-036, 2026-10-15). Confirm with Plytix whether that route is meant to work without automatic inheritance. */}
+  The `POST` link at `parent_level` succeeded on an account where the level `PATCH` returns `403` (FB-036, 2026-10-15). Confirm with Plytix whether that route is meant to work without automatic inheritance. PM-25 (2026-10-19): Plytix asked us not to present that route as a workaround for the `403`, so the page no longer mentions it. */}
 
 ## Product Categories
 
-Categories are a tree. Each category has a `parent_id`, a `path` array holding the full chain of names down to it, a `slug`, and an `n_children` count.
+Categories are a tree. Each category has a `parent_id` that points at the category above it. To read the hierarchy as names rather than IDs, request `parent` with `_fields` for the direct parent as a category object, or `parents` for every ancestor as a list of category objects.
 
-A product can belong to more than one category. Its `categories` field returns the full category objects, each with its `id`, `name`, and `path`, so you don't need a second call to turn an ID into a name.
+A product can belong to more than one category. Its `categories` field returns the full category objects, each with its `id` and `name`, so you don't need a second call to turn an ID into a name.
 
-Adding and removing categories happens through dedicated endpoints: `POST /api/v3/products/{id}/categories` links one, and `DELETE /api/v3/products/{id}/categories/{category_id}` unlinks it. See [Safely remove categories, assets, or relationships](/docs/guides/safely-removing-categories-assets-or-relationships).
+Adding and removing categories happens through dedicated endpoints: `POST /api/v3/products/{id}/categories` links one, and `DELETE /api/v3/products/{id}/categories/{category_id}` unlinks it. See [Unlink categories, assets, or relationships](/docs/guides/safely-removing-categories-assets-or-relationships).
 
 Assets have their own separate tree, `/api/v3/asset-categories`. Product categories and asset categories don't share nodes.
 
@@ -114,7 +115,7 @@ Assets have their own separate tree, `/api/v3/asset-categories`. Product categor
 
 An asset is a file stored in Plytix DAM: an image, video, document, spreadsheet, or other file type. Assets exist independently of products, and uploading one with `POST /api/v3/assets` is separate from connecting it to a product. A product connects to assets in two ways: `thumbnail_id` sets its single main image, and media and media gallery attributes hold other assets as attribute values in the `attributes` map. There's no dedicated endpoint for linking or unlinking an asset.
 
-Each asset carries file metadata (`filename`, `extension`, `content_type`, `file_size`, `checksum`), an `alt_text` field, a `public` flag, and two counters that are handy for cleanup work: `n_products` and `n_catalogs` tell you how many places reference the asset before you delete it.
+Each asset record carries its `id`, its `filename`, and an `alt_text` field, along with `created` and `modified` timestamps. Request `categories` with `_fields` to expand the asset categories it's filed under. Asset records don't currently include a download URL for the file.
 
 On the product side, `thumbnail_id` points at the single asset used as the product's main image, while `assets` lists every asset linked to it.
 
@@ -122,52 +123,49 @@ On the product side, `thumbnail_id` points at the single asset used as the produ
 
 A relationship connects products to other products. Setting one up takes two steps and conflating them is a common source of confusion.
 
-1. The Relationship itself is the named type, such as "Accessories", "Spare parts", or "Bundle contents". It's an account-level entity at `/api/v3/relationships`, and creating one links no products.
-2. Linking products happens through `/api/v3/products/{product_id}/relationships/{relationship_id}`, which attaches specific related products to one product under that relationship type.
+1. The Relationship itself is the named type, such as "Gift basket", "Recommended products", or "Gift pack". It's an account-level entity, and creating one links no products.
+2. Linking products attaches specific related products to one product under that relationship type.
 
 Each link can carry a `quantity`, which is what makes relationships usable for bundles and packs rather than only for recommendations.
 
-Both steps are writable. `POST /api/v3/relationships` creates the type, and `POST`, `PATCH`, and `DELETE` on `/api/v3/products/{product_id}/relationships/{relationship_id}` link products, change a link's quantity, and unlink again. The unlink is scoped: it removes the link and leaves both products intact.
+V3's relationship endpoints are being redesigned and aren't documented yet. Until they are, manage relationships and related products through V1.
 
-You read a product's relationships through its `product_relationships` field.
+{/* FLAG (open): REL-23. The 2026-10-19 spec replaces `/api/v3/relationships`, `/api/v3/related-products` and `/api/v3/products/{product_id}/relationships` with `/api/v3/product-relationship-types` and `/api/v3/products/{product_identifier}/product_relationship_types`, and `product_relationships` on the product with `product_relationships_from`/`_to`. Rewrite this section once Plytix classifies the new operations. */}
 
-## Lists
+## Asset lists
 
-Both products and assets support lists, and both come in two flavors:
+Asset lists group assets, and come in two flavors:
 
-- Static lists hold a fixed set of members you add and remove yourself.
+- Static lists hold a fixed set of assets you add and remove yourself.
 - Smart lists store a `query` instead of members, so their contents update as your data changes. These are what the dashboard calls smart lists.
 
-A product's `static_lists` field shows the static lists it belongs to.
+Request an asset's `static_lists` with `_fields` to see the static lists it belongs to. Add an asset to a static list with `POST /api/v3/assets/{identifier}/static_lists`, and remove it with `DELETE /api/v3/assets/{identifier}/static_lists/{id}`.
 
 ## How related data comes back
 
-Plytix expands related entities for you. Ask for `categories`, `assets`, or `product_relationships` and you get the objects themselves, not a list of IDs to resolve separately. There's no `_expand` parameter to set, and passing one returns an error.
+Plytix expands related entities for you. Ask for `categories` or `assets` and you get the objects themselves, not a list of IDs to resolve separately. There's no `_expand` parameter to set, and passing one returns an error.
 
 The shape of an expanded field depends on the relation. To-many relations, such as `categories` and `assets`, come back as arrays. To-one relations, such as `thumbnail`, `parent`, and `product_family`, come back as a single object.
 
-Expansion isn't narrowed by your filters. This request finds products in the Backpacks category, but each product still returns all of its categories and assets, not only the matching category:
+Expansion isn't narrowed by your filters. This request finds products in the Drinkware category, but each product still returns all of its categories and assets, not only the matching category:
 
 ```http
-GET /api/v3/products?categories.name[intersects]=Backpacks&_fields=sku&_fields=categories&_fields=assets
+GET /api/v3/products?categories.name[intersects]=Drinkware&_fields=sku&_fields=categories&_fields=assets
 ```
 
 What you can't ask for is the underlying ID array. Every field ending in `_ids` is hidden from responses, so `_fields=category_ids` returns `400` with a `HiddenFieldError`. Use the plural name instead: `categories`, not `category_ids`.
 
-Two more details about reads:
-
-- `_fields` only narrows the response on the search endpoint. `GET /api/v3/products/{id}` always returns the full product, whatever you pass.
-- Products also carry `channels`, `ecatalogs`, and `product_data_sheets`, which record where their content gets published. These are read-only.
+`_fields` works the same way on a single product: `GET /api/v3/products/{id}?_fields=sku` returns only the `sku`. Without `_fields`, a read returns the default fields, and related entities come back only when you name them.
 
 ## Related articles
 
 Now that you know how the entities fit together, you can explore these related guides.
 
 <Cards>
-  <Card icon={<OrganizationRegular />} title="Reconstruct parent/variant hierarchies" href="/docs/guides/reconstructing-parent-variant-hierarchies">
+  <Card icon={<OrganizationRegular />} title="Rebuild parent and variant products" href="/docs/guides/reconstructing-parent-variant-hierarchies">
     See product levels, families, and inheritance working in real requests.
   </Card>
-  <Card icon={<FilterRegular />} title="Audit product data quality with filters" href="/docs/guides/auditing-product-data-quality-with-filters">
+  <Card icon={<FilterRegular />} title="Audit product data quality" href="/docs/guides/auditing-product-data-quality-with-filters">
     Query system fields and the attributes map to find incomplete products.
   </Card>
 </Cards>

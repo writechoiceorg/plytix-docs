@@ -1,0 +1,58 @@
+# Schema edits for the product-categories endpoints (Phase 3, 2026-10-20).
+# Sources: spec 2026-10-02 (required fields, additionalProperties false),
+# bruno-collection/03-Product-Categories/ (2026-09-07/22), 16 Oct 2026 field-audit handoff.
+# CategoryBaseOutputDto is shared with asset categories, so it isn't edited here.
+overlay: 1.0.0
+info:
+  title: product-categories schemas
+  version: 1.0.0
+actions:
+  # --- create body ---------------------------------------------------------------
+  - target: $.components.schemas.ProductCategoryCreateInputDto
+    update:
+      description: Body for creating a product category. Only `name` is required, and fields not listed here return `422`.
+  - target: $.components.schemas.ProductCategoryCreateInputDto.properties.name
+    update:
+      description: Category name.
+      examples:
+        - Drinkware
+  - target: $.components.schemas.ProductCategoryCreateInputDto.properties.parent_id
+    update:
+      description: ID of the category to create this one under. Leave it out to create a top-level category.
+      examples:
+        - 6a1f0c2e9b3d4a5f8c7e1c01
+
+  # --- update body ---------------------------------------------------------------
+  - target: $.components.schemas.ProductCategoryUpdateInputDto
+    update:
+      description: Fields to change. Send only the fields you want to change, and fields not listed here return `422`.
+  - target: $.components.schemas.ProductCategoryUpdateInputDto.properties.name
+    update:
+      description: New category name.
+      examples:
+        - Espresso Cups
+  - target: $.components.schemas.ProductCategoryUpdateInputDto.properties.parent_id
+    update:
+      description: ID of the category to move this one under.
+      examples:
+        - 6a1f0c2e9b3d4a5f8c7e1c01
+
+  # --- read model (search and get) -------------------------------------------------
+  - target: $.components.schemas.ProductCategoryGetOutputDto.properties.parent_id
+    update:
+      description: ID of the category directly above this one. `null` on a top-level category from a get by ID. Search results and create responses leave the key out for a top-level category.
+  - target: $.components.schemas.ProductCategoryCreateOutputDto
+    update:
+      description: The new category. `created`, `modified`, and, on a top-level category, `parent_id` aren't returned. Read the category back to get them.
+  - target: $.components.schemas.ProductCategoryGetOutputDto.properties.path
+    remove: true
+  - target: $.components.schemas.ProductCategoryGetOutputDto.properties.slug
+    remove: true
+  - target: $.components.schemas.ProductCategoryGetOutputDto.properties.n_children
+    remove: true
+  - target: $.components.schemas.ProductCategoryCreateOutputDto.properties.path
+    remove: true
+  - target: $.components.schemas.ProductCategoryCreateOutputDto.properties.slug
+    remove: true
+  - target: $.components.schemas.ProductCategoryCreateOutputDto.properties.n_children
+    remove: true

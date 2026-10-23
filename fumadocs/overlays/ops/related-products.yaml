@@ -1,0 +1,13 @@
+# Operation edits for the related-products endpoints.
+# Phase 2 (2026-10-20): the search is published. The nested GETs under
+# /products/{product_id}/relationships/{relationship_id}/related-products are on
+# hold (visibility.yaml, VERIFY.md); their actions below are kept but not applied.
+# Sources: Q#63, Q#64, Q#112, Q#113, Get Related Products (Top-Level).bru.
+# 2026-10-22: the 2026-10-19 spec removed these routes (relationship types moved to
+# /api/v3/product-relationship-types, still unclassified in visibility.yaml), so
+# every action matched nothing and was deleted. The old text is in git history.
+overlay: 1.0.0
+info:
+  title: related-products operations
+  version: 1.0.0
+actions: []

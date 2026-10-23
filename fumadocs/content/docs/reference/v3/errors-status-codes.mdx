@@ -3,7 +3,7 @@ title: Errors and status codes
 description: "Reference for the HTTP status codes and error response shapes you see across the Plytix API, including validation errors."
 ---
 
-import { BookOpenRegular, GaugeRegular } from '@/components/icons';
+import { BookOpenRegular, DocumentEditRegular } from '@/components/icons';
 
 This page documents the HTTP status codes and error response formats you'll encounter when calling the Plytix API.
 
@@ -46,9 +46,9 @@ The API returns the following standard HTTP status codes, grouped by class:
 
 ## Error response format
 
-Operations declare only two response codes in the OpenAPI specification: 200 for successful requests, and 422 for validation errors.
+Response bodies depend on the operation. A `204 No Content` response has no body and must not be parsed as JSON. Use each operation's documented success and error schema in the [API reference](/reference/v3).
 
-Every response, successful or not, uses an envelope with a `data` field and an `errors` array. The `errors` array is always present, even on a successful response, and is empty when there's nothing to report. Search responses also include a `pagination` object with `next_page` and `previous_page`.
+Many responses carry a `data` field and an `errors` array, and search responses also include a `pagination` object with `next_page` and `previous_page`. A `422` uses a `detail` array instead, as shown below.
 
 Example response for a request that fails with a 404:
 
@@ -103,10 +103,10 @@ Open the entries below for the shape of each error object.
 ## Related resources
 
 <Cards>
-  <Card icon={<BookOpenRegular />} title="API Overview" href="/docs/reference/v3">
+  <Card icon={<BookOpenRegular />} title="API Overview" href="/reference/v3">
     What the Plytix API is for, the resources it exposes, and the response conventions this page builds on.
   </Card>
-  <Card icon={<GaugeRegular />} title="Rate limits" href="/docs/reference/v3/rate-limits">
-    How Plytix's API rate limits work and where to check the limits for your plan.
+  <Card icon={<DocumentEditRegular />} title="Update and delete records" href="/reference/v3/updates-and-deletes">
+    See which status each write returns and when a response has no body.
   </Card>
 </Cards>

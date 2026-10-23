@@ -1,11 +1,11 @@
 ---
-title: "Searching and pagination"
+title: "Search and pagination"
 description: "Reference for converting a V1 search POST body into a V3 GET query, and for paging through a V3 result set that returns no record counts."
 ---
 
-import { FilterRegular, TextNumberListLtrRegular } from '@/components/icons';
+import { ArrowDownloadRegular, TextNumberListLtrRegular } from '@/components/icons';
 
-A V1 search is a POST with a JSON body. A V3 search is a GET with query parameters. This page maps the two request shapes onto each other and covers what changes once the results come back, including the two pagination behaviors that break migrated paging loops. It's part of the reference set for [Migrating to V3](/docs/guides/migrating-to-v3).
+A V1 search is a POST with a JSON body. A V3 search is a GET with query parameters. This page maps the two request shapes onto each other and covers what changes once the results come back, including the two pagination behaviors that break migrated paging loops. It's part of the reference set for [Migration overview](/docs/guides/migrating-to-v3).
 
 ## Request shape
 
@@ -39,16 +39,16 @@ The V1/V2 defaults and the 100 limit are documented on product search (V1 and V2
 
 V3 returns page URLs rather than a page number to increment, so a paging loop follows `next_page` instead of counting pages. Live responses leave the key out when it doesn't apply, and the `Pagination` schema also allows `null`, so a client written as `if (pagination.next_page !== null)` is wrong. Continue the loop only while `next_page` holds a URL you can request, which covers an absent key and a null one.
 
-Paging doesn't freeze the result set. Each request runs the query again, so records added, deleted, or re-sorted while you're paging can come back twice or not at all. For a run that has to be consistent, filter on a stable field such as a date range. [Export your full catalog](/docs/guides/exporting-your-full-catalog) walks through the full pattern.
+Paging doesn't freeze the result set. Each request runs the query again, so records added, deleted, or re-sorted while you're paging can come back twice or not at all. A date filter alone doesn't make the run consistent. Sort on a deterministic field and reconcile at the end. [Export your full catalog](/docs/guides/exporting-your-full-catalog) walks through the full pattern.
 
 <Callout type="warn" title="No counts in V3">
   V1 returned `total_count` on every search. V3 has no equivalent: the pagination block carries no counts, and there is no parameter that adds one. Requesting `_total_count` or `_filtered_count` returns `400` with `InvalidFieldError: Field '_total_count' does not exist.`, confirmed on products and assets.
 
-  Anything in your integration that reads a total (a progress bar, a "showing N of M" label, a pre-sized buffer) has to page to the end and tally. See [Pagination](/docs/reference/v3/pagination).
+  Anything in your integration that reads a total (a progress bar, a "showing N of M" label, a pre-sized buffer) has to page to the end and tally. See [Pagination](/reference/v3/pagination).
 </Callout>
 
 <Callout type="warn" title="Rewrite next_page links to https">
-  Pagination links currently come back as `http://` URLs that `301` to `https`. Clients that don't forward `Authorization` across a scheme-changing redirect drop it and get a `401`. Rewrite the scheme to `https` before you follow the link. This is a link-generation issue rather than a convention of the API, so don't build your integration around the `http` form.
+  Pagination links currently come back as `http://` URLs that `301` to `https`. Clients that don't forward `Authorization` across a scheme-changing redirect drop it and get a `401`. Rewrite the scheme to `https`, and check that the host and path match your original search before you attach your token. See [Fix the scheme before following the link](/reference/v3/pagination#fix-the-scheme-before-following-the-link). This is a link-generation issue rather than a convention of the API, so don't build your integration around the `http` form.
 </Callout>
 
 ## Convert a product search
@@ -83,8 +83,8 @@ The response wraps the records in `data` and the links in `pagination`:
   "data": [
     {
       "id": "6aa022262b6fd055ffb7caa4",
-      "sku": "WC-TEST-FULL-001",
-      "label": "WC Test Full Product",
+      "sku": "GF-Chocolates",
+      "label": "Chocolate box",
       "status": "Draft",
       "created": "2026-09-08T14:56:38.319000"
     }
@@ -94,17 +94,17 @@ The response wraps the records in `data` and the links in `pagination`:
 }
 ```
 
-This result set fits on one page, so `pagination` is empty. When more records match, it carries a `next_page` URL to follow. [Pagination](/docs/reference/v3/pagination) has the full loop.
+This result set fits on one page, so `pagination` is empty. When more records match, it carries a `next_page` URL to follow. [Pagination](/reference/v3/pagination) has the full loop.
 
 ## Related resources
 
 Now that you can convert a search and page through its results, you can explore these related pages.
 
 <Cards>
-  <Card icon={<FilterRegular />} title="Filter operators" href="/docs/guides/migrating-to-v3/filter-operators">
-    Map each V1 filter object to its V3 bracket syntax.
+  <Card icon={<ArrowDownloadRegular />} title="Export your full catalog" href="/docs/guides/exporting-your-full-catalog">
+    Apply V3 paging to a full-catalog export that you can resume.
   </Card>
-  <Card icon={<TextNumberListLtrRegular />} title="Pagination" href="/docs/reference/v3/pagination">
+  <Card icon={<TextNumberListLtrRegular />} title="Pagination" href="/reference/v3/pagination">
     Read the V3 pagination block and its parameters in full.
   </Card>
 </Cards>

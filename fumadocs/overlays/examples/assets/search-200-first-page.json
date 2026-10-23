@@ -1,0 +1,24 @@
+{
+  "data": [
+    {
+      "id": "6a1f0c2e9b3d4a5f8c7e1b03",
+      "assigned": true,
+      "filename": "Enjoy Mug - White.jpg",
+      "alt_text": "Adventure mug in white",
+      "created": "2026-06-22T08:44:19.008000",
+      "modified": "2026-06-22T08:44:19.046000"
+    },
+    {
+      "id": "6a1f0c2e9b3d4a5f8c7e1b02",
+      "assigned": true,
+      "filename": "Enjoy Mug - Blue.jpg",
+      "alt_text": null,
+      "created": "2026-06-22T08:44:18.978000",
+      "modified": "2026-06-22T08:44:18.990000"
+    }
+  ],
+  "errors": [],
+  "pagination": {
+    "next_page": "http://<api-host>/api/v3/assets?_page=2&_page_size=2"
+  }
+}

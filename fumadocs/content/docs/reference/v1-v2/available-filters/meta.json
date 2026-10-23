@@ -1,0 +1,9 @@
+{
+  "title": "Available Filters",
+  "pages": [
+    "get-available-asset-filters",
+    "get-available-product-filters",
+    "get-available-relationship-filters"
+  ],
+  "icon": "Filter"
+}

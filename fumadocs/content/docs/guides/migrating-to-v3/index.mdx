@@ -1,5 +1,5 @@
 ---
-title: "Migrating to V3"
+title: "Migration overview"
 description: "Decide which parts of a V1/V2 integration move to V3, which have to stay where they are, and how to convert the parts that move."
 ---
 
@@ -28,23 +28,23 @@ Before you start, you need:
    | Operation | Why V3 |
    |---|---|
    | Searching and reading any resource | Richer operators, real `OR` grouping, field expansion in one call |
-   | Create, update, and delete on products, assets, categories, asset categories, product attributes, attribute groups, families, and relationships | Consistent conventions across every resource |
+   | Create, update, and delete on products, assets, categories, asset categories, product attributes, attribute groups, families, and relationship types | Consistent conventions across every resource |
    | Linking products to categories, assets to categories, and attributes to groups | Dedicated link and unlink endpoints, rather than rewriting an array |
-   | Adding and removing product relationships | V3's `DELETE /products/{product_id}/relationships/{relationship_id}` is a scoped unlink; V1 needs a separate `/unlink` call |
+   | Removing product relationships | V3's `DELETE /products/{product_id}/relationships/{relationship_id}` is a scoped unlink; V1 needs a separate `/unlink` call. Adding links and changing quantities aren't available through V3 yet, so keep those calls on V1/V2 for now; see [Product relationships](/docs/guides/migrating-to-v3/endpoint-mapping#product-relationships) |
    | Creating variants | `parent_id` and `product_family_id` on the product itself |
+   | Connecting assets to a product | Media and media gallery attributes: a media attribute takes a bare asset ID and a gallery takes an array of IDs. `thumbnail_id` sets the main image |
 
    **Keep these on V1/V2.** They have no confirmed V3 equivalent today:
 
    | Operation | V1 endpoint | Status in V3 |
    |---|---|---|
    | Replacing the binary content of an existing asset | `PUT /api/v1/assets/{asset_id}/content` | No equivalent. V3 accepts `url` or `content` only when the asset is created; its update schema carries only `filename` and `alt_text` |
-   | Linking and unlinking assets on a product | `POST` and `DELETE /api/v1/products/{product_id}/assets` | No dedicated endpoint. Set a media or media gallery attribute to the asset ID with `PATCH /api/v3/products/{identifier}/attributes/{label}` and clear it with `DELETE` on the same path. `thumbnail_id` sets the main image |
    | Discovering the available filters for a resource | `GET /api/v1/filters/product`, `/filters/asset`, `/filters/relationships` | No equivalent. Build filters from `GET /api/v3/product-attributes` instead |
    | Resyncing variants against their parent | `POST /api/v1/products/{parent_product_id}/variants/resync` | No equivalent |
    | Reading a total result count | `total_count` on every V1 search response | No equivalent anywhere in V3. See step 6 |
    | Searching API credentials and account memberships | `POST /api/v1/accounts/api-credentials/search`, `/accounts/memberships/search` | No equivalent. Managing keys and users in the Plytix dashboard doesn't replace searching them through the API |
 
-   **Bulk writes aren't in V3 yet.** The current V3 contract has no bulk create, update, or delete endpoints. Bulk endpoints are part of Plytix's V3 design (planned), so a large change is many single requests for now, paced under your [rate limit](/docs/reference/v3/rate-limits).
+   **Bulk writes aren't in V3 yet.** The current V3 contract has no bulk create, update, or delete endpoints. Bulk endpoints are part of Plytix's V3 design (planned), so a large change is many single requests for now, paced under your [rate limit](/reference/v3/rate-limits).
 
    <Callout type="info" title="Keeping some calls on V1/V2">
      If your integration keeps some calls on V1/V2, each version authenticates in its own way. V1/V2 keep the current token flow, and V3's new model isn't published yet, so don't assume one token covers both.
@@ -123,7 +123,7 @@ Before you start, you need:
    Two changes are worth calling out beyond the renaming:
 
    - **Products accept more than one identifier.** In V3, both the product ID and the SKU work in the path, as long as the SKU is URL-encoded. That removes a lookup step for integrations keyed on SKU.
-   - **Related data comes back with the record.** Where V1 has a separate call for each relation, V3 returns them through field selection on a search: `GET /api/v3/products?sku=<sku>&_fields=categories&_fields=assets`. The per-relation subpaths, such as `GET /api/v3/products/{identifier}/categories`, return the same data one relation at a time.
+   - **Related data comes back with the record.** Where V1 has a separate call for each relation, V3 returns them through field selection on a search: `GET /api/v3/products?sku=<sku>&_fields=categories&_fields=assets`. The per-relation endpoints, such as `GET /api/v3/products/{identifier}/categories`, return the same data one relation at a time.
 
    See [Endpoint mapping](/docs/guides/migrating-to-v3/endpoint-mapping) for the complete mapping.
 
@@ -149,10 +149,10 @@ Before you start, you need:
    Anything in your integration that reads a total has to be reworked to page to the end and tally: a progress bar, a "showing N of M" label, a pre-sized buffer, a sanity check that compares an expected count against a returned one. V3 also paginates by returning the next page's URL rather than a page number to increment, so the loop follows `next_page` until that key stops appearing.
 
    <Callout type="warn" title="Rewrite next_page to https before following it">
-     Every `next_page` and `previous_page` URL is generated with the `http` scheme and `301`s to `https`. HTTP clients that don't forward `Authorization` across a scheme-changing redirect will drop it and get a `401`. Rewrite the scheme before requesting the URL, or use `curl -L --location-trusted`.
+     Every `next_page` and `previous_page` URL is generated with the `http` scheme and `301`s to `https`. HTTP clients that don't forward `Authorization` across a scheme-changing redirect will drop it and get a `401`. Rewrite the scheme to `https`, then check that the host and path match the search you started before you attach your token. Don't let your HTTP client forward `Authorization` across redirects, because that sends your token to whatever host the redirect names. See [Fix the scheme before following the link](/reference/v3/pagination#fix-the-scheme-before-following-the-link).
    </Callout>
 
-   Note also that these keys are omitted when they don't apply rather than set to `null`, so test for presence, not for `!== null`. See [Pagination](/docs/reference/v3/pagination).
+   Note also that these keys are omitted when they don't apply rather than set to `null`, so test for presence, not for `!== null`. See [Pagination](/reference/v3/pagination).
 
 7. **Change how your code reads write responses.**
 
@@ -171,10 +171,10 @@ Before you start, you need:
 
    Two V3 behaviors catch migrated code out:
 
-   - **PATCH replaces the `attributes` map rather than merging into it.** Sending only the attributes that changed deletes every attribute you left out, with no error and no warning. See the [before-and-after example](/docs/guides/migrating-to-v3/responses-and-updates#how-patch-treats-the-attributes-map). To change one attribute, send its bare JSON value to `PATCH /products/{identifier}/attributes/{name}`. To change several, read the current map, merge, and send it back. V3 has no conditional write, so a change someone else makes between your read and your write is overwritten.
+   - **PATCH replaces the `attributes` map rather than merging into it.** Sending only the attributes that changed deletes every attribute you left out, with no error and no warning. See the [before-and-after example](/docs/guides/migrating-to-v3/responses-and-updates#how-patch-treats-the-attributes-map). To change one attribute, send its bare JSON value to `PATCH /products/{identifier}/attributes/{name}`. To change several, send a partial map to `PATCH /products/{identifier}/attributes`, which merges it into the existing map.
    - **DELETE erases** the entity or the field it's applied to. It doesn't set the value to null or reset it to a default. Deleting a variant's override leaves the variant empty instead of showing the parent's value again. Confirm on a test record that a delete does what your V1 code assumed.
 
-   See [Update and delete records](/docs/reference/v3/updates-and-deletes).
+   See [Update and delete records](/reference/v3/updates-and-deletes).
 
 9. **Compare both versions on test data before cutting over.**
 
@@ -194,7 +194,7 @@ Check the problems below if you run into issues while following this guide.
   </Accordion>
 
   <Accordion title="Attributes you didn't touch disappeared after an update" value="attributes-disappeared">
-    PATCH replaced the whole `attributes` map with what you sent. Restore the missing values, then patch one attribute at a time through `PATCH /products/{identifier}/attributes/{name}`. Use read-merge-write only where nothing else edits the same products at the same time, because it overwrites changes made between your read and your write.
+    PATCH replaced the whole `attributes` map with what you sent. Restore the missing values, then send future changes to `PATCH /products/{identifier}/attributes` (a partial map that's merged in) or to `PATCH /products/{identifier}/attributes/{name}` (one attribute). Don't send a partial map to the product itself.
   </Accordion>
 
   <Accordion title={<>A link request returns <code>404</code> or <code>405</code></>} value="link-request-404-405">
@@ -210,7 +210,7 @@ Check the problems below if you run into issues while following this guide.
   </Accordion>
 
   <Accordion title="You can't find the V3 endpoint for replacing an asset's file or attaching an asset to a product" value="no-v3-asset-endpoint">
-    V3 has neither. Uploading a new asset works in V3 with `POST /api/v3/assets` and a `url` or `content`, but replacing the file of an existing asset stays on V1. Attaching an asset to a product goes through media and media gallery attributes in V3, and their value format isn't confirmed yet, so keep that on V1 for now, as step 1 explains.
+    V3 has no dedicated endpoint for either. Uploading a new asset works in V3 with `POST /api/v3/assets` and a `url` or `content`, but replacing the file of an existing asset stays on V1. Attaching an asset to a product goes through media and media gallery attributes in V3: a media attribute takes a bare asset ID and a gallery takes an array of IDs. See [Connect other assets to a product](/docs/guides/safely-removing-categories-assets-or-relationships#connect-other-assets-to-a-product).
   </Accordion>
 </Accordions>
 
@@ -222,7 +222,7 @@ Six reference pages sit under this guide and carry the detail the steps above po
   <Card icon={<KeyRegular />} title="Authentication and base URLs" href="/docs/guides/migrating-to-v3/authentication-and-base-urls">
     The base URLs and path prefixes, the V1/V2 token flow, and the status of V3 authentication.
   </Card>
-  <Card icon={<SearchRegular />} title="Searching and pagination" href="/docs/guides/migrating-to-v3/searching-and-pagination">
+  <Card icon={<SearchRegular />} title="Search and pagination" href="/docs/guides/migrating-to-v3/searching-and-pagination">
     The V1 search body translated into a V3 query string, and how V3 pages.
   </Card>
   <Card icon={<FilterRegular />} title="Filter operators" href="/docs/guides/migrating-to-v3/filter-operators">
@@ -234,7 +234,7 @@ Six reference pages sit under this guide and carry the detail the steps above po
   <Card icon={<TableRegular />} title="Endpoint mapping" href="/docs/guides/migrating-to-v3/endpoint-mapping">
     The V1/V2 endpoints with their V3 equivalents, resource by resource.
   </Card>
-  <Card icon={<BoxDismissRegular />} title="Not migrated and new in V3" href="/docs/guides/migrating-to-v3/not-migrated-and-new-in-v3">
+  <Card icon={<BoxDismissRegular />} title="What's new and not migrated" href="/docs/guides/migrating-to-v3/not-migrated-and-new-in-v3">
     What has no V3 counterpart, what V3 added, and what V2 covers.
   </Card>
 </Cards>

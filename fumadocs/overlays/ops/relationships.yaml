@@ -1,0 +1,21 @@
+# Operation edits for the relationships endpoints: relationship TYPES such as
+# "Gift basket". Links between products under a type are the product-relationships
+# resource (mostly on hold, REL-2); link only to its published pages.
+#
+# Phase 3 (2026-10-20). Sources: config/api-testing.config.md (Q#60, Q#74,
+# Q#84, Q#91, Q#113, Q#116), bruno-collection/14-Relationships/ (captures
+# 2026-09-15 to 2026-09-22), the data model guide (intent).
+#
+# - PATCH success is documented as 204 from the spec plus Q#84/Q#116; the only
+#   relationship capture (2026-09-15) predates that change and shows 200 (VERIFY.md).
+# - The field routes were never tested except the GET discovery 400; PATCH and
+#   DELETE field routes redirect only.
+# - account_id is left out of examples (sanitization rule).
+# 2026-10-22: the 2026-10-19 spec removed these routes (relationship types moved to
+# /api/v3/product-relationship-types, still unclassified in visibility.yaml), so
+# every action matched nothing and was deleted. The old text is in git history.
+overlay: 1.0.0
+info:
+  title: relationships operations
+  version: 1.0.0
+actions: []

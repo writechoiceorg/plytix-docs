@@ -1,0 +1,777 @@
+# Patches for upstream spec bugs. Each cites a question in overlays/QUESTIONS.md.
+# The build fails with REDUNDANT_FIX once Plytix fixes one upstream: then delete it.
+# Generated 2026-10-20 by scripts/api/migrate-legacy.mjs; edit freely from here on.
+overlay: 1.0.0
+info:
+  title: Upstream spec fixes
+  version: 1.0.0
+actions:
+  - target: $.paths['/api/v3/product-families/{product_family_id}/attributes/{attribute_id}'].get
+    description: GET /api/v3/product-families/{product_family_id}/attributes/{attribute_id} uses {product_family_id}, {attribute_id} in its path but doesn't declare them.
+    x-plytix-question: OAS-1
+    update:
+      parameters:
+        - name: product_family_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: product_family_id
+        - name: attribute_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: attribute_id
+  - target: $.paths['/api/v3/product-families/{product_family_id}/attributes/{attribute_id}'].post
+    description: POST /api/v3/product-families/{product_family_id}/attributes/{attribute_id} uses {product_family_id}, {attribute_id} in its path but doesn't declare them.
+    x-plytix-question: OAS-1
+    update:
+      parameters:
+        - name: product_family_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: product_family_id
+        - name: attribute_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: attribute_id
+  - target: $.paths['/api/v3/product-families/{product_family_id}/attributes/{attribute_id}'].delete
+    description: DELETE /api/v3/product-families/{product_family_id}/attributes/{attribute_id} uses {product_family_id}, {attribute_id} in its path but doesn't declare them.
+    x-plytix-question: OAS-1
+    update:
+      parameters:
+        - name: product_family_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: product_family_id
+        - name: attribute_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: attribute_id
+  - target: $.paths['/api/v3/product-families/{product_family_id}/attributes/{attribute_id}'].patch
+    description: PATCH /api/v3/product-families/{product_family_id}/attributes/{attribute_id} uses {product_family_id}, {attribute_id} in its path but doesn't declare them. It also declares no request body. The request body is inferred from Update Family Attribute Level.bru; every PATCH so far returned 403, so it has never been validated (VERIFY.md).
+    x-plytix-question: OAS-1, OAS-10
+    update:
+      parameters:
+        - name: product_family_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: product_family_id
+        - name: attribute_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: attribute_id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - level
+              properties:
+                level:
+                  type: string
+                  enum:
+                    - no_level
+                    - parent_level
+                    - variant_level
+                  description: The new level. Changing it returns `403` on accounts without automatic inheritance.
+  - target: $.paths['/api/v3/product-families/{product_family_id}/attributes/{attribute_id}/{path}'].get
+    description: GET /api/v3/product-families/{product_family_id}/attributes/{attribute_id}/{path} uses {product_family_id}, {attribute_id}, {path} in its path but doesn't declare them.
+    x-plytix-question: OAS-1
+    update:
+      parameters:
+        - name: product_family_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: product_family_id
+        - name: attribute_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: attribute_id
+        - name: path
+          in: path
+          required: true
+          schema:
+            type: string
+            title: path
+  - target: $.paths['/api/v3/product-families/{product_family_id}/attributes/{attribute_id}/{path}'].delete
+    description: DELETE /api/v3/product-families/{product_family_id}/attributes/{attribute_id}/{path} uses {product_family_id}, {attribute_id}, {path} in its path but doesn't declare them.
+    x-plytix-question: OAS-1
+    update:
+      parameters:
+        - name: product_family_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: product_family_id
+        - name: attribute_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: attribute_id
+        - name: path
+          in: path
+          required: true
+          schema:
+            type: string
+            title: path
+  - target: $.paths['/api/v3/product-families/{product_family_id}/attributes/{attribute_id}/{path}'].patch
+    description: PATCH /api/v3/product-families/{product_family_id}/attributes/{attribute_id}/{path} uses {product_family_id}, {attribute_id}, {path} in its path but doesn't declare them.
+    x-plytix-question: OAS-1
+    update:
+      parameters:
+        - name: product_family_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: product_family_id
+        - name: attribute_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: attribute_id
+        - name: path
+          in: path
+          required: true
+          schema:
+            type: string
+            title: path
+  - target: $.paths['/api/v3/product-families/{product_family_id}/attributes'].get
+    description: GET /api/v3/product-families/{product_family_id}/attributes uses {product_family_id} in its path but doesn't declare it.
+    x-plytix-question: OAS-1
+    update:
+      parameters:
+        - name: product_family_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: product_family_id
+  - target: $.paths['/api/v3/product-families/{product_family_id}/attributes'].post
+    description: POST /api/v3/product-families/{product_family_id}/attributes uses {product_family_id} in its path but doesn't declare it. It also declares no request body.
+    x-plytix-question: OAS-1, OAS-10
+    update:
+      parameters:
+        - name: product_family_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: product_family_id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              title: FamilyAttributeLinkInputDto
+              required:
+                - attribute_id
+              properties:
+                attribute_id:
+                  type: string
+                  description: ID of the attribute to link.
+                level:
+                  type: string
+                  enum:
+                    - no_level
+                    - parent_level
+                    - variant_level
+                  description: How the attribute value passes down the family hierarchy. Defaults to `no_level`.
+  - target: $.paths['/api/v3/products/{identifier}/{path}'].patch
+    description: PATCH /api/v3/products/{identifier}/{path} declares no request body; it takes the field value on its own (Q#87, FB-020).
+    x-plytix-question: OAS-10
+    update:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              description: The new value on its own. Its type depends on the attribute.
+            examples:
+              text:
+                summary: Text attribute
+                value: '2019'
+              decimal:
+                summary: Decimal attribute (sent as a string)
+                value: "12.5"
+              multiSelect:
+                summary: Multi-select attribute
+                value:
+                  - Blue
+              clear:
+                summary: Remove a Text value
+                value: null
+  - target: $.paths['/api/v3/assets/{identifier}/{path}'].patch
+    description: PATCH /api/v3/assets/{identifier}/{path} declares no request body; it takes the new value of one field on its own (Q#29, Asset Subpaths.bru 2026-09-08, ASSET-4).
+    x-plytix-question: OAS-10, ASSET-23
+    update:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: string
+              description: The new value of the field named in `path`, for example `alt_text`, sent on its own, not wrapped in an object.
+            examples:
+              altText:
+                summary: New alt text (path `alt_text`)
+                value: Adventure mug in blue, front view
+  - target: $.paths['/api/v3/product-attribute-groups/{identifier}/{path}'].patch
+    description: PATCH /api/v3/product-attribute-groups/{identifier}/{path} declares no request body; PATCH .../name with a bare JSON string returns 204 (Update Product Attribute Group.bru, 2026-10-13, Q#108).
+    x-plytix-question: OAS-10, GRP-22
+    update:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: string
+              description: The group's new name on its own. Only `name` can be changed.
+            examples:
+              name:
+                summary: New name (path `name`)
+                value: Rich Content
+  - target: $.paths['/api/v3/product-families/{identifier}/{path}'].patch
+    description: PATCH /api/v3/product-families/{identifier}/{path} declares no request body; PATCH .../name with a raw JSON string renamed the family (Update and Delete Product Family.bru, 2026-09-15).
+    x-plytix-question: OAS-10, FAM-21
+    update:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: string
+              description: The new value on its own. Only `name` can be changed.
+            examples:
+              name:
+                summary: New name (path `name`)
+                value: Mugs and Cups
+  # Dedicated association routes made public on 2026-10-22 (16 Oct 2026 handoff).
+  - target: $.paths['/api/v3/products/{identifier}/categories'].post
+    description: POST /api/v3/products/{identifier}/categories uses {identifier} in its path but doesn't declare it.
+    x-plytix-question: OAS-1
+    update:
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+            title: identifier
+  - target: $.paths['/api/v3/products/{identifier}/categories/{id}'].delete
+    description: DELETE /api/v3/products/{identifier}/categories/{id} uses {identifier}, {id} in its path but doesn't declare them.
+    x-plytix-question: OAS-1
+    update:
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+            title: identifier
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: id
+  - target: $.paths['/api/v3/product-attributes/{identifier}/groups'].post
+    description: POST /api/v3/product-attributes/{identifier}/groups uses {identifier} in its path but doesn't declare it.
+    x-plytix-question: OAS-1
+    update:
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+            title: identifier
+  - target: $.paths['/api/v3/product-attributes/{identifier}/groups/{id}'].delete
+    description: DELETE /api/v3/product-attributes/{identifier}/groups/{id} uses {identifier}, {id} in its path but doesn't declare them.
+    x-plytix-question: OAS-1
+    update:
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+            title: identifier
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: id
+  - target: $.components.schemas.ProductFamilyOutputDto
+    description: ProductFamilyOutputDto declares `_id`, but every live response returns `id` (List Product Families.bru, Get Product Family by ID.bru, Create Product Family.bru).
+    x-plytix-question: FAM-22
+    update:
+      properties:
+        id:
+          anyOf:
+            - $ref: "#/components/schemas/PydanticObjectId"
+            - type: "null"
+          description: Product family ID
+  - target: $.components.schemas.ProductFamilyOutputDto.properties._id
+    description: Replaced by `id` above.
+    x-plytix-question: FAM-22
+    remove: true
+  - target: $.components.schemas.ProductFamilyCreateOutputDto
+    description: ProductFamilyCreateOutputDto declares `_id`, but every live response returns `id` (List Product Families.bru, Get Product Family by ID.bru, Create Product Family.bru).
+    x-plytix-question: FAM-22
+    update:
+      properties:
+        id:
+          anyOf:
+            - $ref: "#/components/schemas/PydanticObjectId"
+            - type: "null"
+          description: Product family ID
+  - target: $.components.schemas.ProductFamilyCreateOutputDto.properties._id
+    description: Replaced by `id` above.
+    x-plytix-question: FAM-22
+    remove: true
+  - target: $.components.schemas.BooleanAttributeCreateOutputDto
+    description: BooleanAttributeCreateOutputDto declares `_id`, but live attribute responses return `id` (Create Text Attribute.bru, Get Product Attribute by ID.bru).
+    x-plytix-question: ATTR-28
+    update:
+      properties:
+        id:
+          anyOf:
+            - $ref: "#/components/schemas/PydanticObjectId"
+            - type: "null"
+          description: Product attribute ID
+  - target: $.components.schemas.BooleanAttributeCreateOutputDto.properties._id
+    description: Replaced by `id` above.
+    x-plytix-question: ATTR-28
+    remove: true
+  - target: $.components.schemas.BooleanAttributeGetOutputDto
+    description: BooleanAttributeGetOutputDto declares `_id`, but live attribute responses return `id` (Create Text Attribute.bru, Get Product Attribute by ID.bru).
+    x-plytix-question: ATTR-28
+    update:
+      properties:
+        id:
+          anyOf:
+            - $ref: "#/components/schemas/PydanticObjectId"
+            - type: "null"
+          description: Product attribute ID
+  - target: $.components.schemas.BooleanAttributeGetOutputDto.properties._id
+    description: Replaced by `id` above.
+    x-plytix-question: ATTR-28
+    remove: true
+  - target: $.components.schemas.CompletenessAttributeCreateOutputDto
+    description: CompletenessAttributeCreateOutputDto declares `_id`, but live attribute responses return `id` (Create Text Attribute.bru, Get Product Attribute by ID.bru).
+    x-plytix-question: ATTR-28
+    update:
+      properties:
+        id:
+          anyOf:
+            - $ref: "#/components/schemas/PydanticObjectId"
+            - type: "null"
+          description: Product attribute ID
+  - target: $.components.schemas.CompletenessAttributeCreateOutputDto.properties._id
+    description: Replaced by `id` above.
+    x-plytix-question: ATTR-28
+    remove: true
+  - target: $.components.schemas.CompletenessAttributeGetOutputDto
+    description: CompletenessAttributeGetOutputDto declares `_id`, but live attribute responses return `id` (Create Text Attribute.bru, Get Product Attribute by ID.bru).
+    x-plytix-question: ATTR-28
+    update:
+      properties:
+        id:
+          anyOf:
+            - $ref: "#/components/schemas/PydanticObjectId"
+            - type: "null"
+          description: Product attribute ID
+  - target: $.components.schemas.CompletenessAttributeGetOutputDto.properties._id
+    description: Replaced by `id` above.
+    x-plytix-question: ATTR-28
+    remove: true
+  - target: $.components.schemas.DateAttributeCreateOutputDto
+    description: DateAttributeCreateOutputDto declares `_id`, but live attribute responses return `id` (Create Text Attribute.bru, Get Product Attribute by ID.bru).
+    x-plytix-question: ATTR-28
+    update:
+      properties:
+        id:
+          anyOf:
+            - $ref: "#/components/schemas/PydanticObjectId"
+            - type: "null"
+          description: Product attribute ID
+  - target: $.components.schemas.DateAttributeCreateOutputDto.properties._id
+    description: Replaced by `id` above.
+    x-plytix-question: ATTR-28
+    remove: true
+  - target: $.components.schemas.DateAttributeGetOutputDto
+    description: DateAttributeGetOutputDto declares `_id`, but live attribute responses return `id` (Create Text Attribute.bru, Get Product Attribute by ID.bru).
+    x-plytix-question: ATTR-28
+    update:
+      properties:
+        id:
+          anyOf:
+            - $ref: "#/components/schemas/PydanticObjectId"
+            - type: "null"
+          description: Product attribute ID
+  - target: $.components.schemas.DateAttributeGetOutputDto.properties._id
+    description: Replaced by `id` above.
+    x-plytix-question: ATTR-28
+    remove: true
+  - target: $.components.schemas.DecimalAttributeCreateOutputDto
+    description: DecimalAttributeCreateOutputDto declares `_id`, but live attribute responses return `id` (Create Text Attribute.bru, Get Product Attribute by ID.bru).
+    x-plytix-question: ATTR-28
+    update:
+      properties:
+        id:
+          anyOf:
+            - $ref: "#/components/schemas/PydanticObjectId"
+            - type: "null"
+          description: Product attribute ID
+  - target: $.components.schemas.DecimalAttributeCreateOutputDto.properties._id
+    description: Replaced by `id` above.
+    x-plytix-question: ATTR-28
+    remove: true
+  - target: $.components.schemas.DecimalAttributeGetOutputDto
+    description: DecimalAttributeGetOutputDto declares `_id`, but live attribute responses return `id` (Create Text Attribute.bru, Get Product Attribute by ID.bru).
+    x-plytix-question: ATTR-28
+    update:
+      properties:
+        id:
+          anyOf:
+            - $ref: "#/components/schemas/PydanticObjectId"
+            - type: "null"
+          description: Product attribute ID
+  - target: $.components.schemas.DecimalAttributeGetOutputDto.properties._id
+    description: Replaced by `id` above.
+    x-plytix-question: ATTR-28
+    remove: true
+  - target: $.components.schemas.DropdownAttributeCreateOutputDto
+    description: DropdownAttributeCreateOutputDto declares `_id`, but live attribute responses return `id` (Create Text Attribute.bru, Get Product Attribute by ID.bru).
+    x-plytix-question: ATTR-28
+    update:
+      properties:
+        id:
+          anyOf:
+            - $ref: "#/components/schemas/PydanticObjectId"
+            - type: "null"
+          description: Product attribute ID
+  - target: $.components.schemas.DropdownAttributeCreateOutputDto.properties._id
+    description: Replaced by `id` above.
+    x-plytix-question: ATTR-28
+    remove: true
+  - target: $.components.schemas.DropdownAttributeGetOutputDto
+    description: DropdownAttributeGetOutputDto declares `_id`, but live attribute responses return `id` (Create Text Attribute.bru, Get Product Attribute by ID.bru).
+    x-plytix-question: ATTR-28
+    update:
+      properties:
+        id:
+          anyOf:
+            - $ref: "#/components/schemas/PydanticObjectId"
+            - type: "null"
+          description: Product attribute ID
+  - target: $.components.schemas.DropdownAttributeGetOutputDto.properties._id
+    description: Replaced by `id` above.
+    x-plytix-question: ATTR-28
+    remove: true
+  - target: $.components.schemas.FormulaAttributeCreateOutputDto
+    description: FormulaAttributeCreateOutputDto declares `_id`, but live attribute responses return `id` (Create Text Attribute.bru, Get Product Attribute by ID.bru).
+    x-plytix-question: ATTR-28
+    update:
+      properties:
+        id:
+          anyOf:
+            - $ref: "#/components/schemas/PydanticObjectId"
+            - type: "null"
+          description: Product attribute ID
+  - target: $.components.schemas.FormulaAttributeCreateOutputDto.properties._id
+    description: Replaced by `id` above.
+    x-plytix-question: ATTR-28
+    remove: true
+  - target: $.components.schemas.FormulaAttributeGetOutputDto
+    description: FormulaAttributeGetOutputDto declares `_id`, but live attribute responses return `id` (Create Text Attribute.bru, Get Product Attribute by ID.bru).
+    x-plytix-question: ATTR-28
+    update:
+      properties:
+        id:
+          anyOf:
+            - $ref: "#/components/schemas/PydanticObjectId"
+            - type: "null"
+          description: Product attribute ID
+  - target: $.components.schemas.FormulaAttributeGetOutputDto.properties._id
+    description: Replaced by `id` above.
+    x-plytix-question: ATTR-28
+    remove: true
+  - target: $.components.schemas.HtmlAttributeCreateOutputDto
+    description: HtmlAttributeCreateOutputDto declares `_id`, but live attribute responses return `id` (Create Text Attribute.bru, Get Product Attribute by ID.bru).
+    x-plytix-question: ATTR-28
+    update:
+      properties:
+        id:
+          anyOf:
+            - $ref: "#/components/schemas/PydanticObjectId"
+            - type: "null"
+          description: Product attribute ID
+  - target: $.components.schemas.HtmlAttributeCreateOutputDto.properties._id
+    description: Replaced by `id` above.
+    x-plytix-question: ATTR-28
+    remove: true
+  - target: $.components.schemas.HtmlAttributeGetOutputDto
+    description: HtmlAttributeGetOutputDto declares `_id`, but live attribute responses return `id` (Create Text Attribute.bru, Get Product Attribute by ID.bru).
+    x-plytix-question: ATTR-28
+    update:
+      properties:
+        id:
+          anyOf:
+            - $ref: "#/components/schemas/PydanticObjectId"
+            - type: "null"
+          description: Product attribute ID
+  - target: $.components.schemas.HtmlAttributeGetOutputDto.properties._id
+    description: Replaced by `id` above.
+    x-plytix-question: ATTR-28
+    remove: true
+  - target: $.components.schemas.IntAttributeCreateOutputDto
+    description: IntAttributeCreateOutputDto declares `_id`, but live attribute responses return `id` (Create Text Attribute.bru, Get Product Attribute by ID.bru).
+    x-plytix-question: ATTR-28
+    update:
+      properties:
+        id:
+          anyOf:
+            - $ref: "#/components/schemas/PydanticObjectId"
+            - type: "null"
+          description: Product attribute ID
+  - target: $.components.schemas.IntAttributeCreateOutputDto.properties._id
+    description: Replaced by `id` above.
+    x-plytix-question: ATTR-28
+    remove: true
+  - target: $.components.schemas.IntAttributeGetOutputDto
+    description: IntAttributeGetOutputDto declares `_id`, but live attribute responses return `id` (Create Text Attribute.bru, Get Product Attribute by ID.bru).
+    x-plytix-question: ATTR-28
+    update:
+      properties:
+        id:
+          anyOf:
+            - $ref: "#/components/schemas/PydanticObjectId"
+            - type: "null"
+          description: Product attribute ID
+  - target: $.components.schemas.IntAttributeGetOutputDto.properties._id
+    description: Replaced by `id` above.
+    x-plytix-question: ATTR-28
+    remove: true
+  - target: $.components.schemas.MediaAttributeCreateOutputDto
+    description: MediaAttributeCreateOutputDto declares `_id`, but live attribute responses return `id` (Create Text Attribute.bru, Get Product Attribute by ID.bru).
+    x-plytix-question: ATTR-28
+    update:
+      properties:
+        id:
+          anyOf:
+            - $ref: "#/components/schemas/PydanticObjectId"
+            - type: "null"
+          description: Product attribute ID
+  - target: $.components.schemas.MediaAttributeCreateOutputDto.properties._id
+    description: Replaced by `id` above.
+    x-plytix-question: ATTR-28
+    remove: true
+  - target: $.components.schemas.MediaAttributeGetOutputDto
+    description: MediaAttributeGetOutputDto declares `_id`, but live attribute responses return `id` (Create Text Attribute.bru, Get Product Attribute by ID.bru).
+    x-plytix-question: ATTR-28
+    update:
+      properties:
+        id:
+          anyOf:
+            - $ref: "#/components/schemas/PydanticObjectId"
+            - type: "null"
+          description: Product attribute ID
+  - target: $.components.schemas.MediaAttributeGetOutputDto.properties._id
+    description: Replaced by `id` above.
+    x-plytix-question: ATTR-28
+    remove: true
+  - target: $.components.schemas.MediaGalleryAttributeCreateOutputDto
+    description: MediaGalleryAttributeCreateOutputDto declares `_id`, but live attribute responses return `id` (Create Text Attribute.bru, Get Product Attribute by ID.bru).
+    x-plytix-question: ATTR-28
+    update:
+      properties:
+        id:
+          anyOf:
+            - $ref: "#/components/schemas/PydanticObjectId"
+            - type: "null"
+          description: Product attribute ID
+  - target: $.components.schemas.MediaGalleryAttributeCreateOutputDto.properties._id
+    description: Replaced by `id` above.
+    x-plytix-question: ATTR-28
+    remove: true
+  - target: $.components.schemas.MediaGalleryAttributeGetOutputDto
+    description: MediaGalleryAttributeGetOutputDto declares `_id`, but live attribute responses return `id` (Create Text Attribute.bru, Get Product Attribute by ID.bru).
+    x-plytix-question: ATTR-28
+    update:
+      properties:
+        id:
+          anyOf:
+            - $ref: "#/components/schemas/PydanticObjectId"
+            - type: "null"
+          description: Product attribute ID
+  - target: $.components.schemas.MediaGalleryAttributeGetOutputDto.properties._id
+    description: Replaced by `id` above.
+    x-plytix-question: ATTR-28
+    remove: true
+  - target: $.components.schemas.MultiSelectAttributeCreateOutputDto
+    description: MultiSelectAttributeCreateOutputDto declares `_id`, but live attribute responses return `id` (Create Text Attribute.bru, Get Product Attribute by ID.bru).
+    x-plytix-question: ATTR-28
+    update:
+      properties:
+        id:
+          anyOf:
+            - $ref: "#/components/schemas/PydanticObjectId"
+            - type: "null"
+          description: Product attribute ID
+  - target: $.components.schemas.MultiSelectAttributeCreateOutputDto.properties._id
+    description: Replaced by `id` above.
+    x-plytix-question: ATTR-28
+    remove: true
+  - target: $.components.schemas.MultiSelectAttributeGetOutputDto
+    description: MultiSelectAttributeGetOutputDto declares `_id`, but live attribute responses return `id` (Create Text Attribute.bru, Get Product Attribute by ID.bru).
+    x-plytix-question: ATTR-28
+    update:
+      properties:
+        id:
+          anyOf:
+            - $ref: "#/components/schemas/PydanticObjectId"
+            - type: "null"
+          description: Product attribute ID
+  - target: $.components.schemas.MultiSelectAttributeGetOutputDto.properties._id
+    description: Replaced by `id` above.
+    x-plytix-question: ATTR-28
+    remove: true
+  - target: $.components.schemas.MultilineAttributeGetOutputDto
+    description: MultilineAttributeGetOutputDto declares `_id`, but live attribute responses return `id` (Create Text Attribute.bru, Get Product Attribute by ID.bru).
+    x-plytix-question: ATTR-28
+    update:
+      properties:
+        id:
+          anyOf:
+            - $ref: "#/components/schemas/PydanticObjectId"
+            - type: "null"
+          description: Product attribute ID
+  - target: $.components.schemas.MultilineAttributeGetOutputDto.properties._id
+    description: Replaced by `id` above.
+    x-plytix-question: ATTR-28
+    remove: true
+  - target: $.components.schemas.ProductAttributeGenericCreateOutputDto
+    description: ProductAttributeGenericCreateOutputDto declares `_id`, but live attribute responses return `id` (Create Text Attribute.bru, Get Product Attribute by ID.bru).
+    x-plytix-question: ATTR-28
+    update:
+      properties:
+        id:
+          anyOf:
+            - $ref: "#/components/schemas/PydanticObjectId"
+            - type: "null"
+          description: Product attribute ID
+  - target: $.components.schemas.ProductAttributeGenericCreateOutputDto.properties._id
+    description: Replaced by `id` above.
+    x-plytix-question: ATTR-28
+    remove: true
+  - target: $.components.schemas.ProductAttributeGenericGetOutputDto
+    description: ProductAttributeGenericGetOutputDto declares `_id`, but live attribute responses return `id` (Create Text Attribute.bru, Get Product Attribute by ID.bru).
+    x-plytix-question: ATTR-28
+    update:
+      properties:
+        id:
+          anyOf:
+            - $ref: "#/components/schemas/PydanticObjectId"
+            - type: "null"
+          description: Product attribute ID
+  - target: $.components.schemas.ProductAttributeGenericGetOutputDto.properties._id
+    description: Replaced by `id` above.
+    x-plytix-question: ATTR-28
+    remove: true
+  - target: $.components.schemas.ProductAttributeGetBaseOutputDto
+    description: ProductAttributeGetBaseOutputDto declares `_id`, but live attribute responses return `id` (Create Text Attribute.bru, Get Product Attribute by ID.bru).
+    x-plytix-question: ATTR-28
+    update:
+      properties:
+        id:
+          anyOf:
+            - $ref: "#/components/schemas/PydanticObjectId"
+            - type: "null"
+          description: Product attribute ID
+  - target: $.components.schemas.ProductAttributeGetBaseOutputDto.properties._id
+    description: Replaced by `id` above.
+    x-plytix-question: ATTR-28
+    remove: true
+  - target: $.components.schemas.TextAttributeCreateOutputDto
+    description: TextAttributeCreateOutputDto declares `_id`, but live attribute responses return `id` (Create Text Attribute.bru, Get Product Attribute by ID.bru).
+    x-plytix-question: ATTR-28
+    update:
+      properties:
+        id:
+          anyOf:
+            - $ref: "#/components/schemas/PydanticObjectId"
+            - type: "null"
+          description: Product attribute ID
+  - target: $.components.schemas.TextAttributeCreateOutputDto.properties._id
+    description: Replaced by `id` above.
+    x-plytix-question: ATTR-28
+    remove: true
+  - target: $.components.schemas.TextAttributeGetOutputDto
+    description: TextAttributeGetOutputDto declares `_id`, but live attribute responses return `id` (Create Text Attribute.bru, Get Product Attribute by ID.bru).
+    x-plytix-question: ATTR-28
+    update:
+      properties:
+        id:
+          anyOf:
+            - $ref: "#/components/schemas/PydanticObjectId"
+            - type: "null"
+          description: Product attribute ID
+  - target: $.components.schemas.TextAttributeGetOutputDto.properties._id
+    description: Replaced by `id` above.
+    x-plytix-question: ATTR-28
+    remove: true
+  - target: $.components.schemas.UrlAttributeCreateOutputDto
+    description: UrlAttributeCreateOutputDto declares `_id`, but live attribute responses return `id` (Create Text Attribute.bru, Get Product Attribute by ID.bru).
+    x-plytix-question: ATTR-28
+    update:
+      properties:
+        id:
+          anyOf:
+            - $ref: "#/components/schemas/PydanticObjectId"
+            - type: "null"
+          description: Product attribute ID
+  - target: $.components.schemas.UrlAttributeCreateOutputDto.properties._id
+    description: Replaced by `id` above.
+    x-plytix-question: ATTR-28
+    remove: true
+  - target: $.components.schemas.UrlAttributeGetOutputDto
+    description: UrlAttributeGetOutputDto declares `_id`, but live attribute responses return `id` (Create Text Attribute.bru, Get Product Attribute by ID.bru).
+    x-plytix-question: ATTR-28
+    update:
+      properties:
+        id:
+          anyOf:
+            - $ref: "#/components/schemas/PydanticObjectId"
+            - type: "null"
+          description: Product attribute ID
+  - target: $.components.schemas.UrlAttributeGetOutputDto.properties._id
+    description: Replaced by `id` above.
+    x-plytix-question: ATTR-28
+    remove: true

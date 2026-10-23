@@ -9,11 +9,11 @@ This page documents which method to use for each kind of change, what comes back
 
 Key points on this page:
 
-- POST returns the full created record. PATCH returns `204` with no body, so an update has to be read back.
+- Each write returns the status and body its operation declares. PATCH returns `204` with no body, so an update has to be read back.
 - PATCH is the standard way to change a record, because it touches only the top-level fields you name.
-- Naming a map field such as `attributes` in a PATCH replaces that whole map, deleting anything you left out.
-- An empty string or empty list is stored as a value, not treated as a deletion.
-- DELETE erases a field or record rather than setting it to null, which can let an inherited value take over.
+- Naming a map field such as `attributes` in a PATCH on the record replaces that whole map, deleting anything you left out. A partial map sent to `PATCH .../attributes` is merged instead.
+- On the attribute types tested, sending `""`, `[]`, or `null` clears the value, so the attribute ends up absent rather than stored as empty.
+- DELETE erases a field or record rather than setting it to null. Erasing a variant's value doesn't bring back an inherited value.
 
 ## Choose a method
 
@@ -22,7 +22,7 @@ Key points on this page:
 | Create a record | POST | `/api/v3/<entities>` |
 | Change some fields on a record | PATCH | `/api/v3/<entities>/<identifier>` |
 | Remove a record | DELETE | `/api/v3/<entities>/<identifier>` |
-| Read, create, or remove a single field | GET, POST, DELETE | `/api/v3/<entities>/<identifier>/<field>` |
+| Read, create, change, or remove a single field | GET, POST, PATCH, DELETE | `/api/v3/<entities>/<identifier>/<field>` |
 | Link a related record | POST | `/api/v3/<entities>/<identifier>/<related-entities>` |
 | Change a link | PATCH | `/api/v3/<entities>/<identifier>/<related-entities>/<linked_id>` |
 | Remove a link | DELETE | `/api/v3/<entities>/<identifier>/<related-entities>/<linked_id>` |
@@ -35,50 +35,44 @@ Key points on this page:
 
 ## What a write returns
 
-A successful POST returns the complete created record. PATCH and DELETE return no body at all, so the only way to see the result of an update is to read the record back.
+Each operation declares its own success status and response body, so check the operation's page in the API reference rather than assuming one shape for every write. PATCH and DELETE return no body at all, so the only way to see the result of an update is to read the record back.
 
 | Operation | Status | Body |
 |---|---|---|
-| Create | `201` | The full created record |
+| Create | `201` | As declared by the operation. Creating a product returns the new product in `data`, without expanded relations. Linking a category to a product returns only the linked category's `id` |
 | Update | `204` | None |
 | Delete | `204` | None |
-| Accepted for async processing | `202` | A `process_id` for tracking |
 
 ## What a PATCH replaces
 
-A PATCH merges at the top level only. Top-level fields you leave out keep their current values, but a map field you name is replaced in full rather than merged into.
+A PATCH on a record merges at the top level only. Top-level fields you leave out keep their current values, but a map field you name is replaced in full rather than merged into.
 
 | What you send | What happens |
 |---|---|
 | A top-level field (`label`, `status`, `gtin`) | Only that field changes |
 | A top-level field you omit | Left untouched |
-| `attributes` with some keys | The whole map is replaced; omitted attributes are deleted |
+| `attributes` with some keys, to `PATCH /products/<identifier>` | The whole map is replaced; omitted attributes are deleted |
+| A partial map, to `PATCH /products/<identifier>/attributes` | The attributes you send are merged; omitted attributes are kept |
 
-So `{"attributes": {"price": 34.99}}` on a product that also has `brand` and `care_instructions` leaves it with `price` alone. Read the current map, apply your change to it, and send the result back.
+So `{"attributes": {"suggested_retail_price": "34.99"}}` sent to the product leaves a product that also has `brand` and `collection` with `suggested_retail_price` alone. To change several attributes and keep the rest, send the partial map, `{"suggested_retail_price": "34.99"}`, to the product's `attributes` path instead. [Responses and updates](/docs/guides/migrating-to-v3/responses-and-updates#how-patch-treats-the-attributes-map) shows both routes with before and after examples.
 
-To change one attribute without resending the map, address it through its own path instead. The body is the bare value:
+To change one attribute, address it through its own path. The body is the bare value, in the format the attribute type takes. A decimal attribute takes its value as a string:
 
 ```bash
 curl --request PATCH \
   --url 'https://<v3-base-url>/api/v3/products/<identifier>/attributes/<name>' \
   --header 'Authorization: Bearer <token>' \
   --header 'Content-Type: application/json' \
-  --data '34.99'
+  --data '"34.99"'
 ```
 
 This returns `204` and leaves every other attribute intact.
 
 ## How empty values are treated
 
-An empty string or an empty list is a value in V3, not an instruction to remove something.
+On the attribute types tested, an empty value isn't stored. A text attribute set to `""`, `null`, or only spaces, and a multiselect attribute set to `[]` or `null`, end up absent from the product, the same as an attribute that was never set. A media gallery set to `[]` or `null` loses its asset associations, while the assets stay in Plytix DAM. A media attribute rejects `""`, so clear it with DELETE on its field path.
 
-| Operation | Empty value behavior |
-|---|---|
-| POST | `""` and `[]` are stored verbatim |
-| PATCH | `""` and `[]` are stored verbatim |
-| DELETE | Erases the field or record |
-
-So `{"description": ""}` sets the description to an empty string. It doesn't remove the field. To remove it, use DELETE on the field path.
+A cleared attribute and one that was never set both match `[!exists]=true` and `[length]=0`, and neither matches `[null]`. Other attribute types haven't been tested. [Responses and updates](/docs/guides/migrating-to-v3/responses-and-updates#empty-values-null-and-deletion) lists the tested cases by type.
 
 ## What DELETE removes
 
@@ -91,11 +85,11 @@ curl --request DELETE \
   --header 'Authorization: Bearer <token>'
 ```
 
-<Callout type="warn" title="Erasing a field can change what the record shows">
-  Because DELETE erases rather than nulls, removing a field can let an inherited value resolve in its place. A product that inherits from a family may show the family's value once its own is gone, so the field doesn't go empty, it changes. Check on a test record before running a delete across a catalog.
+<Callout type="warn" title="Erasing a variant's value doesn't restore inheritance">
+  In testing, deleting a value that a variant had overridden left the variant with no value for that attribute. It didn't bring back the parent's value. Check on a test record before running a delete across a catalog.
 </Callout>
 
-Field-level creation and deletion apply to attributes only. You can POST or DELETE a single attribute on a record through its field path; other fields are changed with PATCH on the record.
+Field-level writes apply to attributes only. You can POST, PATCH, or DELETE a single attribute on a record through its field path; other fields are changed with PATCH on the record.
 
 ## Change a single field
 
@@ -110,13 +104,7 @@ curl --request GET \
 
 The same path pattern extends through related entities, in the form `/api/v3/<entities>/<identifier>/<subentity>/<identifier>/<field>`.
 
-## Advanced updates
-
-Some changes can't be expressed by assigning a value to a field, such as inserting an item at a specific position in a list. For those, V3 accepts JSON Patch: send a PATCH with the content type `application/json-patch+json` and a body that describes the change as a list of RFC 6902 operations, each naming an `op`, a `path`, and, where the operation needs one, a `value`.
-
-## Async operations
-
-An operation that can't complete within the request returns `202` with a `process_id` rather than a result. Track it through the Process Manager API, and the record changes once processing finishes.
+{/* FLAG (open): The "Advanced updates" (JSON Patch, `application/json-patch+json`) and "Async operations" (`202` with `process_id`, Process Manager API) sections were removed on 2026-10-22. Neither is declared in the public V3 spec, and Plytix's 16 Oct handoff keeps bulk and job-management operations out of current examples ("Use each operation's declared status and schema"). Restore only if Plytix publishes them. */}
 
 ## Write safely
 
@@ -125,17 +113,17 @@ Follow these practices when you write to the API:
 - **Read before you write.** Confirm which records match your filter before applying a change to them.
 - **Test deletes on one record.** Erasure and inheritance interact in ways that are hard to predict from a filter alone.
 - **Don't parse a write response for values.** Read the record back instead.
-- **Pace a long run of writes.** V3 has no bulk write endpoints, so a large change is many single requests. See [Bulk operations for large catalogs](/docs/guides/bulk-operations-for-large-catalogs).
+- **Pace a long run of writes.** V3 has no bulk write endpoints, so a large change is many single requests. See [Rate limits](/reference/v3/rate-limits).
 
 ## Related resources
 
 Now that you know how V3 handles writes, you can explore these related pages.
 
 <Cards>
-  <Card icon={<WarningRegular />} title="Errors and Status Codes" href="/docs/reference/v3/errors-status-codes">
+  <Card icon={<WarningRegular />} title="Errors and Status Codes" href="/reference/v3/errors-status-codes">
     Read the status codes and error shapes a failed write returns.
   </Card>
-  <Card icon={<BookOpenRegular />} title="Safely remove categories, assets, or relationships" href="/docs/guides/safely-removing-categories-assets-or-relationships">
+  <Card icon={<BookOpenRegular />} title="Unlink categories, assets, or relationships" href="/docs/guides/safely-removing-categories-assets-or-relationships">
     Apply these delete rules to a real cleanup task.
   </Card>
 </Cards>

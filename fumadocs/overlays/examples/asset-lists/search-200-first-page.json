@@ -1,0 +1,29 @@
+{
+  "data": [
+    {
+      "id": "6a1f0c2e9b3d4a5f8c7e1301",
+      "name": "Marketing logos",
+      "query": [[{"operator": "in", "field": "static_lists", "value": ["6a1f0c2e9b3d4a5f8c7e1301"], "field_type": null}]],
+      "created": "2026-06-22T08:45:06.848000",
+      "modified": "2026-06-22T08:45:06.866000"
+    },
+    {
+      "id": "6a1f0c2e9b3d4a5f8c7e1302",
+      "name": "Mug Images",
+      "query": [[{"operator": "like", "field": "filename", "value": "mug", "field_type": null}]],
+      "created": "2026-06-22T08:45:06.899000",
+      "modified": "2026-06-22T08:45:06.907000"
+    },
+    {
+      "id": "6a1f0c2e9b3d4a5f8c7e1303",
+      "name": "Sinks",
+      "query": [[{"operator": "in", "field": "static_lists", "value": ["6a1f0c2e9b3d4a5f8c7e1303"], "field_type": null}]],
+      "created": "2026-06-22T08:45:06.929000",
+      "modified": "2026-06-22T08:45:06.936000"
+    }
+  ],
+  "errors": [],
+  "pagination": {
+    "next_page": "http://<api-host>/api/v3/asset-lists?_fields=id&_fields=name&_fields=query&_fields=created&_fields=modified&_page=2&_page_size=3&_sort_by=name"
+  }
+}

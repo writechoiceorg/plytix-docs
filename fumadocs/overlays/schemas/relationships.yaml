@@ -1,0 +1,17 @@
+# Schema edits for the relationships endpoints (relationship types).
+# The migrated 2026-10-20 description of RelationshipUpdateInputDto (internal
+# implementation notes from the upstream docstring) is replaced with reader-facing
+# text; its substance (name only, label derived, status not settable) is kept.
+# Sources: spec 2026-10-02, Q#60, Create Relationship.bru and
+# Update and Delete Relationship.bru (2026-09-15), GEN-1.
+# 2026-10-22: the Relationship*InputDto edits went with the removed routes; RelationshipStatus is
+# still in the 2026-10-19 spec.
+overlay: 1.0.0
+info:
+  title: relationships schemas
+  version: 1.0.0
+actions:
+  - target: $.components.schemas.RelationshipStatus
+    description: Spec enum; ACTIVE on create (Create Relationship.bru); a deleted type returns 404 (REL-21 asks whether DELETED is ever visible)
+    update:
+      description: Status of the relationship type, set by Plytix. A new relationship type is `ACTIVE`. A deleted type returns `404`.

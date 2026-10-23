@@ -23,7 +23,17 @@ const openapi = createOpenAPI({
   input: ['./openapi-v1v2.json'],
 });
 
-const referenceDir = './content/docs/reference/legacy';
+// Page filenames (and so URLs) come from scripts/endpoint-names.json, keyed by
+// "METHOD /path". Titles come from each operation's `summary`.
+const ENDPOINT_NAMES = JSON.parse(await readFile('./scripts/endpoint-names.json', 'utf-8'))['v1-v2'];
+const pageName = (output) => {
+  const key = `${output.item.method.toUpperCase()} ${output.item.path}`;
+  const entry = ENDPOINT_NAMES[key];
+  if (!entry) throw new Error(`No entry for ${key} in scripts/endpoint-names.json`);
+  return entry.slug;
+};
+
+const referenceDir = './content/docs/reference/v1-v2';
 const stagingDir = path.join(referenceDir, 'endpoints');
 
 // Nicer group titles than the auto-generated per-tag titles.
@@ -48,8 +58,8 @@ const TAG_LABELS = {
   assets: 'Assets',
   'available-filters': 'Available Filters',
   categories: 'Categories',
-  products: 'Products (v1)',
-  'products-v2-beta': 'Products (v2 beta)',
+  products: 'Products (V1)',
+  'products-v2-beta': 'Products (V2 beta)',
   'product-attributes': 'Product Attributes',
   'product-attribute-groups': 'Product Attribute Groups',
   relationships: 'Relationships',
@@ -61,6 +71,7 @@ await generateFiles({
   output: stagingDir,
   per: 'operation',
   groupBy: 'tag',
+  name: pageName,
   meta: true,
   // Render the operation description inside the page body via <OpenAPIPage
   // showDescription /> (proper Markdown) instead of dumping the raw
@@ -76,13 +87,17 @@ await generateFiles({
         /(<Comp\b[^\n]*?)\s*\/>/g,
         '$1 preloaded={props.preloaded} />',
       );
+      // Record the operation's path next to its method, so code that only has
+      // the page (its metadata, the llms/MCP Markdown export) can find the operation.
+      const operation = file.content.match(/operations=\{\[\{"path":("[^"]+")/);
+      if (operation) file.content = file.content.replace(/^( {2}method: .+)$/m, `$1\n  path: ${operation[1]}`);
     }
   },
 });
 
 // Move each per-tag folder up to be a real page group directly under
-// content/docs/reference/legacy/ (a folder, not a flattened separator) — "Endpoints"
-// itself is a section header (see legacy/meta.json below), but each
+// content/docs/reference/v1-v2/ (a folder, not a flattened separator) — "Endpoints"
+// itself is a section header (see v1-v2/meta.json below), but each
 // resource inside it stays a collapsible group of its operation pages.
 const stagingMeta = JSON.parse(await readFile(path.join(stagingDir, 'meta.json'), 'utf-8'));
 const tagFolders = [];
@@ -103,7 +118,7 @@ for (const tag of stagingMeta.pages) {
 }
 await rm(stagingDir, { recursive: true, force: true });
 
-// Rebuild legacy/meta.json: keep whatever comes before the "Endpoints"
+// Rebuild v1-v2/meta.json: keep whatever comes before the "Endpoints"
 // section (the hand-written overview page) untouched, and replace
 // everything from "Endpoints" onward with the freshly generated groups.
 const referenceMetaPath = path.join(referenceDir, 'meta.json');
@@ -111,7 +126,7 @@ let referenceMeta;
 try {
   referenceMeta = JSON.parse(await readFile(referenceMetaPath, 'utf-8'));
 } catch {
-  referenceMeta = { title: 'Legacy (v1/v2)', root: true, pages: [] };
+  referenceMeta = { title: 'V1/V2 (Legacy)', icon: 'Archive', pages: [] };
 }
 const cutIndex = referenceMeta.pages.findIndex(
   (p) => p === '---[Webhook]Endpoints---' || p === '---Endpoints---' || p === 'endpoints',
@@ -127,4 +142,4 @@ await writeFile(
   ) + '\n',
 );
 
-console.log(`Generated ${tagFolders.length} endpoint groups directly under content/docs/reference/legacy/.`);
+console.log(`Generated ${tagFolders.length} endpoint groups directly under content/docs/reference/v1-v2/.`);

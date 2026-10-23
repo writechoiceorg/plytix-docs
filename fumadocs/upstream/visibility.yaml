@@ -1,0 +1,198 @@
+# Which upstream V3 operations are published. Read by scripts/api/build.mjs (npm run api:build).
+#
+# Seeded on 2026-10-20 from materials/api-references/endpoint-reviews/
+# "Plytix API v3 - endpoint visibility.xlsx" (Plytix's decision column). From now
+# on this file is the source of truth: when Plytix changes a decision, update it here.
+#
+# Values: public | internal | removed | pending | on-hold
+#   Only `public` operations reach the docs. `pending` means the operation is new
+#   in the spec and Plytix hasn't classified it yet (roadmap.md, "classify the 16
+#   operations missing from the sheet"); it stays out of the docs until it is.
+#   `on-hold` means the operation is public but its live behavior currently
+#   contradicts the spec, so it stays out of the docs until Plytix confirms the
+#   contract (see fumadocs/overlays/VERIFY.md). Overlay edits for it are kept
+#   but not applied; set it back to `public` to restore the page.
+#   Operations missing from this file are excluded too, and the build reports them.
+#
+# 2026-10-22 (Plytix field-audit handoff, 16 Oct 2026): the dedicated product-category
+# and attribute-group link routes are public; the product channel, e-catalog and
+# PDF catalog link routes are internal; GET /api/v3/product-relationships is on hold
+# (published schema doesn't match the live shape, FB-024).
+operations:
+  "GET /api/v3/asset-categories": public
+  "POST /api/v3/asset-categories": public
+  "GET /api/v3/asset-categories/{identifier}": public
+  "PATCH /api/v3/asset-categories/{identifier}": public
+  "DELETE /api/v3/asset-categories/{identifier}": public
+  "GET /api/v3/asset-categories/{identifier}/{path}": public
+  "PATCH /api/v3/asset-categories/{identifier}/{path}": public
+  "DELETE /api/v3/asset-categories/{identifier}/{path}": public
+  "GET /api/v3/asset-lists": public
+  "POST /api/v3/asset-lists": public
+  "GET /api/v3/asset-lists/{identifier}": public
+  "PATCH /api/v3/asset-lists/{identifier}": public
+  "DELETE /api/v3/asset-lists/{identifier}": public
+  "GET /api/v3/asset-lists/{identifier}/{path}": public
+  "PATCH /api/v3/asset-lists/{identifier}/{path}": public
+  "DELETE /api/v3/asset-lists/{identifier}/{path}": public
+  "GET /api/v3/assets": public
+  "POST /api/v3/assets": public
+  "GET /api/v3/assets/{identifier}": public
+  "PATCH /api/v3/assets/{identifier}": public
+  "DELETE /api/v3/assets/{identifier}": public
+  "POST /api/v3/assets/{identifier}/categories": pending
+  "DELETE /api/v3/assets/{identifier}/categories/{id}": pending
+  "POST /api/v3/assets/{identifier}/static_lists": pending
+  "DELETE /api/v3/assets/{identifier}/static_lists/{id}": pending
+  "GET /api/v3/assets/{identifier}/{path}": public
+  "PATCH /api/v3/assets/{identifier}/{path}": public
+  "DELETE /api/v3/assets/{identifier}/{path}": public
+  "GET /api/v3/channels": internal
+  "POST /api/v3/channels": internal
+  "GET /api/v3/channels/{identifier}": internal
+  "PATCH /api/v3/channels/{identifier}": internal
+  "DELETE /api/v3/channels/{identifier}": internal
+  "GET /api/v3/channels/{identifier}/{path}": internal
+  "PATCH /api/v3/channels/{identifier}/{path}": internal
+  "DELETE /api/v3/channels/{identifier}/{path}": internal
+  "GET /api/v3/connections": internal
+  "POST /api/v3/connections": internal
+  "GET /api/v3/connections/{identifier}": internal
+  "PATCH /api/v3/connections/{identifier}": internal
+  "DELETE /api/v3/connections/{identifier}": internal
+  "GET /api/v3/connections/{identifier}/{path}": internal
+  "PATCH /api/v3/connections/{identifier}/{path}": internal
+  "DELETE /api/v3/connections/{identifier}/{path}": internal
+  "GET /api/v3/ecatalogs": internal
+  "POST /api/v3/ecatalogs": internal
+  "GET /api/v3/ecatalogs/{identifier}": internal
+  "PATCH /api/v3/ecatalogs/{identifier}": internal
+  "DELETE /api/v3/ecatalogs/{identifier}": internal
+  "GET /api/v3/ecatalogs/{identifier}/{path}": internal
+  "PATCH /api/v3/ecatalogs/{identifier}/{path}": internal
+  "DELETE /api/v3/ecatalogs/{identifier}/{path}": internal
+  "GET /api/v3/family-attributes": public
+  "GET /api/v3/import-profiles": internal
+  "POST /api/v3/import-profiles": internal
+  "GET /api/v3/import-profiles/{identifier}": internal
+  "PATCH /api/v3/import-profiles/{identifier}": internal
+  "DELETE /api/v3/import-profiles/{identifier}": internal
+  "GET /api/v3/import-profiles/{identifier}/{path}": internal
+  "PATCH /api/v3/import-profiles/{identifier}/{path}": internal
+  "DELETE /api/v3/import-profiles/{identifier}/{path}": internal
+  "GET /api/v3/pdf-catalogs": internal
+  "POST /api/v3/pdf-catalogs": internal
+  "GET /api/v3/pdf-catalogs/{identifier}": internal
+  "PATCH /api/v3/pdf-catalogs/{identifier}": internal
+  "DELETE /api/v3/pdf-catalogs/{identifier}": internal
+  "GET /api/v3/pdf-catalogs/{identifier}/{path}": internal
+  "PATCH /api/v3/pdf-catalogs/{identifier}/{path}": internal
+  "DELETE /api/v3/pdf-catalogs/{identifier}/{path}": internal
+  "GET /api/v3/pim-product-lists": removed
+  "POST /api/v3/pim-product-lists": removed
+  "GET /api/v3/pim-product-lists/{identifier}": removed
+  "PATCH /api/v3/pim-product-lists/{identifier}": removed
+  "DELETE /api/v3/pim-product-lists/{identifier}": removed
+  "GET /api/v3/pim-product-lists/{identifier}/{path}": removed
+  "PATCH /api/v3/pim-product-lists/{identifier}/{path}": removed
+  "DELETE /api/v3/pim-product-lists/{identifier}/{path}": removed
+  "GET /api/v3/product-attribute-groups": public
+  "POST /api/v3/product-attribute-groups": public
+  "GET /api/v3/product-attribute-groups/{identifier}": public
+  "PATCH /api/v3/product-attribute-groups/{identifier}": public
+  "DELETE /api/v3/product-attribute-groups/{identifier}": public
+  "GET /api/v3/product-attribute-groups/{identifier}/{path}": public
+  "PATCH /api/v3/product-attribute-groups/{identifier}/{path}": public
+  "DELETE /api/v3/product-attribute-groups/{identifier}/{path}": public
+  "GET /api/v3/product-attributes": public
+  "POST /api/v3/product-attributes": public
+  "GET /api/v3/product-attributes/{identifier}": public
+  "PATCH /api/v3/product-attributes/{identifier}": public
+  "DELETE /api/v3/product-attributes/{identifier}": public
+  "POST /api/v3/product-attributes/{identifier}/groups": public
+  "DELETE /api/v3/product-attributes/{identifier}/groups/{id}": public
+  "GET /api/v3/product-attributes/{identifier}/{path}": public
+  "PATCH /api/v3/product-attributes/{identifier}/{path}": public
+  "DELETE /api/v3/product-attributes/{identifier}/{path}": public
+  "GET /api/v3/product-categories": public
+  "POST /api/v3/product-categories": public
+  "GET /api/v3/product-categories/{identifier}": public
+  "PATCH /api/v3/product-categories/{identifier}": public
+  "DELETE /api/v3/product-categories/{identifier}": public
+  "GET /api/v3/product-categories/{identifier}/{path}": public
+  "PATCH /api/v3/product-categories/{identifier}/{path}": public
+  "DELETE /api/v3/product-categories/{identifier}/{path}": public
+  "GET /api/v3/product-families": public
+  "POST /api/v3/product-families": public
+  "GET /api/v3/product-families/{identifier}": public
+  "PATCH /api/v3/product-families/{identifier}": public
+  "DELETE /api/v3/product-families/{identifier}": public
+  "GET /api/v3/product-families/{identifier}/{path}": public
+  "POST /api/v3/product-families/{identifier}/{path}": on-hold
+  "PATCH /api/v3/product-families/{identifier}/{path}": public
+  "DELETE /api/v3/product-families/{identifier}/{path}": public
+  "GET /api/v3/product-families/{product_family_id}/attributes": public
+  "POST /api/v3/product-families/{product_family_id}/attributes": public
+  "GET /api/v3/product-families/{product_family_id}/attributes/{attribute_id}": public
+  "POST /api/v3/product-families/{product_family_id}/attributes/{attribute_id}": public
+  "PATCH /api/v3/product-families/{product_family_id}/attributes/{attribute_id}": public
+  "DELETE /api/v3/product-families/{product_family_id}/attributes/{attribute_id}": public
+  "GET /api/v3/product-families/{product_family_id}/attributes/{attribute_id}/{path}": public
+  "PATCH /api/v3/product-families/{product_family_id}/attributes/{attribute_id}/{path}": public
+  "DELETE /api/v3/product-families/{product_family_id}/attributes/{attribute_id}/{path}": public
+  "GET /api/v3/product-relationships": on-hold
+  "GET /api/v3/products": public
+  "POST /api/v3/products": public
+  "GET /api/v3/products/{identifier}": public
+  "PATCH /api/v3/products/{identifier}": public
+  "DELETE /api/v3/products/{identifier}": public
+  "POST /api/v3/products/{identifier}/categories": public
+  "DELETE /api/v3/products/{identifier}/categories/{id}": public
+  "POST /api/v3/products/{identifier}/channels": internal
+  "DELETE /api/v3/products/{identifier}/channels/{id}": internal
+  "POST /api/v3/products/{identifier}/ecatalogs": internal
+  "DELETE /api/v3/products/{identifier}/ecatalogs/{id}": internal
+  "POST /api/v3/products/{identifier}/product_data_sheets": internal
+  "DELETE /api/v3/products/{identifier}/product_data_sheets/{id}": internal
+  "POST /api/v3/products/{identifier}/static_lists": pending
+  "DELETE /api/v3/products/{identifier}/static_lists/{id}": pending
+  "GET /api/v3/products/{identifier}/{path}": public
+  "POST /api/v3/products/{identifier}/{path}": public
+  "PATCH /api/v3/products/{identifier}/{path}": public
+  "DELETE /api/v3/products/{identifier}/{path}": public
+  "GET /api/v3/products/{product_id}/relationships": on-hold
+  "POST /api/v3/products/{product_id}/relationships": on-hold
+  "GET /api/v3/products/{product_id}/relationships/{relationship_id}": public
+  "POST /api/v3/products/{product_id}/relationships/{relationship_id}": on-hold
+  "PATCH /api/v3/products/{product_id}/relationships/{relationship_id}": on-hold
+  "DELETE /api/v3/products/{product_id}/relationships/{relationship_id}": public
+  "GET /api/v3/products/{product_id}/relationships/{relationship_id}/related-products": on-hold
+  "GET /api/v3/products/{product_id}/relationships/{relationship_id}/related-products/{related_product_id}": on-hold
+  "GET /api/v3/products/{product_id}/relationships/{relationship_id}/related-products/{related_product_id}/{path}": on-hold
+  "GET /api/v3/products/{product_id}/relationships/{relationship_id}/{path}": on-hold
+  "PATCH /api/v3/products/{product_id}/relationships/{relationship_id}/{path}": on-hold
+  "DELETE /api/v3/products/{product_id}/relationships/{relationship_id}/{path}": on-hold
+  "GET /api/v3/related-products": public
+  "GET /api/v3/relationships": public
+  "POST /api/v3/relationships": public
+  "GET /api/v3/relationships/{identifier}": public
+  "PATCH /api/v3/relationships/{identifier}": public
+  "DELETE /api/v3/relationships/{identifier}": public
+  "GET /api/v3/relationships/{identifier}/{path}": public
+  "PATCH /api/v3/relationships/{identifier}/{path}": public
+  "DELETE /api/v3/relationships/{identifier}/{path}": public
+  "GET /is_alive": internal
+  "GET /is_ready": internal
+  "GET /metrics": internal
+  # 2026-10-22: new in the 2026-10-19 spec (relationship types replace the relationships API); not classified by Plytix yet.
+  "POST /api/v3/products/{product_identifier}/product_relationship_types": pending
+  "PATCH /api/v3/products/{product_identifier}/product_relationship_types": pending
+  "POST /api/v3/products/{product_identifier}/product_relationship_types/unlink": pending
+  "GET /api/v3/product-relationship-types": pending
+  "POST /api/v3/product-relationship-types": pending
+  "GET /api/v3/product-relationship-types/{identifier}": pending
+  "DELETE /api/v3/product-relationship-types/{identifier}": pending
+  "PATCH /api/v3/product-relationship-types/{identifier}": pending
+  "GET /api/v3/product-relationship-types/{identifier}/{path}": pending
+  "DELETE /api/v3/product-relationship-types/{identifier}/{path}": pending
+  "PATCH /api/v3/product-relationship-types/{identifier}/{path}": pending

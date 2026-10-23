@@ -1,0 +1,33 @@
+# Operation edits for the product-relationships endpoints.
+# Phase 2 (2026-10-20): search, get and delete are published. 2026-10-22: the
+# search (GET /product-relationships) is on hold too: its published schema doesn't
+# match the live shape (FB-024). The write routes,
+# the per-product list and the field routes are on hold (visibility.yaml,
+# VERIFY.md); their actions below are kept but not applied.
+# Sources: Q#62, Q#112, Q#113, FB-024, Manage Product Relationship Link.bru,
+# the safely-remove guide.
+overlay: 1.0.0
+info:
+  title: product-relationships operations
+  version: 1.0.0
+actions:
+  - target: $.paths['/api/v3/product-relationships'].get
+    description: Q#112 (scoped, relationship_id filter returns 200), FB-024 (shape changed 2026-10-15, uncaptured), Q#113
+    update:
+      summary: Search product relationships
+      operationId: search-product-relationships
+      description: |-
+        Returns the relationship links of the products in your account, one page at a time: which products use which relationship types.
+
+        To get the products on the other end of a product's relationships, with their quantities, use [Search related products](/reference/v3/related-products/search-related-products) with `product_id=<id>`.
+
+        Related pages:
+
+        - [Filtering and search](/reference/v3/filtering-and-search)
+        - [Pagination](/reference/v3/pagination)
+
+  - target: $.paths['/api/v3/product-relationships'].get.parameters[?(@.name=='filters' && @.in=='query')]
+    description: 'PM-50; field names from the resource''s response schema, operators per the API-wide grammar (Q#11, Q#99)'
+    update:
+      example:
+        product_id: 6a1f0c2e9b3d4a5f8c7e1a01
