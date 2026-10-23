@@ -49,14 +49,6 @@ actions:
       description: Text that describes the asset for people who can't see it.
       examples:
         - Adventure mug in blue, front view
-
-  # --- fields Plytix's 16 Oct 2026 handoff excludes from the public model -----------
-  # File metadata, counters, housekeeping and account fields (2026-10-22). The live
-  # API still returns them (QUESTIONS.md OAS-26), and asset records have no download
-  # URL (FB-030, ASSET-25). AssetFileType and AssetStatus were only reachable
-  # through the removed fields.
-  - target: $.components.schemas.AssetOutputDto.properties.account_id
-    remove: true
   - target: $.components.schemas.AssetOutputDto.properties.content_type
     remove: true
   - target: $.components.schemas.AssetOutputDto.properties.checksum
@@ -80,8 +72,6 @@ actions:
   - target: $.components.schemas.AssetOutputDto.properties.public
     remove: true
   - target: $.components.schemas.AssetOutputDto.properties.status
-    remove: true
-  - target: $.components.schemas.AssetCreateOutputDto.properties.account_id
     remove: true
   - target: $.components.schemas.AssetCreateOutputDto.properties.content_type
     remove: true

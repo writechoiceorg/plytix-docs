@@ -84,11 +84,6 @@ actions:
   - target: $.components.schemas.AssetListCreateOutputDto.properties.query.anyOf[1]
     update:
       title: None
-
-  # --- shared condition models -----------------------------------------------------
-  - target: $.components.schemas.AssetListType
-    update:
-      description: '`Smart`: members are the assets that match the list''s `query`. `Static`: membership is stored on each asset, and Plytix generates the `query`.'
   - target: $.components.schemas.FilterModel
     update:
       title: Field condition
@@ -113,10 +108,3 @@ actions:
     update:
       title: Relationship condition
       description: A condition on product relationships. For asset fields, use a field condition.
-
-  # --- fields Plytix's 16 Oct 2026 handoff excludes from the public model -----------
-  # The live API still returns them (QUESTIONS.md OAS-26). 2026-10-22.
-  - target: $.components.schemas.AssetListOutputDto.properties.account_id
-    remove: true
-  - target: $.components.schemas.AssetListCreateOutputDto.properties.account_id
-    remove: true

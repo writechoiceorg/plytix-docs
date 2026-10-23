@@ -55,47 +55,34 @@ A product's position in the hierarchy is reported by `product_level`: `0` SINGLE
 
 ## Product relationships
 
-V1 and V2 handle related products differently, so each legacy row names its version. V3's `DELETE` on a relationship removes every related product under it at once, which is not what the legacy calls that remove only the products you name do.
+V3's relationship endpoints are being redesigned, so there's no V3 equivalent to map these calls to yet. Keep your V1 and V2 calls for relationships and related products until the new endpoints are documented here.
 
-| Legacy endpoint | V3 | Notes |
-|---|---|---|
-| `POST /api/v1/products/{product_id}/relationships/{relationship_id}` | Not available yet | Linking related products through V3 isn't available yet. See the callout below. |
-| `POST /api/v2/products/{product_id}/relationships/{relationship_id}` | Not available yet | Same as the row above. |
-| `PATCH /api/v1/products/{product_id}/relationships/{relationship_id}/product/{related_product_id}` | Not available yet | Changing a related product's quantity through V3 isn't available yet. See the callout below. |
-| `PATCH /api/v2/products/{product_id}/relationships/{relationship_id}` | Not available yet | Same as the row above. |
-| `POST /api/v1/products/{product_id}/relationships/{relationship_id}/unlink` | No dedicated endpoint | V1 removes only the products listed in the body. See the V3 `DELETE` row for the difference. |
-| `DELETE /api/v2/products/{product_id}/relationships/{relationship_id}` | No dedicated endpoint | V2 removes only the product IDs listed in the body. See the V3 `DELETE` row for the difference. |
-| Not available | `DELETE /api/v3/products/{product_id}/relationships/{relationship_id}` | Removes the whole association: every related product under that relationship, for this product. The product itself stays. |
-| Not available | [`GET /api/v3/related-products`](/reference/v3/related-products/search-related-products) | Lists product-to-product links with each link's `quantity`. Filter by `product_id`. |
-
-<Callout type="warn" title="Relationship links can't be created or changed through V3 yet">
-  The spec declares `POST` and `PATCH` on `/api/v3/products/{product_id}/relationships`, but they aren't available yet. When we tried them on October 15, 2026, `POST` returned `405 Method Not Allowed` and `PATCH` returned `422` with "relationships: Extra inputs are not permitted". Keep your legacy calls for creating links and changing quantities until Plytix confirms the V3 contract. To read links in V3, use [`GET /api/v3/related-products`](/reference/v3/related-products/search-related-products).
-</Callout>
+| Legacy endpoint | V3 |
+|---|---|
+| `POST /api/v1/products/{product_id}/relationships/{relationship_id}` | Not available yet |
+| `POST /api/v2/products/{product_id}/relationships/{relationship_id}` | Not available yet |
+| `PATCH /api/v1/products/{product_id}/relationships/{relationship_id}/product/{related_product_id}` | Not available yet |
+| `PATCH /api/v2/products/{product_id}/relationships/{relationship_id}` | Not available yet |
+| `POST /api/v1/products/{product_id}/relationships/{relationship_id}/unlink` | Not available yet |
+| `DELETE /api/v2/products/{product_id}/relationships/{relationship_id}` | Not available yet |
 
 {/* FLAG (open):
-  REL-2. Live relationship writes on the development account contradict the spec and our own 2026-09-15 results (FB-024). Both routes the spec declares for `POST` returned `405`, and `GET /products/{id}/relationships` returned `404 Field 'relationships' does not exist`. These routes, the nested related-products GETs, and `GET /api/v3/product-relationships` (FB-024 shape mismatch) are on hold, so the table no longer lists them. Restore the V3 write rows once Plytix confirms the current contract. */}
-
-<Callout type="info" title="Narrow the account-wide association endpoints">
-  `GET /api/v3/related-products` and `GET /api/v3/family-attributes` return every matching record in your account when called with no filter. Add a filter to read only the records you need: `product_id` on related products, and `product_family_id` on family attributes.
-</Callout>
-
-{/* FLAG (open):
-  `GET /products/{id}/relationships/{relationship_id}/related-products[/{related_product_id}]` is unconfirmed. It returned empty or `404` for a link confirmed to exist by three other means. Ask Plytix whether it is unfinished before documenting it as usable.
+  REL-23. The 2026-10-19 spec removes `/api/v3/relationships`, `/api/v3/related-products` and every `/api/v3/products/{product_id}/relationships` route, and adds `/api/v3/product-relationship-types` plus `/api/v3/products/{product_identifier}/product_relationship_types` (link, update, unlink). The new operations are `pending` in visibility.yaml. Once Plytix classifies them, map the legacy rows above and the relationship-definition rows below to them. Supersedes REL-2 and FB-024.
 */}
 
-{/* FLAG (open):
-  The V1 unlink method and path spelling follow the V1 Postman request definitions (`POST .../unlink`, `PATCH .../product/{related_product_id}`). The collection's own overview table lists `PATCH` for `/unlink` and `/products/` for the related-product path (FB-023). Whether a V3 PATCH keeps related products left out of the array, and how to remove one related product in V3, are unconfirmed (FB-024).
-*/}
+<Callout type="info" title="Narrow the account-wide association endpoint">
+  `GET /api/v3/family-attributes` returns every matching record in your account when called with no filter. Add `product_family_id` to read only one family's attributes.
+</Callout>
 
 ## Relationship definitions
 
-| V1 | V3 | Notes |
-|---|---|---|
-| `POST /api/v1/relationships` | `POST /api/v3/relationships` | |
-| `POST /api/v1/relationships/search` | `GET /api/v3/relationships` | |
-| `GET /api/v1/relationships/{relationship_id}` | `GET /api/v3/relationships/{identifier}` | |
-| `PATCH /api/v1/relationships/{relationship_id}` | `PATCH /api/v3/relationships/{identifier}` | Only `name` can be changed. |
-| `DELETE /api/v1/relationships/{relationship_id}` | `DELETE /api/v3/relationships/{identifier}` | |
+| V1 | V3 |
+|---|---|
+| `POST /api/v1/relationships` | Not available yet |
+| `POST /api/v1/relationships/search` | Not available yet |
+| `GET /api/v1/relationships/{relationship_id}` | Not available yet |
+| `PATCH /api/v1/relationships/{relationship_id}` | Not available yet |
+| `DELETE /api/v1/relationships/{relationship_id}` | Not available yet |
 
 ## Assets
 

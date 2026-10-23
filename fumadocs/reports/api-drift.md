@@ -2,11 +2,11 @@
 
 Source: `upstream/openapi-v3.json` · Result: **PASS**
 
-Visibility: 90 public operations published; excluded 12 on-hold, 6 pending, 49 internal, 8 removed; 0 unclassified. Pruned 148 unreachable components.
+Visibility: 78 public operations published; excluded 17 pending, 49 internal, 1 on-hold, 8 removed; 0 unclassified. Pruned 158 unreachable components.
 
-Coverage: 90/90 operations edited, 90/90 described, 90/90 clean operationIds, 189/189 params described, 89/137 responses with examples. Details: `reports/api-coverage.md`.
+Coverage: 78/78 operations edited, 78/78 described, 78/78 clean operationIds, 161/161 params described, 78/118 responses with examples. Details: `reports/api-coverage.md`.
 
-## Warnings (169)
+## Warnings (144)
 
 - lint: info-license: Info object should contain `license` field. (#/info)
 - lint: tag-description: Tag object should contain `description` field. (#/tags/0/description)
@@ -58,8 +58,31 @@ Coverage: 90/90 operations edited, 90/90 described, 90/90 clean operationIds, 18
 - lint: no-invalid-media-type-examples: Example value must conform to the schema: `modified` property must match format "date-time". (#/paths/~1api~1v3~1product-categories/get/responses/200/content/application~1json/examples/firstPage/value/data/1/modified)
 - lint: no-invalid-media-type-examples: Example value must conform to the schema: `modified` property type must be null. (#/paths/~1api~1v3~1product-categories/get/responses/200/content/application~1json/examples/firstPage/value/data/1/modified)
 - lint: no-invalid-media-type-examples: Example value must conform to the schema: `modified` property must match a schema in anyOf. (#/paths/~1api~1v3~1product-categories/get/responses/200/content/application~1json/examples/firstPage/value/data/1/modified)
-- …and 119 more
+- …and 94 more
 
-## Notices (1)
+## Notices (24)
 
-- on hold: 12 operations left out (24 overlay edits kept, not applied): GET /api/v3/products/{product_id}/relationships/{relationship_id}/related-products/{related_product_id}; GET /api/v3/products/{product_id}/relationships/{relationship_id}/related-products/{related_product_id}/{path}; GET /api/v3/products/{product_id}/relationships/{relationship_id}/related-products; POST /api/v3/products/{product_id}/relationships/{relationship_id}; PATCH /api/v3/products/{product_id}/relationships/{relationship_id}; GET /api/v3/products/{product_id}/relationships/{relationship_id}/{path}; DELETE /api/v3/products/{product_id}/relationships/{relationship_id}/{path}; PATCH /api/v3/products/{product_id}/relationships/{relationship_id}/{path}; GET /api/v3/products/{product_id}/relationships; POST /api/v3/products/{product_id}/relationships; GET /api/v3/product-relationships; POST /api/v3/product-families/{identifier}/{path}
+- visibility: entry for an operation upstream no longer has: POST /api/v3/product-families/{identifier}/{path}
+- visibility: entry for an operation upstream no longer has: POST /api/v3/products/{identifier}/{path}
+- visibility: entry for an operation upstream no longer has: GET /api/v3/products/{product_id}/relationships
+- visibility: entry for an operation upstream no longer has: POST /api/v3/products/{product_id}/relationships
+- visibility: entry for an operation upstream no longer has: GET /api/v3/products/{product_id}/relationships/{relationship_id}
+- visibility: entry for an operation upstream no longer has: POST /api/v3/products/{product_id}/relationships/{relationship_id}
+- visibility: entry for an operation upstream no longer has: PATCH /api/v3/products/{product_id}/relationships/{relationship_id}
+- visibility: entry for an operation upstream no longer has: DELETE /api/v3/products/{product_id}/relationships/{relationship_id}
+- visibility: entry for an operation upstream no longer has: GET /api/v3/products/{product_id}/relationships/{relationship_id}/related-products
+- visibility: entry for an operation upstream no longer has: GET /api/v3/products/{product_id}/relationships/{relationship_id}/related-products/{related_product_id}
+- visibility: entry for an operation upstream no longer has: GET /api/v3/products/{product_id}/relationships/{relationship_id}/related-products/{related_product_id}/{path}
+- visibility: entry for an operation upstream no longer has: GET /api/v3/products/{product_id}/relationships/{relationship_id}/{path}
+- visibility: entry for an operation upstream no longer has: PATCH /api/v3/products/{product_id}/relationships/{relationship_id}/{path}
+- visibility: entry for an operation upstream no longer has: DELETE /api/v3/products/{product_id}/relationships/{relationship_id}/{path}
+- visibility: entry for an operation upstream no longer has: GET /api/v3/related-products
+- visibility: entry for an operation upstream no longer has: GET /api/v3/relationships
+- visibility: entry for an operation upstream no longer has: POST /api/v3/relationships
+- visibility: entry for an operation upstream no longer has: GET /api/v3/relationships/{identifier}
+- visibility: entry for an operation upstream no longer has: PATCH /api/v3/relationships/{identifier}
+- visibility: entry for an operation upstream no longer has: DELETE /api/v3/relationships/{identifier}
+- visibility: entry for an operation upstream no longer has: GET /api/v3/relationships/{identifier}/{path}
+- visibility: entry for an operation upstream no longer has: PATCH /api/v3/relationships/{identifier}/{path}
+- visibility: entry for an operation upstream no longer has: DELETE /api/v3/relationships/{identifier}/{path}
+- on hold: 1 operations left out (2 overlay edits kept, not applied): GET /api/v3/product-relationships

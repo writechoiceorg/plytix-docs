@@ -42,18 +42,11 @@ actions:
       description: ID of the asset category to move this category under.
       examples:
         - 6a1f0c2e9b3d4a5f8c7e1801
-
-  # --- fields Plytix's 16 Oct 2026 handoff excludes from the public model -----------
-  # 2026-10-22. The live API still returns them (QUESTIONS.md OAS-26).
-  - target: $.components.schemas.AssetCategoryOutputDto.properties.account_id
-    remove: true
   - target: $.components.schemas.AssetCategoryOutputDto.properties.path
     remove: true
   - target: $.components.schemas.AssetCategoryOutputDto.properties.slug
     remove: true
   - target: $.components.schemas.AssetCategoryOutputDto.properties.n_children
-    remove: true
-  - target: $.components.schemas.AssetCategoryCreateOutputDto.properties.account_id
     remove: true
   - target: $.components.schemas.AssetCategoryCreateOutputDto.properties.path
     remove: true

@@ -27,14 +27,14 @@ In short:
 | Product Family | The set of attributes that applies to one type of product, plus its inheritance rules | `/api/v3/product-families` |
 | Product Category | A node in a hierarchical tree you file products under | `/api/v3/product-categories` |
 | Asset | A file in Plytix DAM, such as an image, video, or document | `/api/v3/assets` |
-| Relationship | A named type of connection between products, such as "Gift basket" | `/api/v3/relationships` |
+| Relationship | A named type of connection between products, such as "Gift basket" | Being redesigned; see [Relationships](#relationships) |
 | Asset list | A saved set of assets, either Static or Smart | `/api/v3/asset-lists` |
 
 ## Products
 
 A product is the unit everything else attaches to. It carries two kinds of data, and the difference matters when you write queries.
 
-Everything that isn't a custom attribute value sits at the top level of the product object. That includes system fields (`id`, `sku`, `label`, `gtin`, `status`, `product_level`), relationship fields (`categories`, `assets`, `product_relationships`), timestamps (`created`, `modified`), and foreign keys that point at other entities (`product_family_id`, `parent_id`, which the dashboard shows as "Variant of", and `thumbnail_id`). The system fields are the System Attributes that ship with every Plytix account. You can't rename or delete them.
+Everything that isn't a custom attribute value sits at the top level of the product object. That includes system fields (`id`, `sku`, `label`, `gtin`, `status`, `product_level`), relationship fields (`categories`, `assets`), timestamps (`created`, `modified`), and foreign keys that point at other entities (`product_family_id`, `parent_id`, which the dashboard shows as "Variant of", and `thumbnail_id`). The system fields are the System Attributes that ship with every Plytix account. You can't rename or delete them.
 
 Your own attribute values sit inside the `attributes` map, keyed by each attribute's label, its snake-case identifier such as `suggested_retail_price` (not its display name):
 
@@ -123,16 +123,14 @@ On the product side, `thumbnail_id` points at the single asset used as the produ
 
 A relationship connects products to other products. Setting one up takes two steps and conflating them is a common source of confusion.
 
-1. The Relationship itself is the named type, such as "Gift basket", "Recommended products", or "Gift pack". It's an account-level entity at `/api/v3/relationships`, and creating one links no products.
+1. The Relationship itself is the named type, such as "Gift basket", "Recommended products", or "Gift pack". It's an account-level entity, and creating one links no products.
 2. Linking products attaches specific related products to one product under that relationship type.
 
 Each link can carry a `quantity`, which is what makes relationships usable for bundles and packs rather than only for recommendations.
 
-You can create and manage relationship types through the API today: `POST /api/v3/relationships` creates one. Creating and changing the links between products isn't available through V3 yet. `DELETE /api/v3/products/{product_id}/relationships/{relationship_id}` removes a product's links under one relationship type and leaves both products intact.
+V3's relationship endpoints are being redesigned and aren't documented yet. Until they are, manage relationships and related products through V1.
 
-A product's `product_relationships` field lists the relationship types it uses. To read which products it's linked to, and each link's `quantity`, search [`GET /api/v3/related-products`](/reference/v3/related-products/search-related-products) filtered by `product_id`.
-
-{/* FLAG (open): REL-2. The spec declares `POST` and `PATCH` on `/api/v3/products/{product_id}/relationships/{relationship_id}`, but they returned `405` and `422` on 2026-10-15 (FB-024) and are on hold. Restore the write description once Plytix confirms the contract. */}
+{/* FLAG (open): REL-23. The 2026-10-19 spec replaces `/api/v3/relationships`, `/api/v3/related-products` and `/api/v3/products/{product_id}/relationships` with `/api/v3/product-relationship-types` and `/api/v3/products/{product_identifier}/product_relationship_types`, and `product_relationships` on the product with `product_relationships_from`/`_to`. Rewrite this section once Plytix classifies the new operations. */}
 
 ## Asset lists
 
@@ -145,7 +143,7 @@ Request an asset's `static_lists` with `_fields` to see the static lists it belo
 
 ## How related data comes back
 
-Plytix expands related entities for you. Ask for `categories`, `assets`, or `product_relationships` and you get the objects themselves, not a list of IDs to resolve separately. There's no `_expand` parameter to set, and passing one returns an error.
+Plytix expands related entities for you. Ask for `categories` or `assets` and you get the objects themselves, not a list of IDs to resolve separately. There's no `_expand` parameter to set, and passing one returns an error.
 
 The shape of an expanded field depends on the relation. To-many relations, such as `categories` and `assets`, come back as arrays. To-one relations, such as `thumbnail`, `parent`, and `product_family`, come back as a single object.
 

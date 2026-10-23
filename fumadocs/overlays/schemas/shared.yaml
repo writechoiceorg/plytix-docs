@@ -9,12 +9,6 @@ actions:
     description: spec docstring ("Failure -> errors is set, data is an empty list"), Q#18
     update:
       description: The response envelope. On success, `data` holds the result (a list for searches). On failure, `errors` lists what went wrong and `data` is an empty list.
-
-  # --- fields Plytix's 16 Oct 2026 handoff excludes from the public model -----------
-  # CategoryBaseOutputDto is the expanded `parent`/`parents` of both product and
-  # asset categories (2026-10-22; QUESTIONS.md OAS-26).
-  - target: $.components.schemas.CategoryBaseOutputDto.properties.account_id
-    remove: true
   - target: $.components.schemas.CategoryBaseOutputDto.properties.path
     remove: true
   - target: $.components.schemas.CategoryBaseOutputDto.properties.slug

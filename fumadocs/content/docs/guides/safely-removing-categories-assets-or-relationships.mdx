@@ -64,6 +64,8 @@ Follow the steps below to read a product's current categories, remove one of the
 
 ## Remove a relationship from a product
 
+{/* FLAG (open): REL-23. The 2026-10-19 spec removes `product_relationships` and the `/api/v3/products/{product_id}/relationships` routes in favor of `product_relationships_from`/`_to` and `/api/v3/products/{product_identifier}/product_relationship_types`. Rewrite this section once Plytix classifies the new operations. */}
+
 Relationships work the same way as categories, with one extra layer: the relationship type is an account-level entity, and the link between two products lives under it.
 
 Follow the steps below to remove a relationship link without deleting the relationship type or either product.

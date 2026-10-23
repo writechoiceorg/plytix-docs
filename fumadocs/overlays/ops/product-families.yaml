@@ -258,30 +258,6 @@ actions:
     update:
       description: The field to read, such as `name` or `created`.
 
-  # --- POST /api/v3/product-families/{identifier}/{path} (recommended on-hold) ------
-  - target: $.paths['/api/v3/product-families/{identifier}/{path}'].post
-    description: Q#67, FAM-1 (Plytix answer, no fix announced), Update and Delete Product Family.bru "405 - Not Allowed (Spec Mismatch)" (2026-09-15). Recommended for on-hold; text kept accurate in case it publishes.
-    update:
-      summary: Create a product family field
-      operationId: link-product-family-field
-      description: |-
-        This route returns `405` for every field. To rename a product family, use [Update a product family field](/reference/v3/product-families/update-product-family-field) or [Rename a product family](/reference/v3/product-families/update-product-family). To link an attribute to a family, use [Link an attribute to a product family](/reference/v3/family-attributes/add-attribute-to-family).
-
-  - target: $.paths['/api/v3/product-families/{identifier}/{path}'].post.responses['405']
-    description: Update and Delete Product Family.bru "405 - Not Allowed (Spec Mismatch)" (2026-09-15)
-    update:
-      description: '`POST` isn''t supported on this path.'
-      content:
-        application/json:
-          examples:
-            notAllowed:
-              summary: POST on a family field
-              value:
-                data: []
-                errors:
-                  - name: MethodNotAllowed
-                    description: POST is not allowed on this path.
-
   # --- PATCH /api/v3/product-families/{identifier}/{path} ---------------------------
   - target: $.paths['/api/v3/product-families/{identifier}/{path}'].patch
     description: Update and Delete Product Family.bru "200 - Success (Generic Subpath /name)" (2026-09-15; status now 204 per Q#84/Q#116, VERIFY.md), Q#60 (name only). Request body not declared upstream (proposed fix FAM-21).

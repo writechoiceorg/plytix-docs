@@ -36,16 +36,7 @@ actions:
   - target: $.components.schemas.ProductAttributeGroupOutputDto.properties.order
     update:
       description: Display position of the group among your attribute groups.
-
-  # --- fields Plytix's 16 Oct 2026 handoff excludes from the public model -----------
-  # attribute_labels is replaced by a related `attributes` list whose shape isn't
-  # defined yet (GRP-24), so no example shows group members (2026-10-22). The live
-  # API still returns attribute_labels (OAS-26).
-  - target: $.components.schemas.ProductAttributeGroupOutputDto.properties.account_id
-    remove: true
   - target: $.components.schemas.ProductAttributeGroupOutputDto.properties.attribute_labels
-    remove: true
-  - target: $.components.schemas.ProductAttributeGroupCreateOutputDto.properties.account_id
     remove: true
   - target: $.components.schemas.ProductAttributeGroupCreateOutputDto.properties.attribute_labels
     remove: true

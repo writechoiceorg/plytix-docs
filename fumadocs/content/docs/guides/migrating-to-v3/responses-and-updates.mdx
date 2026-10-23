@@ -61,7 +61,7 @@ The V1/V2 GET wraps the same record in an array (abridged):
 }
 ```
 
-A V3 create returns `201` with `data` as an object holding the resource's creation representation. For products, the specification defines it without relationship expansions: it carries IDs such as `parent_id` and `product_family_id`, but not expanded fields such as `categories`, `assets`, `thumbnail`, or `product_relationships`. If your code needs those after a create, read the record back.
+A V3 create returns `201` with `data` as an object holding the resource's creation representation. For products, the specification defines it without relationship expansions: it carries IDs such as `parent_id` and `product_family_id`, but not expanded fields such as `categories`, `assets`, or `thumbnail`. If your code needs those after a create, read the record back.
 
 A V3 PATCH returns `204` with an empty body:
 

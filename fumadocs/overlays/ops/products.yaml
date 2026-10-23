@@ -66,8 +66,6 @@ actions:
 
         Ask for `categories`, not `category_ids`: `category_ids` doesn't exist and returns `400`.
 
-        `product_relationships` returns only the ID of each relationship type the product uses. To get the related products, use [Search related products](/reference/v3/related-products/search-related-products) with `product_id=<id>`.
-
   - target: $.paths['/api/v3/products'].get.parameters[?(@.name=='_sort_by' && @.in=='query')]
     description: Q#9, Q#100, FB-009, FB-029; num_variations dropped from the list (excluded by the 16 Oct handoff)
     update:
@@ -338,8 +336,6 @@ actions:
 
         `data` holds the product object itself, not a list, and the response has no `pagination` key.
 
-        `product_relationships` lists only the ID of each relationship type the product uses. To get the related products, use [Search related products](/reference/v3/related-products/search-related-products) with `product_id=<id>`.
-
   - target: $.paths['/api/v3/products/{identifier}'].get.parameters[?(@.name=='identifier' && @.in=='path')]
     description: Q#86 (GET only)
     update:
@@ -404,8 +400,6 @@ actions:
 
         `data` holds the value itself, so its shape depends on the field. A field the product doesn't have returns `400`, naming the field.
 
-        Relationships aren't available here: read `product_relationships` with [Get a product](/reference/v3/products/get-product).
-
   - target: $.paths['/api/v3/products/{identifier}/{path}'].get.parameters[?(@.name=='path' && @.in=='path')]
     description: Q#16, FB-026
     update:
@@ -443,72 +437,6 @@ actions:
             errors: []
             pagination: {}
 
-  # --- POST /api/v3/products/{identifier}/{path} (Phase 2) -----------------------
-  - target: $.paths['/api/v3/products/{identifier}/{path}'].post
-    description: Q#94, Q#96, Q#105, Q#107, PROD-7, PROD-8, FAM-1, Link Category to Product.bru (2026-10-08)
-    update:
-      summary: Link a record to a product
-      operationId: add-product-field
-      description: |-
-        Links one record to the product. Set `path` to the link collection, for example `categories`, and send the record's ID as `{"id": "<id>"}`.
-
-        A successful link returns `201` with the linked ID. Send one record per request: the body doesn't take a list of IDs.
-
-        If the record is already linked to the product, the request returns `409`. An ID that doesn't exist returns `404`.
-
-        For categories, [Link a category to a product](/reference/v3/products/link-product-category) documents the same request on its dedicated route.
-
-        Assets can't be linked here. To use an asset on a product, set it as the product's `thumbnail_id` or as a value of a media attribute. See [Safely remove categories, assets, or relationships](/docs/guides/safely-removing-categories-assets-or-relationships#connect-other-assets-to-a-product) and [Update and delete records](/reference/v3/updates-and-deletes).
-
-  - target: $.paths['/api/v3/products/{identifier}/{path}'].post.parameters[?(@.name=='path' && @.in=='path')]
-    description: Q#94, Q#105
-    update:
-      description: The link collection, for example `categories`.
-
-  - target: $.paths['/api/v3/products/{identifier}/{path}'].post.responses['201']
-    description: Link Category to Product.bru 201 (2026-10-08)
-    update:
-      description: Linked. `data.id` is the ID of the linked record.
-      content:
-        application/json:
-          examples:
-            linked:
-              summary: Category linked
-              value:
-                data:
-                  id: 6a1f0c2e9b3d4a5f8c7e1c02
-                errors: []
-
-  - target: $.paths['/api/v3/products/{identifier}/{path}'].post.responses['409']
-    description: Link Category to Product.bru 409 (2026-10-08), Q#94
-    update:
-      description: The record is already linked to this product. Nothing changed.
-      content:
-        application/json:
-          examples:
-            alreadyLinked:
-              summary: Category already linked
-              value:
-                data: []
-                errors:
-                  - name: AlreadyExists
-                    description: "'6a1f0c2e9b3d4a5f8c7e1c02' is already linked to products 6a1f0c2e9b3d4a5f8c7e1a01 through 'categories'"
-
-  - target: $.paths['/api/v3/products/{identifier}/{path}'].post.responses['422'].content['application/json']
-    description: Link Category to Product.bru 422 (2026-10-08)
-    update:
-      examples:
-        wrongBody:
-          summary: List field instead of id
-          description: 'Body `{"category_ids": ["6a1f0c2e9b3d4a5f8c7e1c02"]}`'
-          value:
-            data: []
-            errors:
-              - name: InputDTOValidationError
-                description: 'id: Field required'
-              - name: InputDTOValidationError
-                description: 'category_ids: Extra inputs are not permitted'
-
   # --- PATCH /api/v3/products/{identifier}/{path} (Phase 2) ----------------------
   - target: $.paths['/api/v3/products/{identifier}/{path}'].patch
     description: Q#84, Q#87, Q#95, FB-006, FB-007, FB-020, ASSET-3, status map ("only work on attributes")
@@ -530,7 +458,7 @@ actions:
 
         Completeness and formula attributes are calculated by Plytix, so writing to them returns `422`.
 
-        Link collections such as `categories` can't be changed here (`405`). Link and unlink records with [Link a record to a product](/reference/v3/products/add-product-field) and [Delete a product field value or link](/reference/v3/products/delete-product-field). See [Update and delete records](/reference/v3/updates-and-deletes).
+        Link collections such as `categories` can't be changed here (`405`). Link and unlink categories with [Link a category to a product](/reference/v3/products/link-product-category) and [Unlink a category from a product](/reference/v3/products/delete-product-category-link). See [Update and delete records](/reference/v3/updates-and-deletes).
 
   - target: $.paths['/api/v3/products/{identifier}/{path}'].patch.parameters[?(@.name=='path' && @.in=='path')]
     description: Q#87
@@ -637,18 +565,6 @@ actions:
             errors:
               - name: ValueError
                 description: Field 'colour' not found
-
-  - target: $.paths['/api/v3/products/{identifier}/{path}'].post.responses['404'].content['application/json']
-    description: Q#105 (2026-10-13)
-    update:
-      examples:
-        unknownId:
-          summary: Category ID that doesn't exist
-          value:
-            data: []
-            errors:
-              - name: NotFoundError
-                description: Linked id '6a1f0c2e9b3d4a5f8c7e1c09' not found in relationship 'categories'
 
   # --- POST /api/v3/products/{identifier}/categories (public since 2026-10-22) ------
   # Dedicated association route, made public under the 16 Oct 2026 handoff's

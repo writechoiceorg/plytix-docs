@@ -184,3 +184,15 @@ operations:
   "GET /is_alive": internal
   "GET /is_ready": internal
   "GET /metrics": internal
+  # 2026-10-22: new in the 2026-10-19 spec (relationship types replace the relationships API); not classified by Plytix yet.
+  "POST /api/v3/products/{product_identifier}/product_relationship_types": pending
+  "PATCH /api/v3/products/{product_identifier}/product_relationship_types": pending
+  "POST /api/v3/products/{product_identifier}/product_relationship_types/unlink": pending
+  "GET /api/v3/product-relationship-types": pending
+  "POST /api/v3/product-relationship-types": pending
+  "GET /api/v3/product-relationship-types/{identifier}": pending
+  "DELETE /api/v3/product-relationship-types/{identifier}": pending
+  "PATCH /api/v3/product-relationship-types/{identifier}": pending
+  "GET /api/v3/product-relationship-types/{identifier}/{path}": pending
+  "DELETE /api/v3/product-relationship-types/{identifier}/{path}": pending
+  "PATCH /api/v3/product-relationship-types/{identifier}/{path}": pending

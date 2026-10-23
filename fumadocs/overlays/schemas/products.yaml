@@ -89,22 +89,13 @@ actions:
     remove: true
   - target: $.components.schemas.ProductListOutputDto
     remove: true
-
-  # --- fields Plytix's 16 Oct 2026 handoff excludes from the public model -----------
-  # The live API still returns them (QUESTIONS.md OAS-26); the docs hide them now.
-  - target: $.components.schemas.ProductOutputDto.properties.account_id
-    remove: true
   - target: $.components.schemas.ProductOutputDto.properties.num_variations
     remove: true
   - target: $.components.schemas.ProductOutputDto.properties.overwritten_attributes
     remove: true
-  - target: $.components.schemas.ProductCreateOutputDto.properties.account_id
-    remove: true
   - target: $.components.schemas.ProductCreateOutputDto.properties.num_variations
     remove: true
   - target: $.components.schemas.ProductCreateOutputDto.properties.overwritten_attributes
-    remove: true
-  - target: $.components.schemas.ProductRelationshipModelOutputDto.properties.relationship_label
     remove: true
 
   # --- relations you can expand with _fields (16 Oct handoff) -------------------------
@@ -126,7 +117,3 @@ actions:
   - target: $.components.schemas.ProductOutputDto.properties.product_family
     update:
       description: The product family as a full record. Returned only when you name `product_family` in `_fields`. `product_family_id` holds its ID.
-  - target: $.components.schemas.ProductOutputDto.properties.product_relationships
-    description: Q#113; relationship_label excluded by the 16 Oct handoff
-    update:
-      description: The relationship types the product uses, each identified by its `relationship_id`. To get the products on the other end, use [Search related products](/reference/v3/related-products/search-related-products) with `product_id=<id>`.

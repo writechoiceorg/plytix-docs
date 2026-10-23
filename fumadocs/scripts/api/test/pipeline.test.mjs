@@ -15,7 +15,7 @@ import { SITE_ROOT, readJson, readYaml } from '../lib/util.mjs';
 import { trimResponses } from '../lib/responses.mjs';
 import { checkContent } from '../lib/validate.mjs';
 
-const NESTED = '/api/v3/products/{product_id}/relationships/{relationship_id}';
+const NESTED = '/api/v3/product-families/{product_family_id}/attributes/{attribute_id}';
 
 const OVERLAY = {
   overlay: '1.0.0',
@@ -179,8 +179,8 @@ test('simulated upstream fix: redundant fixes and changed overridden fields are 
   const fixIt = (spec) => {
     // Plytix declares the missing path params on one nested route...
     spec.paths[NESTED].get.parameters.push(
-      { name: 'product_id', in: 'path', required: true, schema: { type: 'string' } },
-      { name: 'relationship_id', in: 'path', required: true, schema: { type: 'string' } },
+      { name: 'product_family_id', in: 'path', required: true, schema: { type: 'string' } },
+      { name: 'attribute_id', in: 'path', required: true, schema: { type: 'string' } },
     );
     // ...and writes its own description where we override one.
     spec.paths['/api/v3/products'].get.description = 'Upstream now documents this.';

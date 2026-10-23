@@ -8,6 +8,17 @@ Related files:
 - `VERIFY.md`: every published claim waiting for a live recheck, row by row
 - `QUESTIONS.md`: open questions for the Plytix dev team
 
+## 0. Relationships after the 2026-10-19 spec (REL-23)
+
+The 2026-10-19 spec removed the relationships API: `/api/v3/relationships/*`, `/api/v3/related-products`, every `/api/v3/products/{product_id}/relationships/*` route, and the generic `POST /api/v3/products/{identifier}/{path}`. Their 11 published pages (and `add-product-field`) are gone, and their overlay actions were deleted (the text is in git history before this change). Most rows in the on-hold table below no longer exist upstream.
+
+The replacements are `pending` in `../upstream/visibility.yaml`: `/api/v3/product-relationship-types` (search, create, get, update, delete, field routes) and `POST`/`PATCH /api/v3/products/{product_identifier}/product_relationship_types` plus `POST .../unlink`. Once Plytix classifies them:
+
+1. Set them `public`, test them live, and write `ops/product-relationship-types.yaml` (reuse what fits from the deleted `ops/relationships.yaml`), plus the `20-meta.yaml` tag order.
+2. Rewrite the content flagged `REL-23`: `guides/data-model.mdx` (Relationships), `guides/migrating-to-v3/endpoint-mapping.mdx` (Product relationships, Relationship definitions), `guides/migrating-to-v3/not-migrated-and-new-in-v3.mdx`, `guides/migrating-to-v3/filter-operators.mdx` (relationship filter row), `reference/v3/filtering-and-search.mdx` (relationship filters), `guides/safely-removing-categories-assets-or-relationships.mdx` (Remove a relationship), and the Relationships cards in `reference/v3/index.mdx`.
+3. Fix `ops/product-relationships.yaml` (`GET /api/v3/product-relationships`, still on hold): its description links to the removed related-products page.
+4. Empty overlay files kept for now: `ops/relationships.yaml`, `ops/related-products.yaml`. Delete them, or reuse them for the new resource. `20-meta.yaml` still lists the `relationships`, `productrelationships` and `relatedproducts` tags.
+
 ## 1. Restore the operations on hold (deferred from Phase 2)
 
 Twelve operations are `on-hold` in `../upstream/visibility.yaml`: the live API contradicted the spec, so they're left out of the docs. Their overlay text is kept but not applied, and their drift baseline is preserved.

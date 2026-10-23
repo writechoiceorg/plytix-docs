@@ -85,16 +85,6 @@ actions:
     update:
       description: ID of the product attribute, a 24-character hexadecimal string.
 
-  - target: $.paths.*.*.parameters[?(@.name=='product_id' && @.in=='path')]
-    description: OAS-1 fixes
-    update:
-      description: ID of the product, a 24-character hexadecimal string.
-
-  - target: $.paths.*.*.parameters[?(@.name=='relationship_id' && @.in=='path')]
-    description: OAS-1 fixes
-    update:
-      description: ID of the relationship type, a 24-character hexadecimal string.
-
   # --- error responses ---------------------------------------------------------
   - target: $.paths.*.*.responses['400']
     description: FB-010, Q#89

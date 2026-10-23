@@ -632,3 +632,37 @@ Raised while applying `materials/api-references/endpoint-reviews/Plytix_API_v3_W
 
 | Plytix response |
 | :---- |
+
+## 2026-10-19 spec
+
+### REL-23
+
+- **Observed:** The 2026-10-19 spec removes the relationships API: `/api/v3/relationships/*`, `/api/v3/related-products`, and every `/api/v3/products/{product_id}/relationships/*` route (23 operations, 11 of them published). It adds `/api/v3/product-relationship-types/*` (search, create, get, update, delete, field routes) and `POST`/`PATCH /api/v3/products/{product_identifier}/product_relationship_types` plus `POST .../product_relationship_types/unlink`. `ProductOutputDto.product_relationships` is replaced by `product_relationships_from` and `product_relationships_to`. We've removed the old pages and keep the 11 new operations `pending`, so the docs currently have no relationships reference. This may also answer REL-2.
+- **Question:** Which of the 11 new operations are public? Are the old routes gone from production, or only from the spec? Are `product_relationships_from`/`_to` public fields?
+
+| Plytix response |
+| :---- |
+
+### PROD-21
+
+- **Observed:** The 2026-10-19 spec drops the generic `POST /api/v3/products/{identifier}/{path}` link route (and `POST /api/v3/product-families/{identifier}/{path}`) in favor of the dedicated link routes (`POST /api/v3/products/{identifier}/categories`, and so on). Our "Link a record to a product" page is removed; we point readers to the category link route instead.
+- **Question:** Does the generic `POST` still work in production, or is it retired?
+
+| Plytix response |
+| :---- |
+
+### LIST-24
+
+- **Observed:** In the 2026-10-19 spec, `AssetListOutputDto.type` allows `AssetList` besides `Smart` and `Static`, while create (`ListCreateType`) accepts only `Smart` and `Static`. We describe only `Smart` and `Static`.
+- **Question:** When does a list come back with `type: AssetList`, and what does it mean?
+
+| Plytix response |
+| :---- |
+
+### OAS-31
+
+- **Observed:** The 2026-10-19 spec drops `account_id` from every output schema, and adds descriptions to the `PATCH .../{identifier}/{path}` routes saying a JSON object body is merged into the field. We already omitted `account_id`, and our field-route pages document only single-value replacement.
+- **Question:** Is the object-merge behavior live for every resource (for example `PATCH /api/v3/products/{id}/attributes` with `{"color": "blue"}`)? Has `account_id` been removed from the responses, or only from the spec?
+
+| Plytix response |
+| :---- |

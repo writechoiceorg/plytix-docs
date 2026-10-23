@@ -35,23 +35,17 @@ actions:
     remove: true
   - target: $.components.schemas.AttributeRefInputDto
     remove: true
-  - target: $.components.schemas.ProductFamilyOutputDto.properties.account_id
-    remove: true
   - target: $.components.schemas.ProductFamilyOutputDto.properties.total_products
     remove: true
   - target: $.components.schemas.ProductFamilyOutputDto.properties.total_attributes
     remove: true
   - target: $.components.schemas.ProductFamilyOutputDto.properties.total_models
     remove: true
-  - target: $.components.schemas.ProductFamilyCreateOutputDto.properties.account_id
-    remove: true
   - target: $.components.schemas.ProductFamilyCreateOutputDto.properties.total_products
     remove: true
   - target: $.components.schemas.ProductFamilyCreateOutputDto.properties.total_attributes
     remove: true
   - target: $.components.schemas.ProductFamilyCreateOutputDto.properties.total_models
-    remove: true
-  - target: $.components.schemas.FamilyAttributeOutputDto.properties.account_id
     remove: true
   # --- output: family_attributes (16 Oct handoff: expandable with _fields) ----------
   - target: $.components.schemas.ProductFamilyOutputDto.properties.family_attributes

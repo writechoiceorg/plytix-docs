@@ -53,7 +53,7 @@ Follow the steps below to authenticate and load every product into your ERP once
      --data-urlencode "_page_size=100"
    ```
 
-   Follow `pagination.next_page` until it's absent, as described in [Export your full catalog](/docs/guides/exporting-your-full-catalog). Relations such as `categories` and `product_relationships` are returned only when you name them, so add `_fields=categories` or `_fields=product_relationships` if your ERP needs them.
+   Follow `pagination.next_page` until it's absent, as described in [Export your full catalog](/docs/guides/exporting-your-full-catalog). Relations such as `categories` are returned only when you name them, so add `_fields=categories` if your ERP needs them.
 
 4. **Write each product into your ERP, keyed by SKU.**
 

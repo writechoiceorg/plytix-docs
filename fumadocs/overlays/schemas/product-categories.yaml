@@ -44,20 +44,11 @@ actions:
   - target: $.components.schemas.ProductCategoryCreateOutputDto
     update:
       description: The new category. `created`, `modified`, and, on a top-level category, `parent_id` aren't returned. Read the category back to get them.
-
-  # --- fields Plytix's 16 Oct 2026 handoff excludes from the public model -----------
-  # slug and n_children are excluded; path is pending Plytix's exposure decision, so
-  # it stays out too (2026-10-22). The live API still returns them (QUESTIONS.md
-  # OAS-26). The shared CategoryBaseOutputDto is trimmed in schemas/shared.yaml.
-  - target: $.components.schemas.ProductCategoryGetOutputDto.properties.account_id
-    remove: true
   - target: $.components.schemas.ProductCategoryGetOutputDto.properties.path
     remove: true
   - target: $.components.schemas.ProductCategoryGetOutputDto.properties.slug
     remove: true
   - target: $.components.schemas.ProductCategoryGetOutputDto.properties.n_children
-    remove: true
-  - target: $.components.schemas.ProductCategoryCreateOutputDto.properties.account_id
     remove: true
   - target: $.components.schemas.ProductCategoryCreateOutputDto.properties.path
     remove: true

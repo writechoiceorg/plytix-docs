@@ -96,6 +96,8 @@ Custom attributes are addressed directly in V3 rather than through a field-name 
 | Related entity field | Not possible | `categories.name[<op>]=value`, for example `categories.name=Drinkware` |
 | Product relationships | `relationship_filters` with nested `product_ids` objects | `product_relationships.relationship_id=<id>&product_relationships.related_products.product_id=<id>` |
 
+{/* FLAG (open): REL-23. The 2026-10-19 spec removes `product_relationships` and the `/api/v3/products/{product_id}/relationships` routes in favor of `product_relationships_from`/`_to` and `/api/v3/products/{product_identifier}/product_relationship_types`. Rewrite this section once Plytix classifies the new operations. */}
+
 {/* FLAG (open):
   The `product_relationships` filter in the last row comes from the internal API V3 reference and the 2026-10-02 spec's field names. It hasn't been tested live. Confirm with `endpoint-tester`, including whether the relationship, product, and quantity conditions apply to the same related product.
 */}

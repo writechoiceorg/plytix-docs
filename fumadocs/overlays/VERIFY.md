@@ -23,6 +23,8 @@ A ready-made script for these checks was used on 2026-10-20 (it reads `.env` wit
 
 ### On hold (left out of the docs)
 
+**2026-10-22: superseded.** The 2026-10-19 spec removes all of these routes (and the published relationships, related-products and product-relationship pages), replacing them with `/api/v3/product-relationship-types` and `/api/v3/products/{product_identifier}/product_relationship_types`, which are `pending` (REL-23). Their overlay actions were deleted. When the new operations are classified, test them live before publishing; the list below is kept for history.
+
 These operations are `on-hold` in `upstream/visibility.yaml` because the live API contradicts the spec (FB-024 on 2026-10-15; quirk #63 still on 2026-10-13). Retest them, rewrite their overlay text (it predates Phase 2 and is tagged `x-review`), then set them back to `public`. Closes REL-2.
 
 - `POST /api/v3/products/{product_id}/relationships` (405)
