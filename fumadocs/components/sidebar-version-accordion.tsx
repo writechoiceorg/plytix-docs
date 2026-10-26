@@ -7,7 +7,7 @@ const SIDEBAR_SELECTOR = '#nd-sidebar, #nd-sidebar-mobile';
 const REFERENCE_PREFIX = '/reference';
 
 /**
- * Makes the API version folders (V3, V1/V2) an accordion: opening one closes
+ * Makes the API version folders (V3, V1 and V2) an accordion: opening one closes
  * the other. Closing goes through the folder's own trigger, so Fumadocs keeps
  * its open state (and chevron) in sync.
  */

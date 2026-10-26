@@ -1,6 +1,6 @@
 import { llms, loader } from 'fumadocs-core/source';
 import { fluentIconsPlugin } from './fluent-icons-plugin';
-import { docsRoute, getPageUrl } from './shared';
+import { docsRoute, getPageUrl, isPublishedPath } from './shared';
 import { defineDocs } from 'fumadocs-mdx/macro';
 import { applyMdxPreset } from 'fumadocs-mdx/config';
 import { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
@@ -23,11 +23,15 @@ const docs = defineDocs({
   },
 });
 
+// Unpublished pages are dropped here, so every route, the search index and
+// the MCP server (all built on `source`) treat them as nonexistent.
+const docsSource = docs.toFumadocsSource();
+
 // See https://fumadocs.dev/docs/headless/source-api for more info
 export const source = loader({
   baseUrl: docsRoute,
   url: (slugs) => getPageUrl(slugs),
-  source: docs.toFumadocsSource(),
+  source: { ...docsSource, files: docsSource.files.filter((file) => isPublishedPath(file.path)) },
   plugins: [fluentIconsPlugin(), openapi.loaderPlugin()],
 });
 

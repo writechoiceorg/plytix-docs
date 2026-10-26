@@ -1,17 +1,11 @@
 ---
-title: V1/V2 authentication
-description: "Reference for getting a bearer token and using it on V1/V2 requests, including how long a token stays valid and the errors you can get."
+title: V1 and V2 authentication
+description: "Reference for getting a bearer token and using it on V1 and V2 requests, including how long a token stays valid and the errors you can get."
 ---
 
-import { KeyRegular, RocketRegular } from '@/components/icons';
+The V1 and V2 APIs use bearer token authentication. Rather than sending your API key and password with every call, you exchange them once for a short-lived access token, then send that token in the `Authorization` header of every request. Any administrator on your Plytix account can issue the API key and password from the **API** tab in the account's Admin section.
 
-<Callout type="info" title="V1/V2 (Legacy)">
-This page covers the V1/V2 APIs. For V3 (Beta), see [V3 Authentication](/reference/v3/authentication).
-</Callout>
-
-The V1/V2 APIs use bearer token authentication. Rather than sending your API key and password with every call, you exchange them once for a short-lived access token, then send that token in the `Authorization` header of every request. Any administrator on your Plytix account can issue the API key and password from the **API** tab in the account's Admin section.
-
-This page documents the token exchange and how to use the token you get back. The flow is the same one V3 uses, so a token from this exchange works against V1/V2 and V3.
+This page documents the token exchange and how to use the token you get back. The flow is the same one V3 uses, so a token from this exchange works against V1, V2, and V3.
 
 ## Get a bearer token
 
@@ -53,7 +47,7 @@ The token request goes to the authentication service at `https://auth.plytix.com
 
 ## Send the token
 
-Send the returned token in the `Authorization` header of every request, with a space after `Bearer`. Requests and responses on V1/V2 use JSON, so set the content headers as well:
+Send the returned token in the `Authorization` header of every request, with a space after `Bearer`. Requests and responses on V1 and V2 use JSON, so set the content headers as well:
 
 ```http
 Content-Type: application/json
@@ -92,15 +86,4 @@ A `401` from the token request looks like this:
   The API key and password you issue work only against the authentication service for the environment that issued them. If a valid-looking key returns `401`, check that you're calling the right host.
 </Callout>
 
-See [Errors and status codes](/reference/v1-v2/errors-status-codes) for the error format used across V1/V2.
-
-## Related resources
-
-<Cards>
-  <Card icon={<RocketRegular />} title="Get started with the API" href="/docs/guides/quickstart">
-    Walk through generating credentials and making your first request.
-  </Card>
-  <Card icon={<KeyRegular />} title="Authentication and base URLs" href="/docs/guides/migrating-to-v3/authentication-and-base-urls">
-    See how authentication and base URLs change when you move to V3.
-  </Card>
-</Cards>
+See [Errors and status codes](/reference/v1-v2/errors-status-codes) for the error format used across V1 and V2.

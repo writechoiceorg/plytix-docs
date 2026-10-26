@@ -1,15 +1,11 @@
 ---
-title: V1/V2 rate limits
-description: "Reference for how rate limits work on V1/V2, what happens when you exceed them, and where to find the limits for your plan."
+title: V1 and V2 rate limits
+description: "Reference for how rate limits work on V1 and V2, what happens when you exceed them, and where to find the limits for your plan."
 ---
 
-import { GaugeRegular, KeyRegular } from '@/components/icons';
+import { KeyRegular } from '@/components/icons';
 
-<Callout type="info" title="V1/V2 (Legacy)">
-This page covers the V1/V2 APIs. For V3 (Beta), see [V3 Rate limits](/reference/v3/rate-limits).
-</Callout>
-
-Plytix enforces rate limits on the API so that no single account can degrade the platform for everyone else. This page covers how those limits work on V1/V2, what happens when you exceed them, and where to check the limits for your plan.
+Plytix enforces rate limits on the API so that no single account can degrade the platform for everyone else. This page covers how those limits work on V1 and V2, what happens when you exceed them, and where to check the limits for your plan.
 
 <Callout type="warn" title="Checking your plan's limits">
   Rate limits vary by account plan. To confirm the limits that apply to your account, ask your account manager.
@@ -19,10 +15,10 @@ Plytix enforces rate limits on the API so that no single account can degrade the
 
 Every request counts as one hit. For each hit, the API checks two conditions: you haven't reached your plan's limit for requests per 10 seconds, and you haven't reached its limit for requests per hour. A request counts against both windows at the same time, so whichever window you exhaust first blocks you.
 
-Your account plan sets the limits, and they apply to all resources in the API. For the standard plan values, see [Rate limits](/reference/v3/rate-limits) in the V3 reference.
+Your account plan sets the limits, and they apply to all resources in the API.
 
 {/* FLAG (open):
-  The standard plan values were confirmed against V3 only. This page assumes V1/V2 draw on the same per-account limits, because all three versions accept the same token. Confirm with Plytix before publishing, including whether calls to V1/V2, and V3 add to one shared count.
+  The standard plan values were confirmed against V3 only. This page assumes V1 and V2 draw on the same per-account limits, because all three versions accept the same token. Confirm with Plytix before publishing, including whether calls to V1, V2, and V3 add to one shared count.
 */}
 
 ## Exceeding your limit
@@ -34,8 +30,5 @@ If you reach either limit, the API returns a `429 TOO MANY REQUESTS` status code
 <Cards>
   <Card icon={<KeyRegular />} title="Authentication" href="/reference/v1-v2/token-authentication">
     Get a bearer token, and see how long it stays valid.
-  </Card>
-  <Card icon={<GaugeRegular />} title="Rate limits" href="/reference/v3/rate-limits">
-    See how rate limits work in V3.
   </Card>
 </Cards>

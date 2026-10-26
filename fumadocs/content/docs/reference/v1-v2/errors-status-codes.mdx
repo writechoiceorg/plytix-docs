@@ -1,15 +1,9 @@
 ---
-title: V1/V2 errors and status codes
-description: "Reference for the HTTP status codes and error response format the V1/V2 APIs return, and how they differ from V3 responses."
+title: V1 and V2 errors and status codes
+description: "Reference for the HTTP status codes and error response format the V1 and V2 APIs return, and how they differ from V3 responses."
 ---
 
-import { ArrowSwapRegular, WarningRegular } from '@/components/icons';
-
-<Callout type="info" title="V1/V2 (Legacy)">
-This page covers the V1/V2 APIs. For V3 (Beta), see [V3 Errors and status codes](/reference/v3/errors-status-codes).
-</Callout>
-
-This page documents the HTTP status codes and the response formats you encounter when you call the V1/V2 APIs. Successful responses and error responses use different shapes, so it helps to know both before you write error handling.
+This page documents the HTTP status codes and the response formats you encounter when you call the V1 and V2 APIs. Successful responses and error responses use different shapes, so it helps to know both before you write error handling.
 
 <Callout type="warn" title="Deprecation notice">
   The API sends a custom `X-Plytix-Deprecation` header in the response when the endpoint you're calling is scheduled for deprecation soon. Log this header in your integration so you hear about a retirement before it happens.
@@ -128,22 +122,9 @@ A detailed error lists each field that failed validation:
 
 V3 returns errors in a different envelope. If you handle both versions in one client, branch on the API version before you parse an error.
 
-| | V1/V2 | V3 |
+| | V1 and V2 | V3 |
 |---|---|---|
 | Error location | `error` object | `errors` array |
 | Error entry | `msg`, optional `errors` with `field` and `msg` | `name` and `description` |
 | Successful body | `data` list | `data` list, plus an always-present `errors` array |
 | Validation failures | `422` with the `error` object | `422` with a `detail` array |
-
-See the [V3 errors reference](/reference/v3/errors-status-codes) for the full V3 format.
-
-## Related resources
-
-<Cards>
-  <Card icon={<WarningRegular />} title="Errors and status codes" href="/reference/v3/errors-status-codes">
-    Compare these codes with the status codes and error shapes in V3.
-  </Card>
-  <Card icon={<ArrowSwapRegular />} title="Migration overview" href="/docs/guides/migrating-to-v3">
-    Plan a move to V3, including how error handling changes.
-  </Card>
-</Cards>

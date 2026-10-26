@@ -6,23 +6,40 @@ import {
   ViewOptionsPopover,
 } from 'fumadocs-ui/layouts/notebook/page';
 import { MarkdownCopyButton } from '@/components/page-actions';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { getMDXComponents } from '@/components/mdx';
 import type { Metadata } from 'next';
 import { createRelativeLink } from 'fumadocs-ui/mdx';
-import { getPageImageUrl, getPageMarkdownUrl, gitConfig, isReferenceSlugs } from '@/lib/shared';
+import {
+  getPageImageUrl,
+  getPageMarkdownUrl,
+  gitConfig,
+  isReferenceSlugs,
+  landingRoute,
+} from '@/lib/shared';
 import { openapi } from '@/lib/openapi';
 import { getPageOperation } from '@/lib/openapi-markdown';
 import { Callout } from '@/components/callout';
 import Link from 'fumadocs-core/link';
 
 /**
+ * The page at these slugs. A missing page is a 404, except the /docs and
+ * /reference roots, which lead to the landing page when their own landing
+ * page isn't published (see `publishedFolders` in lib/shared.ts).
+ */
+function getPublishedPage(slugs: string[]) {
+  const page = source.getPage(slugs);
+  if (page) return page;
+  if (slugs.length === 0 || (isReferenceSlugs(slugs) && slugs.length === 1)) redirect(landingRoute);
+  notFound();
+}
+
+/**
  * Renders one content page. Shared by the /docs and /reference routes, which
  * serve the same content tree (see `url` in lib/source.ts).
  */
 export async function DocsPageView({ slugs }: { slugs: string[] }) {
-  const page = source.getPage(slugs);
-  if (!page) notFound();
+  const page = getPublishedPage(slugs);
 
   const MDX = page.data.body;
   const markdownUrl = getPageMarkdownUrl(page).url;
@@ -40,7 +57,7 @@ export async function DocsPageView({ slugs }: { slugs: string[] }) {
         />
       </div>
       <DocsBody>
-        <LegacyVersionNote slugs={slugs} page={page} />
+        <VersionNote slugs={slugs} page={page} />
         <MDX
           components={getMDXComponents({
             // this allows you to link to other pages with relative file paths
@@ -55,7 +72,7 @@ export async function DocsPageView({ slugs }: { slugs: string[] }) {
 
 const MAPPING = '/docs/guides/migrating-to-v3/endpoint-mapping';
 
-/** Where a V1/V2 endpoint's V3 equivalent is documented, by its path. */
+/** Where a V1 or V2 endpoint's V3 equivalent is documented, by its path. */
 function v3EquivalentFor(path: string): { href: string; label: string } {
   const root = path.split('/')[3];
   const section = (anchor: string, label: string) => ({ href: `${MAPPING}#${anchor}`, label });
@@ -79,18 +96,21 @@ function v3EquivalentFor(path: string): { href: string; label: string } {
 }
 
 /**
- * V1/V2 endpoint pages are generated, so their version note is added here
- * rather than in each file. Concept pages carry the same note in their MDX.
+ * V1 and V2 endpoint pages are generated, so their version note is added here
+ * rather than in each file. It names the endpoint's own version, since V2
+ * covers only some product endpoints.
  */
-function LegacyVersionNote({ slugs, page }: { slugs: string[]; page: NonNullable<ReturnType<typeof source.getPage>> }) {
+function VersionNote({ slugs, page }: { slugs: string[]; page: NonNullable<ReturnType<typeof source.getPage>> }) {
   if (!isReferenceSlugs(slugs) || slugs[1] !== 'v1-v2') return null;
+  // The note points readers at V3, so it goes when V3 isn't published.
+  if (!source.getPage(['reference', 'v3'])) return null;
   const found = getPageOperation(page);
   if (!found) return null;
 
   const api = found.path.startsWith('/api/v2/') ? 'V2 beta API' : 'V1 API';
   const target = v3EquivalentFor(found.path);
   return (
-    <Callout type="info" title="V1/V2 (Legacy)">
+    <Callout type="info" title={api}>
       This endpoint is part of the {api}. For V3 (Beta), see <Link href={target.href}>{target.label}</Link>.
     </Callout>
   );
@@ -98,7 +118,7 @@ function LegacyVersionNote({ slugs, page }: { slugs: string[]; page: NonNullable
 
 const VERSION_LABELS: Record<string, string> = {
   v3: 'V3 (Beta)',
-  'v1-v2': 'V1/V2 (Legacy)',
+  'v1-v2': 'V1 and V2',
 };
 
 /** First sentence of an operation's description, as plain text for a meta tag. */
@@ -118,21 +138,20 @@ function firstSentence(markdown: string | undefined): string | undefined {
 
 /**
  * Titles get the site name from the root layout's title template, and
- * reference pages also name their API version, so V3 and V1/V2 pages with the
+ * reference pages also name their API version, so V3, V1 and V2 pages with the
  * same name ("Get a product") stay distinct in tabs and search results.
  * Generated endpoint pages have no description of their own, so one is built
  * from the operation.
  */
 export function getDocsPageMetadata(slugs: string[]): Metadata {
-  const page = source.getPage(slugs);
-  if (!page) notFound();
+  const page = getPublishedPage(slugs);
 
   const found = getPageOperation(page);
   let version = isReferenceSlugs(slugs) ? VERSION_LABELS[slugs[1]] : undefined;
   // V1 and V2 (beta) both have pages such as "Create a product"; name the one
   // each endpoint belongs to.
-  if (slugs[1] === 'v1-v2' && found?.path.startsWith('/api/v1/')) version = 'V1 (Legacy)';
-  if (slugs[1] === 'v1-v2' && found?.path.startsWith('/api/v2/')) version = 'V2 beta (Legacy)';
+  if (slugs[1] === 'v1-v2' && found?.path.startsWith('/api/v1/')) version = 'V1';
+  if (slugs[1] === 'v1-v2' && found?.path.startsWith('/api/v2/')) version = 'V2 beta';
   const title =
     version && !page.data.title.startsWith(version.split(' ')[0])
       ? `${page.data.title} · ${version}`

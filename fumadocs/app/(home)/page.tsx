@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
+import { landingRoute, publishedFolders } from '@/lib/shared';
 import {
   ArrowRightRegular,
   BookOpenRegular,
@@ -37,6 +39,9 @@ const cards = [
 ];
 
 export default function HomePage() {
+  // The cards link into the guides and V3, so a partial deployment skips this page.
+  if (publishedFolders) redirect(landingRoute);
+
   return (
     <main className="w-full max-w-[1280px] mx-auto px-4 md:px-[30px] pt-12 pb-16">
       {/* Hero: same ink panel in both themes, lit by blurred lilac/cyan glows. */}

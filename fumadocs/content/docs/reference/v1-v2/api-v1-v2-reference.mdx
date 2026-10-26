@@ -1,21 +1,17 @@
 ---
-title: "V1/V2 API reference overview"
-description: "Reference for the V1 and V2 (beta) APIs for teams not yet on V3: core concepts, every resource, and guidance on moving to V3."
+title: "V1 and V2 API reference overview"
+description: "Reference for the V1 and V2 (beta) APIs: core concepts and every resource."
 ---
 
 import { BeakerRegular, BoxRegular, BuildingRegular, FilterRegular, FolderListRegular, GaugeRegular, ImageRegular, KeyRegular, LayerRegular, LinkRegular, SearchRegular, TagMultipleRegular, TagRegular, TextNumberListLtrRegular, WarningRegular } from '@/components/icons';
 
-<Callout type="info" title="V1/V2 (Legacy)">
-This page covers the V1/V2 APIs. For V3 (Beta), see [the V3 API reference overview](/reference/v3).
-</Callout>
-
-This is the reference for Plytix's V1 API, plus the small set of V2 (beta) endpoints that mirror some V1 product operations with a slightly different shape. New integrations should use [V3 (Beta) API reference](/reference/v3); see [Migration overview](/docs/guides/migrating-to-v3) for what's different and how to migrate.
+This is the reference for Plytix's V1 API, plus the small set of V2 (beta) endpoints that mirror some V1 product operations with a slightly different shape.
 
 Every request here uses the same bearer-token authentication as V3: get a token from [`POST /auth/api/get-token`](/reference/v1-v2/authentication/get-token) and send it as `Authorization: Bearer <token>`.
 
 ## Core concepts
 
-Before integrating with a specific resource, review these fundamental patterns. They apply to every V1/V2 endpoint, and several differ from V3.
+Before integrating with a specific resource, review these fundamental patterns. They apply to every V1 and V2 endpoint, and several differ from V3.
 
 <Cards>
   <Card icon={<KeyRegular />} title="Authentication" href="/reference/v1-v2/token-authentication">

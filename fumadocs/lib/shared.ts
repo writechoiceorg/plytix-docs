@@ -15,6 +15,28 @@ export const gitConfig = {
   branch: 'main',
 };
 
+// Content folders this deployment publishes (null publishes everything). This
+// branch ships only the V1 and V2 reference: every other page is left out of the
+// source, so it has no route, search entry, llms.txt entry, .md or OG image.
+export const publishedFolders: string[] | null = ['reference/v1-v2'];
+
+// Where `/` (and `/reference`, when its landing page isn't published) leads.
+export const landingRoute = '/reference/v1-v2/api-v1-v2-reference';
+
+/**
+ * Whether a content file (path relative to content/docs) is published. The
+ * meta.json files of a published folder's ancestors are kept too, so the
+ * folder keeps its place (and tab) in the page tree.
+ */
+export function isPublishedPath(path: string): boolean {
+  if (!publishedFolders) return true;
+  return publishedFolders.some((folder) => {
+    if (path.startsWith(`${folder}/`)) return true;
+    const meta = path.match(/^(.*\/)?meta\.json$/);
+    return meta !== null && `${folder}/`.startsWith(meta[1] ?? '');
+  });
+}
+
 export function isReferenceSlugs(slugs: string[] | undefined): slugs is string[] {
   return slugs?.[0] === referenceFolder;
 }

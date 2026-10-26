@@ -1,15 +1,9 @@
 ---
-title: V1/V2 filtering and search
-description: Reference for the search request body in V1/V2, including filters, operators, returned attributes, and relationship filters.
+title: V1 and V2 filtering and search
+description: Reference for the search request body in V1 and V2, including filters, operators, returned attributes, and relationship filters.
 ---
 
-import { ArrowSwapRegular, FilterRegular } from '@/components/icons';
-
-<Callout type="info" title="V1/V2 (Legacy)">
-This page covers the V1/V2 APIs. For V3 (Beta), see [V3 Filtering and search](/reference/v3/filtering-and-search).
-</Callout>
-
-Search endpoints in V1/V2 take their filters in a JSON request body, not in the query string. This page documents that body: how to write filter conditions, which operators exist, how to choose the attributes that come back, and how to filter products by their relationships.
+Search endpoints in V1 and V2 take their filters in a JSON request body, not in the query string. This page documents that body: how to write filter conditions, which operators exist, how to choose the attributes that come back, and how to filter products by their relationships.
 
 Key points on this page:
 
@@ -190,14 +184,3 @@ When a request includes a `relationships.` column in `attributes`, each product 
 {/* FLAG (open):
   The collection lists `eq`, `in`, `gt`, `gte`, `lt`, `lte`, `bte`, and `last_days` as the operators under relationship filters, without saying which apply to `qty_operator`. Only `gt` and `bte` appear in its examples. Confirm the valid `qty_operator` values before publishing.
 */}
-
-## Related resources
-
-<Cards>
-  <Card icon={<FilterRegular />} title="Filtering and search" href="/reference/v3/filtering-and-search">
-    See the V3 filter syntax that replaces V1 filter objects.
-  </Card>
-  <Card icon={<ArrowSwapRegular />} title="Filter operators" href="/docs/guides/migrating-to-v3/filter-operators">
-    Map V1 filter operators to their V3 query-string equivalents.
-  </Card>
-</Cards>
