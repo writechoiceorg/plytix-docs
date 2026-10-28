@@ -95,14 +95,3 @@ To avoid the `428`, narrow the search with filters until it matches 10000 produc
 {/* FLAG (open):
   These limits come from the product search endpoint description only. The collection doesn't say whether asset, category, family, or relationship searches share the same page size ceiling. Confirm before telling readers the limits apply to every search.
 */}
-
-## How this differs from V3
-
-V3 pages through results with a link, not a page number, and it has no record counts. If you're migrating, anything that reads `total_count` has to change.
-
-| | V1 and V2 | V3 |
-|---|---|---|
-| Where you set it | `pagination` object in the body | `_page`, `_page_size`, and `_sort_by` in the query string |
-| Maximum page size | `100` on product search | `1000` |
-| Counts | `count` and `total_count` | None |
-| Moving to the next page | Increment `page` | Follow `next_page` |

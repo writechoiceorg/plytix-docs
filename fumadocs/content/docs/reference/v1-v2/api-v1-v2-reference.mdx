@@ -7,11 +7,11 @@ import { BeakerRegular, BoxRegular, BuildingRegular, FilterRegular, FolderListRe
 
 This is the reference for Plytix's V1 API, plus the small set of V2 (beta) endpoints that mirror some V1 product operations with a slightly different shape.
 
-Every request here uses the same bearer-token authentication as V3: get a token from [`POST /auth/api/get-token`](/reference/v1-v2/authentication/get-token) and send it as `Authorization: Bearer <token>`.
+Every request here uses bearer-token authentication: get a token from [`POST /auth/api/get-token`](/reference/v1-v2/authentication/get-token) and send it as `Authorization: Bearer <token>`.
 
 ## Core concepts
 
-Before integrating with a specific resource, review these fundamental patterns. They apply to every V1 and V2 endpoint, and several differ from V3.
+Before integrating with a specific resource, review these fundamental patterns. They apply to every V1 and V2 endpoint.
 
 <Cards>
   <Card icon={<KeyRegular />} title="Authentication" href="/reference/v1-v2/token-authentication">

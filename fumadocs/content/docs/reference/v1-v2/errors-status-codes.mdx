@@ -1,6 +1,6 @@
 ---
 title: V1 and V2 errors and status codes
-description: "Reference for the HTTP status codes and error response format the V1 and V2 APIs return, and how they differ from V3 responses."
+description: "Reference for HTTP status codes and error formats returned by Plytix API v1 and v2."
 ---
 
 This page documents the HTTP status codes and the response formats you encounter when you call the V1 and V2 APIs. Successful responses and error responses use different shapes, so it helps to know both before you write error handling.
@@ -117,14 +117,3 @@ A detailed error lists each field that failed validation:
 {/* FLAG (open):
   The error shapes above come from the V1 Postman collection. Only the `401` body from the token request has been checked against the live API, and it matched the nested `error` object, though its `errors` entry names the field `http_status_code` rather than the credential at fault. Check other statuses against the live API before relying on their exact bodies.
 */}
-
-## How this differs from V3
-
-V3 returns errors in a different envelope. If you handle both versions in one client, branch on the API version before you parse an error.
-
-| | V1 and V2 | V3 |
-|---|---|---|
-| Error location | `error` object | `errors` array |
-| Error entry | `msg`, optional `errors` with `field` and `msg` | `name` and `description` |
-| Successful body | `data` list | `data` list, plus an always-present `errors` array |
-| Validation failures | `422` with the `error` object | `422` with a `detail` array |
