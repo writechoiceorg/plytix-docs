@@ -6,7 +6,7 @@
 >
 > Source: `materials/project-references/brand-and-style/Plytix Content Guidelines 2026.pdf`, §3 ("How we talk about Plytix and Plytix products") and §7 ("Word list").
 >
-> Additional entries below (Bulk API, Destinations, MCP Server, Smart List, Webhooks) are sourced from `materials/project-references/brief/before-writing.md`, §3 ("Product Roadmap") — a meeting-prep doc, not the content-guidelines PDF. Capitalization for these is marked `[PENDING]` where the source doesn't state it explicitly; confirm with the project lead before publishing content that uses them.
+> Additional entries below (Bulk API, Destinations, Smart List, Webhooks) are sourced from `materials/project-references/brief/before-writing.md`, §3 ("Product Roadmap") — a meeting-prep doc, not the content-guidelines PDF. Capitalization for these is marked `[PENDING]` where the source doesn't state it explicitly; confirm with the project lead before publishing content that uses them.
 
 ---
 
@@ -54,6 +54,14 @@
 
 ---
 
+### Documentation MCP
+
+**Capitalisation:** Documentation MCP
+**Definition:** The read-only MCP server that lets an AI assistant search and read the public Plytix documentation pages. It needs no Plytix account or token and can't access account data.
+**Notes:** Implemented in this repo (`fumadocs/app/api/mcp/route.ts`) and documented at `guides/documentation-mcp.mdx`. A different server from the **Plytix MCP**; never use the two names interchangeably.
+
+---
+
 ### ebook
 
 **Capitalisation:** ebook (lowercase)
@@ -83,14 +91,6 @@
 **Capitalisation:** internet (lowercase)
 **Definition:** The global network.
 **Notes:** Not "Internet."
-
----
-
-### MCP Server
-
-**Capitalisation:** MCP Server `[PENDING]`
-**Definition:** Plytix's planned Model Context Protocol server, letting AI IDEs and AI agents (Claude, Gemini, etc.) connect to Plytix data directly.
-**Notes:** Not yet live at time of writing — confirm shipped status before publishing. A significant differentiator for the developer audience; likely to need its own getting-started content once available.
 
 ---
 
@@ -139,6 +139,14 @@
 **Capitalisation:** Plytix Feed Management
 **Definition:** Official Plytix product name.
 **Notes:** Spell out in full. Don't abbreviate to "PFM" or "Feed tool."
+
+---
+
+### Plytix MCP
+
+**Capitalisation:** Plytix MCP
+**Definition:** Plytix's Model Context Protocol server, which connects a compatible AI application to a Plytix account so the assistant can discover and call Plytix tools. Authenticates with OAuth.
+**Notes:** Beta (source: Plytix MCP documentation brief, 27 Oct 2026); always announce it as a beta. The first version wraps V3, but don't call it an API version or imply that every V3 endpoint is a tool. Documented at `guides/platform-mcp/index.mdx`. Replaces the earlier working names "MCP Server" and "Platform MCP"; don't use those. Distinct from the **Documentation MCP**.
 
 ---
 

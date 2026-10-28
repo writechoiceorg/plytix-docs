@@ -1,8 +1,215 @@
 ---
-title: "Plytix Platform MCP"
-description: "Learn about the planned Plytix Platform MCP, which will let AI assistants work with the data in your Plytix account."
+title: "Plytix MCP"
+description: "Learn how to connect an AI application to your Plytix account with the Plytix MCP beta, check the connection, and run your first task."
 ---
 
-<ComingSoon title="Plytix Platform MCP is coming soon">
-  The Plytix Platform MCP will let an AI assistant work with the data in your Plytix account. Setup and usage guides will be published here when it's available. In the meantime, the [Documentation MCP](/docs/guides/documentation-mcp) is available and connects your assistant to these docs.
-</ComingSoon>
+import { BookOpenRegular, KeyRegular } from '@/components/icons';
+
+<Callout type="info" title="Plytix MCP is in beta">
+  The Plytix MCP is a beta release. What your assistant can do is limited to the tools in the current release, listed in [Available capabilities](#available-capabilities). Check the [changelog](#changelog) for additions and changes.
+</Callout>
+
+The Plytix MCP connects a compatible AI application to your Plytix account, so you can ask your assistant to work with your product data in natural language. This guide covers what the Plytix MCP is, connecting your account and checking the connection, the capabilities in this release, a few example workflows to start from, and what to do if something doesn't work.
+
+The Plytix MCP signs in with OAuth, so you authorize your AI application in the browser instead of pasting a token. What your assistant can do depends on two factors: the tools in the current release and the access you grant when you authorize it. Some tools can change your catalog, so try the example workflows on a test account first.
+
+{/* FLAG (open):
+  The Plytix MCP endpoint on this page is the placeholder `<plytix-mcp-url>`. The 27 Oct 2026 brief gives `https://pim.dev.plytix.com/mcp`, which is the DEV URL. Replace the placeholder with the release URL before publishing, and test every step on this page against it.
+*/}
+
+## What is the Plytix MCP?
+
+The Plytix MCP is a server that lets an AI application, such as an AI assistant or agent, work with the data in your Plytix account. It uses the Model Context Protocol (MCP), an open standard that lets AI applications discover and call tools exposed by external services.
+
+Once you connect it, your assistant finds the Plytix tools on its own and calls them when your request needs your account's data. You ask in plain language, and you don't call tools by name.
+
+The Plytix MCP isn't an API version, and it doesn't give your assistant every endpoint in the [V3 API](/reference/v3). It offers the tools listed in [Available capabilities](#available-capabilities), and that list grows from release to release.
+
+It's also separate from the [Documentation MCP](/docs/guides/documentation-mcp), which reads these docs, needs no account, and can't see your data. Connecting one doesn't connect the other.
+
+## Connect your account
+
+To connect, you add the Plytix MCP to your AI application as a remote MCP server, then sign in to Plytix with OAuth to authorize it.
+
+### Prerequisites
+
+Before you start, make sure you have the following:
+
+- A Plytix account with access to the Plytix MCP.
+- An AI application that supports remote MCP servers and OAuth sign-in. Your application or workspace may also need an administrator to approve custom connections.
+
+{/* FLAG (open):
+  The brief leaves account eligibility and permissions as "[confirmed eligibility and permissions]". Confirm with Plytix which plans or accounts can use the beta, and which Plytix role or access the signing-in user needs, then make the first bullet specific.
+*/}
+
+You'll need the following connection details:
+
+| Setting | Value |
+|---|---|
+| Server URL | `<plytix-mcp-url>` |
+| Authentication | OAuth |
+
+You don't need a [V3 access token](/reference/v3/authentication) to connect. The OAuth sign-in authorizes your AI application.
+
+{/* FLAG (open):
+  Confirm with Plytix that the OAuth sign-in is separate from the V3 access tokens created in the **API v3** tab, and that users never paste an access token into their AI application. Also confirm whether an authorization can be revoked from the Plytix side, and where, so this page can document disconnecting.
+*/}
+
+### Add the Plytix MCP to your AI application
+
+Follow the steps below to add the server, authorize it, and enable it.
+
+1. **Open** the custom connector or MCP server settings in your AI application.
+2. **Add** a connection named `Plytix` and enter the server URL `<plytix-mcp-url>`.
+3. **Choose** OAuth as the authentication method, then follow the prompts to sign in to Plytix.
+4. **Review** the access the application requests, then complete the authorization.
+5. **Return** to your AI application and enable the Plytix connection for your conversation, if your application asks you to.
+
+For account and workspace requirements in a specific application, see [Claude's guide to custom connectors](https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp) or [OpenAI's guide to custom MCP servers](https://developers.openai.com/api/docs/guides/custom-mcp-server).
+
+{/* FLAG (open):
+  Client walkthroughs aren't on this page yet. Per the brief, add short `Tabs` for Claude and ChatGPT only after testing each flow against the release endpoint. Each tab covers the real menu path, URL entry, authorization, enabling the connector, and one successful read, and links to the client's official guidance. Name an exact Google client before adding one: Gemini CLI documents remote MCP with OAuth (https://geminicli.com/docs/tools/mcp-server/), but add a Gemini CLI tab only after testing it with Plytix.
+*/}
+
+### Verify the connection
+
+Follow the steps below to confirm that your AI application found the Plytix tools and can read your account.
+
+1. **Check** that your application lists the Plytix tools. Most applications show a connection's tools in its settings, or next to the connector in a conversation.
+2. **Ask** what the connection can do:
+
+   ```text
+   What can you do with my Plytix account through this connection?
+   ```
+
+   A working connection answers with the capabilities in this release. This confirms that the tools were found, but not that your assistant can read your data.
+
+3. **Run** a small read that you can check yourself, such as the first workflow in [Example workflows](#find-a-product):
+
+   ```text
+   Using Plytix, find the product with SKU GF-Basket and show its name and description.
+   ```
+
+   Compare the answer against the product in Plytix. If the values match, the connection works and your account is reachable. If the answer has no specifics, your assistant probably answered without calling Plytix. See [Troubleshooting](#troubleshooting).
+
+## Available capabilities
+
+Your AI application discovers the Plytix tools directly from the server. Each tool comes with a description and an input schema, which tell the application what the tool does and what it needs. The live tool definitions are always current, so to see the exact tools available to you, ask your assistant or check the connection in your application's settings.
+
+This table summarizes what you can do in this release:
+
+{/* FLAG (open):
+  The tool list isn't captured yet. Fill in this table from a tested connection to the release endpoint (the `tools/list` response or the client's tool list), one row per capability, using the brief's entry format. Summarize tasks; don't copy tool names or parameters. Remove the placeholder row below, and update **Last verified** at each review.
+*/}
+
+| Capability | What you can do | Access | Limitations | Last verified |
+|---|---|---|---|---|
+| [Capability] | [One sentence describing the task] | [Read or Write] | [Only if relevant] | [Date] |
+
+## Example workflows
+
+These prompts describe tasks you might hand to your assistant. Each one names what it needs from the release, so skip any that the [current capabilities](#available-capabilities) don't cover. Start your prompt with "Using Plytix," so your assistant knows to call the Plytix tools, then adapt the SKUs and fields to your own catalog.
+
+{/* FLAG (open):
+  None of these prompts has been run yet. Test each one on a sample account against the release endpoint before publishing, record the actual outcome, and remove any workflow whose tools aren't in the release. Plytix is open to more use-case suggestions.
+*/}
+
+### Find a product
+
+Look up one product and read back its values.
+
+```text
+Using Plytix, find the product with SKU GF-Basket and show its name and description.
+```
+
+Your assistant gets the matching product and reports the values Plytix returned. This workflow needs product lookup and access to those fields.
+
+### Understand your catalog structure
+
+Ask your assistant to explain how your attributes are set up.
+
+```text
+Using Plytix, list the product attributes available in my account and explain which ones describe product dimensions.
+```
+
+Your assistant gets your attribute definitions and explains the relevant ones, such as `product_length_mm` or `product_weight_kg`. This workflow needs attribute discovery.
+
+### Review content quality
+
+Check a small set of products for missing content, without changing anything.
+
+```text
+Using Plytix, inspect 10 products in the Drinkware category and identify which have an empty description. Show the SKUs and don't change anything.
+```
+
+Your assistant reviews the products it gets and lists the SKUs with an empty description. The result covers only those 10 products, so it's a spot check, not an audit of your whole catalog. This workflow needs product search with the relevant fields.
+
+{/* FLAG (open):
+  The brief leaves the selection as "[a supported selection]". Confirm which selections the release tools support (a category, a product list, a family, or none), then replace "in the Drinkware category" to match.
+*/}
+
+### Improve a product description
+
+Get a suggested rewrite and approve it before anything changes.
+
+```text
+Using Plytix, for SKU GF-Basket, propose a clearer description and show me the proposed text before saving anything.
+```
+
+Your assistant reads the current description and shows you a suggested rewrite. Nothing changes in Plytix until you approve the text in a second prompt, such as "Save that description to GF-Basket." Saving needs a tool with write access to product attributes.
+
+<Callout type="warn" title="Review before you save">
+  A write tool changes your catalog as soon as it runs. Ask for a proposal first, review it, and then approve the change in a separate prompt. Plytix can't undo some changes, so try write workflows on a test account first.
+</Callout>
+
+## Limitations and troubleshooting
+
+The Plytix MCP is in beta, so its capabilities are limited to the tools in the current release, and an action that isn't in [Available capabilities](#available-capabilities) isn't available yet. Your assistant also reads product data from suppliers, imports, and integrations. Treat that text as untrusted, and keep reading and writing in separate prompts.
+
+Check the problems below if you run into issues while connecting or using the Plytix MCP.
+
+<Accordions type="multiple">
+  <Accordion title="The connection fails" value="connection-fails">
+    Check that the server URL matches `<plytix-mcp-url>` exactly, then complete the OAuth authorization again. If your application asks for an administrator's approval for custom connections, the connection can't finish until that approval is given.
+  </Accordion>
+  <Accordion title="No Plytix tools appear" value="no-tools">
+    Check that the Plytix connection is enabled for your conversation, since some applications add a connector without turning it on. If your application has an option to refresh a connection's tool list, use it after a new release so your assistant sees the current tools.
+  </Accordion>
+  <Accordion title="Your assistant says it can't do what you asked" value="action-unavailable">
+    Check the request against [Available capabilities](#available-capabilities) first, since the beta covers only the tools in the current release. If the capability is listed, check the access you granted when you authorized the connection, then authorize again if the access you granted doesn't cover the task.
+  </Accordion>
+  <Accordion title="Your assistant answers about your catalog without calling Plytix" value="no-tool-call">
+    An answer that sounds plausible but doesn't match your account usually means your assistant answered from its own knowledge instead of calling a tool. Start the prompt with "Using Plytix," and ask your assistant to show the SKUs it retrieved, so you can check the answer against Plytix.
+  </Accordion>
+  <Accordion title="Results are shorter than what Plytix shows" value="short-results">
+    Your assistant may have stopped at the first page of results and reported it as the full answer. Ask it to get all the results, and include the expected count in your prompt when you know it, so your assistant can check its answer against that count.
+  </Accordion>
+</Accordions>
+
+## Changelog
+
+This section records additions, changes, and removals in each Plytix MCP release, newest first. An entry includes an **Action required** line only when you need to reconnect, refresh your tool list, or change a workflow.
+
+{/* FLAG (open):
+  Replace the placeholders below with the beta release date, the confirmed capabilities, and any material restrictions. If Plytix starts a shared portal changelog, move these entries there and link to it from this section.
+*/}
+
+### [Release date]
+
+Beta release.
+
+- **Added:** [Confirmed capabilities]
+- **Limitations:** [Material restrictions]
+
+## Related articles
+
+Now that you know how to connect your Plytix account to an AI application, you can explore these related guides.
+
+<Cards>
+  <Card icon={<BookOpenRegular />} title="Connect an AI assistant to the Plytix docs" href="/docs/guides/documentation-mcp">
+    Give your assistant the Plytix documentation, alongside your account data.
+  </Card>
+  <Card icon={<KeyRegular />} title="Authentication" href="/reference/v3/authentication">
+    Learn how V3 access tokens work when you build your own integration.
+  </Card>
+</Cards>
