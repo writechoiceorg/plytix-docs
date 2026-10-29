@@ -6,15 +6,15 @@ description: "Learn how to connect an AI application to your Plytix account with
 import { BookOpenRegular, KeyRegular } from '@/components/icons';
 
 <Callout type="info" title="Plytix MCP is in beta">
-  The Plytix MCP is a beta release. What your assistant can do is limited to the tools in the current release, listed in [Available capabilities](#available-capabilities). Check the [changelog](#changelog) for additions and changes.
+  The Plytix MCP is a beta release. To turn it on for your account, contact your account manager. What your assistant can do is limited to the tools in the current release, listed in [Available capabilities](#available-capabilities). Check the [changelog](#changelog) for additions and changes.
 </Callout>
 
 The Plytix MCP connects a compatible AI application to your Plytix account, so you can ask your assistant to work with your product data in natural language. This guide covers what the Plytix MCP is, connecting your account and checking the connection, the capabilities in this release, a few example workflows to start from, and what to do if something doesn't work.
 
-The Plytix MCP signs in with OAuth, so you authorize your AI application in the browser instead of pasting a token. What your assistant can do depends on two factors: the tools in the current release and the access you grant when you authorize it. Some tools can change your catalog, so try the example workflows on a test account first.
+The Plytix MCP signs in with OAuth, so you authorize your AI application in the browser instead of pasting a token. What your assistant can do depends on two factors: the tools in the current release and the access you set for each tool in your AI application. Some tools can change your catalog, so try the example workflows on a test account first.
 
 {/* FLAG (open):
-  The Plytix MCP endpoint on this page is the placeholder `<plytix-mcp-url>`. The 27 Oct 2026 brief gives `https://pim.dev.plytix.com/mcp`, which is the DEV URL. Replace the placeholder with the release URL before publishing, and test every step on this page against it.
+  Release URL `https://pim.plytix.com/mcp` confirmed by David (29 Oct 2026; he gave it without the scheme, `https://` follows the DEV URL). The server goes live on November 6, 2026. Test every step on this page against it before publishing.
 */}
 
 ## What is the Plytix MCP?
@@ -35,24 +35,24 @@ To connect, you add the Plytix MCP to your AI application as a remote MCP server
 
 Before you start, make sure you have the following:
 
-- A Plytix account with access to the Plytix MCP.
+- Plytix MCP access turned on for your Plytix account. To request it, contact your account manager.
 - An AI application that supports remote MCP servers and OAuth sign-in. Your application or workspace may also need an administrator to approve custom connections.
 
 {/* FLAG (open):
-  The brief leaves account eligibility and permissions as "[confirmed eligibility and permissions]". Confirm with Plytix which plans or accounts can use the beta, and which Plytix role or access the signing-in user needs, then make the first bullet specific.
+  Eligibility confirmed by David (29 Oct 2026): beta access is turned on per account through the account manager. Still open: which Plytix role or access the person signing in needs.
 */}
 
 You'll need the following connection details:
 
 | Setting | Value |
 |---|---|
-| Server URL | `<plytix-mcp-url>` |
+| Server URL | `https://pim.plytix.com/mcp` |
 | Authentication | OAuth |
 
-You don't need a [V3 access token](/reference/v3/authentication) to connect. The OAuth sign-in authorizes your AI application.
+The Plytix MCP is separate from the V3 API, so you don't need V3 or a [V3 access token](/reference/v3/authentication) to connect. The OAuth sign-in authorizes your AI application, separately from the access tokens in the **API v3** tab.
 
 {/* FLAG (open):
-  Confirm with Plytix that the OAuth sign-in is separate from the V3 access tokens created in the **API v3** tab, and that users never paste an access token into their AI application. Also confirm whether an authorization can be revoked from the Plytix side, and where, so this page can document disconnecting.
+  Can a user revoke a Plytix MCP authorization from inside Plytix, and if so, where? David (29 Oct 2026) says access is managed on the AI application side.
 */}
 
 ### Add the Plytix MCP to your AI application
@@ -60,10 +60,13 @@ You don't need a [V3 access token](/reference/v3/authentication) to connect. The
 Follow the steps below to add the server, authorize it, and enable it.
 
 1. **Open** the custom connector or MCP server settings in your AI application.
-2. **Add** a connection named `Plytix` and enter the server URL `<plytix-mcp-url>`.
+2. **Add** a connection named `Plytix` and enter the server URL `https://pim.plytix.com/mcp`.
 3. **Choose** OAuth as the authentication method, then follow the prompts to sign in to Plytix.
-4. **Review** the access the application requests, then complete the authorization.
-5. **Return** to your AI application and enable the Plytix connection for your conversation, if your application asks you to.
+4. **Complete** the authorization when Plytix asks you to.
+5. **Set** the access for each Plytix tool in your application's connector settings, if your application offers this. For example, you can let a tool run on its own, require your approval each time it runs, or block it.
+6. **Return** to your AI application and enable the Plytix connection for your conversation, if your application asks you to.
+
+To disconnect, remove the Plytix connection in your AI application's settings.
 
 For account and workspace requirements in a specific application, see [Claude's guide to custom connectors](https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp) or [OpenAI's guide to custom MCP servers](https://developers.openai.com/api/docs/guides/custom-mcp-server).
 
@@ -94,24 +97,33 @@ Follow the steps below to confirm that your AI application found the Plytix tool
 
 ## Available capabilities
 
-Your AI application discovers the Plytix tools directly from the server. Each tool comes with a description and an input schema, which tell the application what the tool does and what it needs. The live tool definitions are always current, so to see the exact tools available to you, ask your assistant or check the connection in your application's settings.
+Your AI application discovers the Plytix tools directly from the server. Each tool comes with a description and an input schema, which tell the application what the tool does and what it needs. The live tool definitions are always current, so to see the exact tools available to you, ask your assistant or check the connection in your application's settings. Your application lists each tool by a short title, such as "Get product list".
+
+Each capability below is made up of several tools, such as one that searches and one that updates. Because you set access for each tool, you can let read tools run on their own and require your approval for tools that change your catalog.
 
 This table summarizes what you can do in this release:
 
 {/* FLAG (open):
-  The tool list isn't captured yet. Fill in this table from a tested connection to the release endpoint (the `tools/list` response or the client's tool list), one row per capability, using the brief's entry format. Summarize tasks; don't copy tool names or parameters. Remove the placeholder row below, and update **Last verified** at each review.
+  Built from Plytix's tool inventory (`materials/api-references/mcp/Plytix MCP - Tool Inventory - Tools.csv`, 72 tools, reviewed on 29 Oct 2026 through a ChatGPT connection). A Claude connection to the DEV server (screenshot, 29 Oct 2026) shows 25 read-only tools, including "Get product categorization", which has no match in the inventory's 23 search and get tools. Confirm the release tool list against `https://pim.plytix.com/mcp` on November 6, 2026, and update **Last verified** at each review.
 */}
 
 | Capability | What you can do | Access | Limitations | Last verified |
 |---|---|---|---|---|
-| [Capability] | [One sentence describing the task] | [Read or Write] | [Only if relevant] | [Date] |
+| Products | Search products with filters, get a product by ID or SKU, create and update products, remove a field, and delete products. | Read and write | Searches return results in pages. Deleting a product can't be undone. | October 29, 2026 |
+| Product categories | Search, get, create, update, and delete product categories, and add products to a category or remove them. | Read and write | Removing a product from a category deletes neither. Deleting a category can't be undone. | October 29, 2026 |
+| Product lists | Search, get, create, update, and delete product lists, and add products to a static list or remove them. | Read and write | Smart lists select products with filters, so you add products only to static lists. Deleting a list can't be undone. | October 29, 2026 |
+| Product attributes and attribute groups | Search, get, create, update, and delete product attributes and attribute groups, remove a field from an attribute, and add an attribute to a group or remove it. | Read and write | Searches include built-in system attributes. Deleting an attribute or a group can't be undone. | October 29, 2026 |
+| Product families | Search, get, create, update, and delete product families, and link attributes to a family at the parent level, the variant level, or no level. | Read and write | Removing an attribute from a family deletes neither. Deleting a family can't be undone. | October 29, 2026 |
+| Product relationships | Search relationship types and the relationships between products, manage relationship types, and link, update, or unlink products. | Read and write | A relationship goes in one direction, from one product to another. Deleting a relationship type can't be undone. | October 29, 2026 |
+| Assets | Search, get, create, update, and delete assets, remove a field, and add assets to asset categories and static asset lists or remove them. | Read and write | Deleting an asset can't be undone. | October 29, 2026 |
+| Asset categories and asset lists | Search, get, create, update, and delete asset categories and asset lists. | Read and write | Deleting a category or a list can't be undone. | October 29, 2026 |
 
 ## Example workflows
 
 These prompts describe tasks you might hand to your assistant. Each one names what it needs from the release, so skip any that the [current capabilities](#available-capabilities) don't cover. Start your prompt with "Using Plytix," so your assistant knows to call the Plytix tools, then adapt the SKUs and fields to your own catalog.
 
 {/* FLAG (open):
-  None of these prompts has been run yet. Test each one on a sample account against the release endpoint before publishing, record the actual outcome, and remove any workflow whose tools aren't in the release. Plytix is open to more use-case suggestions.
+  None of these prompts has been run yet. Test each one on a sample account against the release endpoint before publishing, record the actual outcome, and remove any workflow whose tools aren't in the release. The channel content, supplier file, and team questions workflows were approved by David on 29 Oct 2026.
 */}
 
 ### Find a product
@@ -144,9 +156,35 @@ Using Plytix, inspect 10 products in the Drinkware category and identify which h
 
 Your assistant reviews the products it gets and lists the SKUs with an empty description. The result covers only those 10 products, so it's a spot check, not an audit of your whole catalog. This workflow needs product search with the relevant fields.
 
-{/* FLAG (open):
-  The brief leaves the selection as "[a supported selection]". Confirm which selections the release tools support (a category, a product list, a family, or none), then replace "in the Drinkware category" to match.
-*/}
+### Draft content for a sales channel
+
+Turn your product data into listing copy, without changing anything in Plytix.
+
+```text
+Using Plytix, get the name and description of SKU GF-Basket, and draft a product title and a 150-word description for an Amazon listing. Don't change anything in Plytix.
+```
+
+Your assistant reads the product's values and writes the draft in the conversation. Plytix doesn't change. This workflow needs product lookup and access to those fields.
+
+### Check a supplier file before you import it
+
+Compare a supplier's file with your catalog before you import it into Plytix.
+
+```text
+Using Plytix, compare the attached supplier file with my catalog. List the SKUs in the file that aren't in Plytix, and the SKUs whose name differs from Plytix. Don't change anything.
+```
+
+Your assistant reads the file in your AI application, looks up its SKUs in Plytix, and lists the differences. For a long file, ask how many SKUs it checked and compare that with the file. This workflow needs an AI application that accepts file attachments, and product lookup.
+
+### Answer product questions for your team
+
+Let colleagues in sales or support get product facts from Plytix in chat.
+
+```text
+Using Plytix, which category is SKU GF-Basket in, and what does its description say? Show the values you used.
+```
+
+Your assistant answers from the values Plytix returns and shows them, so your colleague can check the answer. This workflow needs product lookup and access to the product's categories.
 
 ### Improve a product description
 
@@ -170,13 +208,13 @@ Check the problems below if you run into issues while connecting or using the Pl
 
 <Accordions type="multiple">
   <Accordion title="The connection fails" value="connection-fails">
-    Check that the server URL matches `<plytix-mcp-url>` exactly, then complete the OAuth authorization again. If your application asks for an administrator's approval for custom connections, the connection can't finish until that approval is given.
+    Check that the server URL matches `https://pim.plytix.com/mcp` exactly, then complete the OAuth authorization again. If your application asks for an administrator's approval for custom connections, the connection can't finish until that approval is given.
   </Accordion>
   <Accordion title="No Plytix tools appear" value="no-tools">
     Check that the Plytix connection is enabled for your conversation, since some applications add a connector without turning it on. If your application has an option to refresh a connection's tool list, use it after a new release so your assistant sees the current tools.
   </Accordion>
   <Accordion title="Your assistant says it can't do what you asked" value="action-unavailable">
-    Check the request against [Available capabilities](#available-capabilities) first, since the beta covers only the tools in the current release. If the capability is listed, check the access you granted when you authorized the connection, then authorize again if the access you granted doesn't cover the task.
+    Check the request against [Available capabilities](#available-capabilities) first, since the beta covers only the tools in the current release. If the capability is listed, check the access you set for that tool in your AI application's connector settings. A blocked tool can't run, and a tool that needs approval runs only after you approve it.
   </Accordion>
   <Accordion title="Your assistant answers about your catalog without calling Plytix" value="no-tool-call">
     An answer that sounds plausible but doesn't match your account usually means your assistant answered from its own knowledge instead of calling a tool. Start the prompt with "Using Plytix," and ask your assistant to show the SKUs it retrieved, so you can check the answer against Plytix.
@@ -191,15 +229,15 @@ Check the problems below if you run into issues while connecting or using the Pl
 This section records additions, changes, and removals in each Plytix MCP release, newest first. An entry includes an **Action required** line only when you need to reconnect, refresh your tool list, or change a workflow.
 
 {/* FLAG (open):
-  Replace the placeholders below with the beta release date, the confirmed capabilities, and any material restrictions. If Plytix starts a shared portal changelog, move these entries there and link to it from this section.
+  Release date confirmed by David (29 Oct 2026). Check the entry below against the release tool list on November 6, 2026. If Plytix starts a shared portal changelog, move these entries there and link to it from this section.
 */}
 
-### [Release date]
+### November 6, 2026
 
 Beta release.
 
-- **Added:** [Confirmed capabilities]
-- **Limitations:** [Material restrictions]
+- **Added:** Tools to read and change your products, your assets, and the catalog structure around them, such as categories, lists, and families. See [Available capabilities](#available-capabilities).
+- **Limitations:** The beta covers your product and asset data only. Other parts of Plytix, such as channels, aren't available through the Plytix MCP.
 
 ## Related articles
 

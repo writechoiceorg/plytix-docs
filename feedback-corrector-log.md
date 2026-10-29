@@ -2,7 +2,7 @@
 
 Record of every `feedback-corrector` run: the feedback received, what our sources said, what changed on the page, and the reply sent to David. One section per page, newest run first. Open questions for Plytix live in [`feedback-flags.md`](feedback-flags.md).
 
-**Last updated:** 2026-10-14
+**Last updated:** 2026-10-29
 
 ## Index
 
@@ -22,6 +22,7 @@ Record of every `feedback-corrector` run: the feedback received, what our source
 | [Connect an AI assistant to the Plytix docs](#connect-an-ai-assistant-to-the-plytix-docs) | 1 | 2026-10-14 |
 | [Not migrated and new in V3](#not-migrated-and-new-in-v3) | 1 | 2026-10-14 |
 | [Migrating to V3](#migrating-to-v3) | 1 | 2026-10-14 |
+| [Plytix MCP](#plytix-mcp) | 1 | 2026-10-29 |
 
 ---
 
@@ -1082,4 +1083,75 @@ Open questions:
 - Is the creation representation (the record without expanded relations) the final create response, or will creates move to the ID-only response in the internal documentation?
 - Does categories.id[intersects]=<id> match products in a category the same way V1's categories "in" filter does?
 - Is replacing the whole attributes map on PATCH intended, and does the single-attribute PATCH take a bare JSON value for every attribute type?
+```
+
+---
+
+## Plytix MCP
+
+**Page:** `fumadocs/content/docs/guides/platform-mcp/index.mdx` · **Page type:** How-to
+
+### Run 2026-10-29
+
+**Feedback from:** David, written answers to our MCP page questions, plus the tool inventory sheet (saved as `materials/api-references/mcp/Plytix MCP - Tool Inventory - Tools.csv`)
+**Approved by the user:** all ("Proceed with the changes")
+
+#### Feedback items
+
+| # | Feedback (short) | Type | Location | Verdict | Outcome |
+|---|---|---|---|---|---|
+| F1 | "The production server url will be: pim.plytix.com/mcp" | Factual | Connection details table, step 2, "The connection fails" accordion, top FLAG | Accepted on David's authority (not live until November 6) | Applied |
+| F2 | "The MCP access is independent to API v3." | Factual | Prerequisites, after the connection details | Supported | Applied |
+| F3 | "MCP is under beta access ... contact your account manager." | Scope | Beta callout, Prerequisites | Supported | Applied |
+| F4 | "the MCP Oauth is independent to API v3 token management." | Factual | Prerequisites | Already aligned; FLAG narrowed | Applied |
+| F5 | "set on the LLM side and user will be able to set different access to every available tool." | Factual | Intro, Add the Plytix MCP steps, "Your assistant says it can't do what you asked" accordion | Supported (DEV connector screenshot) | Applied |
+| F6 | Tool inventory sheet; "the optimized title is shown in the frontend of your model as tool list." | Factual / Scope | Available capabilities | Supported (inventory CSV); titles not in the sheet | Applied |
+| F7 | "release date is expected to be the next friday 6th of november" | Factual | Changelog | Supported | Applied |
+| F8 | "Regarding the proposal of use cases, they are good." | Scope | Example workflows | Supported | Applied |
+
+#### Applied changes
+
+| # | Change made | Source |
+|---|---|---|
+| F1 | `<plytix-mcp-url>` replaced with `https://pim.plytix.com/mcp` in three places; top FLAG narrowed to testing before publishing | David's answer; DEV URL `https://pim.dev.plytix.com/mcp` in the 27 Oct brief for the scheme |
+| F2, F4 | "The Plytix MCP is separate from the V3 API, so you don't need V3 or a V3 access token to connect. The OAuth sign-in authorizes your AI application, separately from the access tokens in the **API v3** tab." FLAG narrowed to revocation from Plytix | David's answer; glossary → Plytix MCP ("Authenticates with OAuth") |
+| F3 | Callout: "To turn it on for your account, contact your account manager." Prerequisite: "Plytix MCP access turned on for your Plytix account. To request it, contact your account manager." FLAG narrowed to the signing-in role | David's answer |
+| F5 | Intro now says access is set per tool in the AI application; new step 5 "**Set** the access for each Plytix tool..."; step 4 is now "**Complete** the authorization when Plytix asks you to."; added "To disconnect, remove the Plytix connection in your AI application's settings."; accordion points to per-tool settings | David's answer; Claude connector screenshot for "Plytix PIM - DEV" (per-tool allow, approval, block; **Disconnect**) |
+| F6 | Capability table filled with eight rows (products, product categories, product lists, attributes and attribute groups, families, relationships, assets, asset categories and asset lists), all read and write, last verified October 29, 2026; intro notes tools appear by short title and that read and write tools can get different access; FLAG rewritten to the DEV vs inventory discrepancy | `materials/api-references/mcp/Plytix MCP - Tool Inventory - Tools.csv` (72 tools: 12 search, 11 get, 11 create, 12 update, 11 delete, 6 link, 6 unlink, 3 unset) |
+| F7 | Changelog entry "November 6, 2026": beta release, Added (links to Available capabilities), Limitations (product and asset data only; channels not available) | David's answer; inventory "all in PIM" |
+| F8 | Three workflows added: "Draft content for a sales channel", "Check a supplier file before you import it", "Answer product questions for your team" | David's answer; glossary → Channel; `sample-data.md` (`GF-Basket`) |
+
+Also resolved in the page: the content-review FLAG ("[a supported selection]"). The search tools take V3 filter syntax, and V3 filters products by category name (`categories.name=Drinkware`, `filter-operators.mdx` line 96), so "in the Drinkware category" stays.
+
+#### Not changed
+
+- None. The tool-title column wasn't added because the inventory has no titles (FB-056).
+
+#### Flags
+
+Added: FB-054, FB-055, FB-056, FB-057 · Resolved: none (details in [`feedback-flags.md`](feedback-flags.md))
+
+#### Follow-ups on other pages
+
+- `.claude/skills/writer/references/information-architecture.md` line 47: update the "blocked on flags" list.
+- `.claude/skills/writer/references/glossary.md`, Plytix MCP entry: add the account-manager activation and the separation from V3.
+
+#### Reply to David
+
+```text
+Thanks, David. I've updated the Plytix MCP page:
+
+- Server URL: the page now uses https://pim.plytix.com/mcp throughout.
+- Beta access: the beta callout and the prerequisites say access is turned on per account, and to contact the account manager to request it.
+- V3: the page says the Plytix MCP is separate from V3, so readers don't need V3 or a V3 access token, and the OAuth sign-in is separate from the tokens in the API v3 tab.
+- Tool access: a new step tells readers to set access for each tool in their AI application (let it run, require approval, or block it), and to disconnect there too. Troubleshooting now points to those settings.
+- Tool list: Available capabilities now summarizes your sheet in eight groups, from products to asset categories and lists, with the access and limits for each, such as deletes that can't be undone.
+- Release date: the changelog starts with a November 6, 2026 beta entry.
+- Use cases: I've added all three as example workflows: drafting channel content from product data, checking a supplier file against the catalog, and answering product questions for internal teams.
+
+Open questions:
+- Can you confirm the full URL is https://pim.plytix.com/mcp? We'll test the page against it on November 6.
+- Which Plytix role does the person signing in need, and does the assistant see only what that user can see?
+- Can a user or admin see or revoke MCP connections from inside Plytix?
+- Is your sheet the tool list for the release? Our Claude connection to the DEV server shows 25 read-only tools, including "Get product categorization", which isn't in the sheet. The sheet also doesn't have the display titles. Could you share them?
 ```

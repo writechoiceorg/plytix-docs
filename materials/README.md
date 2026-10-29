@@ -9,6 +9,7 @@ materials/
 │   ├── v1-reference/          v1 Postman collection, v1/v2 rate limits
 │   ├── bulk-operations/       Bulk API docs (large clients only)
 │   ├── endpoint-reviews/      Plytix endpoint review / visibility spreadsheets
+│   ├── mcp/                   Plytix MCP tool inventory (tools, descriptions, availability)
 │   └── existing-docs-scrape/  scraped index.html of current docs
 ├── project-references/
 │   ├── brief/                 requirements, before-writing, feedback, dev-team questions
