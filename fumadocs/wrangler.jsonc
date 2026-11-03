@@ -1,12 +1,15 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "plytix-docs",
-  "main": ".open-next/worker.js",
+  // Wraps .open-next/worker.js with password protection (DOCS_PASSWORD secret).
+  "main": "./worker.ts",
   "compatibility_date": "2026-09-17",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "assets": {
     "directory": ".open-next/assets",
-    "binding": "ASSETS"
+    "binding": "ASSETS",
+    // Run worker.ts before serving static files, so they're password-protected too.
+    "run_worker_first": true
   },
   "services": [
     { "binding": "WORKER_SELF_REFERENCE", "service": "plytix-docs" }
