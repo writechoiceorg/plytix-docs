@@ -1,6 +1,24 @@
 # Feedback status for David
 
-Updated 2026-10-21.
+Updated 2026-11-05.
+
+---
+
+Page: 19 October documentation actions, follow-up (5 November)
+
+Solved:
+- PM-51, saved payloads: Update an asset category and Update a product category each have their 5 saved Postman bodies back as selectable examples. Update a product attribute and Search product attributes have 3 each. Both "Sort root categories" examples say to send the request to `/root` (enter `root` as the category ID), so that URL isn't lost.
+- PM-51, upload playground: Replace an asset's content shows a file picker again, and the field type reads "file". The cURL, JavaScript, and Python samples send the picked file as a multipart file part.
+
+In progress:
+- V3 spec: our build can now pick up new specs automatically on weekdays. It's off for now because `pim.dev.plytix.com/api/v3/openapi.json` returns `401` without credentials.
+- V3 authentication: we're checking the token pages against the "beta" tab in the dev Accounts app.
+
+Questions:
+- V3 spec: how should our CI authenticate to `pim.dev.plytix.com/api/v3/openapi.json`? Is that URL stable, and will production publish one at `pim.plytix.com/api/v3/openapi.json`?
+- V3 authentication: in dev, the token UI is on a tab called "beta", while your 23 October guide calls it "API v3". Which name will customers see?
+- PM-51: the saved "Search by type" body sends `pagination.count` and `pagination.total_count`, which normally appear only in responses. Does the API ignore them? If so, can we drop them from the example?
+- PM-54 (still open): what is the exact lowercase recipe you tested for ASCII `!in`, and which control IDs did it preserve? What escape syntax makes `contains:ignorecase` match punctuation literally, and does plain `contains` behave the same way? The page keeps both out until we have them.
 
 ---
 

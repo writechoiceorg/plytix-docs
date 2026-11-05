@@ -2,7 +2,7 @@
 
 Running log of open questions and conflicts found while applying Plytix feedback to the docs. Maintained by the `feedback-corrector` skill: one section per page, updated in place.
 
-**Last updated:** 2026-11-04
+**Last updated:** 2026-11-05
 
 ## Summary
 
@@ -25,7 +25,7 @@ Running log of open questions and conflicts found while applying Plytix feedback
 | [Connect an AI assistant to the Plytix docs](fumadocs/content/docs/guides/documentation-mcp.mdx) | 2 | 0 | 2026-10-14 |
 | [Not migrated and new in V3](fumadocs/content/docs/guides/migrating-to-v3/not-migrated-and-new-in-v3.mdx) | 2 | 0 | 2026-10-14 |
 | [Migrating to V3](fumadocs/content/docs/guides/migrating-to-v3/index.mdx) | 0 (tracked under FB-001, FB-002, FB-010, FB-016, FB-018, FB-019, FB-020, FB-042) | 0 | 2026-10-14 |
-| [19 October action list (PM items)](#19-october-2026-documentation-actions-pm-items) | 4 | 0 | 2026-10-19 |
+| [19 October action list (PM items)](#19-october-2026-documentation-actions-pm-items) | 5 | 0 | 2026-11-05 |
 | [19 October marketing and design feedback](#19-october-2026-marketing-and-design-feedback) | 6 | 0 | 2026-10-21 |
 | [Plytix MCP](fumadocs/content/docs/guides/platform-mcp/index.mdx) (six pages) | 5 | 0 | 2026-11-04 |
 
@@ -570,6 +570,7 @@ No new flags. Every open question from this review is already tracked: authentic
 | Date | Feedback from | Applied | Skipped | Flagged |
 |---|---|---|---|---|
 | 2026-10-19 | Plytix action list (PM items) | 18 (PM-07, PM-13, PM-16, PM-17, PM-19, PM-23, PM-24, PM-25, PM-26, PM-28, PM-29, PM-30, PM-32, PM-35, PM-42, PM-45, PM-52, PM-54) | 20, out of this pass: PM-11; library-generated UI and snippets (PM-40, PM-41, PM-56, PM-57, PM-58, PM-59); site UI (PM-06, PM-43, PM-44, PM-46, PM-60, PM-63); PM-36; reference-spec items (PM-37, PM-38, PM-50, PM-51, PM-61, PM-62) | 4 new (FB-044 to FB-047); PM-28's header question is tracked under FB-028 |
+| 2026-11-05 | Plytix action list (PM items), follow-up | 1 (PM-51) | 0 | 1 new (FB-059) |
 
 ### Applied
 
@@ -593,6 +594,7 @@ No new flags. Every open question from this review is already tracked: authentic
 | PM-45 | `reference/legacy/filtering-and-search.mdx`, `reference/legacy/pagination.mdx` | Broken `migration-reference` cards now open Filter operators and Searching and pagination | Page doesn't exist |
 | PM-52 | `guides/migrating-to-v3/responses-and-updates.mdx`, `reference/v3/updates-and-deletes.mdx`, `guides/syncing-your-erp-with-plytix.mdx` | Three PATCH routes with before/after examples; read-merge-write advice removed | Root replace is ours (quirk #85); the `/attributes` merge is Plytix's Dev test only (FB-047) |
 | PM-54 | `guides/migrating-to-v3/filter-operators.mdx` | `like` and `!like` recipes, multiselect any-value and all-value operators, punctuation and Unicode warnings | Plytix's Dev tests; two gaps flagged (FB-044, FB-045) |
+| PM-51 (2026-11-05) | `openapi-v1v2.json`: Update an asset category, Update a product category, Update a product attribute, Search product attributes; Replace asset content (playground) | The 16 saved Postman bodies restored as named request examples (5, 5, 3, 3), with a request schema per operation. Both "Sort root categories" examples say to send the request to `.../categories/{file,product}/root` (enter `root` as the category ID). The upload playground shows a file picker again: fumadocs upgrades the 3.0 spec to 3.1, which turned `format: binary` into `contentMediaType`, and the playground only checked `format`. Patched in `patches/` (see `patches/README.md`) | `materials/api-references/v1-reference/Plytix_pimv1.postman_collection.json` (bodies copied by script, not retyped); code samples for a picked file come from `lib/code-samples.ts` |
 
 Also fixed: `reference/v3/updates-and-deletes.mdx` sent a decimal attribute as a bare number (`'34.99'`), which FB-020 shows returns `422`. It now sends `'"34.99"'`.
 
@@ -604,6 +606,7 @@ Also fixed: `reference/v3/updates-and-deletes.mdx` sent a decimal attribute as a
 | FB-045 | Open | PM-54: "Escape literal punctuation for the tested pattern cases." | The page says `[contains:ignorecase]` treated `A.B` and `A+B` as patterns. The escape syntax isn't given, so the page doesn't show one. | Action list, PM-54 | What escape syntax makes `contains:ignorecase` match punctuation literally, and does plain `contains` behave the same way? | 2026-10-19 | |
 | FB-046 | Open | PM-26: "Clearing, absence, null and empty values are explained by tested type and route." | The type-by-type table uses Plytix's results for `null` on MultiSelect and Media gallery, gallery `[]`, and the rejected media `""`. Text `null` on the attribute path (FB-020) and Text `""` / MultiSelect `[]` (FB-015) are ours. The route for each Plytix `null` case wasn't stated. | Action list, PM-26; FLAG comment in `responses-and-updates.mdx` | Which route did each `null` test use: root PATCH, `/attributes`, or the attribute's own path? | 2026-10-19 | |
 | FB-047 | Open | PM-52: "Retest on release candidate." | `PATCH /products/{identifier}/attributes` with a partial map is documented as a merge from Plytix's Dev test. We haven't run it; only the root replace is ours (quirk #85). | Action list, PM-52; FLAG comment in `responses-and-updates.mdx` | Can you confirm the `/attributes` merge on the release candidate? | 2026-10-19 | |
+| FB-059 | Open | PM-51: "Restore the reviewed saved payloads and alternatives." | The saved "Search by type" body sends `pagination.count` and `pagination.total_count`, which the operation's own description shows only in responses. It's restored verbatim, as PM-51 asks. | Postman, "Product attribute search" → "Search by type" | Does the API ignore `count` and `total_count` in a search request? If so, can we drop them from the example? | 2026-11-05 | |
 
 ### Effect on existing flags
 
@@ -620,7 +623,7 @@ Also fixed: `reference/v3/updates-and-deletes.mdx` sent a decimal attribute as a
 
 - Reference-spec items (PM-37, PM-38, PM-50, PM-51, PM-61, PM-62): findings were drafted but nothing was changed.
   - PM-62: 22 invalid JSON units on 9 legacy pages, all fixable with syntax-only repairs.
-  - PM-51: 16 saved Postman payloads on 4 operations.
+  - PM-51: 16 saved Postman payloads on 4 operations. Applied on 2026-11-05 (see Applied).
   - PM-37: 9 legacy operations where the prose marks fields mandatory but the schema doesn't.
   - PM-38: a rule-based title map for all 150 V3 operations.
   - Regenerating the V3 pages would also publish about 20 descriptions already in `openapi.json` but never regenerated (product relationships, related products, family attributes).

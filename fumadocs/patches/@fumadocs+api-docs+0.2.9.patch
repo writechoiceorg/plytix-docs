@@ -1,5 +1,5 @@
 diff --git a/node_modules/@fumadocs/api-docs/dist/components/playground/inputs.js b/node_modules/@fumadocs/api-docs/dist/components/playground/inputs.js
-index 28e59f1..a058f42 100644
+index 28e59f1..4357a12 100644
 --- a/node_modules/@fumadocs/api-docs/dist/components/playground/inputs.js
 +++ b/node_modules/@fumadocs/api-docs/dist/components/playground/inputs.js
 @@ -4,7 +4,7 @@ import { Input, labelVariants } from "../input.js";
@@ -29,7 +29,7 @@ index 28e59f1..a058f42 100644
  			className: "p-2 h-[240px] text-sm font-mono resize-none focus-visible:outline-none",
  			onChange: (v) => {
  				setValue(v.target.value);
-@@ -122,12 +129,13 @@ function JsonInput({ fieldName }) {
+@@ -122,17 +129,19 @@ function JsonInput({ fieldName }) {
  				}
  			}
  		}), /* @__PURE__ */ jsx("p", {
@@ -44,7 +44,14 @@ index 28e59f1..a058f42 100644
  	const [value, setValue] = useFieldValue(fieldName);
  	const id = stringifyFieldKey(fieldName);
  	const t = useTranslations({ note: "playground" });
-@@ -149,6 +157,7 @@ function FieldInput({ field, fieldName, isRequired, ...props }) {
+ 	if (field.type === "null") return;
+-	if (field.type === "string" && field.format === "binary") return /* @__PURE__ */ jsxs(Fragment$1, { children: [/* @__PURE__ */ jsx("label", {
++	// [plytix-docs patch PM-51] OpenAPI 3.0 `format: binary` is upgraded to `contentMediaType: application/octet-stream`; show the file picker for both
++	if (field.type === "string" && (field.format === "binary" || field.contentMediaType === "application/octet-stream")) return /* @__PURE__ */ jsxs(Fragment$1, { children: [/* @__PURE__ */ jsx("label", {
+ 		htmlFor: id,
+ 		className: cn(buttonVariants({
+ 			variant: "secondary",
+@@ -149,6 +158,7 @@ function FieldInput({ field, fieldName, isRequired, ...props }) {
  			children: t("Upload")
  		})
  	}), /* @__PURE__ */ jsx("input", {
@@ -52,7 +59,7 @@ index 28e59f1..a058f42 100644
  		id,
  		type: "file",
  		multiple: false,
-@@ -175,6 +184,7 @@ function FieldInput({ field, fieldName, isRequired, ...props }) {
+@@ -175,6 +185,7 @@ function FieldInput({ field, fieldName, isRequired, ...props }) {
  			value: idx === -1 && isRequired ? "" : String(idx),
  			onValueChange: (v) => setValue(field.enum[Number(v)]),
  			children: [/* @__PURE__ */ jsx(SelectTrigger, {
@@ -60,7 +67,7 @@ index 28e59f1..a058f42 100644
  				id,
  				...props,
  				children: /* @__PURE__ */ jsx(SelectValue, { placeholder: t("Select") })
-@@ -207,6 +217,7 @@ function FieldInput({ field, fieldName, isRequired, ...props }) {
+@@ -207,6 +218,7 @@ function FieldInput({ field, fieldName, isRequired, ...props }) {
  			value: value === void 0 && isRequired ? "" : String(value),
  			onValueChange: (value) => setValue(value === "undefined" ? void 0 : value === "true"),
  			children: [/* @__PURE__ */ jsx(SelectTrigger, {
@@ -68,7 +75,7 @@ index 28e59f1..a058f42 100644
  				id,
  				...props,
  				children: /* @__PURE__ */ jsx(SelectValue, {})
-@@ -218,6 +229,7 @@ function FieldInput({ field, fieldName, isRequired, ...props }) {
+@@ -218,6 +230,7 @@ function FieldInput({ field, fieldName, isRequired, ...props }) {
  	}
  	const isNumber = field.type === "integer" || field.type === "number";
  	return /* @__PURE__ */ jsx(Input, {
@@ -76,7 +83,7 @@ index 28e59f1..a058f42 100644
  		id,
  		placeholder: t("Enter value"),
  		type: isNumber ? "number" : "text",
-@@ -229,7 +241,7 @@ function FieldInput({ field, fieldName, isRequired, ...props }) {
+@@ -229,7 +242,7 @@ function FieldInput({ field, fieldName, isRequired, ...props }) {
  		}
  	});
  }
@@ -85,7 +92,7 @@ index 28e59f1..a058f42 100644
  	const { readOnly, writeOnly } = useSchemaContext();
  	const { generateDefault, schemaToString } = useSchemaUtils();
  	const field = useResolvedSchema(_field);
-@@ -273,8 +285,11 @@ function FieldSet({ field: _field, fieldName, toolbar, name, isRequired, depth =
+@@ -273,8 +286,11 @@ function FieldSet({ field: _field, fieldName, toolbar, name, isRequired, depth =
  		});
  	}
  	function renderUnsetButton() {
@@ -97,7 +104,7 @@ index 28e59f1..a058f42 100644
  			onClick: () => dataEngine.delete(fieldName),
  			className: "text-fd-muted-foreground hover:text-fd-accent-foreground",
  			children: /* @__PURE__ */ jsx(X, { className: "size-3.5" })
-@@ -288,6 +303,7 @@ function FieldSet({ field: _field, fieldName, toolbar, name, isRequired, depth =
+@@ -288,6 +304,7 @@ function FieldSet({ field: _field, fieldName, toolbar, name, isRequired, depth =
  			name,
  			fieldName,
  			isRequired,
@@ -105,7 +112,7 @@ index 28e59f1..a058f42 100644
  			field: union[info.oneOf],
  			depth: depth + 1,
  			slotType: showSelect ? false : slotType,
-@@ -313,6 +329,7 @@ function FieldSet({ field: _field, fieldName, toolbar, name, isRequired, depth =
+@@ -313,6 +330,7 @@ function FieldSet({ field: _field, fieldName, toolbar, name, isRequired, depth =
  			name,
  			fieldName,
  			isRequired,
@@ -113,7 +120,7 @@ index 28e59f1..a058f42 100644
  			field: {
  				...field,
  				type: info.selectedType
-@@ -385,7 +402,8 @@ function FieldSet({ field: _field, fieldName, toolbar, name, isRequired, depth =
+@@ -385,7 +403,8 @@ function FieldSet({ field: _field, fieldName, toolbar, name, isRequired, depth =
  		}), /* @__PURE__ */ jsx(FieldInput, {
  			field,
  			fieldName,
@@ -200,3 +207,17 @@ index 1deaf19..0070493 100644
  					className: cn(buttonVariants({
  						size: "icon-xs",
  						variant: "ghost"
+diff --git a/node_modules/@fumadocs/api-docs/dist/schema/to-string.js b/node_modules/@fumadocs/api-docs/dist/schema/to-string.js
+index 899ccc4..7772fc3 100644
+--- a/node_modules/@fumadocs/api-docs/dist/schema/to-string.js
++++ b/node_modules/@fumadocs/api-docs/dist/schema/to-string.js
+@@ -49,7 +49,8 @@ function schemaToString(value, flags = 0) {
+ 		if (or) return union(or, " | ", flags);
+ 		if (schema.allOf) return union(schema.allOf, " & ", flags);
+ 		if (schema.not) return `not (${run(schema.not, flags)})`;
+-		if (schema.type === "string" && schema.format === "binary") return "file";
++		// [plytix-docs patch PM-51] also label upgraded 3.0 binary fields (contentMediaType) as "file"
++		if (schema.type === "string" && (schema.format === "binary" || schema.contentMediaType === "application/octet-stream")) return "file";
+ 		if (typeof schema.type === "string") return schema.type;
+ 		return "unknown";
+ 	}

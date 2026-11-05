@@ -21,6 +21,7 @@ Every patched line is marked with a `[plytix-docs patch PM-xx]` comment.
 | `dist/requests/generators/index.js` | PM-56 | `pathnameFromRequest` encodes each path value with `encodeURIComponent`, so `/` or `?` stay in one segment. The playground request, the request preview and every code sample use this function. |
 | `dist/playground/client.js` | PM-56 | **Send** is blocked while a required path parameter is empty or only whitespace. The Path panel opens, an inline error appears under the field (`aria-invalid` and `aria-describedby` on the input), and focus moves to the first empty field. No request is sent. The error clears as the user types. Path inputs get `aria-required`. |
 | `dist/playground/client.js` | PM-58 | Closing the JSON editor returns focus to the **Open JSON Editor** button. |
+| `dist/playground/client.js` | PM-51 | `BodyInput` treats a body with `contentMediaType: application/octet-stream` as binary, like `format: binary`. fumadocs upgrades OpenAPI 3.0 documents (`openapi-v1v2.json`) to 3.1 on load, and the upgrader replaces `format: binary` with `contentMediaType`. |
 
 ## @fumadocs+api-docs+0.2.9.patch
 
@@ -31,3 +32,5 @@ Every patched line is marked with a `[plytix-docs patch PM-xx]` comment.
 | `dist/components/playground/inputs.js` | PM-56 | `FieldSet` and `FieldInput` pass a new `inputProps` prop through to the input element, which `client.js` uses for the ARIA attributes above. |
 | `dist/components/playground/schema.js` | PM-59 | `useFieldInfo` selects the matching `oneOf`/`anyOf` member or `type` again when the value changes outside the selector (for example, after a JSON edit). It changes only the selection and never rewrites the value. |
 | `dist/components/schema/client.js` | PM-40 | The icon-only link button next to each schema field copies a link that highlights that field. It gets `aria-label="Copy link to field <name>"` and `type="button"`. |
+| `dist/components/playground/inputs.js` | PM-51 | `FieldInput` shows the file picker for a string with `contentMediaType: application/octet-stream` as well as `format: binary`. Without it, the multipart `file` field of the V1/V2 upload endpoint rendered as a text box after the 3.0-to-3.1 upgrade. |
+| `dist/schema/to-string.js` | PM-51 | The same fields show the type `file` instead of `string`. |

@@ -63,7 +63,13 @@ To resume:
 
 ## 4. Phase 4: hardening (not started)
 
-1. **Automatic intake.** When Plytix provides a stable spec URL (OAS-3), add a `schedule:` trigger to `.github/workflows/api-spec.yml` that runs the existing `intake` job with that URL. It already downloads the spec, runs `api:intake` and `api:build`, and opens a PR with the drift report. Note: PRs opened with the default `GITHUB_TOKEN` don't trigger the `check` job, so use a bot token or push a commit to the PR.
+1. **Automatic intake (prepared, off).** `.github/workflows/api-spec.yml` has a weekday `schedule:` that runs the `intake` job with the repo variable `V3_SPEC_URL`. The job skips a spec that's already on main or already in an `spec/auto-<sha>` branch. Otherwise it runs `api:intake` and `api:build` and opens a PR with the drift report. To turn it on, once Plytix answers OAS-3 (the spec URL `https://pim.dev.plytix.com/api/v3/openapi.json` returns `401` without auth):
+   1. Add the secret `V3_SPEC_TOKEN` if the URL needs a Bearer token. Another auth method needs a change to the download step.
+   2. Set the repo variable `V3_SPEC_URL`.
+   3. Make sure the workflow is on `main`: GitHub runs schedules only from the default branch.
+   4. Test it with **Run workflow** and the same URL in `spec_url`.
+
+   Note: PRs opened with the default `GITHUB_TOKEN` don't trigger the `check` job, so use a bot token or push a commit to the PR.
 2. **Strict coverage in CI.** Change the `check` job to run `npm run api:check -- --strict-coverage`. It passes today; it makes CI fail when a new upstream operation arrives without overlay edits or with a FastAPI-style operationId.
 3. **Cloudflare deploy job (optional).** Add a `deploy` job on `main` after `check` passes, running `npm run cf:deploy` with `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` secrets. Decide who owns the token first. Deploys are manual today.
 4. **Periodic live replay.** Once credentials work, schedule the `endpoint-tester` skill to replay the published examples and flag differences.

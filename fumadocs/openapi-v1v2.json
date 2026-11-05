@@ -2381,6 +2381,140 @@
         ],
         "summary": "Search product attributes",
         "operationId": "productAttributeSearch_api_v1_attributes_product_search_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "filters": {
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "field": {
+                            "type": "string"
+                          },
+                          "operator": {
+                            "type": "string"
+                          },
+                          "value": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "attributes": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "pagination": {
+                    "type": "object",
+                    "properties": {
+                      "page": {
+                        "type": "integer"
+                      },
+                      "page_size": {
+                        "type": "integer"
+                      },
+                      "order": {
+                        "type": "string",
+                        "nullable": true
+                      }
+                    }
+                  }
+                }
+              },
+              "examples": {
+                "search-product-attributes-with-no-filter": {
+                  "summary": "Search product attributes with no filter",
+                  "value": {
+                    "filters": [
+                      []
+                    ],
+                    "attributes": [
+                      "name",
+                      "label",
+                      "options",
+                      "attributes",
+                      "groups",
+                      "type_class"
+                    ],
+                    "pagination": {
+                      "page_size": 100,
+                      "page": 1,
+                      "order": ""
+                    }
+                  }
+                },
+                "search-by-type": {
+                  "summary": "Search by type",
+                  "value": {
+                    "filters": [
+                      [
+                        {
+                          "field": "type_class",
+                          "operator": "eq",
+                          "value": "MultilineAttribute"
+                        }
+                      ]
+                    ],
+                    "pagination": {
+                      "count": 10,
+                      "order": null,
+                      "page": 1,
+                      "page_size": 25,
+                      "total_count": 82
+                    },
+                    "attributes": [
+                      "id",
+                      "name",
+                      "label",
+                      "attributes",
+                      "groups",
+                      "type_class",
+                      "options"
+                    ]
+                  }
+                },
+                "completeness-example": {
+                  "summary": "Completeness example",
+                  "value": {
+                    "filters": [
+                      [
+                        {
+                          "field": "type_class",
+                          "operator": "eq",
+                          "value": "CompletenessAttribute"
+                        }
+                      ]
+                    ],
+                    "pagination": {
+                      "order": "",
+                      "page": 1,
+                      "page_size": 25
+                    },
+                    "attributes": [
+                      "id",
+                      "name",
+                      "label",
+                      "attributes",
+                      "groups",
+                      "type_class",
+                      "options"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
         "description": "Filter product attributes by multiple criteria\n\nFilter structure and format is described under Resources section in this guide.\n\n# Restrictions\n\n* Search requests\n\n    * Search filters MUST include all necessary columns. If an attribute is not explicitly requested it won’t be returned by the API. Available attributes can be found later in this section. \n    Requesting non-existing attributes will return a 422 error code.\n    You are allowed to sort by columns not included in “attributes” field, however this attribute won’t be returned\n\n# Response Format\n\nEndpoint successful responses are wrapped in { data: [ ...] } object as in any other search endpoint. You can read more about response format in __Resources__ section in this guide.\n\nAll attributes share a set of common fields while some attributes also have some custom attributes, current version supports the following attributes*.\n\n* Please ** DO NOT ** rely in any other attribute returned by endpoints as they can dissapear in future releases of the API\n\n\n| Field | Description | Attribute type |\n| --- | --- | --- |\n| id   |  Attribute unique identifier | ALL |\n| name | Attribute name, usually contains some human friendly name | ALL |\n| label | Attribute unique label, generated by PIM and used in searches, etc. | ALL |\n| type_class  | Attribute class identifier, you can check available values in Product Attributes main section in this guide | ALL |\n| groups | Array of group identifiers where this attribute belongs to |  ALL |\n| options |Array of available values for attribute | MultiSelectAttribute, DropdownAttribute  |\n| attributes | Array of objects of the form {'id': ..., 'label': ...} | CompletenessAttribute |\n\n\n\n\n\n\n# Basic Example\nComplex examples can be found in code examples\n\n1.- Search for all product attributes and all fields (a.k.a no-filters) 100 items max.\n```json\n{  \n   \"filters\":[],\n   \"attributes\":[  \n      \"name\",\n      \"label\",\n      \"attributes\",\n      \"groups\",\n      \"type_class\",\n      \"options\"\n   ],\n   \"pagination\":{  \n      \"page_size\":100,\n      \"page\":1,\n      \"order\":\"\"\n   }\n}\n ```\nResponse\n```json\n{  \n   \"data\":[\n       {\n\t        \"id\": \"5d00ae1aebd6f0000170c3d5\", \n\t        \"label\": \"in_stock\", \n\t        \"name\": \"In Stock\", \n\t        \"type_class\": \"BooleanAttribute\",\n\t        \"groups\": [\n\t\t        \"5d00d00fc3ddd200018d92f4\"\n\t\t     ] \n    \t},\n    \t{\n    \t\t\"id\": \"5d0384c339d49f0001391965\", \n    \t\t\"name\": \"color\", \n    \t\t\"label\": \"color\", \n    \t\t\"groups\": [], \n    \t\t\"options\": [\n\t    \t\t\"blue\",\n\t    \t\t\"black\", \n\t    \t\t\"green\", \n\t    \t\t\"red\"\n    \t\t], \n\t    \t\"type_class\": \"MultiSelectAttribute\"\n    \t}\n   ],\n   \"pagination\":{\n     \"count\": 2, \n     \"order\": \"\", \n     \"page\": 1, \n     \"page_size\": 100, \n     \"total_count\": 2\n   }\n}\n ```\n \n 2.- Search for \"Rich info complete\" completeness attribute. This completeness attribute is formed by System attributes: 'sku' and 'label' and product attribute 'Additional Image Gallery'\n```json\n{  \n   \"filters\":[[{\"field\":\"name\",\"operator\":\"like\",\"value\":\"RiCh InFo\"}]],\n   \"attributes\":[  \n      \"name\",\n      \"label\",\n      \"attributes\",\n      \"type_class\"\n   ],\n   \"pagination\":{  \n      \"page_size\":25,\n      \"page\":1,\n      \"order\":\"\"\n   }\n}\n\n ```\nResponse\n```json\n{\n  \"data\": [\n    {\n      \"attributes\": [\n        {\n          \"id\": null, \n          \"label\": \"sku\"\n        }, \n        {\n          \"id\": null, \n          \"label\": \"label\"\n        }, \n        {\n          \"id\": \"5c582c9c9e877f04666c64ac\", \n          \"label\": \"additional_image_gallery\"\n        }\n      ], \n      \"id\": \"5c766b364931b805abd334a0\", \n      \"label\": \"rich_info_complete\", \n      \"name\": \"Rich Info Complete \", \n      \"type_class\": \"CompletenessAttribute\"\n    }\n  ], \n  \"pagination\": {\n    \"count\": 1, \n    \"order\": null, \n    \"page\": 1, \n    \"page_size\": 25, \n    \"total_count\": 82\n  }\n}\n\n ```",
         "responses": {
           "200": {
@@ -2681,6 +2815,82 @@
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Attribute name."
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "What information the attribute holds."
+                  },
+                  "options": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Dropdown and multiselect attributes only. Replaces the existing options."
+                  },
+                  "attributes": {
+                    "type": "array",
+                    "description": "Completeness attributes only. The attributes the completeness attribute checks.",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "label": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "examples": {
+                "patch-attribute-name": {
+                  "summary": "Patch attribute name",
+                  "value": {
+                    "name": "new name"
+                  }
+                },
+                "patch-dropdown-attribute-options": {
+                  "summary": "Patch dropdown attribute options",
+                  "description": "The options you send replace the existing ones.",
+                  "value": {
+                    "name": "available sizes",
+                    "options": [
+                      "XS",
+                      "S",
+                      "L",
+                      "M",
+                      "XL",
+                      "XXL"
+                    ]
+                  }
+                },
+                "patch-completeness-attribute": {
+                  "summary": "Patch completeness attribute",
+                  "value": {
+                    "attributes": [
+                      {
+                        "id": "5d0b50f525abd700016fc03b",
+                        "label": "size"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
         "description": "This resource allows you to modify some properties of existing attributes.\n\n- All attributes can patch name and description fields\n\n| Field | Type | Description |\n| --- | --- | --- |\n| name | string | friendly name for the attribute |\n| description | string | to help other users to understand what kind of information this attribute holds |\n\n\n- DropdownAttribute and MultiselecAttributes can also patch available options. *NOTE* options will replace existing ones\n\n- CompletenessAttribute can patch its \"attributes\".",
         "responses": {
           "200": {
@@ -3335,6 +3545,82 @@
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Send the property you want to change. `parent_id` and `sort_children` aren't allowed in the same request.",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Category name."
+                  },
+                  "parent_id": {
+                    "type": "string",
+                    "description": "ID of the new parent category. An empty string makes the category a root category."
+                  },
+                  "sort_children": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "IDs of all subcategories in the new order. To reorder root categories, send this to the `root` category ID."
+                  }
+                }
+              },
+              "examples": {
+                "change-category-name": {
+                  "summary": "Change category name",
+                  "value": {
+                    "name": "Packshots small"
+                  }
+                },
+                "change-parent-category": {
+                  "summary": "Change parent category",
+                  "value": {
+                    "parent_id": "5cfa0ee53da03100019ba910"
+                  }
+                },
+                "convert-into-root-category": {
+                  "summary": "Convert into root category",
+                  "description": "An empty `parent_id` makes the category a root category.",
+                  "value": {
+                    "parent_id": ""
+                  }
+                },
+                "sort-subcategories": {
+                  "summary": "Sort subcategories",
+                  "description": "Send this request to the parent category, and list all of its subcategories in the new order.",
+                  "value": {
+                    "sort_children": [
+                      "5cfa10a13da03100019ba913",
+                      "5cfa10973da03100019ba912",
+                      "5cfa10a83da03100019ba914"
+                    ]
+                  }
+                },
+                "sort-root-categories": {
+                  "summary": "Sort root categories",
+                  "description": "Send this request to `/api/v1/categories/file/root`: enter `root` as the category ID. List all root categories in the new order.",
+                  "value": {
+                    "sort_children": [
+                      "5cf69f4d568c1c001c039c76",
+                      "5cf4d55eb694740001006ed1",
+                      "5cf69f4d568c1c001c039c7a",
+                      "5cf9f06d53f18e0001006e6d",
+                      "5cfa05273da03100019ba90e",
+                      "5cfa0ee53da03100019ba910",
+                      "5cfa0c1e3da03100019ba90f",
+                      "5cfa10893da03100019ba911"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
         "description": "Using this verb you can change some of the properties of any category.\n\nAllowed properties:\n\n| Property | Description |\n| --- | --- |\n| name | Category name |\n| parent_id | New parent category id. Use emtpy string to make it root category|\n| sort_children | Reorder subcategories |\n\nNote: **parent_id** and **sort_children** are not allowed in the same request.\n\n\n# Moving Categories\n## Convert to root category (a.k.a first level categories)\nYou must issue a patch request to https://pim.plytix.com/api/v1/categories/file/categoryId (see examples) specifiying **parent_id** as empty string, i.e. {\"parent_id\": \"\"}\n\n## Move as subcategory of another category\nYou must issue a patch request to https://pim.plytix.com/api/v1/categories/file/categoryId (see examples) specifiying **parent_id** as new parent category id, i.e. {\"parent_id\": \"new parent category here\"}\n\n\n# Sorting Categories\n## Sorting Root Categories\n\nWhen patching root categories (a.k.a first level categories) only reorder is allowed and must be done under the special endpoint https://pim.plytix.com/api/v1/categories/file/root, 200 status code is returned upon successful response and empty data array is returned.\n\n# Sorting Subcategories\nA patch request must be issued to parent ID category including in its body a dictionary with **ALL** subcategories in desired order, you are not allowed to make partial orders or add new categories or this operations will return 422 error code.\n\n```\n{ \"sort_children\": [\"<subcategory_id>\", \"<subcategory_id>\"] }\n```",
         "responses": {
           "200": {
@@ -3889,6 +4175,82 @@
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Send the property you want to change. `parent_id` and `sort_children` aren't allowed in the same request.",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Category name."
+                  },
+                  "parent_id": {
+                    "type": "string",
+                    "description": "ID of the new parent category. An empty string makes the category a root category."
+                  },
+                  "sort_children": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "IDs of all subcategories in the new order. To reorder root categories, send this to the `root` category ID."
+                  }
+                }
+              },
+              "examples": {
+                "change-category-name": {
+                  "summary": "Change category name",
+                  "value": {
+                    "name": "Apron Bamboo"
+                  }
+                },
+                "change-parent-category": {
+                  "summary": "Change parent category",
+                  "value": {
+                    "parent_id": "5cfa0ee53da03100019ba910"
+                  }
+                },
+                "convert-into-root-category": {
+                  "summary": "Convert into root category",
+                  "description": "An empty `parent_id` makes the category a root category.",
+                  "value": {
+                    "parent_id": ""
+                  }
+                },
+                "sort-subcategories": {
+                  "summary": "Sort subcategories",
+                  "description": "Send this request to the parent category, and list all of its subcategories in the new order.",
+                  "value": {
+                    "sort_children": [
+                      "5cfa10a13da03100019ba913",
+                      "5cfa10973da03100019ba912",
+                      "5cfa10a83da03100019ba914"
+                    ]
+                  }
+                },
+                "sort-root-categories": {
+                  "summary": "Sort root categories",
+                  "description": "Send this request to `/api/v1/categories/product/root`: enter `root` as the category ID. List all root categories in the new order.",
+                  "value": {
+                    "sort_children": [
+                      "5cf69f4d568c1c001c039c76",
+                      "5cf4d55eb694740001006ed1",
+                      "5cf69f4d568c1c001c039c7a",
+                      "5cf9f06d53f18e0001006e6d",
+                      "5cfa05273da03100019ba90e",
+                      "5cfa0ee53da03100019ba910",
+                      "5cfa0c1e3da03100019ba90f",
+                      "5cfa10893da03100019ba911"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
         "description": "Using this verb you can change some of the properties of any category.\n\nAllowed properties:\n\n| Property | Description |\n| --- | --- |\n| name | Category name |\n| parent_id | New parent category id. Use emtpy string to make it root category|\n| sort_children | Reorder subcategories |\n\nNote: **parent_id** and **sort_children** are not allowed in the same request.\n\n# Moving Categories\n## Convert to root category (a.k.a first level categories)\nYou must issue a patch request to https://pim.plytix.com/api/v1/categories/product/categoryId (see examples) specifiying **parent_id** as empty string, i.e. {\"parent_id\": \"\"}\n\n## Move as subcategory of another category\nYou must issue a patch request to https://pim.plytix.com/api/v1/categories/product/categoryId (see examples) specifiying **parent_id** as new parent category id, i.e. {\"parent_id\": \"new parent category here\"}\n\n\n# Sorting Categories\n## Sorting Root Categories\n\nWhen patching root categories (a.k.a first level categories) only reorder is allowed and must be done under the special endpoint https://pim.plytix.com/api/v1/categories/product/root, 200 status code is returned upon successful response and empty data array is returned.\n\n# Sorting Subcategories\nA patch request must be issued to parent ID category including in its body a dictionary with **ALL** subcategories in desired order, you are not allowed to make partial orders or add new categories or this operations will return 422 error code.\n\n```\n{ \"sort_children\": [\"<subcategory_id>\", \"<subcategory_id>\"] }\n```",
         "responses": {
           "200": {

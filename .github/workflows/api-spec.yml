@@ -26,6 +26,11 @@ on:
         description: 'URL of a new Plytix V3 spec. Leave empty to just re-run the checks.'
         required: false
         type: string
+  # Automatic intake, weekdays at 07:00 UTC. A no-op until the repo variable
+  # V3_SPEC_URL is set (see the `intake` job). GitHub runs schedules only from
+  # the default branch.
+  schedule:
+    - cron: '0 7 * * 1-5'
 
 permissions:
   contents: write
@@ -36,47 +41,80 @@ defaults:
     working-directory: fumadocs
 
 jobs:
-  # Manual intake: download a new spec and open a PR with the rebuilt docs.
-  # Once Plytix publishes the spec at a stable URL (overlays/QUESTIONS.md, OAS-3),
-  # add a `schedule:` trigger that runs this job with that URL.
+  # Intake: download a new spec and open a PR with the rebuilt docs.
+  # - Manual: run the workflow with `spec_url`.
+  # - Scheduled: runs with the repo variable V3_SPEC_URL, and does nothing while
+  #   it's unset. The spec URL Plytix named (pim.dev.plytix.com/api/v3/openapi.json)
+  #   returns 401 without auth, so this stays off until Plytix confirms how CI
+  #   should authenticate (overlays/QUESTIONS.md, OAS-3). If the secret
+  #   V3_SPEC_TOKEN exists, it's sent as a Bearer token.
+  # A spec already on main, or already in an open intake PR, is skipped: the
+  # branch name carries the spec's sha256, so each spec version gets one PR and
+  # fixes pushed to that PR are never overwritten.
   # PRs opened with the default GITHUB_TOKEN don't trigger other workflows, so
   # the `check` job won't start on that PR by itself: push any commit to it (or
   # swap in a bot PAT here) to run the checks.
   intake:
-    if: github.event_name == 'workflow_dispatch' && inputs.spec_url != ''
+    if: >-
+      (github.event_name == 'workflow_dispatch' && inputs.spec_url != '') ||
+      (github.event_name == 'schedule' && vars.V3_SPEC_URL != '')
     runs-on: ubuntu-latest
+    env:
+      SPEC_URL: ${{ inputs.spec_url || vars.V3_SPEC_URL }}
     steps:
       - uses: actions/checkout@v4
+      - name: Download the spec and skip it if it isn't new
+        id: download
+        env:
+          SPEC_TOKEN: ${{ secrets.V3_SPEC_TOKEN }}
+        run: |
+          auth=()
+          if [ -n "$SPEC_TOKEN" ]; then auth=(-H "Authorization: Bearer $SPEC_TOKEN"); fi
+          curl -fsSL "${auth[@]}" "$SPEC_URL" -o "$RUNNER_TEMP/openapi-v3.json"
+          sha=$(sha256sum "$RUNNER_TEMP/openapi-v3.json" | cut -d' ' -f1)
+          current=$(node -p "require('./upstream/SOURCE.json').sha256")
+          branch="spec/auto-${sha:0:12}"
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
+          if [ "$sha" = "$current" ]; then
+            echo "::notice::The spec at $SPEC_URL is already on main (sha256 $sha)."
+            echo "new=false" >> "$GITHUB_OUTPUT"
+          elif git ls-remote --exit-code --heads origin "$branch" > /dev/null; then
+            echo "::notice::This spec is already in branch $branch."
+            echo "new=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "new=true" >> "$GITHUB_OUTPUT"
+          fi
       - uses: actions/setup-node@v4
+        if: steps.download.outputs.new == 'true'
         with:
           node-version: 22
           cache: npm
           cache-dependency-path: fumadocs/package-lock.json
-      - run: npm ci
-      - name: Download and take in the new spec
-        env:
-          SPEC_URL: ${{ inputs.spec_url }}
-        run: |
-          curl -fsSL "$SPEC_URL" -o "$RUNNER_TEMP/openapi-v3.json"
-          npm run api:intake -- "$RUNNER_TEMP/openapi-v3.json" --channel "$SPEC_URL"
+      - if: steps.download.outputs.new == 'true'
+        run: npm ci
+      - name: Take in the new spec
+        if: steps.download.outputs.new == 'true'
+        run: npm run api:intake -- "$RUNNER_TEMP/openapi-v3.json" --channel "$SPEC_URL"
       - name: Rebuild (drift is reported in the PR, not here)
         id: build
+        if: steps.download.outputs.new == 'true'
         continue-on-error: true
         run: npm run api:build
       - name: Open a PR
+        if: steps.download.outputs.new == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           BUILD_OUTCOME: ${{ steps.build.outcome }}
+          BRANCH: ${{ steps.download.outputs.branch }}
         run: |
-          branch="spec/$(date -u +%Y-%m-%d)-${GITHUB_RUN_ID}"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git checkout -b "$branch"
+          git checkout -b "$BRANCH"
           git add -A upstream openapi.json redirects.v3.json overlays/baseline.lock.json content/docs/reference/v3
           git commit -m "Take in new upstream V3 spec"
-          git push -u origin "$branch"
+          git push -u origin "$BRANCH"
           {
-            echo "New upstream V3 spec from \`${{ inputs.spec_url }}\`."
+            echo "New upstream V3 spec from \`$SPEC_URL\` (${GITHUB_EVENT_NAME})."
             echo
             echo "Build: **${BUILD_OUTCOME}**. If it failed, fix the drift below before merging."
             echo
@@ -85,7 +123,7 @@ jobs:
           gh pr create --title "Upstream V3 spec $(date -u +%Y-%m-%d)" --body-file "$RUNNER_TEMP/body.md"
 
   check:
-    if: github.event_name != 'workflow_dispatch' || inputs.spec_url == ''
+    if: github.event_name != 'schedule' && (github.event_name != 'workflow_dispatch' || inputs.spec_url == '')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

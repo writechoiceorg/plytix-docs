@@ -28,7 +28,8 @@ Every fix in `00-fixes.yaml` cites one of these IDs through `x-plytix-question`.
 ### OAS-3
 
 - **Observed:** Spec drops arrive as a new dated file (`openapi_pimv3_YYYYMMDD.json`) sent by hand.
-- **Question:** How often will the spec change (per release, or ad hoc)? Can you publish it at a stable URL (or attach it to each release), so our CI can pick up new versions automatically?
+- **Update (2026-11-05):** Plytix now publishes the spec at `https://pim.dev.plytix.com/api/v3/openapi.json`. Without credentials it returns `401`, so CI can't download it yet. `.github/workflows/api-spec.yml` now has a weekday schedule that takes in the spec from the repo variable `V3_SPEC_URL`, sending the secret `V3_SPEC_TOKEN` as a Bearer token if it's set. It stays off until the variable is set.
+- **Question:** How often will the spec change (per release, or ad hoc)? Can you publish it at a stable URL (or attach it to each release), so our CI can pick up new versions automatically? How should our CI authenticate to `pim.dev.plytix.com/api/v3/openapi.json`: a V3 access token (which permissions, and who owns it), or another method? Will the production spec be published at `pim.plytix.com/api/v3/openapi.json`, and should the docs follow dev or production?
 
 | Plytix response |
 | :---- |
