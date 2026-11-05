@@ -2,7 +2,7 @@
 
 Record of every `feedback-corrector` run: the feedback received, what our sources said, what changed on the page, and the reply sent to David. One section per page, newest run first. Open questions for Plytix live in [`feedback-flags.md`](feedback-flags.md).
 
-**Last updated:** 2026-10-29
+**Last updated:** 2026-11-04
 
 ## Index
 
@@ -22,7 +22,7 @@ Record of every `feedback-corrector` run: the feedback received, what our source
 | [Connect an AI assistant to the Plytix docs](#connect-an-ai-assistant-to-the-plytix-docs) | 1 | 2026-10-14 |
 | [Not migrated and new in V3](#not-migrated-and-new-in-v3) | 1 | 2026-10-14 |
 | [Migrating to V3](#migrating-to-v3) | 1 | 2026-10-14 |
-| [Plytix MCP](#plytix-mcp) | 1 | 2026-10-29 |
+| [Plytix MCP](#plytix-mcp) | 2 | 2026-11-04 |
 
 ---
 
@@ -1089,7 +1089,77 @@ Open questions:
 
 ## Plytix MCP
 
-**Page:** `fumadocs/content/docs/guides/platform-mcp/index.mdx` · **Page type:** How-to
+**Page:** `fumadocs/content/docs/guides/platform-mcp/index.mdx` · **Page type:** How-to (split into six pages on 2026-11-04: `index.mdx`, `connect.mdx`, `capabilities-and-permissions.mdx`, `example-workflows.mdx`, `troubleshooting.mdx`, `changelog.mdx`)
+
+### Run 2026-11-04
+
+**Feedback from:** David, written review of the staging site (MCP section and homepage). Also used: `materials/api-references/mcp/Plytix MCP Documentation Brief.pdf` (27 Oct 2026), and Claude's and OpenAI's connector guides (checked 2026-11-04).
+**Approved by the user:** all, through plan approval (staging only; one Connect page with Claude and ChatGPT tabs; no screenshots for now)
+
+#### Feedback items
+
+| # | Feedback (short) | Type | Location | Verdict | Outcome |
+|---|---|---|---|---|---|
+| F1 | "add separate, step-by-step instructions for Claude and ChatGPT ... Screenshots would help." | Scope | Connect your account | Supported (official client guides); the brief wanted tabs only after testing, and David's newer request wins | Applied as tabs, with a FLAG that they're untested; screenshots deferred |
+| F2 | "keep the current URL as the overview and organize the content into: Overview, Connect ..., Capabilities and permissions, Example workflows, Troubleshooting, Changelog" | Structure | Whole page, `meta.json` | Supported (supersedes the brief's one-page layout) | Applied |
+| F3 | "The capabilities section should remain a summary." | Scope | Available capabilities | Already aligned (brief [8]) | Kept as a summary |
+| F4 | Homepage: "Broadening the headline to 'Build with Plytix' and mentioning both the API and MCP." | Scope | `app/(home)/page.tsx` hero | Preference | Applied |
+| F5 | "Adding an 'Explore Plytix MCP' button with a Beta label in the main section." | Scope | Hero | Preference | Applied |
+| F6 | "Adding a dedicated MCP card ... The Help Center can remain accessible through the footer." | Scope | Homepage cards | Supported (`components/site-footer.tsx` links the Help Center) | Applied; Help Center card removed |
+| F7 | "the public homepage should direct users to the available reference and avoid instructions that depend on API v3." | Scope | Hero button, Get started and API reference cards | Supported | Applied; all point to the V1/V2 reference |
+| F8 | "Permissions: qualify the statements that users can configure access per tool ... flag any Plytix-side permission details" | Factual | Intro, step 5, capabilities intro, troubleshooting accordion | Supported (brief p. 3; client guides) | Applied; FB-058 added, FB-054 and FB-055 updated |
+| F9 | "replace 'always current' with wording explaining that applications may need to refresh their tool list" | Factual | Available capabilities | Supported (OpenAI guide: refresh on the plugin's details page) | Applied, plus a new troubleshooting accordion |
+| F10 | "saving a description updates an attribute value on a product, rather than the product attribute definition" | Factual | Improve a product description | Supported | Applied |
+| F11 | "the Troubleshooting link points to #troubleshooting" | Factual | Verify the connection, step 3 | Supported | Applied (links to the Troubleshooting page) |
+| F12 | "simplify the layout and show the verification date once above the table" | Structure | Capabilities table | Supported | Applied |
+
+#### Applied changes
+
+| # | Change made | Source |
+|---|---|---|
+| F1 | `connect.mdx`: `Tabs` for Claude (plans, Team and Enterprise owner setup, **Customize** > **Connectors** > **+ Add** > **Add custom connector**, OAuth sign-in, **+** > **Connectors** toggle, approvals, disconnect) and ChatGPT (chatgpt.com/plugins > **Add custom MCP server**, **OAuth**, **Create as a plugin**, install, sign in, `@` mention, write confirmations, refresh). Shared prerequisites, connection details, and "Verify the connection" | support.claude.com article 11175166; developers.openai.com custom-mcp-server guide |
+| F2 | Six pages; `meta.json` lists `[Overview](/docs/guides/platform-mcp)` and the five child pages | David's review |
+| F4-F7 | Hero "Build with Plytix", copy on the API and the MCP, **Get started** to the V1/V2 reference, **Explore Plytix MCP** with a Beta pill; cards Get started (V1/V2 token authentication), API reference (V1/V2), Plytix MCP (Beta) | David's review |
+| F8 | "What your assistant can do depends on the tools in the current release and the access you grant when you authorize the connection." New Permissions section: release tools, OAuth access, and application controls that "differ between applications, and some applications offer none" | Brief p. 3 |
+| F9 | "Some AI applications keep the list they got when you connected, so after a release you may need to refresh the connection, or remove it and connect again" | OpenAI guide |
+| F10 | "Saving the text updates the value of the description attribute on that one product. It doesn't change the description attribute itself" | David's review |
+| F11 | Link now `/docs/guides/platform-mcp/troubleshooting` | Built HTML check |
+| F12 | Columns: Capability, What you can do, Limitations; "**Last verified:** October 29, 2026" above the table; the Access column dropped, with one sentence saying every capability has read and write tools | Tool inventory CSV |
+
+#### Not changed
+
+- **F1, screenshots:** deferred until the server is live on November 6 and both flows are tested.
+
+#### Flags
+
+Added: FB-058 · Updated: FB-054, FB-055 (details in [`feedback-flags.md`](feedback-flags.md))
+
+#### Follow-ups on other pages
+
+- `fumadocs/content/docs/index.mdx` ("Documentation home") and `fumadocs/app/not-found.tsx` still link V3 first; align them with F7 before the site goes public.
+- November 6: test both tabs and every example prompt against `https://pim.plytix.com/mcp`, and add screenshots.
+
+#### Reply to David
+
+```text
+Thanks, David. I've applied your feedback on staging:
+
+1. Connection steps: the new "Connect your AI assistant" page has separate Claude and ChatGPT tabs. Each covers prerequisites, where to add the connection, the server URL, OAuth sign-in, turning the connection on, and tool approvals. A shared "Verify the connection" section ends with a first query. The official Claude and OpenAI guides stay as extra references. Screenshots aren't in yet: we'll test both flows against pim.plytix.com/mcp once it's live on November 6 and add them then.
+2. Sidebar: Plytix MCP now has Overview (same URL), Connect your AI assistant, Capabilities and permissions, Example workflows, Troubleshooting, and Changelog. Capabilities stays a summary.
+3. Homepage: the headline is now "Build with Plytix" and covers both the API and the MCP. There's an "Explore Plytix MCP" button with a Beta label, and a Plytix MCP card next to Get started and API reference. The Help Center card is gone, and the footer still links it. The main button and the Get started and API reference cards point to the V1 and V2 reference, with no V3 steps.
+4. Content fixes:
+- Permissions: per-tool controls are now described as features of the AI application, where it offers them, with Claude and ChatGPT examples.
+- Tool updates: "always current" is gone. The page explains that some applications keep the tool list from when you connected, so you may need to refresh or reconnect after a release.
+- Description example: it now says saving updates the description value on that product, not the description attribute itself.
+- Broken anchor: the link now goes to the new Troubleshooting page.
+- Capabilities table: three columns (Capability, What you can do, Limitations), with the verification date shown once above the table.
+
+Open questions for Core:
+- Which Plytix role does someone need to connect? Can the assistant see and change only what that user can in Plytix (for example, can a user without edit rights run write tools)?
+- Can a user or admin see and revoke MCP connections from inside Plytix?
+- Does the Plytix OAuth consent screen let users narrow access, for example to read-only, or does it always grant every tool?
+- Is the tool inventory sheet the final tool list for the November 6 release?
+```
 
 ### Run 2026-10-29
 

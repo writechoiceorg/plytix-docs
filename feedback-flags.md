@@ -2,7 +2,7 @@
 
 Running log of open questions and conflicts found while applying Plytix feedback to the docs. Maintained by the `feedback-corrector` skill: one section per page, updated in place.
 
-**Last updated:** 2026-10-29
+**Last updated:** 2026-11-04
 
 ## Summary
 
@@ -27,7 +27,7 @@ Running log of open questions and conflicts found while applying Plytix feedback
 | [Migrating to V3](fumadocs/content/docs/guides/migrating-to-v3/index.mdx) | 0 (tracked under FB-001, FB-002, FB-010, FB-016, FB-018, FB-019, FB-020, FB-042) | 0 | 2026-10-14 |
 | [19 October action list (PM items)](#19-october-2026-documentation-actions-pm-items) | 4 | 0 | 2026-10-19 |
 | [19 October marketing and design feedback](#19-october-2026-marketing-and-design-feedback) | 6 | 0 | 2026-10-21 |
-| [Plytix MCP](fumadocs/content/docs/guides/platform-mcp/index.mdx) | 4 | 0 | 2026-10-29 |
+| [Plytix MCP](fumadocs/content/docs/guides/platform-mcp/index.mdx) (six pages) | 5 | 0 | 2026-11-04 |
 
 ---
 
@@ -683,24 +683,28 @@ Not changed under item 13: the `http://` `next_page` values in the Quickstart an
 
 ## Plytix MCP
 
-**Page:** `fumadocs/content/docs/guides/platform-mcp/index.mdx`
+**Page:** `fumadocs/content/docs/guides/platform-mcp/index.mdx`. Since 2026-11-04 the content is split across six pages in `guides/platform-mcp/`: `index.mdx` (Overview), `connect.mdx`, `capabilities-and-permissions.mdx`, `example-workflows.mdx`, `troubleshooting.mdx`, and `changelog.mdx`.
 
 ### Run history
 
 | Date | Feedback from | Applied | Skipped | Flagged |
 |---|---|---|---|---|
+| 2026-11-04 | David, written review of the staging site (Claude and ChatGPT connection steps, sidebar structure, homepage, five content fixes) | 12 (F1-F12; F4-F7 on the homepage, `fumadocs/app/(home)/page.tsx`) | Screenshots in F1, deferred until the server is live | 1 new (FB-058); FB-054 and FB-055 updated |
 | 2026-10-29 | David, written answers to our MCP page questions (server URL, eligibility, OAuth, tool list, release date, use cases), plus the tool inventory sheet | 8 (F1-F8) | 0 | 4 new (FB-054 to FB-057) |
 
 ### Flags
 
 | ID | Status | Feedback | What our sources say | Source | Question for Plytix | Raised | Resolution |
 |---|---|---|---|---|---|---|---|
-| FB-054 | Open | F3: "if you want this to be activated for your account, please contact your account manager." | The page now says beta access is turned on per account through the account manager. The answer doesn't say which Plytix role the person signing in with OAuth needs. | Page FLAG under Prerequisites | Which Plytix role does the person signing in need (for example, can a `USER` connect, or only an admin)? Does the assistant see only what that user can see in Plytix? | 2026-10-29 | |
-| FB-055 | Open | F5: "The MCP will be set on the LLM side and user will be able to set different access to every available tool." | The page now tells readers to set per-tool access and to disconnect in their AI application. Claude's connector for the DEV server shows per-tool access settings and a **Disconnect** button. We don't know whether Plytix itself lists or revokes connections. | Screenshot of the Claude connector "Plytix PIM - DEV", 29 Oct 2026 | Can a user or admin see and revoke Plytix MCP connections from inside Plytix? If so, where? | 2026-10-29 | |
+| FB-054 | Open | F3: "if you want this to be activated for your account, please contact your account manager." | The page now says beta access is turned on per account through the account manager. The answer doesn't say which Plytix role the person signing in with OAuth needs. | Page FLAG under Prerequisites | Which Plytix role does the person signing in need (for example, can a `USER` connect, or only an admin)? Does the assistant see only what that user can see in Plytix? | 2026-10-29 | 2026-11-04: still open. David's F8 asks us to flag Plytix-side permission details for Core, so the question now also asks whether a user without edit rights in Plytix can run the write tools. The FLAG is on the Connect and the Capabilities and permissions pages. |
+| FB-055 | Open | F5: "The MCP will be set on the LLM side and user will be able to set different access to every available tool." | The page now tells readers to set per-tool access and to disconnect in their AI application. Claude's connector for the DEV server shows per-tool access settings and a **Disconnect** button. We don't know whether Plytix itself lists or revokes connections. | Screenshot of the Claude connector "Plytix PIM - DEV", 29 Oct 2026 | Can a user or admin see and revoke Plytix MCP connections from inside Plytix? If so, where? | 2026-10-29 | 2026-11-04: still open (F8). Per-tool access is now described as a control of the AI application, where offered, and disconnecting as removing the connection in the AI application. |
 | FB-056 | Open | F6: the tool inventory sheet ("Keep in mind that the optimized title is shown in the frontend of your model as tool list.") | The inventory lists 72 tools, 23 of them read tools (12 search, 11 get), reviewed through a ChatGPT connection. A Claude connection to the DEV server shows 25 read-only tools, including "Get product categorization", which matches none of the inventory's tools. The inventory has no title column, so the page doesn't list titles. | `materials/api-references/mcp/Plytix MCP - Tool Inventory - Tools.csv`; DEV connector screenshot | Is the inventory the tool list for the November 6 release? What is "Get product categorization", and will production expose the same tools as DEV? Can you share the display title for each tool? | 2026-10-29 | |
 | FB-057 | Open | F1: "The production server url will be: pim.plytix.com/mcp" | The page uses `https://pim.plytix.com/mcp`. The `https://` follows the DEV URL in the brief (`https://pim.dev.plytix.com/mcp`). The server isn't live yet, so no step on the page has been tested against it. | Plytix MCP brief, 27 Oct 2026 | Can you confirm the full URL is `https://pim.plytix.com/mcp`? WriteChoice will test the page against it on November 6. | 2026-10-29 | |
+| FB-058 | Open | F8: "Permissions: qualify the statements that users can configure access per tool. The available controls depend on the AI application. Please flag any Plytix-side permission details that need confirmation from Core." | The pages now say access depends on the tools in the release, the access granted at OAuth authorization, and the AI application's own controls (Claude: approval requests, **Allow always**, turning tools off; ChatGPT: write confirmations and per-tool toggles). The brief ties actions to "the access granted during authorization", but we don't know what the Plytix consent screen offers. | `materials/api-references/mcp/Plytix MCP Documentation Brief.pdf`, p. 3 → "The actions it can perform depend on the tools available in the current release and the access granted during authorization."; Claude and OpenAI connector guides, checked 2026-11-04 | Does the Plytix OAuth consent screen let the user narrow the access (for example, read-only), or does authorizing always grant every tool in the release? | 2026-11-04 | |
 
 ### Follow-ups on other pages
 
-- `.claude/skills/writer/references/information-architecture.md` line 47: the page is no longer blocked on the release URL, eligibility, OAuth, use cases, or release date. It's still blocked on the tool-list check (FB-056), the role and revocation questions (FB-054, FB-055), and testing against production.
+- `.claude/skills/writer/references/information-architecture.md` line 47: the page is no longer blocked on the release URL, eligibility, OAuth, use cases, or release date. It's still blocked on the tool-list check (FB-056), the role and revocation questions (FB-054, FB-055), and testing against production. (2026-11-04: IA updated for the six-page structure.)
+- 2026-11-04: on November 6, test the Claude and ChatGPT tabs on `connect.mdx` against `https://pim.plytix.com/mcp` and add screenshots (F1).
+- 2026-11-04: `fumadocs/content/docs/index.mdx` ("Documentation home") still leads with V3 (Beta). It isn't linked from the homepage, but it should follow the same V1/V2-first rule before V3 is public (F7).
 - `.claude/skills/writer/references/glossary.md`, Plytix MCP entry: add that beta access is turned on per account through the account manager and is separate from V3.

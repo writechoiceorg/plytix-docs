@@ -1,0 +1,71 @@
+---
+title: "Capabilities and permissions"
+description: "See what the Plytix MCP beta can do in the current release, and how authorization and your AI application control what your assistant can access."
+---
+
+import { HistoryRegular, LightbulbRegular } from '@/components/icons';
+
+This page summarizes what your assistant can do with the Plytix MCP in this release, and what controls the access it has. It's a summary, not a tool reference: the Plytix MCP describes each of its tools to your AI application directly.
+
+## How your assistant finds the tools
+
+Your AI application discovers the Plytix tools directly from the server. Each tool comes with a description and an input schema, which tell the application what the tool does and what it needs. Your application lists each tool by a short title, such as "Get product list".
+
+The tool list can change from one release to the next. Some AI applications keep the list they got when you connected, so after a release you may need to refresh the connection, or remove it and connect again, before your assistant sees new or changed tools. To see the exact tools available to you, check the connection in your application's settings or ask your assistant. The [changelog](/docs/guides/platform-mcp/changelog) says when a release needs you to refresh.
+
+## Capabilities in this release
+
+Each capability below is made up of several tools, such as one that searches and one that updates. Every capability includes tools that read your data and tools that change your catalog.
+
+{/* FLAG (open):
+  Built from Plytix's tool inventory (`materials/api-references/mcp/Plytix MCP - Tool Inventory - Tools.csv`, 72 tools, reviewed on 29 Oct 2026 through a ChatGPT connection). A Claude connection to the DEV server (screenshot, 29 Oct 2026) shows 25 read-only tools, including "Get product categorization", which has no match in the inventory's 23 search and get tools (FB-056). Confirm the release tool list against `https://pim.plytix.com/mcp` on November 6, 2026, and update **Last verified** at each review.
+*/}
+
+**Last verified:** October 29, 2026
+
+| Capability | What you can do | Limitations |
+|---|---|---|
+| Products | Search products with filters, get a product by ID or SKU, create and update products, remove a field, and delete products. | Searches return results in pages. Deleting a product can't be undone. |
+| Product categories | Search, get, create, update, and delete product categories, and add products to a category or remove them. | Removing a product from a category deletes neither. Deleting a category can't be undone. |
+| Product lists | Search, get, create, update, and delete product lists, and add products to a static list or remove them. | Smart lists select products with filters, so you add products only to static lists. Deleting a list can't be undone. |
+| Product attributes and attribute groups | Search, get, create, update, and delete product attributes and attribute groups, remove a field from an attribute, and add an attribute to a group or remove it. | Searches include built-in system attributes. Deleting an attribute or a group can't be undone. |
+| Product families | Search, get, create, update, and delete product families, and link attributes to a family at the parent level, the variant level, or no level. | Removing an attribute from a family deletes neither. Deleting a family can't be undone. |
+| Product relationships | Search relationship types and the relationships between products, manage relationship types, and link, update, or unlink products. | A relationship goes in one direction, from one product to another. Deleting a relationship type can't be undone. |
+| Assets | Search, get, create, update, and delete assets, remove a field, and add assets to asset categories and static asset lists or remove them. | Deleting an asset can't be undone. |
+| Asset categories and asset lists | Search, get, create, update, and delete asset categories and asset lists. | Deleting a category or a list can't be undone. |
+
+Other parts of Plytix, such as channels, aren't available through the Plytix MCP in this release.
+
+## Permissions
+
+What your assistant can do with your account depends on three things:
+
+- **The tools in the current release.** Your assistant can only do what the tools in [Capabilities in this release](#capabilities-in-this-release) cover.
+- **The access you grant when you authorize the connection.** You sign in to Plytix with OAuth and review the access your AI application requests before you approve it.
+- **The controls your AI application offers.** These differ between applications, and some applications offer none.
+
+For example, Claude asks for your approval before it runs a tool, lets you allow a tool always, and lets you turn tools off in a conversation. ChatGPT asks you to confirm write actions and lets you turn individual tools on or off. For the steps in each application, see [Connect your AI assistant](/docs/guides/platform-mcp/connect). If your application has no per-tool controls, any tool can run when your assistant calls it.
+
+Where your application allows it, let tools that only read data run on their own, and require your approval for tools that change your catalog. Try write workflows on a test account first, since Plytix can't undo some changes, such as deletions.
+
+To stop your assistant from using the Plytix MCP, remove the Plytix connection in your AI application's settings.
+
+{/* FLAG (open):
+  Plytix-side permissions need confirmation from Plytix Core before this section says more:
+  - FB-054: which Plytix role the person signing in needs, and whether the assistant can see and change only what that user can see and change in Plytix (for example, whether a user without edit rights can run write tools).
+  - FB-055: whether a user or admin can see and revoke Plytix MCP connections from inside Plytix, and where.
+  - Whether the OAuth consent screen lets the user narrow the access granted (for example, read-only), or always grants the full tool set.
+*/}
+
+## Related articles
+
+Now that you know what your assistant can do, try it out or check what changed.
+
+<Cards>
+  <Card icon={<LightbulbRegular />} title="Example workflows" href="/docs/guides/platform-mcp/example-workflows">
+    Start from prompts for finding products, reviewing content, and drafting copy.
+  </Card>
+  <Card icon={<HistoryRegular />} title="Changelog" href="/docs/guides/platform-mcp/changelog">
+    Check what changed in each Plytix MCP release.
+  </Card>
+</Cards>

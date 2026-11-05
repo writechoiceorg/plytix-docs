@@ -1,0 +1,120 @@
+---
+title: "Connect your AI assistant"
+description: "Connect Claude or ChatGPT to your Plytix account with the Plytix MCP, authorize it with OAuth, and check that the connection works."
+---
+
+import { LightbulbRegular, ShieldCheckmarkRegular, WrenchRegular } from '@/components/icons';
+
+To connect, you add the Plytix MCP to your AI application as a remote MCP server, then sign in to Plytix with OAuth to authorize it. This guide has step-by-step instructions for Claude and ChatGPT, and a check to run once you're connected.
+
+## Prerequisites
+
+Before you start, make sure you have the following:
+
+- Plytix MCP access turned on for your Plytix account. To request it, contact your account manager.
+- An AI application that supports remote MCP servers and OAuth sign-in, such as Claude or ChatGPT. Your application's plan or workspace settings decide whether you can add a custom connection, and a workspace administrator may need to add or approve it first. Check the requirements for your application in the tabs below.
+
+{/* FLAG (open):
+  Eligibility confirmed by David (29 Oct 2026): beta access is turned on per account through the account manager. Still open (FB-054): which Plytix role or access the person signing in needs, and whether the assistant sees only what that user can see in Plytix.
+*/}
+
+You'll need the following connection details:
+
+| Setting | Value |
+|---|---|
+| Server URL | `https://pim.plytix.com/mcp` |
+| Authentication | OAuth |
+
+The Plytix MCP is separate from the V3 API, so you don't need V3 or a [V3 access token](/reference/v3/authentication) to connect. The OAuth sign-in authorizes your AI application, separately from the access tokens in the **API v3** tab.
+
+## Add the Plytix MCP to your AI application
+
+Pick your AI application and follow the steps to add the server, authorize it, and turn it on in a conversation.
+
+{/* FLAG (open):
+  Both tabs are written from Claude's and OpenAI's official guides (checked 4 Nov 2026), not from a tested connection. Test each flow against `https://pim.plytix.com/mcp` on November 6, 2026: menu labels, the OAuth client option Claude detects, when ChatGPT asks to sign in, how to disconnect, and one successful read. Add screenshots after that test. Per the brief, name an exact Google client before adding one, and add a Gemini CLI tab only after testing it with Plytix.
+*/}
+
+<Tabs items={['Claude', 'ChatGPT']}>
+  <Tab value="Claude">
+    Custom connectors work in Claude on the web and in Claude Desktop, on every plan. On the Free plan, you can add one custom connector.
+
+    **On a Team or Enterprise plan**, an owner adds the connector for the whole organization first. On Team, Owners and Primary Owners can add it. On Enterprise, Owners, Primary Owners, and custom roles with Manage access to Libraries can add it. Owners add it in **Organization settings** > **Connectors** by clicking **Add**, hovering over **Custom**, and selecting **Web**, then entering the name and server URL as in steps 3 to 5 below. After that, each member connects with their own Plytix sign-in: go to **Customize** > **Connectors**, find **Plytix**, click **Connect**, and continue from step 6.
+
+    **On a Free, Pro, or Max plan**, add the connector yourself:
+
+    1. **Open** **Customize** > **Connectors** in Claude.
+    2. **Click** **+ Add**, then **Add custom connector**.
+    3. **Enter** `Plytix` as the name and `https://pim.plytix.com/mcp` as the server URL, then click **Continue**.
+    4. **Review** the authentication settings that Claude detects for the server, then click **Continue**.
+    5. **Select** **Sign in now** under **Authentication**, keep the detected **OAuth client** setting, and click **Add**.
+    6. **Sign in** to Plytix in the window that opens. Review the access that Claude requests, then approve it.
+    7. **Turn on** the connector in a conversation: click the **+** button in the lower left of the chat, click **Connectors**, and turn on the **Plytix** toggle.
+
+    Claude asks for your approval before it runs a tool. Select **Allow always** only for tools you trust to run without review, such as tools that only read data. To keep a tool from running in a conversation, turn it off in the **Search and tools** menu.
+
+    To disconnect, go to **Customize** > **Connectors**, find **Plytix**, and click **Remove** or the three dots next to it.
+
+    For plan and workspace requirements, see [Claude's guide to custom connectors](https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp).
+  </Tab>
+  <Tab value="ChatGPT">
+    You add custom MCP servers in ChatGPT on the web. Whether you can add one depends on your ChatGPT plan and workspace: workspace permissions and security restrictions apply, and on some workspace plans only admins and owners can add a custom MCP server. Check your plan in OpenAI's guide linked at the end of this tab.
+
+    1. **Go** to [chatgpt.com/plugins](https://chatgpt.com/plugins), select the plus button, then select **Add custom MCP server**.
+    2. **Enter** `Plytix` as the name. You can also add a description.
+    3. **Enter** `https://pim.plytix.com/mcp` as the server URL under **Connection**.
+    4. **Select** **OAuth** as the authentication method.
+    5. **Review** the risk warning, then select **I understand and want to continue**.
+    6. **Select** **Create as a plugin**.
+    7. **Install** the Plytix plugin. You'll find it in your personal plugins, or in the workspace where you created it.
+    8. **Sign in** to Plytix when ChatGPT asks you to. Review the access that ChatGPT requests, then approve it.
+    9. **Use** the plugin in a conversation: type `@` in the prompt box and select **Plytix**.
+
+    ChatGPT asks you to confirm write actions before they run, and you can turn individual tools on or off on the plugin's details page in your settings. Review each request before you approve it, and only remember an approval for a tool you trust to change your catalog without asking.
+
+    After a Plytix MCP release, open the plugin's details page and refresh it, so ChatGPT picks up new and changed tools.
+
+    For plan, workspace, and authentication details, see [OpenAI's guide to adding a custom MCP server](https://developers.openai.com/api/docs/guides/custom-mcp-server).
+  </Tab>
+</Tabs>
+
+{/* FLAG (open):
+  Can a user revoke a Plytix MCP authorization from inside Plytix, and if so, where (FB-055)? David (29 Oct 2026) says access is managed on the AI application side.
+*/}
+
+## Verify the connection
+
+Follow the steps below to confirm that your AI application found the Plytix tools and can read your account.
+
+1. **Check** that your application lists the Plytix tools. Claude shows them in the connector's settings, and ChatGPT on the plugin's details page.
+2. **Ask** what the connection can do:
+
+   ```text
+   What can you do with my Plytix account through this connection?
+   ```
+
+   A working connection answers with the capabilities in this release. This confirms that the tools were found, but not that your assistant can read your data.
+
+3. **Run** a small read that you can check yourself, such as the first prompt in [Example workflows](/docs/guides/platform-mcp/example-workflows#find-a-product):
+
+   ```text
+   Using Plytix, find the product with SKU GF-Basket and show its name and description.
+   ```
+
+   Check that your assistant called a Plytix tool, then compare the answer against the product in Plytix. If the values match, the connection works and your account is reachable. If the answer has no specifics, your assistant probably answered without calling Plytix. See [Troubleshooting](/docs/guides/platform-mcp/troubleshooting).
+
+## Next steps
+
+Now that your assistant is connected, explore what it can do.
+
+<Cards>
+  <Card icon={<ShieldCheckmarkRegular />} title="Capabilities and permissions" href="/docs/guides/platform-mcp/capabilities-and-permissions">
+    See what your assistant can do in this release and how access is controlled.
+  </Card>
+  <Card icon={<LightbulbRegular />} title="Example workflows" href="/docs/guides/platform-mcp/example-workflows">
+    Start from prompts for finding products, reviewing content, and drafting copy.
+  </Card>
+  <Card icon={<WrenchRegular />} title="Troubleshooting" href="/docs/guides/platform-mcp/troubleshooting">
+    Fix a connection that fails, missing tools, or answers that don't match your account.
+  </Card>
+</Cards>

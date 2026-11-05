@@ -1,5 +1,12 @@
 {
   "title": "Plytix MCP",
   "icon": "Bot",
-  "pages": []
+  "pages": [
+    "[Overview](/docs/guides/platform-mcp)",
+    "connect",
+    "capabilities-and-permissions",
+    "example-workflows",
+    "troubleshooting",
+    "changelog"
+  ]
 }

@@ -1,0 +1,44 @@
+---
+title: "Troubleshooting"
+description: "Fix common Plytix MCP problems, such as a failed connection, missing tools, blocked actions, or answers that don't match your Plytix account."
+---
+
+import { PlugConnectedRegular, ShieldCheckmarkRegular } from '@/components/icons';
+
+The Plytix MCP is in beta, so its capabilities are limited to the tools in the current release, and an action that isn't in [Capabilities and permissions](/docs/guides/platform-mcp/capabilities-and-permissions) isn't available yet. Your assistant also reads product data from suppliers, imports, and integrations. Treat that text as untrusted, and keep reading and writing in separate prompts.
+
+Check the problems below if you run into issues while connecting or using the Plytix MCP.
+
+<Accordions type="multiple">
+  <Accordion title="The connection fails" value="connection-fails">
+    Check that the server URL matches `https://pim.plytix.com/mcp` exactly, then complete the OAuth authorization again. If your application asks for an administrator's approval for custom connections, the connection can't finish until that approval is given.
+  </Accordion>
+  <Accordion title="No Plytix tools appear" value="no-tools">
+    Check that the Plytix connection is turned on for your conversation, since some applications add a connector without turning it on. See the steps for your application in [Connect your AI assistant](/docs/guides/platform-mcp/connect).
+  </Accordion>
+  <Accordion title="New or changed tools don't appear after a release" value="stale-tools">
+    Some applications keep the tool list they got when you connected. Refresh the Plytix connection if your application offers this, for example from the plugin's details page in ChatGPT. Otherwise, remove the connection and connect again. The [changelog](/docs/guides/platform-mcp/changelog) says when a release needs you to refresh.
+  </Accordion>
+  <Accordion title="Your assistant says it can't do what you asked" value="action-unavailable">
+    Check the request against [Capabilities and permissions](/docs/guides/platform-mcp/capabilities-and-permissions) first, since the beta covers only the tools in the current release. If the capability is listed and your application offers per-tool controls, check whether you turned that tool off or denied its approval request.
+  </Accordion>
+  <Accordion title="Your assistant answers about your catalog without calling Plytix" value="no-tool-call">
+    An answer that sounds plausible but doesn't match your account usually means your assistant answered from its own knowledge instead of calling a tool. Start the prompt with "Using Plytix," and ask your assistant to show the SKUs it retrieved, so you can check the answer against Plytix.
+  </Accordion>
+  <Accordion title="Results are shorter than what Plytix shows" value="short-results">
+    Your assistant may have stopped at the first page of results and reported it as the full answer. Ask it to get all the results, and include the expected count in your prompt when you know it, so your assistant can check its answer against that count.
+  </Accordion>
+</Accordions>
+
+## Related articles
+
+If the problem isn't listed here, check the connection steps or what this release covers.
+
+<Cards>
+  <Card icon={<PlugConnectedRegular />} title="Connect your AI assistant" href="/docs/guides/platform-mcp/connect">
+    Add the Plytix MCP to Claude or ChatGPT, authorize it, and check the connection.
+  </Card>
+  <Card icon={<ShieldCheckmarkRegular />} title="Capabilities and permissions" href="/docs/guides/platform-mcp/capabilities-and-permissions">
+    See what your assistant can do in this release and how access is controlled.
+  </Card>
+</Cards>
