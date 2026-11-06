@@ -1,4 +1,5 @@
 import { createGetUrl } from 'fumadocs-core/source';
+import hiddenContentList from '@/hidden-content.json';
 
 export const appName = 'Plytix Docs';
 // Internal base of the content tree. No page is served under /docs: every page
@@ -21,6 +22,29 @@ export const sections = [
 ] as const;
 
 export type SectionRoute = (typeof sections)[number]['route'];
+
+/**
+ * Content kept in the repo but not published, listed in hidden-content.json
+ * (paths relative to content/docs; a folder hides everything inside it).
+ * lib/source.ts drops these from the source, so they leave the pages, sidebar,
+ * search, llms.txt, .md routes and OG images together; next.config.mjs reads the
+ * same file and skips redirects that would land on them.
+ *
+ * API V3 ships in a later phase (David, 6 Nov 2026, FB-061): the November 9
+ * launch has the Plytix MCP pages and the V1/V2 reference only. Every API guide
+ * is written for V3, so they're hidden with it. To publish V3, empty the list,
+ * restore guides/meta.json, and revert the V1/V2 page edits from the same commit.
+ */
+export const hiddenContent: readonly string[] = hiddenContentList;
+
+/** Whether V3 content is published. Drives the V3 notes in generated V1/V2 pages. */
+export const v3Published = !hiddenContent.includes('reference/v3');
+
+/** Whether a content path (relative to content/docs, with or without extension) is hidden. */
+export function isHiddenContent(path: string): boolean {
+  const clean = path.replace(/\\/g, '/').replace(/^\.?\//, '');
+  return hiddenContent.some((prefix) => clean === prefix || clean.startsWith(`${prefix}/`) || clean.startsWith(`${prefix}.`));
+}
 
 const startsWith = (slugs: readonly string[], prefix: readonly string[]) =>
   prefix.every((segment, i) => slugs[i] === segment);

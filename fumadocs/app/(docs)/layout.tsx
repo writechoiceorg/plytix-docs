@@ -1,4 +1,5 @@
 import { source } from '@/lib/source';
+import { v3Published } from '@/lib/shared';
 import { DocsLayout } from 'fumadocs-ui/layouts/notebook';
 import { baseOptions } from '@/lib/layout.shared';
 import { SidebarBanner } from '@/components/sidebar-banner';
@@ -23,10 +24,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             // The "API Reference" tab's own landing page is just plumbing (it
             // gives the reference folder a resolvable url so this tab exists
             // and stays active across every /reference/** page). Send
-            // clicks straight to the v3 overview instead of that landing page.
+            // clicks straight to the published version's overview instead of
+            // that landing page (V1/V2 while V3 is hidden, see hiddenContent).
             // The versions themselves are folders in that tab's sidebar.
             if (option.url === '/reference') {
-              option = { ...option, url: '/reference/v3' };
+              option = {
+                ...option,
+                url: v3Published ? '/reference/v3' : '/reference/v1-v2/api-v1-v2-reference',
+              };
             }
             // Navbar tabs render only the title, so fold the folder's icon into it.
             // The icon is dropped from the option itself to avoid a duplicate in the

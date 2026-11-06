@@ -2,7 +2,7 @@ import { llms, loader } from 'fumadocs-core/source';
 import { fluentIconsPlugin } from './fluent-icons-plugin';
 import { sidebarTitlePlugin } from './sidebar-title-plugin';
 import { z } from 'zod';
-import { docsRoute, getPageUrl } from './shared';
+import { docsRoute, getPageUrl, isHiddenContent } from './shared';
 import { defineDocs } from 'fumadocs-mdx/macro';
 import { applyMdxPreset } from 'fumadocs-mdx/config';
 import { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
@@ -26,11 +26,19 @@ const docs = defineDocs({
   },
 });
 
+// Unpublished content (see `hiddenContent` in lib/shared.ts) is dropped here, so
+// nothing downstream (pages, sidebar, search, llms.txt, OG images) sees it.
+const docsSource = docs.toFumadocsSource();
+const publishedSource = {
+  ...docsSource,
+  files: docsSource.files.filter((file) => !isHiddenContent(file.path)),
+};
+
 // See https://fumadocs.dev/docs/headless/source-api for more info
 export const source = loader({
   baseUrl: docsRoute,
   url: (slugs) => getPageUrl(slugs),
-  source: docs.toFumadocsSource(),
+  source: publishedSource,
   plugins: [fluentIconsPlugin(), sidebarTitlePlugin(), openapi.loaderPlugin()],
 });
 

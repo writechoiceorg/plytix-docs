@@ -18,13 +18,23 @@ const movedPages = readJson('./redirects.json');
 // also covers the `.md` variant that proxy.ts serves to LLM clients.
 const v3Redirects = readJson('./redirects.v3.json');
 
+// Unpublished content (see hiddenContent in lib/shared.ts). For /reference/** and
+// /guides/** the URL path matches the content path, so a redirect whose
+// destination is under a hidden path is skipped: the old URL 404s instead of
+// redirecting to a page that isn't served.
+const hiddenContent = readJson('./hidden-content.json');
+const isPublished = ({ destination }) => {
+  const path = destination.replace(/^\//, '').replace(/\.md$/, '');
+  return !hiddenContent.some((prefix) => path === prefix || path.startsWith(`${prefix}/`));
+};
+
 /** @type {import('next').NextConfig} */
 const config = {
   reactStrictMode: true,
   async redirects() {
     return [
-      ...movedPages,
-      ...v3Redirects.flatMap(({ source, destination }) => [
+      ...movedPages.filter(isPublished),
+      ...v3Redirects.filter(isPublished).flatMap(({ source, destination }) => [
         { source, destination, permanent: true },
         { source: `${source}.md`, destination: `${destination}.md`, permanent: true },
       ]),

@@ -22,7 +22,7 @@ Record of every `feedback-corrector` run: the feedback received, what our source
 | [Connect an AI assistant to the Plytix docs](#connect-an-ai-assistant-to-the-plytix-docs) | 1 | 2026-10-14 |
 | [Not migrated and new in V3](#not-migrated-and-new-in-v3) | 1 | 2026-10-14 |
 | [Migrating to V3](#migrating-to-v3) | 1 | 2026-10-14 |
-| [Plytix MCP](#plytix-mcp) | 3 | 2026-11-06 |
+| [Plytix MCP](#plytix-mcp) | 4 | 2026-11-06 |
 
 ---
 
@@ -1090,6 +1090,69 @@ Open questions:
 ## Plytix MCP
 
 **Page:** `fumadocs/content/docs/guides/mcp/overview.mdx` · **Page type:** Concept overview plus five child pages. Moved on 2026-11-06 from `guides/platform-mcp/` (`index.mdx`, `connect.mdx`, `capabilities-and-permissions.mdx`, `example-workflows.mdx`, `troubleshooting.mdx`, `changelog.mdx`; split into six pages on 2026-11-04) to `guides/mcp/` (`overview.mdx`, `quickstart.mdx`, `tools.mdx`, and the same last three), served at `/mcp/**`.
+
+### Run 2026-11-06 (2)
+
+**Feedback from:** David, Slack, 6 Nov 2026 11:07, answering our three open questions from the previous run (FB-061, FB-062, and the Core questions behind FB-055 and FB-058). The changes are site-wide, not limited to the MCP pages.
+**Approved by the user:** all. Launch scope set by the user before the proposal: the MCP pages plus the V1/V2 reference (not MCP pages only).
+
+#### Feedback items
+
+| # | Feedback (short) | Type | Location | Verdict | Outcome |
+|---|---|---|---|---|---|
+| F1 | "Yes, v3 should be hidden for a later phase. We will just ship the mcp docs." | Scope | Site-wide: V3 reference, all nine API guides (all V3-based), Migrating to V3; V3 links on seven V1/V2 pages and in site code | Supported (Plytix release decision; the homepage was already V3-free, `app/(home)/page.tsx` line 4) | Applied, FB-061 resolved, FB-063 raised |
+| F2 | "Yes, docs mcp should be turned off." | Scope | `fumadocs/app/api/mcp/route.ts` | Supported | Applied, FB-062 resolved |
+| F3 | "I will get back to you soon with this info." | Question | MCP-018, MCP-028, MCP-034 | Not applicable (no answer yet) | No change; FB-055 and FB-058 noted |
+
+#### Applied changes
+
+| # | Change made | Source |
+|---|---|---|
+| F1 | New `fumadocs/hidden-content.json` lists `reference/v3`, `guides/migrating-to-v3`, and the nine API guides. `lib/shared.ts` exposes it (`hiddenContent`, `isHiddenContent`, `v3Published`), and `lib/source.ts` drops those files from the source, so they leave the pages, sidebar, search, `llms.txt`, `.md` routes, and OG images. Files stay in place, so `api:build` still generates the V3 reference. | David, Slack 11:07 |
+| F1 | `content/docs/guides/meta.json`: only "AI assistants > mcp" remains. | Same |
+| F1 | `app/(docs)/layout.tsx`: the API Reference tab opens `/reference/v1-v2/api-v1-v2-reference` while V3 is hidden. `app/not-found.tsx`: buttons now "Plytix MCP" (`/mcp/overview`) and "API reference" (V1/V2 overview). `components/docs-page-view.tsx`: the "For V3 (Beta), see…" note on generated V1/V2 endpoint pages is off while V3 is hidden. | Same |
+| F1 | `redirects.json`: `/guides` now goes to `/mcp/overview` (temporary, 307). `next.config.mjs` skips redirects whose destination is hidden, so about 200 old `/docs/reference/v3/...` URLs 404 instead of redirecting to a hidden page (105 redirects remain, none to V3). | Same |
+| F1 | `reference/index.mdx`: V3 card and Migration overview sentence removed; one V1/V2 card; new description. | Same |
+| F1 | `reference/v1-v2/api-v1-v2-reference.mdx`: V3 callout and "New integrations should use V3…" removed; "the same bearer-token authentication as V3" → "bearer-token authentication"; "and several differ from V3" dropped; description now "Reference for the V1 API and the V2 (beta) endpoints, covering the core concepts, authentication, and every resource you can work with." | Same |
+| F1 | `errors-status-codes.mdx`: callout and "How this differs from V3" section removed; cards now Authentication and Rate limits; description drops the V3 comparison. | Same |
+| F1 | `filtering-and-search.mdx`: callout and "V3 has no equivalent of these endpoints." removed; cards now Pagination and Get available product filters. | Same |
+| F1 | `pagination.mdx`: callout and "How this differs from V3" section removed; cards now Filtering and search and Search products. | Same |
+| F1 | `rate-limits.mdx`: callout removed; the V3 pointer for plan values replaced with a table (Free: 20 requests per 10 seconds, 2,000 per hour; PRO and Standard+: 50 and 5,000); the hidden FLAG now keeps only the V1/V2 and V3 shared-count question; V3 card → Errors and status codes. | `materials/api-references/v1-reference/Plytix API v1_v2 Rate Limits.pdf`, p. 1 → "Free 20 requests per 10 seconds 2,000 requests per hour / PRO and Standard+ 50 requests per 10 seconds 5,000 requests per hour" |
+| F1 | `token-authentication.mdx`: callout and the V3 sentence removed; cards now Get an access token and Rate limits. | David, Slack 11:07 |
+| F2 | `app/api/mcp/route.ts` and `lib/mcp-search.ts` (used only by the route) removed; `/api/mcp` returns 404. | Same |
+
+Checks: `npm run types:check` and `npm run build` pass. The build prerenders 308 routes: 0 under `/reference/v3`, 0 under `/guides`, 6 under `/mcp`, the V1/V2 reference, and no `/api/mcp`. The only visible "V3" text left is MCP-015's approved Quickstart sentence. No em dashes or lowercase version names in the added lines; descriptions are 123-135 characters.
+
+#### Not changed
+
+- **F3:** no answer yet; FB-055 and FB-058 stay open.
+- **"V1/V2 (Legacy)" label:** kept per `guideline.md` line 22 (Plytix item 19); raised as FB-063.
+- **Quickstart sentence "You don't need V3 API beta access or a V3 access token…":** kept; it's David's approved MCP-015 wording and has no link.
+- **Hidden `{/* FLAG */}` comments mentioning V3:** kept; they don't render and are stripped from `llms.txt`.
+
+#### Flags
+
+Added: FB-063 · Resolved: FB-061, FB-062 · Updated: FB-055, FB-058 (details in [`feedback-flags.md`](feedback-flags.md))
+
+#### Follow-ups on other pages
+
+- When V3 is published: empty `hidden-content.json`, restore `guides/meta.json`, revert the V1/V2 page edits from this change, and point `/guides` back to `/guides/what-is-the-plytix-api`.
+- `.claude/skills/writer/references/information-architecture.md`: record the November 9 launch scope.
+- `reference/v1-v2/rate-limits.mdx`: the V1/V2 rate-limits brief also documents the `429` body, `Retry-After` and `RateLimit-*` headers, and the `rate_limit` token claim, which the page doesn't cover yet.
+
+#### Reply to David
+
+```text
+Thanks, David. Here's what I've changed for the November 9 launch:
+
+1. V3 is hidden. The V3 API reference, the API guides (they're all written for V3), and the Migrating to V3 section are off the site, so at launch it's the homepage, the six MCP pages, and the V1/V2 reference. The V1/V2 pages no longer link to V3, and the V1/V2 rate limits page now lists the plan limits itself. The V3 content is kept ready for the later phase.
+2. The docs MCP is turned off. /api/mcp on the docs site now returns a 404.
+3. Thanks, we'll keep the Core questions open until you hear back.
+
+Open questions
+- We've kept the V1/V2 API reference public at launch, since the homepage points to it. If "just the MCP docs" meant the MCP pages only, let me know and I'll hide the V1/V2 reference too.
+- With V3 hidden, the reference is still labelled "V1/V2 (Legacy)", per your design feedback (item 19). Should we keep "Legacy" at launch, or drop it until V3 is out?
+```
 
 ### Run 2026-11-06
 

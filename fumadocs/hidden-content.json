@@ -1,0 +1,13 @@
+[
+  "reference/v3",
+  "guides/migrating-to-v3",
+  "guides/what-is-the-plytix-api",
+  "guides/quickstart",
+  "guides/data-model",
+  "guides/syncing-your-erp-with-plytix",
+  "guides/exporting-your-full-catalog",
+  "guides/building-marketplace-specific-product-feeds",
+  "guides/auditing-product-data-quality-with-filters",
+  "guides/safely-removing-categories-assets-or-relationships",
+  "guides/reconstructing-parent-variant-hierarchies"
+]

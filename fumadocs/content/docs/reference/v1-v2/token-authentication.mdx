@@ -3,15 +3,11 @@ title: V1/V2 authentication
 description: "Reference for getting a bearer token and using it on V1/V2 requests, including how long a token stays valid and the errors you can get."
 ---
 
-import { KeyRegular, RocketRegular } from '@/components/icons';
-
-<Callout type="info" title="V1/V2 (Legacy)">
-This page covers the V1/V2 APIs. For V3 (Beta), see [V3 Authentication](/reference/v3/authentication).
-</Callout>
+import { GaugeRegular, KeyRegular } from '@/components/icons';
 
 The V1/V2 APIs use bearer token authentication. Rather than sending your API key and password with every call, you exchange them once for a short-lived access token, then send that token in the `Authorization` header of every request. Any administrator on your Plytix account can issue the API key and password from the **API** tab in the account's Admin section.
 
-This page documents the token exchange and how to use the token you get back. V3 doesn't use this exchange: it uses access tokens you create in your account settings, described in [V3 Authentication](/reference/v3/authentication).
+This page documents the token exchange and how to use the token you get back.
 
 ## Get a bearer token
 
@@ -97,10 +93,10 @@ See [Errors and status codes](/reference/v1-v2/errors-status-codes) for the erro
 ## Related resources
 
 <Cards>
-  <Card icon={<RocketRegular />} title="Get started with the API" href="/guides/quickstart">
-    Walk through generating credentials and making your first request.
+  <Card icon={<KeyRegular />} title="Get an access token" href="/reference/v1-v2/authentication/get-token">
+    See the endpoint reference for the token request.
   </Card>
-  <Card icon={<KeyRegular />} title="Authentication and base URLs" href="/guides/migrating-to-v3/authentication-and-base-urls">
-    See how authentication and base URLs change when you move to V3.
+  <Card icon={<GaugeRegular />} title="Rate limits" href="/reference/v1-v2/rate-limits">
+    Check your plan's request limits and what happens when you exceed them.
   </Card>
 </Cards>

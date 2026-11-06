@@ -41,8 +41,8 @@
   },
   {
     "source": "/guides",
-    "destination": "/guides/what-is-the-plytix-api",
-    "permanent": true
+    "destination": "/mcp/overview",
+    "permanent": false
   },
   {
     "source": "/docs/reference/v3/assetcategories/create_asset_categories_api_v3_asset_categories_post",

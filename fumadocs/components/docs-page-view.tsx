@@ -10,7 +10,7 @@ import { notFound } from 'next/navigation';
 import { getMDXComponents } from '@/components/mdx';
 import type { Metadata } from 'next';
 import { createRelativeLink } from 'fumadocs-ui/mdx';
-import { getPageImageUrl, getPageMarkdownUrl, gitConfig, isReferenceSlugs } from '@/lib/shared';
+import { getPageImageUrl, getPageMarkdownUrl, gitConfig, isReferenceSlugs, v3Published } from '@/lib/shared';
 import { openapi } from '@/lib/openapi';
 import { getPageOperation } from '@/lib/openapi-markdown';
 import { Callout } from '@/components/callout';
@@ -83,6 +83,8 @@ function v3EquivalentFor(path: string): { href: string; label: string } {
  * rather than in each file. Concept pages carry the same note in their MDX.
  */
 function LegacyVersionNote({ slugs, page }: { slugs: string[]; page: NonNullable<ReturnType<typeof source.getPage>> }) {
+  // The note only points to V3, so it's off while V3 is hidden (hiddenContent).
+  if (!v3Published) return null;
   if (!isReferenceSlugs(slugs) || slugs[1] !== 'v1-v2') return null;
   const found = getPageOperation(page);
   if (!found) return null;
