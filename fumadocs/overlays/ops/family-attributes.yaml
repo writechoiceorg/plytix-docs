@@ -28,7 +28,7 @@ actions:
         - `variant_level`: a variant's value passes down to its sub-variants.
         - `no_level`: values don't pass down.
 
-        `level` is `null` when the attribute has no level. See [The Plytix data model](/docs/guides/data-model#product-families-and-variants).
+        `level` is `null` when the attribute has no level. See [The Plytix data model](/guides/data-model#product-families-and-variants).
 
         To get the product family or the attribute as a full record, with the attribute's name and type, add `_fields=product_family` or `_fields=attribute`. These relations come back only when you name them in `_fields`.
 
@@ -102,7 +102,7 @@ actions:
 
         A successful link returns `201` with the new link record. A body without `attribute_id` returns `422`.
 
-        To link an attribute without a request body, use [Link an attribute to a product family by URL](/reference/v3/family-attributes/add-attribute-to-family-by-id). See [The Plytix data model](/docs/guides/data-model#product-families-and-variants) for how levels work, and [Update and delete records](/reference/v3/updates-and-deletes) for how writes behave across the V3 API.
+        To link an attribute without a request body, use [Link an attribute to a product family by URL](/reference/v3/family-attributes/add-attribute-to-family-by-id). See [The Plytix data model](/guides/data-model#product-families-and-variants) for how levels work, and [Update and delete records](/reference/v3/updates-and-deletes) for how writes behave across the V3 API.
 
   - target: $.paths['/api/v3/product-families/{product_family_id}/attributes'].post.requestBody.content['application/json']
     description: Create Family Attribute Link.bru request (2026-09-15)

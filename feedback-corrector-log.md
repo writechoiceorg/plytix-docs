@@ -2,7 +2,7 @@
 
 Record of every `feedback-corrector` run: the feedback received, what our sources said, what changed on the page, and the reply sent to David. One section per page, newest run first. Open questions for Plytix live in [`feedback-flags.md`](feedback-flags.md).
 
-**Last updated:** 2026-11-04
+**Last updated:** 2026-11-06
 
 ## Index
 
@@ -22,7 +22,7 @@ Record of every `feedback-corrector` run: the feedback received, what our source
 | [Connect an AI assistant to the Plytix docs](#connect-an-ai-assistant-to-the-plytix-docs) | 1 | 2026-10-14 |
 | [Not migrated and new in V3](#not-migrated-and-new-in-v3) | 1 | 2026-10-14 |
 | [Migrating to V3](#migrating-to-v3) | 1 | 2026-10-14 |
-| [Plytix MCP](#plytix-mcp) | 2 | 2026-11-04 |
+| [Plytix MCP](#plytix-mcp) | 3 | 2026-11-06 |
 
 ---
 
@@ -1089,7 +1089,104 @@ Open questions:
 
 ## Plytix MCP
 
-**Page:** `fumadocs/content/docs/guides/platform-mcp/index.mdx` · **Page type:** How-to (split into six pages on 2026-11-04: `index.mdx`, `connect.mdx`, `capabilities-and-permissions.mdx`, `example-workflows.mdx`, `troubleshooting.mdx`, `changelog.mdx`)
+**Page:** `fumadocs/content/docs/guides/mcp/overview.mdx` · **Page type:** Concept overview plus five child pages. Moved on 2026-11-06 from `guides/platform-mcp/` (`index.mdx`, `connect.mdx`, `capabilities-and-permissions.mdx`, `example-workflows.mdx`, `troubleshooting.mdx`, `changelog.mdx`; split into six pages on 2026-11-04) to `guides/mcp/` (`overview.mdx`, `quickstart.mdx`, `tools.mdx`, and the same last three), served at `/mcp/**`.
+
+### Run 2026-11-06
+
+**Feedback from:** David, Slack message to Marcos on URL structure (drop `/docs`, use `/mcp/overview`, `/mcp/quickstart`, `/mcp/tools`, no Documentation MCP), plus the copy and content findings sheet MCP-001 to MCP-042, saved as `materials/api-references/mcp/Plytix MCP - Copy and Content Findings - Platform MCP.csv`. Also used: OpenAI's "Add custom MCP server" guide (checked 2026-11-06, for MCP-019).
+**Approved by the user:** all proposed items through plan approval, with these decisions: keep the MCP pages in the Guides sidebar (no new tab), drop `/docs` for all guides too, unpublish the Documentation MCP page to `internal-drafts/`, and hold MCP-028 for Core.
+
+#### Feedback items
+
+| # | Feedback (short) | Type | Location | Verdict | Outcome |
+|---|---|---|---|---|---|
+| S1 | `/docs` prefix is redundant on `docs.plytix.com` | Structure / flow | Site routes | Preference (no conflicting source) | Applied site-wide (user's decision) |
+| S2 | MCP at `/mcp/overview`, `/mcp/quickstart`, `/mcp/tools` | Structure / flow | MCP section | Preference | Applied; the other three pages at `/mcp/example-workflows`, `/mcp/troubleshooting`, `/mcp/changelog` |
+| S3 | No Documentation MCP | Scope | `guides/documentation-mcp.mdx`, Overview | Supported (David is the decision owner) | Applied: page unpublished; `/api/mcp` server flagged (FB-062) |
+| MCP-001 | Remove Beta from the hero button | Tone / wording | Homepage hero | Preference | Applied |
+| MCP-002 to 010, 012 | Overview copy, cards, related links | Tone / wording, Scope | Overview | Preference; MCP-007 Unverifiable scope note (FB-058) | Applied |
+| MCP-011 | Next-page link points back to Overview | Structure / flow | Overview navigation | Supported (link item in `meta.json`) | Fixed by the restructure |
+| MCP-013 to 018 | Quickstart copy, Claude org setup split, removal | Tone / wording, Structure | Quickstart | Preference; UI labels untested | Applied |
+| MCP-019 | Remembered approvals scope | Factual | Quickstart, ChatGPT tab | Supported: OpenAI guide → "You can choose to remember the approve or deny choice for a given tool for a conversation" | Applied, with the confirmed scope |
+| MCP-020, 021 | Verification steps, `YOUR-SKU` | Factual, Tone | Quickstart, Verify the connection | Supported (editorial) | Applied |
+| MCP-022 to 027 | Capabilities copy, heading, column | Tone / wording | Capabilities and permissions | Preference | Applied |
+| MCP-028 | "restrictions enforced by Plytix" | Factual | Capabilities, Permissions | Unverifiable (David's note: Core confirmation required) | Held, FB-058 |
+| MCP-029 to 034 | Example workflow copy and prompts | Tone / wording, Factual | Example workflows | Preference; MCP-034 Unverifiable inheritance (FB-058) | Applied |
+| MCP-035 to 040 | Troubleshooting copy and heading | Tone / wording | Troubleshooting | Preference | Applied |
+| MCP-041 | Changelog date November 9 | Factual | Changelog | Inconsistent with David's 29 Oct date; newer statement wins | Applied |
+| MCP-042 | "Usage notes" scope line | Tone / wording | Changelog | Preference | Applied |
+
+#### Applied changes
+
+| # | Change made | Source |
+|---|---|---|
+| S1, S2 | `fumadocs/lib/shared.ts` gets a `sections` table (`guides/mcp` → `/mcp`, `reference` → `/reference`, `guides` → `/guides`). Routes `app/(docs)/guides/` and `app/(docs)/mcp/` replace `app/(docs)/docs/`. `proxy.ts` serves `.md` for every section. `redirects.json` adds permanent redirects for the MCP pages, `/docs/guides/:path*`, `/docs`, `/mcp`, and `/guides`. All internal links in content, overlays, components, and the homepage were updated, and the link check in `scripts/api/lib/validate.mjs` now resolves `/guides` and `/mcp`. `npm run api:build` was rerun. The Overview keeps the page title "Plytix MCP" and shows as "Overview" in the sidebar through a new `sidebarTitle` frontmatter field (`lib/sidebar-title-plugin.ts`). `content/docs/index.mdx` (Documentation home) moved to `internal-drafts/documentation-home.mdx`. | David's Slack message |
+| S3 | `guides/documentation-mcp.mdx` moved to `internal-drafts/guides/`, removed from `guides/meta.json` | David's Slack message |
+| MCP-001 | Beta badge removed from the hero button; the MCP card keeps it | Sheet |
+| MCP-002 | Callout: "To enable the Plytix MCP beta for your account, contact your account manager. Explore the available tools in Capabilities and permissions, and check the changelog for updates." | Sheet |
+| MCP-003 | Intro: "This page introduces the Plytix MCP and explains how access works. Use the guides below to connect your AI assistant, explore the available capabilities, try example workflows, and troubleshoot common issues." | Sheet |
+| MCP-004 | "After you connect, your AI application discovers the available Plytix tools. Ask your assistant a question or describe a task in natural language. When needed, specify that it should use the Plytix connection." | Sheet |
+| MCP-005 | "The Plytix MCP provides tools for working with your catalog through an AI assistant. See Capabilities and permissions for the available operations. Tools may be added, updated, or removed over time, with changes recorded in the changelog." (V3 API link removed) | Sheet |
+| MCP-006 | Documentation MCP paragraph removed | Sheet |
+| MCP-007 | "You sign in to Plytix with OAuth to authorize your AI application. The available tools and the access granted to the connection determine what your assistant can do." | Sheet |
+| MCP-008 | Get started intro as proposed | Sheet |
+| MCP-009, MCP-010 | Shared card descriptions applied on the Overview, Quickstart, Example workflows, and Troubleshooting | Sheet |
+| MCP-011 | `meta.json` lists `overview` as a page instead of a link item, so its next page is Connect your AI assistant | Sheet; verified in the built site |
+| MCP-012 | Related articles: Capabilities and permissions, Example workflows, Troubleshooting (Documentation MCP and Authentication cards removed) | Sheet |
+| MCP-013, 014, 016 | Quickstart intro, prerequisites, and tab lead-in as proposed | Sheet |
+| MCP-015 | "You don't need V3 API beta access or a V3 access token to use the Plytix MCP. Sign in to Plytix with OAuth when your AI application prompts you." (no link; "V3 API" per `guideline.md`) | Sheet; `guideline.md` |
+| MCP-017 | Claude Team/Enterprise text split into **Organization setup** (role details plus five numbered steps) and **Member sign-in** (three numbered steps) | Sheet; existing steps from Claude's guide |
+| MCP-018 | "To remove the connection, open Customize > Connectors and find Plytix. Select Remove, or open its three-dot menu and select the removal option. Complete any confirmation prompts." | Sheet |
+| MCP-019 | "Review each tool request before approving it. Choose to remember an approval only if you trust the tool to make further changes without another review. A remembered approval applies to that tool for the rest of the conversation, and a new conversation asks for confirmation again." | OpenAI guide → "it will apply that choice for the rest of that conversation" and "New conversations will prompt for confirmation again." |
+| MCP-020 | Verification is now (1) check the tool list, (2) run the product lookup; the "What can you do" prompt was removed; closing line "An answer that only describes the available capabilities doesn't confirm a successful connection, so always finish with the product lookup." | Sheet |
+| MCP-021 | Replacement instruction above the prompt; prompt "Using Plytix, find the product with SKU YOUR-SKU and show its SKU, name, and description. Don't change anything." Same change on Example workflows → Find a product, which the Quickstart cites as the same prompt | Sheet |
+| MCP-022 to 027 | Capabilities intro, tool-refresh paragraph, heading "Available capabilities" (anchor updated in links), column "Usage notes", permission bullet, client-controls paragraph as proposed; "in this release" also dropped from the channels sentence | Sheet |
+| MCP-029 to 034 | Example workflows intro, supplier prompt and coverage note, categories prompt with `YOUR-SKU`, approval workflow, description scope with the inheritance check | Sheet |
+| MCP-035 to 040 | Troubleshooting intro, connection, refresh, tool-call, results heading "Fewer results are returned than expected", and pagination text as proposed | Sheet |
+| MCP-041 | Changelog heading "November 9, 2026"; FLAGs on the Overview, Quickstart, Capabilities, and Changelog updated | Sheet |
+| MCP-042 | "Usage notes: The initial beta supports product data, assets, and the catalog structures described in Capabilities and permissions. Channel management is outside the supported scope." | Sheet |
+
+House style applied to David's wording: contractions ("don't", "doesn't", "couldn't"), straight apostrophes, bold UI labels, "V3 API" naming. Checks: no em dashes, banned words, `v1/v2/v3`, H4 headings, or curly quotes on the six pages; descriptions 126 to 145 characters. `npm run api:build`, `api:test` (11/11), `types:check`, and `next build` pass. On `next start`, all six `/mcp/*` pages, `/guides/quickstart`, and `/reference/v3` return 200, old URLs return 308 to the right targets, `/guides/documentation-mcp` and `/guides/mcp/overview` return 404, and the `.md` versions return Markdown. `npm run lint` fails before linting (`typescript-eslint` doesn't support the installed TypeScript 7); that's unrelated to this change.
+
+#### Not changed
+
+- **MCP-028:** held. The current sentence stays until Core confirms which restrictions Plytix enforces (FB-058; David's own note on the item).
+
+#### Flags
+
+Added: FB-060, FB-061, FB-062 · Updated: FB-055, FB-056, FB-057, FB-058 · Resolved: FB-040 (details in [`feedback-flags.md`](feedback-flags.md))
+
+#### Follow-ups on other pages
+
+- Before November 9: test the Quickstart tabs (including the Claude organization setup and removal labels) and every example workflow against `https://pim.plytix.com/mcp`.
+- `.claude/skills/writer/references/`: `information-architecture.md`, `glossary.md`, `projectConvention.md`, `style-guide.md`, and `overlay-authoring.md` updated for the new routes and the unpublished Documentation MCP.
+- FB-061: if Plytix hides the V3 reference and guides at launch, the Guides and API Reference tabs need a separate change.
+
+#### Reply to David
+
+```text
+Thanks, David. The structure works with the portal. I've applied it, along with the copy findings, and it'll be on staging after the next deploy:
+
+URL structure
+- The /docs prefix is gone everywhere, not just for MCP. Guides are now under /guides/..., and every old /docs URL redirects to its new address.
+- The MCP pages are /mcp/overview, /mcp/quickstart (Connect your AI assistant) and /mcp/tools (Capabilities and permissions). Example workflows, Troubleshooting and Changelog sit next to them at /mcp/example-workflows, /mcp/troubleshooting and /mcp/changelog. They stay under AI assistants in the Guides sidebar.
+- The Documentation MCP page is unpublished, and the MCP pages no longer mention it.
+
+Copy findings (MCP-001 to MCP-042)
+- Applied all of them except MCP-028, with small house-style tweaks (contractions, "V3 API" naming).
+- MCP-001: the hero button no longer has the Beta badge; the MCP card and the docs keep it.
+- MCP-011: the Overview's next page is now Connect your AI assistant.
+- MCP-019: OpenAI's guide confirms a remembered approval applies to that tool for the rest of the conversation, and a new conversation asks again, so the page says exactly that.
+- MCP-021 and MCP-032: the prompts use YOUR-SKU with the replacement instruction right above them. "Find a product" uses the same prompt, since the Quickstart points to it.
+- MCP-041: the changelog entry is now dated November 9, 2026.
+- MCP-028: held until Core confirms which restrictions Plytix enforces, so the current sentence stays.
+
+Open questions
+- Do any links outside the docs (help center, emails, product UI) point to /docs/... URLs you'd like updated rather than redirected?
+- MCP-005 and MCP-015 say the V3 API is a separate publication. Should the V3 reference and V3 guides be hidden at the November 9 launch, or does the portal launch with them?
+- The Documentation MCP server (/api/mcp on the docs site) is still running, just unannounced. Should we turn it off for launch?
+- For Core: which restrictions Plytix enforces on an authorized connection (MCP-028), how a description update through the MCP affects parent and variant inheritance (MCP-034), and whether a connection can be revoked from inside Plytix (MCP-018).
+```
 
 ### Run 2026-11-04
 

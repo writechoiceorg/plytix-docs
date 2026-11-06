@@ -107,7 +107,7 @@ Categories are a tree. Each category has a `parent_id` that points at the catego
 
 A product can belong to more than one category. Its `categories` field returns the full category objects, each with its `id` and `name`, so you don't need a second call to turn an ID into a name.
 
-Adding and removing categories happens through dedicated endpoints: `POST /api/v3/products/{id}/categories` links one, and `DELETE /api/v3/products/{id}/categories/{category_id}` unlinks it. See [Unlink categories, assets, or relationships](/docs/guides/safely-removing-categories-assets-or-relationships).
+Adding and removing categories happens through dedicated endpoints: `POST /api/v3/products/{id}/categories` links one, and `DELETE /api/v3/products/{id}/categories/{category_id}` unlinks it. See [Unlink categories, assets, or relationships](/guides/safely-removing-categories-assets-or-relationships).
 
 Assets have their own separate tree, `/api/v3/asset-categories`. Product categories and asset categories don't share nodes.
 
@@ -162,10 +162,10 @@ What you can't ask for is the underlying ID array. Every field ending in `_ids` 
 Now that you know how the entities fit together, you can explore these related guides.
 
 <Cards>
-  <Card icon={<OrganizationRegular />} title="Rebuild parent and variant products" href="/docs/guides/reconstructing-parent-variant-hierarchies">
+  <Card icon={<OrganizationRegular />} title="Rebuild parent and variant products" href="/guides/reconstructing-parent-variant-hierarchies">
     See product levels, families, and inheritance working in real requests.
   </Card>
-  <Card icon={<FilterRegular />} title="Audit product data quality" href="/docs/guides/auditing-product-data-quality-with-filters">
+  <Card icon={<FilterRegular />} title="Audit product data quality" href="/guides/auditing-product-data-quality-with-filters">
     Query system fields and the attributes map to find incomplete products.
   </Card>
 </Cards>

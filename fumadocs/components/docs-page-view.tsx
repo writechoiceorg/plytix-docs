@@ -17,7 +17,7 @@ import { Callout } from '@/components/callout';
 import Link from 'fumadocs-core/link';
 
 /**
- * Renders one content page. Shared by the /docs and /reference routes, which
+ * Renders one content page. Shared by the /guides, /mcp and /reference routes, which
  * serve the same content tree (see `url` in lib/source.ts).
  */
 export async function DocsPageView({ slugs }: { slugs: string[] }) {
@@ -53,7 +53,7 @@ export async function DocsPageView({ slugs }: { slugs: string[] }) {
   );
 }
 
-const MAPPING = '/docs/guides/migrating-to-v3/endpoint-mapping';
+const MAPPING = '/guides/migrating-to-v3/endpoint-mapping';
 
 /** Where a V1/V2 endpoint's V3 equivalent is documented, by its path. */
 function v3EquivalentFor(path: string): { href: string; label: string } {
@@ -61,7 +61,7 @@ function v3EquivalentFor(path: string): { href: string; label: string } {
   const section = (anchor: string, label: string) => ({ href: `${MAPPING}#${anchor}`, label });
   if (path.startsWith('/auth/')) return { href: '/reference/v3/authentication', label: 'V3 authentication' };
   if (root === 'accounts' || root === 'filters') {
-    return { href: '/docs/guides/migrating-to-v3/not-migrated-and-new-in-v3', label: "What's new and not migrated" };
+    return { href: '/guides/migrating-to-v3/not-migrated-and-new-in-v3', label: "What's new and not migrated" };
   }
   if (root === 'products' && path.includes('/variant')) return section('variants', 'Endpoint mapping: Variants');
   if (root === 'products' && path.includes('/relationships')) {

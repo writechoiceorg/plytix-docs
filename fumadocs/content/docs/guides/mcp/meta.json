@@ -2,9 +2,9 @@
   "title": "Plytix MCP",
   "icon": "Bot",
   "pages": [
-    "[Overview](/docs/guides/platform-mcp)",
-    "connect",
-    "capabilities-and-permissions",
+    "overview",
+    "quickstart",
+    "tools",
     "example-workflows",
     "troubleshooting",
     "changelog"

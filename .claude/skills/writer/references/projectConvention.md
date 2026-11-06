@@ -11,7 +11,7 @@
 **Documentation framework:** Fumadocs (`fumadocs-core` 16.x, `fumadocs-ui` via `@fumadocs/base-ui`, `fumadocs-mdx`, `fumadocs-openapi`) on Next.js
 **Platform MCP available:** No
 **Content root:** `fumadocs/content/docs/`
-**Docs base route:** `/docs` for guides; the API reference (`content/docs/reference/**`) is served at `/reference/**` (set in `fumadocs/lib/shared.ts`, updated 2026-10-21). Old `/docs/reference/**` URLs redirect via `fumadocs/redirects.json`.
+**Public routes:** no page is served under `/docs`. Guides (`content/docs/guides/**`) are served at `/guides/**`, the Plytix MCP pages (`content/docs/guides/mcp/**`) at `/mcp/**`, and the API reference (`content/docs/reference/**`) at `/reference/**`. The mapping is the `sections` table in `fumadocs/lib/shared.ts` (updated 2026-11-06, David's URL feedback; reference since 2026-10-21). Old `/docs/guides/**`, `/docs/guides/platform-mcp/**`, and `/docs/reference/**` URLs redirect via `fumadocs/redirects.json`. A page can set an optional `sidebarTitle` in its frontmatter for a shorter sidebar label than its `title`.
 **Base URL:** `[PENDING]`: production domain not confirmed yet
 
 ---
@@ -34,10 +34,11 @@ description: "Read product data from Plytix, detect changes, and push updates ba
 | `title` | Yes | Renders as the page H1. Don't repeat the title as a `# H1` in the body. Follows the title rules in `style-guide.md` (sentence case, 60 characters or fewer). |
 | `description` | Recommended | Renders under the title and is used for metadata. Follows `style-guide.md`'s SEO rules. |
 | `icon` | No | A Lucide icon name (for example, `Rocket`). Resolved by `lucideIconsPlugin`. Mainly for sidebar entries. |
+| `sidebarTitle` | No | A shorter sidebar label than `title`, applied by `fumadocs/lib/sidebar-title-plugin.ts` (added 2026-11-06). Use it only when the title would repeat its folder's name, as on the Plytix MCP overview ("Overview"). |
 | `full` | No | `true` renders a full-width page. Used by generated endpoint pages; don't set it on hand-written pages. |
 | `_openapi` | No | Written by the OpenAPI generator. Never hand-edit. |
 
-**Slugs and URLs:** there is no `slug` field. The URL comes from the file path under `content/docs/`. For example, `content/docs/guides/exporting-your-full-catalog.mdx` is served at `/docs/guides/exporting-your-full-catalog`.
+**Slugs and URLs:** there is no `slug` field. The URL comes from the file path under `content/docs/`. For example, `content/docs/guides/exporting-your-full-catalog.mdx` is served at `/guides/exporting-your-full-catalog`.
 
 **Audience, time to complete, prerequisites:** because these can't live in frontmatter, put them in the page body (for example, in the Prerequisites or Before you begin section defined in `page-types.md`).
 
@@ -51,7 +52,7 @@ These are the only components registered in `fumadocs/components/mdx.tsx`, on to
 |---|---|---|
 | `Callout` | Notes, tips, warnings, and writer flags. See Callout types below. | `<Callout type="info" title="...">...</Callout>` |
 | `Cards` | Wrapper for a group of `Card` components, used in the "Related articles" section | `<Cards>...</Cards>`. Lays out cards in a grid; use exactly 2 cards in a "Related articles" or "Related resources" section (see `style-guide.md`). Landing and section-index pages use `Cards` for navigation and aren't capped. |
-| `Card` | A single related article card with title, icon, link, and short description | `<Card icon={<Search />} title="..." href="/docs/guides/...">Description.</Card>` |
+| `Card` | A single related article card with title, icon, link, and short description | `<Card icon={<Search />} title="..." href="/guides/...">Description.</Card>` |
 | `Steps` / `Step` | Visual step layout. Available, but how-to procedures use numbered lists per `style-guide.md`. Use only for tutorial milestones if the project lead approves. | `<Steps><Step>...</Step></Steps>` |
 | `Tabs` / `Tab` | Alternatives the reader picks one of (for example, v1/v2 vs. v3 samples, or curl vs. Python) | `<Tabs items={['v3', 'v1/v2']}><Tab value="v3">...</Tab><Tab value="v1/v2">...</Tab></Tabs>` |
 | `Accordions` / `Accordion` | Collapsible detail, including supporting lists such as allowed field values inside a procedure step (indent to the step's level). **Required for how-to guide Troubleshooting sections** (one `Accordion` per problem, titled with the symptom; see `style-guide.md`). Also used for FAQs. Always precede with a lead-in sentence. | `<Accordions type="multiple"><Accordion title="...">...</Accordion></Accordions>` |
@@ -79,7 +80,7 @@ Use any icon name from [lucide.dev/icons](https://lucide.dev/icons). Import ever
 
 ### Links
 
-Internal links use absolute paths without the file extension: `/docs/guides/quickstart` for guides, `/reference/v3/pagination` and `/reference/v1-v2/pagination` for the API reference (updated 2026-10-21).
+Internal links use absolute paths without the file extension: `/guides/quickstart` for guides, `/reference/v3/pagination` and `/reference/v1-v2/pagination` for the API reference (updated 2026-10-21).
 
 ---
 

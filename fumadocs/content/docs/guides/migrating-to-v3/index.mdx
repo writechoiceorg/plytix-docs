@@ -30,7 +30,7 @@ Before you start, you need:
    | Searching and reading any resource | Richer operators, real `OR` grouping, field expansion in one call |
    | Create, update, and delete on products, assets, categories, asset categories, product attributes, attribute groups, families, and relationship types | Consistent conventions across every resource |
    | Linking products to categories, assets to categories, and attributes to groups | Dedicated link and unlink endpoints, rather than rewriting an array |
-   | Removing product relationships | V3's `DELETE /products/{product_id}/relationships/{relationship_id}` is a scoped unlink; V1 needs a separate `/unlink` call. Adding links and changing quantities aren't available through V3 yet, so keep those calls on V1/V2 for now; see [Product relationships](/docs/guides/migrating-to-v3/endpoint-mapping#product-relationships) |
+   | Removing product relationships | V3's `DELETE /products/{product_id}/relationships/{relationship_id}` is a scoped unlink; V1 needs a separate `/unlink` call. Adding links and changing quantities aren't available through V3 yet, so keep those calls on V1/V2 for now; see [Product relationships](/guides/migrating-to-v3/endpoint-mapping#product-relationships) |
    | Creating variants | `parent_id` and `product_family_id` on the product itself |
    | Connecting assets to a product | Media and media gallery attributes: a media attribute takes a bare asset ID and a gallery takes an array of IDs. `thumbnail_id` sets the main image |
 
@@ -52,7 +52,7 @@ Before you start, you need:
 
 2. **Plan authentication for each version.**
 
-   V1/V2 keep their current authentication: you exchange your API Key and password for a bearer token and send it in the `Authorization` header. Your credentials, their roles, and your token-refresh logic keep working for those calls. V3 doesn't use that exchange. You create an access token in the **API v3** tab of your account settings, choose its permissions and expiration date, and send it directly as the bearer token. It lasts until the expiration date you chose rather than 15 minutes, so your V3 calls don't need the token-refresh logic, but your integration does need a way to receive a new token when you rotate or replace it. See [Authentication and base URLs](/docs/guides/migrating-to-v3/authentication-and-base-urls) for both flows side by side.
+   V1/V2 keep their current authentication: you exchange your API Key and password for a bearer token and send it in the `Authorization` header. Your credentials, their roles, and your token-refresh logic keep working for those calls. V3 doesn't use that exchange. You create an access token in the **API v3** tab of your account settings, choose its permissions and expiration date, and send it directly as the bearer token. It lasts until the expiration date you chose rather than 15 minutes, so your V3 calls don't need the token-refresh logic, but your integration does need a way to receive a new token when you rotate or replace it. See [Authentication and base URLs](/guides/migrating-to-v3/authentication-and-base-urls) for both flows side by side.
 
 3. **Convert your searches from a POST body to a GET query.**
 
@@ -94,7 +94,7 @@ Before you start, you need:
    | `attributes` | `_fields=<name>`, repeated once per field |
    | `pagination` | `_page`, `_page_size`, and `_sort_by` |
 
-   Most operators change shape and keep their meaning. `{"operator": "eq"}` becomes `field=value` or `field[eq]=value`, `!exists` becomes `field[!exists]=true`, `in` becomes `field[in]=value` repeated per value, and the comparison operators become `field[gt]`, `field[gte]`, `field[lt]`, and `field[lte]`. Missing fields, `null`, empty values, and negated operators are the exception: V3 tests them separately and V1 doesn't define them, so check those filters against [Missing, null, and empty values](/docs/guides/migrating-to-v3/filter-operators#missing-null-and-empty-values). For list fields such as `categories`, use `[intersects]` rather than `[in]`.
+   Most operators change shape and keep their meaning. `{"operator": "eq"}` becomes `field=value` or `field[eq]=value`, `!exists` becomes `field[!exists]=true`, `in` becomes `field[in]=value` repeated per value, and the comparison operators become `field[gt]`, `field[gte]`, `field[lt]`, and `field[lte]`. Missing fields, `null`, empty values, and negated operators are the exception: V3 tests them separately and V1 doesn't define them, so check those filters against [Missing, null, and empty values](/guides/migrating-to-v3/filter-operators#missing-null-and-empty-values). For list fields such as `categories`, use `[intersects]` rather than `[in]`.
 
    Boolean grouping changes too. In V1, filters nest as arrays: items inside one array combine with AND, and the outer arrays combine with OR. In V3, `&` is AND, and OR uses an indexed prefix:
 
@@ -102,7 +102,7 @@ Before you start, you need:
    _or[0]status=Draft&_or[0]status=Completed
    ```
 
-   Custom attributes are addressed directly rather than through a field name string: `attributes.name[eq]=value`. [Filter operators](/docs/guides/migrating-to-v3/filter-operators) carries the full operator mapping.
+   Custom attributes are addressed directly rather than through a field name string: `attributes.name[eq]=value`. [Filter operators](/guides/migrating-to-v3/filter-operators) carries the full operator mapping.
 
    {/* FLAG (open):
      The V1 grouping semantics (AND within an inner array, OR between outer arrays) are unconfirmed. `openapi_pimv1.json` was converted from a Postman collection, and its own description says the shapes were inferred from saved examples rather than verified against the live API. Confirm with `endpoint-tester` before publishing. The V3 side is confirmed.
@@ -125,7 +125,7 @@ Before you start, you need:
    - **Products accept more than one identifier.** In V3, both the product ID and the SKU work in the path, as long as the SKU is URL-encoded. That removes a lookup step for integrations keyed on SKU.
    - **Related data comes back with the record.** Where V1 has a separate call for each relation, V3 returns them through field selection on a search: `GET /api/v3/products?sku=<sku>&_fields=categories&_fields=assets`. The per-relation endpoints, such as `GET /api/v3/products/{identifier}/categories`, return the same data one relation at a time.
 
-   See [Endpoint mapping](/docs/guides/migrating-to-v3/endpoint-mapping) for the complete mapping.
+   See [Endpoint mapping](/guides/migrating-to-v3/endpoint-mapping) for the complete mapping.
 
 5. **Replace array-field linking with the link and unlink endpoints.**
 
@@ -165,13 +165,13 @@ Before you start, you need:
    | Delete | `204` with no body |
    | Duplicate on create | `409` |
 
-   Code that reads `data[0]` from a V1 create has to read `data` instead, and anywhere your V1 code reads values out of a PATCH response needs a follow-up GET. See [Responses and updates](/docs/guides/migrating-to-v3/responses-and-updates) for each shape.
+   Code that reads `data[0]` from a V1 create has to read `data` instead, and anywhere your V1 code reads values out of a PATCH response needs a follow-up GET. See [Responses and updates](/guides/migrating-to-v3/responses-and-updates) for each shape.
 
 8. **Re-check your delete and update logic before you run it.**
 
    Two V3 behaviors catch migrated code out:
 
-   - **PATCH replaces the `attributes` map rather than merging into it.** Sending only the attributes that changed deletes every attribute you left out, with no error and no warning. See the [before-and-after example](/docs/guides/migrating-to-v3/responses-and-updates#how-patch-treats-the-attributes-map). To change one attribute, send its bare JSON value to `PATCH /products/{identifier}/attributes/{name}`. To change several, send a partial map to `PATCH /products/{identifier}/attributes`, which merges it into the existing map.
+   - **PATCH replaces the `attributes` map rather than merging into it.** Sending only the attributes that changed deletes every attribute you left out, with no error and no warning. See the [before-and-after example](/guides/migrating-to-v3/responses-and-updates#how-patch-treats-the-attributes-map). To change one attribute, send its bare JSON value to `PATCH /products/{identifier}/attributes/{name}`. To change several, send a partial map to `PATCH /products/{identifier}/attributes`, which merges it into the existing map.
    - **DELETE erases** the entity or the field it's applied to. It doesn't set the value to null or reset it to a default. Deleting a variant's override leaves the variant empty instead of showing the parent's value again. Confirm on a test record that a delete does what your V1 code assumed.
 
    See [Update and delete records](/reference/v3/updates-and-deletes).
@@ -210,7 +210,7 @@ Check the problems below if you run into issues while following this guide.
   </Accordion>
 
   <Accordion title="You can't find the V3 endpoint for replacing an asset's file or attaching an asset to a product" value="no-v3-asset-endpoint">
-    V3 has no dedicated endpoint for either. Uploading a new asset works in V3 with `POST /api/v3/assets` and a `url` or `content`, but replacing the file of an existing asset stays on V1. Attaching an asset to a product goes through media and media gallery attributes in V3: a media attribute takes a bare asset ID and a gallery takes an array of IDs. See [Connect other assets to a product](/docs/guides/safely-removing-categories-assets-or-relationships#connect-other-assets-to-a-product).
+    V3 has no dedicated endpoint for either. Uploading a new asset works in V3 with `POST /api/v3/assets` and a `url` or `content`, but replacing the file of an existing asset stays on V1. Attaching an asset to a product goes through media and media gallery attributes in V3: a media attribute takes a bare asset ID and a gallery takes an array of IDs. See [Connect other assets to a product](/guides/safely-removing-categories-assets-or-relationships#connect-other-assets-to-a-product).
   </Accordion>
 </Accordions>
 
@@ -219,22 +219,22 @@ Check the problems below if you run into issues while following this guide.
 Six reference pages sit under this guide and carry the detail the steps above point to:
 
 <Cards>
-  <Card icon={<KeyRegular />} title="Authentication and base URLs" href="/docs/guides/migrating-to-v3/authentication-and-base-urls">
+  <Card icon={<KeyRegular />} title="Authentication and base URLs" href="/guides/migrating-to-v3/authentication-and-base-urls">
     The base URLs and path prefixes, the V1/V2 token flow, and V3 access tokens.
   </Card>
-  <Card icon={<SearchRegular />} title="Search and pagination" href="/docs/guides/migrating-to-v3/searching-and-pagination">
+  <Card icon={<SearchRegular />} title="Search and pagination" href="/guides/migrating-to-v3/searching-and-pagination">
     The V1 search body translated into a V3 query string, and how V3 pages.
   </Card>
-  <Card icon={<FilterRegular />} title="Filter operators" href="/docs/guides/migrating-to-v3/filter-operators">
+  <Card icon={<FilterRegular />} title="Filter operators" href="/guides/migrating-to-v3/filter-operators">
     Every operator, boolean grouping, and custom attributes.
   </Card>
-  <Card icon={<DocumentEditRegular />} title="Responses and updates" href="/docs/guides/migrating-to-v3/responses-and-updates">
+  <Card icon={<DocumentEditRegular />} title="Responses and updates" href="/guides/migrating-to-v3/responses-and-updates">
     What each write returns, and the behaviors that break migrated code.
   </Card>
-  <Card icon={<TableRegular />} title="Endpoint mapping" href="/docs/guides/migrating-to-v3/endpoint-mapping">
+  <Card icon={<TableRegular />} title="Endpoint mapping" href="/guides/migrating-to-v3/endpoint-mapping">
     The V1/V2 endpoints with their V3 equivalents, resource by resource.
   </Card>
-  <Card icon={<BoxDismissRegular />} title="What's new and not migrated" href="/docs/guides/migrating-to-v3/not-migrated-and-new-in-v3">
+  <Card icon={<BoxDismissRegular />} title="What's new and not migrated" href="/guides/migrating-to-v3/not-migrated-and-new-in-v3">
     What has no V3 counterpart, what V3 added, and what V2 covers.
   </Card>
 </Cards>

@@ -40,8 +40,8 @@ actions:
 
         Related pages:
 
-        - [The Plytix data model](/docs/guides/data-model#product-families-and-variants)
-        - [Reconstruct parent/variant hierarchies](/docs/guides/reconstructing-parent-variant-hierarchies)
+        - [The Plytix data model](/guides/data-model#product-families-and-variants)
+        - [Reconstruct parent/variant hierarchies](/guides/reconstructing-parent-variant-hierarchies)
         - [Filtering and search](/reference/v3/filtering-and-search)
         - [Pagination](/reference/v3/pagination)
 
@@ -91,7 +91,7 @@ actions:
 
         To add attributes to the family, link them after it exists with [Link an attribute to a product family](/reference/v3/family-attributes/add-attribute-to-family). Each link sets the attribute's inheritance `level`.
 
-        See [The Plytix data model](/docs/guides/data-model#product-families-and-variants) for how levels work, and [Update and delete records](/reference/v3/updates-and-deletes).
+        See [The Plytix data model](/guides/data-model#product-families-and-variants) for how levels work, and [Update and delete records](/reference/v3/updates-and-deletes).
 
   - target: $.paths['/api/v3/product-families'].post.requestBody.content['application/json']
     description: Create Product Family.bru "201 - Success" request (2026-09-22), sanitized; withAttributes dropped (16 Oct handoff)

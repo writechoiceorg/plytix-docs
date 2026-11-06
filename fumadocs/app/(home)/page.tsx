@@ -29,7 +29,7 @@ const cards = [
     description:
       'Connect Claude, ChatGPT, or another AI application to your Plytix account and work with your product data in natural language.',
     bullets: ['Connect your AI assistant with OAuth', 'Capabilities and example workflows'],
-    href: '/docs/guides/platform-mcp',
+    href: '/mcp/overview',
     linkLabel: 'Explore Plytix MCP',
   },
 ];
@@ -75,11 +75,10 @@ export default function HomePage() {
             Get started
           </Link>
           <Link
-            href="/docs/guides/platform-mcp"
+            href="/mcp/overview"
             className="inline-flex items-center gap-2 rounded-full border border-white/40 px-6 py-3 text-lg text-white no-underline transition-colors hover:bg-white/10"
           >
             Explore Plytix MCP
-            <BetaBadge label="Beta" className="bg-[#BDA8FF] text-[#201A32]" />
           </Link>
         </div>
       </section>

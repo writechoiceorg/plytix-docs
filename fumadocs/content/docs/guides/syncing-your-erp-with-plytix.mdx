@@ -53,7 +53,7 @@ Follow the steps below to authenticate and load every product into your ERP once
      --data-urlencode "_page_size=100"
    ```
 
-   Follow `pagination.next_page` until it's absent, as described in [Export your full catalog](/docs/guides/exporting-your-full-catalog). Relations such as `categories` are returned only when you name them, so add `_fields=categories` if your ERP needs them.
+   Follow `pagination.next_page` until it's absent, as described in [Export your full catalog](/guides/exporting-your-full-catalog). Relations such as `categories` are returned only when you name them, so add `_fields=categories` if your ERP needs them.
 
 4. **Write each product into your ERP, keyed by SKU.**
 
@@ -86,7 +86,7 @@ Follow the steps below on each scheduled run to read the products that changed s
      --data-urlencode "_page_size=100"
    ```
 
-   `modified` is the last-modification timestamp, so this returns edits as well as new products. Filtering on `created` instead returns only products added in the window. Read every page. Each page runs the query again, so a product edited while you're paging moves out of the window and can shift the pages after it. See [Search and pagination](/docs/guides/migrating-to-v3/searching-and-pagination) for that risk, and [Reconcile on a slower schedule](#reconcile-on-a-slower-schedule) for the safety net.
+   `modified` is the last-modification timestamp, so this returns edits as well as new products. Filtering on `created` instead returns only products added in the window. Read every page. Each page runs the query again, so a product edited while you're paging moves out of the window and can shift the pages after it. See [Search and pagination](/guides/migrating-to-v3/searching-and-pagination) for that risk, and [Reconcile on a slower schedule](#reconcile-on-a-slower-schedule) for the safety net.
 
    {/* FLAG (open):
      Retested 2026-10-15 on the development account (FB-027): `modified[gte]` and `modified[lt]` combine in one request, full UTC timestamps, fractional seconds, and offsets are all accepted, `modified` advances after a single-attribute `PATCH` and after archiving, and archived products stay in the results with `status: Archived`. An invalid date returns `200` with an empty list instead of an error, so validate timestamps before sending. Still open: whether any call lists products deleted since a given time.
@@ -128,7 +128,7 @@ Follow the steps below to write ERP-owned fields back to Plytix and create the p
    */}
 
    <Callout type="error" title="Don't send a partial attributes map to the product itself">
-     `PATCH /products/<product_id>` with `{"attributes": {"suggested_retail_price": 34.99}}` replaces the entire `attributes` map. In testing, every attribute missing from the payload was removed; see the before-and-after example in [Responses and updates](/docs/guides/migrating-to-v3/responses-and-updates#how-patch-treats-the-attributes-map). Top-level fields such as `label` and `status` are merged, so you can send them on their own. To change several attributes in one request, send a partial map to `PATCH /products/<product_id>/attributes`, which merges it into the existing map. To change one, use the single-attribute path.
+     `PATCH /products/<product_id>` with `{"attributes": {"suggested_retail_price": 34.99}}` replaces the entire `attributes` map. In testing, every attribute missing from the payload was removed; see the before-and-after example in [Responses and updates](/guides/migrating-to-v3/responses-and-updates#how-patch-treats-the-attributes-map). Top-level fields such as `label` and `status` are merged, so you can send them on their own. To change several attributes in one request, send a partial map to `PATCH /products/<product_id>/attributes`, which merges it into the existing map. To change one, use the single-attribute path.
    </Callout>
 
 3. **Create the products Plytix doesn't have yet.**
@@ -149,7 +149,7 @@ Follow the steps below to write ERP-owned fields back to Plytix and create the p
    | `label`, `gtin`, `status`, `attributes`, `thumbnail_id`, `product_family_id`, `parent_id` | Accepted in the same request. |
    | `category_ids` and the other `*_ids` link arrays | Rejected with `422` and `"Extra inputs are not permitted"`, on create and on `PATCH` alike. |
 
-   Categories are attached afterwards with `POST /products/<product_id>/categories`, sending `{"id": "<category_id>"}`. See [Unlink categories, assets, or relationships](/docs/guides/safely-removing-categories-assets-or-relationships) for the full link and unlink pattern.
+   Categories are attached afterwards with `POST /products/<product_id>/categories`, sending `{"id": "<category_id>"}`. See [Unlink categories, assets, or relationships](/guides/safely-removing-categories-assets-or-relationships) for the full link and unlink pattern.
 
    Checking for the SKU before you create doesn't rule out a conflict, because another process can create the same SKU between your check and your `POST`. If the create returns `409`, search for the SKU, confirm it's the product you meant to create, and update it instead of repeating the `POST`.
 
@@ -195,7 +195,7 @@ Check the problems below if you run into issues while following this guide.
     If each pull returns the products your previous run wrote to Plytix, your own writes are updating their `modified` timestamp. Compare values before you write, as described in [Decide who owns each field](#decide-who-owns-each-field), so an unchanged value is never sent.
   </Accordion>
   <Accordion title="An empty value you sent doesn't appear on the product" value="empty-value-stored">
-    On the attribute types tested, sending `""`, `[]`, or `null` clears the value, so the attribute is absent from the product afterward rather than stored as empty. A media attribute rejects `""`; clear it with `DELETE` on the attribute's path instead. See [Responses and updates](/docs/guides/migrating-to-v3/responses-and-updates#empty-values-null-and-deletion) for the tested cases by attribute type.
+    On the attribute types tested, sending `""`, `[]`, or `null` clears the value, so the attribute is absent from the product afterward rather than stored as empty. A media attribute rejects `""`; clear it with `DELETE` on the attribute's path instead. See [Responses and updates](/guides/migrating-to-v3/responses-and-updates#empty-values-null-and-deletion) for the tested cases by attribute type.
   </Accordion>
   <Accordion title="Attributes you didn't touch disappear after a sync run" value="attributes-disappear">
     A `PATCH` on the product that names `attributes` replaces the whole map, so every attribute missing from your payload is removed. Send the changed attributes as a partial map to `PATCH /products/<product_id>/attributes`, which merges them, or address each attribute at its own path, as shown in step 2 of [Push ERP changes to Plytix](#push-erp-changes-to-plytix). `PATCH /products/<product_id>/attributes/<name>` changes only the attribute you name.

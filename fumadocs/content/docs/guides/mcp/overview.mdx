@@ -1,12 +1,11 @@
 ---
 title: "Plytix MCP"
+sidebarTitle: "Overview"
 description: "Learn what the Plytix MCP beta is, how it connects an AI application to your Plytix account, and where to start setting it up."
 ---
 
 import {
-  BookOpenRegular,
   HistoryRegular,
-  KeyRegular,
   LightbulbRegular,
   PlugConnectedRegular,
   ShieldCheckmarkRegular,
@@ -14,49 +13,47 @@ import {
 } from '@/components/icons';
 
 <Callout type="info" title="Plytix MCP is in beta">
-  The Plytix MCP is a beta release. To turn it on for your account, contact your account manager. What your assistant can do is limited to the tools in the current release, summarized in [Capabilities and permissions](/docs/guides/platform-mcp/capabilities-and-permissions). Check the [changelog](/docs/guides/platform-mcp/changelog) for additions and changes.
+  To enable the Plytix MCP beta for your account, contact your account manager. Explore the available tools in [Capabilities and permissions](/mcp/tools), and check the [changelog](/mcp/changelog) for updates.
 </Callout>
 
-The Plytix MCP connects a compatible AI application to your Plytix account, so you can ask your assistant to work with your product data in natural language. This page explains what the Plytix MCP is and how access works, and points you to the guides for connecting your account, the capabilities in this release, example workflows, and troubleshooting.
+The Plytix MCP connects a compatible AI application to your Plytix account, so you can ask your assistant to work with your product data in natural language. This page introduces the Plytix MCP and explains how access works. Use the guides below to connect your AI assistant, explore the available capabilities, try example workflows, and troubleshoot common issues.
 
 {/* FLAG (open):
-  Release URL `https://pim.plytix.com/mcp` confirmed by David (29 Oct 2026; he gave it without the scheme, `https://` follows the DEV URL). The server goes live on November 6, 2026. Test every step in this section against it before publishing.
+  Release URL `https://pim.plytix.com/mcp` confirmed by David (29 Oct 2026; he gave it without the scheme, `https://` follows the DEV URL). Launch planned for November 9, 2026 (David, MCP-041, 6 Nov 2026; earlier planned for November 6). Test every step in this section against it before publishing.
 */}
 
 ## What is the Plytix MCP?
 
 The Plytix MCP is a server that lets an AI application, such as an AI assistant or agent, work with the data in your Plytix account. It uses the Model Context Protocol (MCP), an open standard that lets AI applications discover and call tools exposed by external services.
 
-Once you connect it, your assistant finds the Plytix tools on its own and calls them when your request needs your account's data. You ask in plain language, and you don't call tools by name.
+After you connect, your AI application discovers the available Plytix tools. Ask your assistant a question or describe a task in natural language. When needed, specify that it should use the Plytix connection.
 
-The Plytix MCP isn't an API version, and it doesn't give your assistant every endpoint in the [V3 API](/reference/v3). It offers the tools summarized in [Capabilities and permissions](/docs/guides/platform-mcp/capabilities-and-permissions), and that list grows from release to release.
-
-It's also separate from the [Documentation MCP](/docs/guides/documentation-mcp), which reads these docs, needs no account, and can't see your data. Connecting one doesn't connect the other.
+The Plytix MCP provides tools for working with your catalog through an AI assistant. See [Capabilities and permissions](/mcp/tools) for the available operations. Tools may be added, updated, or removed over time, with changes recorded in the [changelog](/mcp/changelog).
 
 ## How access works
 
-The Plytix MCP signs in with OAuth, so you authorize your AI application in the browser instead of pasting a token. What your assistant can do depends on the tools in the current release and the access you grant when you authorize the connection.
+You sign in to Plytix with OAuth to authorize your AI application. The available tools and the access granted to the connection determine what your assistant can do.
 
-Some AI applications also let you control individual tools, for example by asking for your approval before a tool runs or by turning a tool off. These controls belong to the AI application, so they differ from one application to another. Some tools can change your catalog, so try the [example workflows](/docs/guides/platform-mcp/example-workflows) on a test account first.
+Some AI applications also let you control individual tools, for example by asking for your approval before a tool runs or by turning a tool off. These controls belong to the AI application, so they differ from one application to another. Some tools can change your catalog, so try the [example workflows](/mcp/example-workflows) on a test account first.
 
 ## Get started
 
-Follow these guides in order to connect your account and run your first task.
+Start with Connect your AI assistant, verify the connection, and try an example workflow. Use Capabilities and permissions, Troubleshooting, and Changelog as reference guides.
 
 <Cards>
-  <Card icon={<PlugConnectedRegular />} title="Connect your AI assistant" href="/docs/guides/platform-mcp/connect">
+  <Card icon={<PlugConnectedRegular />} title="Connect your AI assistant" href="/mcp/quickstart">
     Add the Plytix MCP to Claude or ChatGPT, authorize it, and check the connection.
   </Card>
-  <Card icon={<ShieldCheckmarkRegular />} title="Capabilities and permissions" href="/docs/guides/platform-mcp/capabilities-and-permissions">
-    See what your assistant can do in this release and how access is controlled.
+  <Card icon={<ShieldCheckmarkRegular />} title="Capabilities and permissions" href="/mcp/tools">
+    Explore the available capabilities and learn how access is controlled.
   </Card>
-  <Card icon={<LightbulbRegular />} title="Example workflows" href="/docs/guides/platform-mcp/example-workflows">
+  <Card icon={<LightbulbRegular />} title="Example workflows" href="/mcp/example-workflows">
     Start from prompts for finding products, reviewing content, and drafting copy.
   </Card>
-  <Card icon={<WrenchRegular />} title="Troubleshooting" href="/docs/guides/platform-mcp/troubleshooting">
-    Fix a connection that fails, missing tools, or answers that don't match your account.
+  <Card icon={<WrenchRegular />} title="Troubleshooting" href="/mcp/troubleshooting">
+    Resolve connection issues, find missing tools, and investigate unexpected answers.
   </Card>
-  <Card icon={<HistoryRegular />} title="Changelog" href="/docs/guides/platform-mcp/changelog">
+  <Card icon={<HistoryRegular />} title="Changelog" href="/mcp/changelog">
     Check what changed in each Plytix MCP release.
   </Card>
 </Cards>
@@ -66,10 +63,13 @@ Follow these guides in order to connect your account and run your first task.
 Now that you know what the Plytix MCP does, you can explore these related guides.
 
 <Cards>
-  <Card icon={<BookOpenRegular />} title="Connect an AI assistant to the Plytix docs" href="/docs/guides/documentation-mcp">
-    Give your assistant the Plytix documentation, alongside your account data.
+  <Card icon={<ShieldCheckmarkRegular />} title="Capabilities and permissions" href="/mcp/tools">
+    Explore the available capabilities and learn how access is controlled.
   </Card>
-  <Card icon={<KeyRegular />} title="Authentication" href="/reference/v3/authentication">
-    Learn how V3 access tokens work when you build your own integration.
+  <Card icon={<LightbulbRegular />} title="Example workflows" href="/mcp/example-workflows">
+    Start from prompts for finding products, reviewing content, and drafting copy.
+  </Card>
+  <Card icon={<WrenchRegular />} title="Troubleshooting" href="/mcp/troubleshooting">
+    Resolve connection issues, find missing tools, and investigate unexpected answers.
   </Card>
 </Cards>

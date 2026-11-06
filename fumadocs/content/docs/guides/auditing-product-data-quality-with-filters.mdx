@@ -11,7 +11,7 @@ Find products that break your own catalog's data rules: a required field that's 
 
 Before you start, make sure you have the following:
 
-- A V3 access token with the permissions this guide needs. See [Authentication](/reference/v3/authentication), or the [Quickstart](/docs/guides/quickstart) for a first walkthrough.
+- A V3 access token with the permissions this guide needs. See [Authentication](/reference/v3/authentication), or the [Quickstart](/guides/quickstart) for a first walkthrough.
 - Familiarity with the query-string filter syntax covered in [Filtering and Query Syntax](/reference/v3/filtering-and-search). This guide assumes you can already build a basic filter like `sku=GF-Basket`.
 - The rules your catalog applies: which fields each product needs, based on its family, product level, status, or where you publish it.
 
@@ -126,7 +126,7 @@ Follow the steps below to define your rules, check each one with a filter, and c
 
 8. **Collect every page and record the failed rules per product.**
 
-   One request returns one page. Select `id`, `sku`, and the fields you're auditing with `_fields`, add `_sort_by=id`, and follow `pagination.next_page` while it holds a usable URL, as described in [Export your full catalog](/docs/guides/exporting-your-full-catalog). When you run several checks, merge the results by `id` and keep the list of rules each product fails, so a product that fails three checks appears once:
+   One request returns one page. Select `id`, `sku`, and the fields you're auditing with `_fields`, add `_sort_by=id`, and follow `pagination.next_page` while it holds a usable URL, as described in [Export your full catalog](/guides/exporting-your-full-catalog). When you run several checks, merge the results by `id` and keep the list of rules each product fails, so a product that fails three checks appears once:
 
    ```json
    {
@@ -142,7 +142,7 @@ Follow the steps below to define your rules, check each one with a filter, and c
 Now that you know how to audit product data, you can explore these related pages.
 
 <Cards>
-  <Card icon={<OrganizationRegular />} title="Plytix data model" href="/docs/guides/data-model">
+  <Card icon={<OrganizationRegular />} title="Plytix data model" href="/guides/data-model">
     Understand the attributes, families, and relations that your filters target.
   </Card>
   <Card icon={<FilterRegular />} title="Filtering and Query Syntax" href="/reference/v3/filtering-and-search">

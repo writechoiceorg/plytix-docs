@@ -21,7 +21,7 @@ _openapi:
 
           Plytix doesn't check for duplicates, so each request creates a new asset, even for a URL you've used before. Before you retry a request that timed out, search your assets to check whether the first request went through.
 
-          Creating an asset doesn't attach it to a product. To use the asset on a product, set it as the product's `thumbnail_id`, or as a value of a media or media gallery attribute. See [Safely remove categories, assets, or relationships](/docs/guides/safely-removing-categories-assets-or-relationships#connect-other-assets-to-a-product).
+          Creating an asset doesn't attach it to a product. To use the asset on a product, set it as the product's `thumbnail_id`, or as a value of a media or media gallery attribute. See [Safely remove categories, assets, or relationships](/guides/safely-removing-categories-assets-or-relationships#connect-other-assets-to-a-product).
 
           The body accepts only the fields listed below. `category_ids` returns `422` with "Extra inputs are not permitted": link categories with a separate request after the asset exists.
 ---

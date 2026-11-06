@@ -25,7 +25,7 @@ export default function NotFound() {
         <div className="flex flex-wrap items-center justify-center gap-3">
           <FullSearchTrigger className="h-10 px-4" />
           <Link
-            href="/docs/guides/what-is-the-plytix-api"
+            href="/guides/what-is-the-plytix-api"
             className="inline-flex h-10 items-center rounded-full bg-[#7A52FF] px-4 text-sm font-medium text-white transition-colors hover:bg-[#6a40f5]"
           >
             Documentation overview

@@ -5,7 +5,7 @@ description: "Reference for every V1/V2 endpoint and its V3 equivalent, resource
 
 import { BookOpenRegular, DocumentEditRegular } from '@/components/icons';
 
-This page maps the V1/V2 endpoints most integrations use to their V3 equivalents, one resource at a time, and ends with the link and unlink endpoints that replaced V1's array fields. The Notes column records where the payload, the scope of the operation, or the response shape changes, because a similar-looking path doesn't always have the same effect. "No V3 equivalent" means V3 can't do the operation, and "No dedicated endpoint" means V3 has no matching endpoint but may cover the operation through another workflow. [What's new and not migrated](/docs/guides/migrating-to-v3/not-migrated-and-new-in-v3) collects those in one place. It's part of the reference set for [Migration overview](/docs/guides/migrating-to-v3).
+This page maps the V1/V2 endpoints most integrations use to their V3 equivalents, one resource at a time, and ends with the link and unlink endpoints that replaced V1's array fields. The Notes column records where the payload, the scope of the operation, or the response shape changes, because a similar-looking path doesn't always have the same effect. "No V3 equivalent" means V3 can't do the operation, and "No dedicated endpoint" means V3 has no matching endpoint but may cover the operation through another workflow. [What's new and not migrated](/guides/migrating-to-v3/not-migrated-and-new-in-v3) collects those in one place. It's part of the reference set for [Migration overview](/guides/migrating-to-v3).
 
 ## Products
 
@@ -14,7 +14,7 @@ Every V1 endpoint in this table also has a V2 counterpart under `/api/v2`. V2 is
 | V1 | V3 | Notes |
 |---|---|---|
 | `POST /api/v1/products` | `POST /api/v3/products` | |
-| `POST /api/v1/products/search` | `GET /api/v3/products` | The search body becomes query parameters. See [Search and pagination](/docs/guides/migrating-to-v3/searching-and-pagination). |
+| `POST /api/v1/products/search` | `GET /api/v3/products` | The search body becomes query parameters. See [Search and pagination](/guides/migrating-to-v3/searching-and-pagination). |
 | `GET /api/v1/products/{product_id}` | `GET /api/v3/products/{identifier}` | V3 returns `data` as a single object, not an array. |
 | `PATCH /api/v1/products/{product_id}` | `PATCH /api/v3/products/{identifier}` | |
 | `DELETE /api/v1/products/{product_id}` | `DELETE /api/v3/products/{identifier}` | Deletes the product. To detach a variant from its parent without deleting it, see [Variants](#variants). |
@@ -47,7 +47,7 @@ Every V1 endpoint below except the variant list also has a V2 counterpart under 
 | `GET /api/v1/products/{product_id}/variants` | `GET /api/v3/products?parent_id=<parent_id>` | Lists the parent's direct variants. To filter by the parent's SKU instead, use `parent.sku=<sku>`. |
 | `POST /api/v1/products/{parent_product_id}/variants/resync` | No V3 equivalent | |
 
-A product's position in the hierarchy is reported by `product_level`: `0` SINGLE, `1` PARENT, `2` VARIANT, `3` SUB_VARIANT. A standalone product starts at `0` and becomes `1` as soon as another product references it through `parent_id`. See [Rebuild parent and variant products](/docs/guides/reconstructing-parent-variant-hierarchies).
+A product's position in the hierarchy is reported by `product_level`: `0` SINGLE, `1` PARENT, `2` VARIANT, `3` SUB_VARIANT. A standalone product starts at `0` and becomes `1` as soon as another product references it through `parent_id`. See [Rebuild parent and variant products](/guides/reconstructing-parent-variant-hierarchies).
 
 {/* FLAG (open):
   Linking with `parent_id` on PATCH and unlinking with `"parent_id": null` follow the 2026-10-02 spec (`ProductUpdateInputDto.parent_id`: "null detaches the product from its current parent") and the October 13 spec cited in the review, but neither is tested live. V1 warns that unlinking "might cause data loss". What V3 does to the variant's attribute values is unconfirmed (FB-022). Test with `endpoint-tester` before publishing.

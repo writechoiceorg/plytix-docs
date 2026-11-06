@@ -5,18 +5,18 @@ description: "Try example prompts for the Plytix MCP beta, from finding a produc
 
 import { ShieldCheckmarkRegular, WrenchRegular } from '@/components/icons';
 
-These prompts describe tasks you might hand to your assistant once you've [connected your account](/docs/guides/platform-mcp/connect). Each one names what it needs from the release, so skip any that the [current capabilities](/docs/guides/platform-mcp/capabilities-and-permissions#capabilities-in-this-release) don't cover. Start your prompt with "Using Plytix," so your assistant knows to call the Plytix tools, then adapt the SKUs and fields to your own catalog.
+Use these prompts as starting points after [connecting your account](/mcp/quickstart). Replace sample SKUs, category names, and attribute labels with values from your own catalog. Each example identifies the [capabilities](/mcp/tools#available-capabilities) it requires. Specify that the assistant should use Plytix, and check the resulting tool calls and data.
 
 {/* FLAG (open):
-  None of these prompts has been run yet. Test each one on a sample account against the release endpoint before publishing, record the actual outcome, and remove any workflow whose tools aren't in the release. The channel content, supplier file, and team questions workflows were approved by David on 29 Oct 2026.
+  None of these prompts has been run yet. Test each one on a sample account against the release endpoint before publishing, record the actual outcome, and remove any workflow whose tools aren't in the release. The channel content, supplier file, and team questions workflows were approved by David on 29 Oct 2026. Core to confirm how a description update through the MCP applies to parent and variant inheritance (MCP-034, FB-058).
 */}
 
 ## Find a product
 
-Look up one product and read back its values.
+Look up one product and read back its values. Replace `YOUR-SKU` with a SKU that exists in your account, then ask:
 
 ```text
-Using Plytix, find the product with SKU GF-Basket and show its name and description.
+Using Plytix, find the product with SKU YOUR-SKU and show its SKU, name, and description. Don't change anything.
 ```
 
 Your assistant gets the matching product and reports the values Plytix returned. This workflow needs product lookup and access to those fields.
@@ -56,17 +56,17 @@ Your assistant reads the product's values and writes the draft in the conversati
 Compare a supplier's file with your catalog before you import it into Plytix.
 
 ```text
-Using Plytix, compare the attached supplier file with my catalog. List the SKUs in the file that aren't in Plytix, and the SKUs whose name differs from Plytix. Don't change anything.
+Using Plytix, compare the attached supplier file with my catalog. List the SKUs that are missing from Plytix and the SKUs of products whose names differ between the file and the catalog. Report how many rows you checked and any rows you couldn't compare. Don't change anything.
 ```
 
-Your assistant reads the file in your AI application, looks up its SKUs in Plytix, and lists the differences. For a long file, ask how many SKUs it checked and compare that with the file. This workflow needs an AI application that accepts file attachments, and product lookup.
+Your assistant reads the file in your AI application, looks up its SKUs in Plytix, and lists the differences. For a large file, compare the number of rows reviewed with the total number of rows supplied. Ask the assistant to identify duplicate SKUs, skipped rows, and any records it couldn't compare. This workflow needs an AI application that accepts file attachments, and product lookup.
 
 ## Answer product questions for your team
 
-Let colleagues in sales or support get product facts from Plytix in chat.
+Let colleagues in sales or support get product facts from Plytix in chat. Replace `YOUR-SKU` with a SKU that exists in your account, then ask:
 
 ```text
-Using Plytix, which category is SKU GF-Basket in, and what does its description say? Show the values you used.
+Using Plytix, list the categories assigned to SKU YOUR-SKU and show its description. Include the SKU and the values returned by Plytix. Don't change anything.
 ```
 
 Your assistant answers from the values Plytix returns and shows them, so your colleague can check the answer. This workflow needs product lookup and access to the product's categories.
@@ -79,9 +79,9 @@ Get a suggested rewrite and approve it before anything changes.
 Using Plytix, for SKU GF-Basket, propose a clearer description and show me the proposed text before saving anything.
 ```
 
-Your assistant reads the current description and shows you a suggested rewrite. Nothing changes in Plytix until you approve the text in a second prompt, such as "Save that description to GF-Basket."
+For this workflow, ask the assistant to read the description and propose a rewrite without saving it. Review the proposal before asking it to update the product, for example with "Save that description to GF-Basket." A write tool applies the update when it runs, subject to your AI application's controls.
 
-Saving the text updates the value of the description attribute on that one product. It doesn't change the description attribute itself, so other products and the attribute's settings stay as they are. This step needs the tool that updates products.
+Saving the text updates the product's description value through the tool that updates products. It doesn't edit the attribute definition. Confirm how parent and variant inheritance applies before updating an inherited value.
 
 <Callout type="warn" title="Review before you save">
   A write tool changes your catalog as soon as it runs. Ask for a proposal first, review it, and then approve the change in a separate prompt. Plytix can't undo some changes, so try write workflows on a test account first.
@@ -92,10 +92,10 @@ Saving the text updates the value of the description attribute on that one produ
 Now that you've seen what your assistant can do, check its limits or fix a problem.
 
 <Cards>
-  <Card icon={<ShieldCheckmarkRegular />} title="Capabilities and permissions" href="/docs/guides/platform-mcp/capabilities-and-permissions">
-    See what your assistant can do in this release and how access is controlled.
+  <Card icon={<ShieldCheckmarkRegular />} title="Capabilities and permissions" href="/mcp/tools">
+    Explore the available capabilities and learn how access is controlled.
   </Card>
-  <Card icon={<WrenchRegular />} title="Troubleshooting" href="/docs/guides/platform-mcp/troubleshooting">
-    Fix a connection that fails, missing tools, or answers that don't match your account.
+  <Card icon={<WrenchRegular />} title="Troubleshooting" href="/mcp/troubleshooting">
+    Resolve connection issues, find missing tools, and investigate unexpected answers.
   </Card>
 </Cards>

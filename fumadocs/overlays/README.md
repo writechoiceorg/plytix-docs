@@ -93,4 +93,4 @@ The build keeps two responses per operation (`scripts/api/lib/responses.mjs`): i
 
 ## Writing descriptions
 
-Follow `.claude/skills/writer/references/style-guide.md` and `glossary.md`. Descriptions are Markdown (links, tables, code). Link to other pages with site routes (`/docs/guides/...`, `/reference/v3/...`); the build fails on a link to a page that doesn't exist. Don't state behavior that no source confirms: add a question to `QUESTIONS.md` instead.
+Follow `.claude/skills/writer/references/style-guide.md` and `glossary.md`. Descriptions are Markdown (links, tables, code). Link to other pages with site routes (`/guides/...`, `/reference/v3/...`); the build fails on a link to a page that doesn't exist. Don't state behavior that no source confirms: add a question to `QUESTIONS.md` instead.

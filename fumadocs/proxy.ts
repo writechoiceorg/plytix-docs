@@ -1,16 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { isMarkdownPreferred, rewritePath } from 'fumadocs-core/negotiation';
-import { docsContentRoute, docsRoute, referenceFolder, referenceRoute } from '@/lib/shared';
+import { docsContentRoute, sections } from '@/lib/shared';
 
-// Pages under /docs and /reference both resolve to the same content route;
-// /reference/** maps to the reference/ folder of the content tree.
-const routes = [
-  { from: docsRoute, to: docsContentRoute },
-  { from: referenceRoute, to: `${docsContentRoute}/${referenceFolder}` },
-].map(({ from, to }) => ({
-  docs: rewritePath(`${from}{/*path}`, `${to}{/*path}/content.md`).rewrite,
-  suffix: rewritePath(`${from}{/*path}.md`, `${to}{/*path}/content.md`).rewrite,
-}));
+// Every section route (/guides, /mcp, /reference) resolves to the same content
+// route; each maps to its own folder of the content tree (see lib/shared.ts).
+const routes = sections.map(({ folder, route }) => {
+  const to = [docsContentRoute, ...folder].join('/');
+  return {
+    docs: rewritePath(`${route}{/*path}`, `${to}{/*path}/content.md`).rewrite,
+    suffix: rewritePath(`${route}{/*path}.md`, `${to}{/*path}/content.md`).rewrite,
+  };
+});
 
 export default function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;

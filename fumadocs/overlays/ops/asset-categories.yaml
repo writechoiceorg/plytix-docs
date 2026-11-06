@@ -32,7 +32,7 @@ actions:
 
         - [Filtering and search](/reference/v3/filtering-and-search)
         - [Pagination](/reference/v3/pagination)
-        - [The Plytix data model](/docs/guides/data-model#product-categories)
+        - [The Plytix data model](/guides/data-model#product-categories)
 
   - target: $.paths['/api/v3/asset-categories'].get.parameters[?(@.name=='filters' && @.in=='query')]
     description: 'PM-50; field names from the resource''s response schema, operators per the API-wide grammar (Q#11, Q#99)'

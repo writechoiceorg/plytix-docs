@@ -40,8 +40,8 @@ actions:
 
         - [Filtering and search](/reference/v3/filtering-and-search)
         - [Pagination](/reference/v3/pagination)
-        - [Export your full catalog](/docs/guides/exporting-your-full-catalog)
-        - [Audit product data quality with filters](/docs/guides/auditing-product-data-quality-with-filters)
+        - [Export your full catalog](/guides/exporting-your-full-catalog)
+        - [Audit product data quality with filters](/guides/auditing-product-data-quality-with-filters)
 
   - target: $.paths['/api/v3/products'].get.parameters[?(@.name=='filters' && @.in=='query')]
     description: 'PM-50; List Products.bru "200" (status=Draft&created[gt]=…)'
@@ -138,7 +138,7 @@ actions:
         - The variant joins the parent's product family automatically, so you can leave out `product_family_id`. Sending a different family returns `422`.
         - The variant gets `product_level` `2`, and a parent that was standalone becomes `1`. A variant of a variant is `3`.
 
-        See [Reconstruct parent/variant hierarchies](/docs/guides/reconstructing-parent-variant-hierarchies).
+        See [Reconstruct parent/variant hierarchies](/guides/reconstructing-parent-variant-hierarchies).
 
         The body accepts only the fields listed below. List fields such as `category_ids` and `static_list_ids` return `422` with "Extra inputs are not permitted". Link categories after the product exists, with [Link a category to a product](/reference/v3/products/link-product-category).
 
@@ -507,7 +507,7 @@ actions:
 
         Assets can't be unlinked here. To detach one, clear the product's `thumbnail_id`, or delete the media attribute value that holds it.
 
-        See [Safely remove categories, assets, or relationships](/docs/guides/safely-removing-categories-assets-or-relationships#remove-a-category-from-a-product) and [Update and delete records](/reference/v3/updates-and-deletes).
+        See [Safely remove categories, assets, or relationships](/guides/safely-removing-categories-assets-or-relationships#remove-a-category-from-a-product) and [Update and delete records](/reference/v3/updates-and-deletes).
 
   - target: $.paths['/api/v3/products/{identifier}/{path}'].delete.parameters[?(@.name=='path' && @.in=='path')]
     description: Q#94, FB-006
@@ -655,7 +655,7 @@ actions:
 
         Only that one link is removed. The product, the category, and the product's other categories stay as they are.
 
-        To file the product under a category again, use [Link a category to a product](/reference/v3/products/link-product-category). See [Safely remove categories, assets, or relationships](/docs/guides/safely-removing-categories-assets-or-relationships#remove-a-category-from-a-product) and [Update and delete records](/reference/v3/updates-and-deletes).
+        To file the product under a category again, use [Link a category to a product](/reference/v3/products/link-product-category). See [Safely remove categories, assets, or relationships](/guides/safely-removing-categories-assets-or-relationships#remove-a-category-from-a-product) and [Update and delete records](/reference/v3/updates-and-deletes).
 
   - target: $.paths['/api/v3/products/{identifier}/categories/{id}'].delete.parameters[?(@.name=='identifier' && @.in=='path')]
     description: config "ID prefixes"

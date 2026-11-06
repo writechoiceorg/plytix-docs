@@ -5,7 +5,7 @@ description: "Reference for the V1 endpoints that have no V3 counterpart, the re
 
 import { ArrowSwapRegular, BookOpenRegular } from '@/components/icons';
 
-Not every V1 call has a V3 counterpart yet. This page lists the V1 endpoints missing from the current V3 contract, the entry points that are new in V3, and the slice of the API that V2 covers. It reflects the V3 OpenAPI dated 2026-10-02 and will change as V3 expands. Keep a legacy call wherever your integration needs a capability with no confirmed public V3 equivalent, and move everything else to V3. It's part of the reference set for [Migration overview](/docs/guides/migrating-to-v3).
+Not every V1 call has a V3 counterpart yet. This page lists the V1 endpoints missing from the current V3 contract, the entry points that are new in V3, and the slice of the API that V2 covers. It reflects the V3 OpenAPI dated 2026-10-02 and will change as V3 expands. Keep a legacy call wherever your integration needs a capability with no confirmed public V3 equivalent, and move everything else to V3. It's part of the reference set for [Migration overview](/guides/migrating-to-v3).
 
 Each entry below falls into one of these groups:
 
@@ -20,7 +20,7 @@ All six endpoints below remain documented in the [V1/V2 reference](/reference/v1
 | V1 endpoint | Status | What to do |
 |---|---|---|
 | `PUT /api/v1/assets/{asset_id}/content` | Legacy only | Keep on V1. V3 takes a file only when it creates an asset. An asset update changes `filename` and `alt_text`, not the file. |
-| `POST` and `DELETE /api/v1/products/{product_id}/assets[/{asset_id}]` | Alternative in V3 | V3 has no product-to-asset link path. You set a media or media gallery attribute to the asset ID with `PATCH /api/v3/products/{identifier}/attributes/{label}` and clear it with `DELETE` on the same path, and `thumbnail_id` sets the main image. A media attribute takes a bare asset ID and a media gallery attribute takes an array of IDs; objects such as `{"id": "<asset_id>"}` are rejected. Clearing the attribute doesn't delete the asset. See [Connect other assets to a product](/docs/guides/safely-removing-categories-assets-or-relationships#connect-other-assets-to-a-product). |
+| `POST` and `DELETE /api/v1/products/{product_id}/assets[/{asset_id}]` | Alternative in V3 | V3 has no product-to-asset link path. You set a media or media gallery attribute to the asset ID with `PATCH /api/v3/products/{identifier}/attributes/{label}` and clear it with `DELETE` on the same path, and `thumbnail_id` sets the main image. A media attribute takes a bare asset ID and a media gallery attribute takes an array of IDs; objects such as `{"id": "<asset_id>"}` are rejected. Clearing the attribute doesn't delete the asset. See [Connect other assets to a product](/guides/safely-removing-categories-assets-or-relationships#connect-other-assets-to-a-product). |
 | `GET /api/v1/filters/product`, `/filters/asset`, `/filters/relationships` | Alternative in V3, partial | `GET /api/v3/product-attributes` returns your product attribute definitions, including each attribute's `type`. It doesn't list system fields, asset or relationship fields, or the supported operators: see [Filtering and search](/reference/v3/filtering-and-search) for those. Keep on V1 if you need the full list from the API. |
 | `POST /api/v1/products/{parent_product_id}/variants/resync` | Legacy only | Keep on V1. |
 | `POST /api/v1/accounts/api-credentials/search` | Legacy only | Keep on V1. You can manage API keys in the Plytix dashboard under the **API** tab, but that doesn't replace searching them through the API. |
@@ -50,7 +50,7 @@ V2 is a products-only beta served from the same base URL. It covers a subset of 
 Now that you know what doesn't move, you can explore these related pages.
 
 <Cards>
-  <Card icon={<ArrowSwapRegular />} title="Migration overview" href="/docs/guides/migrating-to-v3">
+  <Card icon={<ArrowSwapRegular />} title="Migration overview" href="/guides/migrating-to-v3">
     Plan the full migration, from what moves to V3 to what stays on V1/V2.
   </Card>
   <Card icon={<BookOpenRegular />} title="API V1/V2 reference" href="/reference/v1-v2/api-v1-v2-reference">

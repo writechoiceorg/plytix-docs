@@ -1,7 +1,47 @@
 [
   {
     "source": "/docs/guides/overview",
-    "destination": "/docs/guides/what-is-the-plytix-api",
+    "destination": "/guides/what-is-the-plytix-api",
+    "permanent": true
+  },
+  {
+    "source": "/docs/guides/platform-mcp",
+    "destination": "/mcp/overview",
+    "permanent": true
+  },
+  {
+    "source": "/docs/guides/platform-mcp.md",
+    "destination": "/mcp/overview.md",
+    "permanent": true
+  },
+  {
+    "source": "/docs/guides/platform-mcp/connect",
+    "destination": "/mcp/quickstart",
+    "permanent": true
+  },
+  {
+    "source": "/docs/guides/platform-mcp/connect.md",
+    "destination": "/mcp/quickstart.md",
+    "permanent": true
+  },
+  {
+    "source": "/docs/guides/platform-mcp/capabilities-and-permissions",
+    "destination": "/mcp/tools",
+    "permanent": true
+  },
+  {
+    "source": "/docs/guides/platform-mcp/capabilities-and-permissions.md",
+    "destination": "/mcp/tools.md",
+    "permanent": true
+  },
+  {
+    "source": "/mcp",
+    "destination": "/mcp/overview",
+    "permanent": true
+  },
+  {
+    "source": "/guides",
+    "destination": "/guides/what-is-the-plytix-api",
     "permanent": true
   },
   {
@@ -1042,6 +1082,21 @@
   {
     "source": "/docs/reference/:path*",
     "destination": "/reference/:path*",
+    "permanent": true
+  },
+  {
+    "source": "/docs/guides/platform-mcp/:page",
+    "destination": "/mcp/:page",
+    "permanent": true
+  },
+  {
+    "source": "/docs/guides/:path*",
+    "destination": "/guides/:path*",
+    "permanent": true
+  },
+  {
+    "source": "/docs",
+    "destination": "/",
     "permanent": true
   }
 ]

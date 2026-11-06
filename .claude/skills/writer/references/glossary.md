@@ -58,7 +58,7 @@
 
 **Capitalisation:** Documentation MCP
 **Definition:** The read-only MCP server that lets an AI assistant search and read the public Plytix documentation pages. It needs no Plytix account or token and can't access account data.
-**Notes:** Implemented in this repo (`fumadocs/app/api/mcp/route.ts`) and documented at `guides/documentation-mcp.mdx`. A different server from the **Plytix MCP**; never use the two names interchangeably.
+**Notes:** Implemented in this repo (`fumadocs/app/api/mcp/route.ts`) and documented at `internal-drafts/guides/documentation-mcp.mdx`, which isn't published: Plytix won't include the Documentation MCP for now (David, 6 Nov 2026), so don't mention it on published pages. A different server from the **Plytix MCP**; never use the two names interchangeably.
 
 ---
 
@@ -146,7 +146,7 @@
 
 **Capitalisation:** Plytix MCP
 **Definition:** Plytix's Model Context Protocol server, which connects a compatible AI application to a Plytix account so the assistant can discover and call Plytix tools. Authenticates with OAuth.
-**Notes:** Beta (source: Plytix MCP documentation brief, 27 Oct 2026); always announce it as a beta. The first version wraps V3, but don't call it an API version or imply that every V3 endpoint is a tool. Documented at `guides/platform-mcp/index.mdx`. Replaces the earlier working names "MCP Server" and "Platform MCP"; don't use those. Distinct from the **Documentation MCP**.
+**Notes:** Beta (source: Plytix MCP documentation brief, 27 Oct 2026); always announce it as a beta. The first version wraps V3, but don't call it an API version or imply that every V3 endpoint is a tool. Documented at `guides/mcp/` (served at `/mcp/**`, overview at `/mcp/overview`). Beta access is turned on per account through the account manager and doesn't need V3 API access. Replaces the earlier working names "MCP Server" and "Platform MCP"; don't use those. Distinct from the **Documentation MCP**.
 
 ---
 

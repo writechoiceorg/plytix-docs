@@ -23,7 +23,7 @@ Plain Markdown, no headings, short paragraphs, lists for parallel facts. In this
 4. Constraints: required fields, uniqueness, limits, valid combinations, parent/variant rules.
 5. Side effects and safety: what else changes, whether a retry is safe (state it only when it follows from verified behavior, for example a unique SKU).
 6. Gotchas confirmed live (silent ignores, replaced maps, `http://` links).
-7. Links: guides and conceptual pages, with site routes (`/docs/guides/...`, `/docs/reference/v3/...`). Link text is the page title.
+7. Links: guides and conceptual pages, with site routes (`/guides/...`, `/reference/v3/...`). Link text is the page title.
 
 `summary` is the page title: sentence case, verb first, 60 characters or fewer ("Search products", "Delete a product category").
 
@@ -50,12 +50,12 @@ Link to these from the matching operations. Resources with no guide are candidat
 
 | Resource | Guides and conceptual pages |
 |---|---|
-| products | `/docs/guides/quickstart`, `/docs/guides/exporting-your-full-catalog`, `/docs/guides/auditing-product-data-quality-with-filters`, `/docs/guides/building-marketplace-specific-product-feeds`, `/docs/guides/syncing-your-erp-with-plytix`, `/docs/guides/reconstructing-parent-variant-hierarchies` (variants) |
-| products: link/unlink, thumbnail | `/docs/guides/safely-removing-categories-assets-or-relationships` |
-| product-categories | `/docs/guides/safely-removing-categories-assets-or-relationships#remove-a-category-from-a-product`, `/docs/guides/data-model` |
-| assets | `/docs/guides/safely-removing-categories-assets-or-relationships#connect-other-assets-to-a-product` |
-| product-attributes | `/docs/guides/syncing-your-erp-with-plytix`, `/docs/guides/building-marketplace-specific-product-feeds`, `/docs/guides/data-model` |
-| product-families | `/docs/guides/reconstructing-parent-variant-hierarchies`, `/docs/guides/data-model` |
-| all search operations | `/docs/reference/v3/filtering-query-syntax`, `/docs/reference/v3/pagination` |
-| all writes | `/docs/reference/v3/updates-and-deletes` |
+| products | `/guides/quickstart`, `/guides/exporting-your-full-catalog`, `/guides/auditing-product-data-quality-with-filters`, `/guides/building-marketplace-specific-product-feeds`, `/guides/syncing-your-erp-with-plytix`, `/guides/reconstructing-parent-variant-hierarchies` (variants) |
+| products: link/unlink, thumbnail | `/guides/safely-removing-categories-assets-or-relationships` |
+| product-categories | `/guides/safely-removing-categories-assets-or-relationships#remove-a-category-from-a-product`, `/guides/data-model` |
+| assets | `/guides/safely-removing-categories-assets-or-relationships#connect-other-assets-to-a-product` |
+| product-attributes | `/guides/syncing-your-erp-with-plytix`, `/guides/building-marketplace-specific-product-feeds`, `/guides/data-model` |
+| product-families | `/guides/reconstructing-parent-variant-hierarchies`, `/guides/data-model` |
+| all search operations | `/reference/v3/filtering-query-syntax`, `/reference/v3/pagination` |
+| all writes | `/reference/v3/updates-and-deletes` |
 | no guide yet | asset-categories, asset-lists, relationships, product-relationships, related-products, family-attributes, product-attribute-groups |

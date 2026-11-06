@@ -22,7 +22,7 @@ actions:
 
         Plytix doesn't check for duplicates, so each request creates a new asset, even for a URL you've used before. Before you retry a request that timed out, search your assets to check whether the first request went through.
 
-        Creating an asset doesn't attach it to a product. To use the asset on a product, set it as the product's `thumbnail_id`, or as a value of a media or media gallery attribute. See [Safely remove categories, assets, or relationships](/docs/guides/safely-removing-categories-assets-or-relationships#connect-other-assets-to-a-product).
+        Creating an asset doesn't attach it to a product. To use the asset on a product, set it as the product's `thumbnail_id`, or as a value of a media or media gallery attribute. See [Safely remove categories, assets, or relationships](/guides/safely-removing-categories-assets-or-relationships#connect-other-assets-to-a-product).
 
         The body accepts only the fields listed below. `category_ids` returns `422` with "Extra inputs are not permitted": link categories with a separate request after the asset exists.
 
@@ -103,7 +103,7 @@ actions:
 
         - [Filtering and search](/reference/v3/filtering-and-search)
         - [Pagination](/reference/v3/pagination)
-        - [The Plytix data model](/docs/guides/data-model#assets)
+        - [The Plytix data model](/guides/data-model#assets)
 
   - target: $.paths['/api/v3/assets'].get.parameters[?(@.name=='filters' && @.in=='query')]
     description: 'PM-50; field names from the resource''s response schema, operators per the API-wide grammar (Q#11, Q#99); extension replaced with filename (excluded by the 16 Oct handoff)'
@@ -236,7 +236,7 @@ actions:
 
         Before you delete an asset, check that no product uses it as its thumbnail (`thumbnail_id`) or as a value of a media or media gallery attribute.
 
-        To take an asset out of an asset category without deleting it, use [Unlink a category from an asset](/reference/v3/assets/delete-asset-field). To detach an asset from a product, change the product instead: see [Safely remove categories, assets, or relationships](/docs/guides/safely-removing-categories-assets-or-relationships#connect-other-assets-to-a-product) and [Update and delete records](/reference/v3/updates-and-deletes).
+        To take an asset out of an asset category without deleting it, use [Unlink a category from an asset](/reference/v3/assets/delete-asset-field). To detach an asset from a product, change the product instead: see [Safely remove categories, assets, or relationships](/guides/safely-removing-categories-assets-or-relationships#connect-other-assets-to-a-product) and [Update and delete records](/reference/v3/updates-and-deletes).
 
   - target: $.paths['/api/v3/assets/{identifier}'].delete.parameters[?(@.name=='identifier' && @.in=='path')]
     description: config "ID prefixes"

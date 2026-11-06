@@ -94,7 +94,7 @@ The text operators above were tested on text attributes. A negated text filter, 
 _or[0]field[!contains:ignorecase]=value&_or[0]field[!exists]=true
 ```
 
-[Filter operators](/docs/guides/migrating-to-v3/filter-operators) covers case and missing-field details when you migrate V1 filters.
+[Filter operators](/guides/migrating-to-v3/filter-operators) covers case and missing-field details when you migrate V1 filters.
 
 ## Functions
 
@@ -186,7 +186,7 @@ Requesting a related entity's fields expands that entity in the response. There 
 </Callout>
 
 <Callout type="info" title="Filters and expanded related records">
-  A filter on a related entity chooses which records match. It doesn't narrow the related records expanded inside each match, as described in [Plytix data model](/docs/guides/data-model). No parameter for returning a different subset of related records has been verified.
+  A filter on a related entity chooses which records match. It doesn't narrow the related records expanded inside each match, as described in [Plytix data model](/guides/data-model). No parameter for returning a different subset of related records has been verified.
 </Callout>
 
 ## Reserved and forbidden names
@@ -204,10 +204,10 @@ Values follow normal URL encoding. Spaces become `+` or `%20`, and `=`, `&`, `?`
 Now that you can filter a search, you can explore these related pages.
 
 <Cards>
-  <Card icon={<SearchRegular />} title="Audit product data quality" href="/docs/guides/auditing-product-data-quality-with-filters">
+  <Card icon={<SearchRegular />} title="Audit product data quality" href="/guides/auditing-product-data-quality-with-filters">
     Use these filters to find incomplete products in your catalog.
   </Card>
-  <Card icon={<ArrowSwapRegular />} title="Filter operators" href="/docs/guides/migrating-to-v3/filter-operators">
+  <Card icon={<ArrowSwapRegular />} title="Filter operators" href="/guides/migrating-to-v3/filter-operators">
     Map V1's JSON filter objects to the syntax on this page.
   </Card>
 </Cards>

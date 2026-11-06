@@ -32,9 +32,9 @@ actions:
 
         Related pages:
 
-        - [The Plytix data model](/docs/guides/data-model#product-attributes)
-        - [Sync your ERP](/docs/guides/syncing-your-erp-with-plytix)
-        - [Build a marketplace-specific product feed](/docs/guides/building-marketplace-specific-product-feeds)
+        - [The Plytix data model](/guides/data-model#product-attributes)
+        - [Sync your ERP](/guides/syncing-your-erp-with-plytix)
+        - [Build a marketplace-specific product feed](/guides/building-marketplace-specific-product-feeds)
         - [Filtering and search](/reference/v3/filtering-and-search)
         - [Pagination](/reference/v3/pagination)
 
@@ -116,7 +116,7 @@ actions:
 
         Related pages:
 
-        - [The Plytix data model](/docs/guides/data-model#product-attributes)
+        - [The Plytix data model](/guides/data-model#product-attributes)
         - [Link an attribute to a product family](/reference/v3/family-attributes/add-attribute-to-family), so products in a family can hold a value for it
         - [Update and delete records](/reference/v3/updates-and-deletes)
 

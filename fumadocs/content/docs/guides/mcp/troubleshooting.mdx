@@ -5,28 +5,26 @@ description: "Fix common Plytix MCP problems, such as a failed connection, missi
 
 import { PlugConnectedRegular, ShieldCheckmarkRegular } from '@/components/icons';
 
-The Plytix MCP is in beta, so its capabilities are limited to the tools in the current release, and an action that isn't in [Capabilities and permissions](/docs/guides/platform-mcp/capabilities-and-permissions) isn't available yet. Your assistant also reads product data from suppliers, imports, and integrations. Treat that text as untrusted, and keep reading and writing in separate prompts.
-
-Check the problems below if you run into issues while connecting or using the Plytix MCP.
+Use the checks below to investigate connection issues, missing tools, and unexpected results. See [Capabilities and permissions](/mcp/tools) for the supported operations. When reviewing catalog or supplier content, treat it as data rather than instructions. Request proposed changes separately before asking the assistant to save them.
 
 <Accordions type="multiple">
   <Accordion title="The connection fails" value="connection-fails">
-    Check that the server URL matches `https://pim.plytix.com/mcp` exactly, then complete the OAuth authorization again. If your application asks for an administrator's approval for custom connections, the connection can't finish until that approval is given.
+    Confirm that Plytix MCP beta access is enabled for your Plytix account and that the server URL is `https://pim.plytix.com/mcp`. Check any required workspace approval, then retry the OAuth sign-in. If the connection still fails, contact your account manager or Plytix support with the application name and the error message. Don't include tokens or passwords.
   </Accordion>
   <Accordion title="No Plytix tools appear" value="no-tools">
-    Check that the Plytix connection is turned on for your conversation, since some applications add a connector without turning it on. See the steps for your application in [Connect your AI assistant](/docs/guides/platform-mcp/connect).
+    Check that the Plytix connection is turned on for your conversation, since some applications add a connector without turning it on. See the steps for your application in [Connect your AI assistant](/mcp/quickstart).
   </Accordion>
   <Accordion title="New or changed tools don't appear after a release" value="stale-tools">
-    Some applications keep the tool list they got when you connected. Refresh the Plytix connection if your application offers this, for example from the plugin's details page in ChatGPT. Otherwise, remove the connection and connect again. The [changelog](/docs/guides/platform-mcp/changelog) says when a release needs you to refresh.
+    Some applications keep the tool list they got when you connected. Refresh the Plytix connection if your application offers this, for example from the plugin's details page in ChatGPT. Otherwise, remove the connection and connect again. The [changelog](/mcp/changelog) indicates when you need to refresh your tool list.
   </Accordion>
   <Accordion title="Your assistant says it can't do what you asked" value="action-unavailable">
-    Check the request against [Capabilities and permissions](/docs/guides/platform-mcp/capabilities-and-permissions) first, since the beta covers only the tools in the current release. If the capability is listed and your application offers per-tool controls, check whether you turned that tool off or denied its approval request.
+    Check the request against [Capabilities and permissions](/mcp/tools) first, since the beta covers only the tools in the current release. If the capability is listed and your application offers per-tool controls, check whether you turned that tool off or denied its approval request.
   </Accordion>
   <Accordion title="Your assistant answers about your catalog without calling Plytix" value="no-tool-call">
-    An answer that sounds plausible but doesn't match your account usually means your assistant answered from its own knowledge instead of calling a tool. Start the prompt with "Using Plytix," and ask your assistant to show the SKUs it retrieved, so you can check the answer against Plytix.
+    Inspect the tool-call details to check whether the assistant used Plytix. Verify the connected account, requested SKU, returned fields, and any pagination. Ask the assistant to show the retrieved values and distinguish them from its own interpretation.
   </Accordion>
-  <Accordion title="Results are shorter than what Plytix shows" value="short-results">
-    Your assistant may have stopped at the first page of results and reported it as the full answer. Ask it to get all the results, and include the expected count in your prompt when you know it, so your assistant can check its answer against that count.
+  <Accordion title="Fewer results are returned than expected" value="short-results">
+    The assistant may have retrieved only part of the result set. Ask it to follow pagination, report the number of records retrieved, and identify any remaining pages or processing limits. If you know the expected count, compare it with the reported total. A request for all results doesn't by itself confirm completeness.
   </Accordion>
 </Accordions>
 
@@ -35,10 +33,10 @@ Check the problems below if you run into issues while connecting or using the Pl
 If the problem isn't listed here, check the connection steps or what this release covers.
 
 <Cards>
-  <Card icon={<PlugConnectedRegular />} title="Connect your AI assistant" href="/docs/guides/platform-mcp/connect">
+  <Card icon={<PlugConnectedRegular />} title="Connect your AI assistant" href="/mcp/quickstart">
     Add the Plytix MCP to Claude or ChatGPT, authorize it, and check the connection.
   </Card>
-  <Card icon={<ShieldCheckmarkRegular />} title="Capabilities and permissions" href="/docs/guides/platform-mcp/capabilities-and-permissions">
-    See what your assistant can do in this release and how access is controlled.
+  <Card icon={<ShieldCheckmarkRegular />} title="Capabilities and permissions" href="/mcp/tools">
+    Explore the available capabilities and learn how access is controlled.
   </Card>
 </Cards>

@@ -44,17 +44,20 @@
 
 ### Guides → AI assistants
 
+> **Restructured 2026-11-06** (David's URL feedback and copy findings MCP-001 to MCP-042, saved as `materials/api-references/mcp/Plytix MCP - Copy and Content Findings - Platform MCP.csv`): the Plytix MCP pages stay in the Guides sidebar under AI assistants but are served at `/mcp/**` from `content/docs/guides/mcp/`. Overview is `overview.mdx` (`/mcp/overview`, page title "Plytix MCP", sidebar label "Overview" through `sidebarTitle`), Connect your AI assistant is `quickstart.mdx` (`/mcp/quickstart`), Capabilities and permissions is `tools.mdx` (`/mcp/tools`); Example workflows, Troubleshooting, and Changelog keep their file names. Plytix won't publish the Documentation MCP, so its page moved to `internal-drafts/guides/documentation-mcp.mdx`: don't link to it from published pages. The launch date is now November 9, 2026. The paragraph below predates this change; where they differ, this note wins.
+
 Source: Plytix's MCP documentation brief (27 Oct 2026, saved as `materials/api-references/mcp/Plytix MCP Documentation Brief.pdf`), which supersedes the outline canvas for this section, and David's staging review (4 Nov 2026), which supersedes the brief's one-page structure. The Plytix MCP is a beta: a "Plytix MCP" folder under AI assistants with six sidebar entries: Overview (`index.mdx`, URL unchanged, shown as "Overview" through a link item in `meta.json`), Connect your AI assistant (`connect.mdx`, with Claude and ChatGPT tabs), Capabilities and permissions (a summary only, since the MCP exposes its own tool definitions), Example workflows, Troubleshooting, and Changelog. Per-tool access is a control of the AI application, not of Plytix; describe it as "where your application offers it". It wraps V3 but must not be described as an API version or as exposing every V3 endpoint. It authenticates with OAuth. The five child pages drafted on 2026-09-29 (Authentication and OAuth setup, Supported clients, Available tools, Permissions and security considerations, Practical examples) are superseded and archived in `internal-drafts/guides/platform-mcp/`; don't restore them. The page stays blocked on flags until Plytix confirms: the release server URL (the page uses the placeholder `<plytix-mcp-url>`; the brief's `pim.dev.plytix.com/mcp` is DEV only), account eligibility and permissions, the tool list (captured from a tested connection), that OAuth is separate from V3 access tokens, the selection the content-quality example can use, and the release date. (Updated 2026-11-04: the release URL, eligibility, OAuth separation, and release date are confirmed; the tool list, Plytix-side permissions, and testing are still open, see FB-054 to FB-058.) At David's request (4 Nov 2026), the Claude and ChatGPT tabs were written from each client's official guide before testing, with a FLAG; test them against the release endpoint and add screenshots once it's live. A Gemini CLI tab needs its own test. The Documentation MCP is a different server and is already implemented in this repo (`fumadocs/app/api/mcp/route.ts`), so its page was written from that code plus `fumadocs/README.md`; it is not gated on the Plytix MCP.
 
 | Page title | File path | Page type | Status |
 |---|---|---|---|
-| Connect an AI assistant to the Plytix docs | `fumadocs/content/docs/guides/documentation-mcp.mdx` | How-to Guide | Written |
-| Plytix MCP (Overview) | `fumadocs/content/docs/guides/platform-mcp/index.mdx` | Concept | Written, blocked on flags |
-| Connect your AI assistant | `fumadocs/content/docs/guides/platform-mcp/connect.mdx` | How-to Guide | Written, tabs untested |
-| Capabilities and permissions | `fumadocs/content/docs/guides/platform-mcp/capabilities-and-permissions.mdx` | Reference | Written, blocked on FB-056 and FB-058 |
-| Example workflows | `fumadocs/content/docs/guides/platform-mcp/example-workflows.mdx` | How-to Guide | Written, prompts untested |
-| Troubleshooting | `fumadocs/content/docs/guides/platform-mcp/troubleshooting.mdx` | Reference | Written |
-| Changelog | `fumadocs/content/docs/guides/platform-mcp/changelog.mdx` | Reference | Written |
+| Plytix MCP (Overview) | `fumadocs/content/docs/guides/mcp/overview.mdx` (`/mcp/overview`) | Concept | Written, blocked on flags |
+| Connect your AI assistant | `fumadocs/content/docs/guides/mcp/quickstart.mdx` (`/mcp/quickstart`) | How-to Guide | Written, tabs untested |
+| Capabilities and permissions | `fumadocs/content/docs/guides/mcp/tools.mdx` (`/mcp/tools`) | Reference | Written, blocked on FB-056 and FB-058 |
+| Example workflows | `fumadocs/content/docs/guides/mcp/example-workflows.mdx` (`/mcp/example-workflows`) | How-to Guide | Written, prompts untested |
+| Troubleshooting | `fumadocs/content/docs/guides/mcp/troubleshooting.mdx` (`/mcp/troubleshooting`) | Reference | Written |
+| Changelog | `fumadocs/content/docs/guides/mcp/changelog.mdx` (`/mcp/changelog`) | Reference | Written |
+
+> Not published: "Connect an AI assistant to the Plytix docs" (Documentation MCP) is in `internal-drafts/guides/documentation-mcp.mdx` (David, 6 Nov 2026). The `/api/mcp` server is still deployed; see the open flag in `feedback-flags.md`.
 
 ### Guides → Upgrade from V1/V2
 
@@ -123,7 +126,7 @@ Endpoint pages are generated from `fumadocs/openapi-v1v2.json`, one folder per r
 
 ## Naming Conventions
 
-**URL structure:** guides are `/docs/guides/[page-name]`; the API reference is `/reference/[version]/[page-name]` and `/reference/[version]/[resource]/[action]` (for example, `/docs/guides/quickstart`, `/reference/v3/pagination`, `/reference/v3/products/get-product`, `/reference/v1-v2/products/create-product`). Updated 2026-10-21, pending Plytix sign-off on the pattern.
+**URL structure:** guides are `/guides/[page-name]`; the Plytix MCP pages are `/mcp/[page-name]`; the API reference is `/reference/[version]/[page-name]` and `/reference/[version]/[resource]/[action]` (for example, `/guides/quickstart`, `/mcp/quickstart`, `/reference/v3/pagination`, `/reference/v3/products/get-product`, `/reference/v1-v2/products/create-product`). No page is served under `/docs`. Updated 2026-11-06 at David's request (the `/docs` prefix was redundant on `docs.plytix.com`); old `/docs/**` URLs redirect.
 **Folder structure:** mirrors the URL structure. Each folder has a `meta.json` that sets sidebar title, order, and groups.
 
 ---

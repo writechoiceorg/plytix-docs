@@ -5,7 +5,7 @@ description: "Reference for converting a V1 search POST body into a V3 GET query
 
 import { ArrowDownloadRegular, TextNumberListLtrRegular } from '@/components/icons';
 
-A V1 search is a POST with a JSON body. A V3 search is a GET with query parameters. This page maps the two request shapes onto each other and covers what changes once the results come back, including the two pagination behaviors that break migrated paging loops. It's part of the reference set for [Migration overview](/docs/guides/migrating-to-v3).
+A V1 search is a POST with a JSON body. A V3 search is a GET with query parameters. This page maps the two request shapes onto each other and covers what changes once the results come back, including the two pagination behaviors that break migrated paging loops. It's part of the reference set for [Migration overview](/guides/migrating-to-v3).
 
 ## Request shape
 
@@ -19,7 +19,7 @@ The structural change is the verb: what used to be a POST body is now a query st
 | Paging | `pagination` object in the body | `_page`, `_page_size`, `_sort_by` |
 | No filter given | The V1 collection always shows a body | Returns the whole collection, one page at a time |
 
-That last row is worth pausing on. A V3 search with no filter parameters returns the whole collection, paged like any other search: the first 25 records, plus a `next_page` link for the rest. It doesn't return every record in one response, and a page of unfiltered results looks much like a page of filtered ones. Test each translated filter against a set of records you can predict, so a filter that didn't convert correctly shows up straight away. [Filter operators](/docs/guides/migrating-to-v3/filter-operators) covers the syntax each V1 operator becomes.
+That last row is worth pausing on. A V3 search with no filter parameters returns the whole collection, paged like any other search: the first 25 records, plus a `next_page` link for the rest. It doesn't return every record in one response, and a page of unfiltered results looks much like a page of filtered ones. Test each translated filter against a set of records you can predict, so a filter that didn't convert correctly shows up straight away. [Filter operators](/guides/migrating-to-v3/filter-operators) covers the syntax each V1 operator becomes.
 
 ## Pagination
 
@@ -39,7 +39,7 @@ The V1/V2 defaults and the 100 limit are documented on product search (V1 and V2
 
 V3 returns page URLs rather than a page number to increment, so a paging loop follows `next_page` instead of counting pages. Live responses leave the key out when it doesn't apply, and the `Pagination` schema also allows `null`, so a client written as `if (pagination.next_page !== null)` is wrong. Continue the loop only while `next_page` holds a URL you can request, which covers an absent key and a null one.
 
-Paging doesn't freeze the result set. Each request runs the query again, so records added, deleted, or re-sorted while you're paging can come back twice or not at all. A date filter alone doesn't make the run consistent. Sort on a deterministic field and reconcile at the end. [Export your full catalog](/docs/guides/exporting-your-full-catalog) walks through the full pattern.
+Paging doesn't freeze the result set. Each request runs the query again, so records added, deleted, or re-sorted while you're paging can come back twice or not at all. A date filter alone doesn't make the run consistent. Sort on a deterministic field and reconcile at the end. [Export your full catalog](/guides/exporting-your-full-catalog) walks through the full pattern.
 
 <Callout type="warn" title="No counts in V3">
   V1 returned `total_count` on every search. V3 has no equivalent: the pagination block carries no counts, and there is no parameter that adds one. Requesting `_total_count` or `_filtered_count` returns `400` with `InvalidFieldError: Field '_total_count' does not exist.`, confirmed on products and assets.
@@ -101,7 +101,7 @@ This result set fits on one page, so `pagination` is empty. When more records ma
 Now that you can convert a search and page through its results, you can explore these related pages.
 
 <Cards>
-  <Card icon={<ArrowDownloadRegular />} title="Export your full catalog" href="/docs/guides/exporting-your-full-catalog">
+  <Card icon={<ArrowDownloadRegular />} title="Export your full catalog" href="/guides/exporting-your-full-catalog">
     Apply V3 paging to a full-catalog export that you can resume.
   </Card>
   <Card icon={<TextNumberListLtrRegular />} title="Pagination" href="/reference/v3/pagination">

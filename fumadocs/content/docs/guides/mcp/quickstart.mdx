@@ -5,14 +5,14 @@ description: "Connect Claude or ChatGPT to your Plytix account with the Plytix M
 
 import { LightbulbRegular, ShieldCheckmarkRegular, WrenchRegular } from '@/components/icons';
 
-To connect, you add the Plytix MCP to your AI application as a remote MCP server, then sign in to Plytix with OAuth to authorize it. This guide has step-by-step instructions for Claude and ChatGPT, and a check to run once you're connected.
+Add the Plytix MCP as a remote MCP server in your AI application, then sign in to Plytix with OAuth. Follow the instructions for Claude or ChatGPT below, then verify the connection.
 
 ## Prerequisites
 
 Before you start, make sure you have the following:
 
 - Plytix MCP access turned on for your Plytix account. To request it, contact your account manager.
-- An AI application that supports remote MCP servers and OAuth sign-in, such as Claude or ChatGPT. Your application's plan or workspace settings decide whether you can add a custom connection, and a workspace administrator may need to add or approve it first. Check the requirements for your application in the tabs below.
+- An AI application that supports remote MCP servers and OAuth sign-in, such as Claude or ChatGPT. Your subscription plan and workspace settings determine whether you can add a custom connection. A workspace administrator may need to add or approve the connection first. Check the requirements for your application in the tabs below.
 
 {/* FLAG (open):
   Eligibility confirmed by David (29 Oct 2026): beta access is turned on per account through the account manager. Still open (FB-054): which Plytix role or access the person signing in needs, and whether the assistant sees only what that user can see in Plytix.
@@ -25,21 +25,35 @@ You'll need the following connection details:
 | Server URL | `https://pim.plytix.com/mcp` |
 | Authentication | OAuth |
 
-The Plytix MCP is separate from the V3 API, so you don't need V3 or a [V3 access token](/reference/v3/authentication) to connect. The OAuth sign-in authorizes your AI application, separately from the access tokens in the **API v3** tab.
+You don't need V3 API beta access or a V3 access token to use the Plytix MCP. Sign in to Plytix with OAuth when your AI application prompts you.
 
 ## Add the Plytix MCP to your AI application
 
-Pick your AI application and follow the steps to add the server, authorize it, and turn it on in a conversation.
+Select your AI application and follow the steps to add the server, authorize the connection, and enable it in a conversation.
 
 {/* FLAG (open):
-  Both tabs are written from Claude's and OpenAI's official guides (checked 4 Nov 2026), not from a tested connection. Test each flow against `https://pim.plytix.com/mcp` on November 6, 2026: menu labels, the OAuth client option Claude detects, when ChatGPT asks to sign in, how to disconnect, and one successful read. Add screenshots after that test. Per the brief, name an exact Google client before adding one, and add a Gemini CLI tab only after testing it with Plytix.
+  Both tabs are written from Claude's and OpenAI's official guides (checked 4 Nov 2026; OpenAI's remembered-approval scope rechecked 6 Nov 2026), not from a tested connection. Test each flow against `https://pim.plytix.com/mcp` before the November 9, 2026 launch: menu labels (including the Claude organization setup and removal labels, MCP-017 and MCP-018), the OAuth client option Claude detects, when ChatGPT asks to sign in, how to disconnect, and one successful read. Add screenshots after that test. Per the brief, name an exact Google client before adding one, and add a Gemini CLI tab only after testing it with Plytix.
 */}
 
 <Tabs items={['Claude', 'ChatGPT']}>
   <Tab value="Claude">
     Custom connectors work in Claude on the web and in Claude Desktop, on every plan. On the Free plan, you can add one custom connector.
 
-    **On a Team or Enterprise plan**, an owner adds the connector for the whole organization first. On Team, Owners and Primary Owners can add it. On Enterprise, Owners, Primary Owners, and custom roles with Manage access to Libraries can add it. Owners add it in **Organization settings** > **Connectors** by clicking **Add**, hovering over **Custom**, and selecting **Web**, then entering the name and server URL as in steps 3 to 5 below. After that, each member connects with their own Plytix sign-in: go to **Customize** > **Connectors**, find **Plytix**, click **Connect**, and continue from step 6.
+    **On a Team or Enterprise plan**, the connector is set up once for the whole organization, then each member signs in.
+
+    **Organization setup:** An owner or another user with connector-management permissions adds Plytix. On Team, Owners and Primary Owners can add it. On Enterprise, Owners, Primary Owners, and custom roles with Manage access to Libraries can add it.
+
+    1. **Open** **Organization settings** > **Connectors** in Claude.
+    2. **Click** **Add**, hover over **Custom**, and select **Web**.
+    3. **Enter** `Plytix` as the name and `https://pim.plytix.com/mcp` as the server URL, then click **Continue**.
+    4. **Review** the authentication settings that Claude detects for the server, then click **Continue**.
+    5. **Select** **Sign in now** under **Authentication**, keep the detected **OAuth client** setting, and click **Add**.
+
+    **Member sign-in:** Each member connects with their own Plytix account.
+
+    1. **Open** **Customize** > **Connectors**, select **Plytix**, and click **Connect**.
+    2. **Sign in** to your own Plytix account in the window that opens. Review the access that Claude requests, then approve it.
+    3. **Turn on** the connector in a conversation: click the **+** button in the lower left of the chat, click **Connectors**, and turn on the **Plytix** toggle.
 
     **On a Free, Pro, or Max plan**, add the connector yourself:
 
@@ -53,7 +67,7 @@ Pick your AI application and follow the steps to add the server, authorize it, a
 
     Claude asks for your approval before it runs a tool. Select **Allow always** only for tools you trust to run without review, such as tools that only read data. To keep a tool from running in a conversation, turn it off in the **Search and tools** menu.
 
-    To disconnect, go to **Customize** > **Connectors**, find **Plytix**, and click **Remove** or the three dots next to it.
+    To remove the connection, open **Customize** > **Connectors** and find **Plytix**. Select **Remove**, or open its three-dot menu and select the removal option. Complete any confirmation prompts.
 
     For plan and workspace requirements, see [Claude's guide to custom connectors](https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp).
   </Tab>
@@ -70,7 +84,7 @@ Pick your AI application and follow the steps to add the server, authorize it, a
     8. **Sign in** to Plytix when ChatGPT asks you to. Review the access that ChatGPT requests, then approve it.
     9. **Use** the plugin in a conversation: type `@` in the prompt box and select **Plytix**.
 
-    ChatGPT asks you to confirm write actions before they run, and you can turn individual tools on or off on the plugin's details page in your settings. Review each request before you approve it, and only remember an approval for a tool you trust to change your catalog without asking.
+    ChatGPT asks you to confirm write actions before they run, and you can turn individual tools on or off on the plugin's details page in your settings. Review each tool request before approving it. Choose to remember an approval only if you trust the tool to make further changes without another review. A remembered approval applies to that tool for the rest of the conversation, and a new conversation asks for confirmation again.
 
     After a Plytix MCP release, open the plugin's details page and refresh it, so ChatGPT picks up new and changed tools.
 
@@ -79,42 +93,36 @@ Pick your AI application and follow the steps to add the server, authorize it, a
 </Tabs>
 
 {/* FLAG (open):
-  Can a user revoke a Plytix MCP authorization from inside Plytix, and if so, where (FB-055)? David (29 Oct 2026) says access is managed on the AI application side.
+  Can a user revoke a Plytix MCP authorization from inside Plytix, and if so, where (FB-055)? David (29 Oct 2026) says access is managed on the AI application side. Removing the connection in the AI application isn't described as revoking the authorization in Plytix until Core confirms (MCP-018).
 */}
 
 ## Verify the connection
 
 Follow the steps below to confirm that your AI application found the Plytix tools and can read your account.
 
-1. **Check** that your application lists the Plytix tools. Claude shows them in the connector's settings, and ChatGPT on the plugin's details page.
-2. **Ask** what the connection can do:
+1. **Check** the tool list in your AI application's connection settings to see which tools were discovered. Claude shows them in the connector's settings, and ChatGPT on the plugin's details page.
+2. **Run** a small read that you can check yourself, the first prompt in [Example workflows](/mcp/example-workflows#find-a-product). Replace `YOUR-SKU` with a SKU that exists in your account, then ask:
 
    ```text
-   What can you do with my Plytix account through this connection?
+   Using Plytix, find the product with SKU YOUR-SKU and show its SKU, name, and description. Don't change anything.
    ```
 
-   A working connection answers with the capabilities in this release. This confirms that the tools were found, but not that your assistant can read your data.
+   Check that your assistant called a Plytix tool, then compare the answer against the product in Plytix. If the values match, the connection works and your account is reachable. If the answer has no specifics, your assistant probably answered without calling Plytix. See [Troubleshooting](/mcp/troubleshooting).
 
-3. **Run** a small read that you can check yourself, such as the first prompt in [Example workflows](/docs/guides/platform-mcp/example-workflows#find-a-product):
-
-   ```text
-   Using Plytix, find the product with SKU GF-Basket and show its name and description.
-   ```
-
-   Check that your assistant called a Plytix tool, then compare the answer against the product in Plytix. If the values match, the connection works and your account is reachable. If the answer has no specifics, your assistant probably answered without calling Plytix. See [Troubleshooting](/docs/guides/platform-mcp/troubleshooting).
+An answer that only describes the available capabilities doesn't confirm a successful connection, so always finish with the product lookup.
 
 ## Next steps
 
 Now that your assistant is connected, explore what it can do.
 
 <Cards>
-  <Card icon={<ShieldCheckmarkRegular />} title="Capabilities and permissions" href="/docs/guides/platform-mcp/capabilities-and-permissions">
-    See what your assistant can do in this release and how access is controlled.
+  <Card icon={<ShieldCheckmarkRegular />} title="Capabilities and permissions" href="/mcp/tools">
+    Explore the available capabilities and learn how access is controlled.
   </Card>
-  <Card icon={<LightbulbRegular />} title="Example workflows" href="/docs/guides/platform-mcp/example-workflows">
+  <Card icon={<LightbulbRegular />} title="Example workflows" href="/mcp/example-workflows">
     Start from prompts for finding products, reviewing content, and drafting copy.
   </Card>
-  <Card icon={<WrenchRegular />} title="Troubleshooting" href="/docs/guides/platform-mcp/troubleshooting">
-    Fix a connection that fails, missing tools, or answers that don't match your account.
+  <Card icon={<WrenchRegular />} title="Troubleshooting" href="/mcp/troubleshooting">
+    Resolve connection issues, find missing tools, and investigate unexpected answers.
   </Card>
 </Cards>

@@ -2,7 +2,7 @@
 // openapi.json. Edits can break a document, so this runs after the overlays.
 //
 //   - Redocly CLI lint (OpenAPI 3.1 structure + rules in fumadocs/redocly.yaml)
-//   - every internal /docs/... link in the spec resolves to a page that exists
+//   - every internal /guides, /mcp or /reference link in the spec resolves to a page that exists
 //     (hand-written MDX, or a reference page this spec will generate)
 //   - every operation has a tag (it decides the nav group and URL)
 //   - content: every operation has a description, upstream parameter and field
@@ -62,7 +62,7 @@ export function checkSpec(spec, { contentDir }) {
     return m && generatedTags.has(m[1]);
   };
 
-  const linkRe = /\]\((\/(?:docs|reference)\/[^)\s#]*)(?:#[^)\s]*)?\)|href="(\/(?:docs|reference)\/[^"#]*)/g;
+  const linkRe = /\]\((\/(?:docs|guides|mcp|reference)\/[^)\s#]*)(?:#[^)\s]*)?\)|href="(\/(?:docs|guides|mcp|reference)\/[^"#]*)/g;
   const broken = new Set();
   for (const text of collectStrings(spec.paths).concat(collectStrings(spec.components))) {
     for (const m of text.matchAll(linkRe)) {
@@ -72,8 +72,17 @@ export function checkSpec(spec, { contentDir }) {
         broken.add(url);
         continue;
       }
-      // /docs/<x> is content/docs/<x>; /reference/<x> is content/docs/reference/<x>.
-      const rel = url.startsWith('/reference') ? 'reference' + url.slice('/reference'.length) : url.replace(/^\/docs\/?/, '');
+      // Public routes map to content folders (see `sections` in lib/shared.ts):
+      // /mcp/<x> is content/docs/guides/mcp/<x>, /guides/<x> is content/docs/guides/<x>,
+      // /reference/<x> is content/docs/reference/<x>. /docs/<x> is a legacy URL
+      // that only redirects, so it never counts as a page.
+      const routes = [['/mcp', 'guides/mcp'], ['/guides', 'guides'], ['/reference', 'reference']];
+      const match = routes.find(([route]) => url === route || url.startsWith(`${route}/`));
+      if (!match) {
+        broken.add(url);
+        continue;
+      }
+      const rel = match[1] + url.slice(match[0].length);
       const candidates = [`${rel}.mdx`, `${rel}/index.mdx`, `${rel}.md`].map((c) => path.join(contentDir, c));
       if (!candidates.some((c) => existsSync(c))) broken.add(url);
     }
