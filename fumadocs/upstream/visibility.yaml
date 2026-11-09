@@ -184,7 +184,11 @@ operations:
   "GET /is_alive": internal
   "GET /is_ready": internal
   "GET /metrics": internal
-  # 2026-10-22: new in the 2026-10-19 spec (relationship types replace the relationships API); not classified by Plytix yet.
+  # 2026-10-22: new in the 2026-10-19 spec (relationship types replace the relationships API).
+  # 2026-11-09: Plytix wants all 11 public. David (Slack): "The endpoints public in the latest
+  # spec should be the one public." Kept pending until ops/relationships.yaml has their
+  # descriptions: switching them to public fails api:build with 6 "no description" errors and
+  # GET .../{path} 200 rendering as null. Set them to public in the same change as those edits.
   "POST /api/v3/products/{product_identifier}/product_relationship_types": pending
   "PATCH /api/v3/products/{product_identifier}/product_relationship_types": pending
   "POST /api/v3/products/{product_identifier}/product_relationship_types/unlink": pending

@@ -2,7 +2,7 @@
 
 Record of every `feedback-corrector` run: the feedback received, what our sources said, what changed on the page, and the reply sent to David. One section per page, newest run first. Open questions for Plytix live in [`feedback-flags.md`](feedback-flags.md).
 
-**Last updated:** 2026-11-06
+**Last updated:** 2026-11-09
 
 ## Index
 
@@ -22,7 +22,7 @@ Record of every `feedback-corrector` run: the feedback received, what our source
 | [Connect an AI assistant to the Plytix docs](#connect-an-ai-assistant-to-the-plytix-docs) | 1 | 2026-10-14 |
 | [Not migrated and new in V3](#not-migrated-and-new-in-v3) | 1 | 2026-10-14 |
 | [Migrating to V3](#migrating-to-v3) | 1 | 2026-10-14 |
-| [Plytix MCP](#plytix-mcp) | 4 | 2026-11-06 |
+| [Plytix MCP](#plytix-mcp) | 6 | 2026-11-09 |
 
 ---
 
@@ -1090,6 +1090,116 @@ Open questions:
 ## Plytix MCP
 
 **Page:** `fumadocs/content/docs/guides/mcp/overview.mdx` · **Page type:** Concept overview plus five child pages. Moved on 2026-11-06 from `guides/platform-mcp/` (`index.mdx`, `connect.mdx`, `capabilities-and-permissions.mdx`, `example-workflows.mdx`, `troubleshooting.mdx`, `changelog.mdx`; split into six pages on 2026-11-04) to `guides/mcp/` (`overview.mdx`, `quickstart.mdx`, `tools.mdx`, and the same last three), served at `/mcp/**`.
+
+### Run 2026-11-09 (2)
+
+**Feedback from:** David, Slack, 9 Nov 2026 8:27, answering our six open questions (MCP-028 permissions, `/docs` links, V3 spec source, product relationships visibility, PM-51, PM-54). Logged under Plytix MCP because the thread started there; items 3-6 touch the V3 spec pipeline, `openapi-v1v2.json`, and the hidden Filter operators page.
+**Approved by the user:** all (F4, F5, F6). F1 held until the new OAuth screen is live; F3 waits for the October 27 spec file.
+
+#### Feedback items
+
+| # | Feedback (short) | Type | Location | Verdict | Outcome |
+|---|---|---|---|---|---|
+| F1 | MCP-028 wording; "OAuth permissions screen improved: users can choose which scopes to grant", deploying today or tomorrow | Factual | `tools.mdx` Permissions; Quickstart sign-in steps | Wording already aligned (Run 2026-11-09); scope selection not live yet | Held, FB-058 updated with ready wording |
+| F2 | "Please keep the redirects in place." | Question | `redirects.json` | Already aligned | No change, FB-060 resolved |
+| F3 | "use the spec snapshot we shared on October 27 as the build input"; auth and production URL still open | Scope | `upstream/`, OAS-3 | Blocked: no October 27 file in the repo (newest is `openapi_pimv3_20261019`, received October 23) | Waiting on the file; OAS-3 response recorded |
+| F4 | "The endpoints public in the latest spec should be the one public." | Scope | `upstream/visibility.yaml` lines 187-198, REL-23 | Supported | Applied, then reverted: `api:build` failed (see Not changed) |
+| F5 | PM-51: remove `pagination.count` and `pagination.total_count` from the V1 request example | Factual | `openapi-v1v2.json`, `POST /api/v1/attributes/product/search`, `search-by-type` | Supported: the request schema already declares only `page`, `page_size`, `order` | Applied, FB-059 resolved |
+| F6 | PM-54: ASCII `!in` recipe; `A\.B` and `A\+B` escapes for `contains:ignorecase` | Factual | `guides/migrating-to-v3/filter-operators.mdx` lines 48-66 (hidden until V3 ships) | Supported: Plytix's Dev tests; `[lower]` is in the spec's filter example (`label[lower][contains:ignorecase]`) | Applied, FB-044 resolved, FB-045 narrowed |
+
+#### Applied changes
+
+| # | Change made | Source |
+|---|---|---|
+| F5 | `search-by-type` request example: `"pagination": {"order": null, "page": 1, "page_size": 25}` (`count` and `total_count` removed). Response examples unchanged. | David, Slack 9 Nov; operation request schema |
+| F6 | Punctuation paragraph gains: "To match punctuation literally, put one backslash before it: send `A\.B` for a literal dot and `A\+B` for a literal plus. The filter value contains that one backslash before URL encoding, so in a JSON string you write `"A\\.B"` and `"A\\+B"`." FLAG narrowed to plain `[contains]`. | David, Slack 9 Nov |
+| F6 | `!in` paragraph replaced: "For ASCII text, lowercase the field with `[lower]` and keep records with no value in the same OR group:" plus `_or[0]attributes.<text_label>[lower][!in]=alphabeta&_or[0]attributes.<text_label>[!exists]=true`, the Dev result (excluded `AlphaBeta`, `alphabeta`; kept `Other` and a product with no value), and the ASCII-only scope (`ÉCOLE`, `école`). FB-044 FLAG removed. | David, Slack 9 Nov; `upstream/openapi-v3.json` filter example |
+
+Checks: `openapi-v1v2.json` parses; `npm run api:check` passes ("Generated files match a fresh build"); no em dashes or lowercase version names in the added prose.
+
+#### Not changed
+
+- **F4:** setting the 11 product-relationship-types operations to `public` made `api:build` fail with 7 blocking content errors: 6 operations have no description, and `GET /api/v3/product-relationship-types/{identifier}/{path}` 200 has no schema or example. Nothing was written. `visibility.yaml` is back to `pending`, with a comment recording David's answer; `ops/relationships.yaml` has no actions since the 2026-10-19 spec. Publishing them needs reference descriptions (Writer work, ideally with `endpoint-tester` runs, since these routes are untested).
+- **F1:** the page doesn't describe scope selection until the new screen is live and tested.
+- **F3:** no file to take in yet.
+
+#### Flags
+
+Resolved: FB-044, FB-059, FB-060 · Updated: FB-045 (now only plain `[contains]`), FB-058 · `overlays/QUESTIONS.md`: OAS-3 and REL-23 responses recorded (details in [`feedback-flags.md`](feedback-flags.md))
+
+#### Follow-ups on other pages
+
+- `overlays/ops/relationships.yaml`: describe the 11 product-relationship-types operations, then set them to `public` in `visibility.yaml` in the same change.
+- Save the October 27 spec snapshot and run `npm run api:intake -- <file>`; re-check REL-23 against it.
+- `tools.mdx` and `quickstart.mdx`: apply the FB-058 scope wording once the new OAuth screen is live.
+
+#### Reply to David
+
+```text
+Thanks, David. Here's where each one landed:
+
+1. MCP-028: your wording is already on the Capabilities and permissions page. Once the new OAuth screen with scope selection is live, we'll test it and update the sign-in steps to say users choose which scopes to grant.
+2. /docs links: no change, the redirects stay in place.
+3. OpenAPI spec: we'll switch the build to the October 27 snapshot as soon as we've saved it in our repo, and keep the automated download off until the auth method and production URL are settled.
+4. Product relationships: noted, all 11 product-relationship-types endpoints will be public. Our build needs a description for each before it publishes them, so we'll write those as part of the V3 phase.
+5. PM-51: done, count and total_count are out of the Search by type request example.
+6. PM-54: the !in recipe, scoped to ASCII, and the A\.B and A\+B escapes are now on the Filter operators page, ready for the V3 release.
+
+Open question
+- Does plain [contains] need the same backslash escaping as [contains:ignorecase]?
+```
+
+### Run 2026-11-09
+
+**Feedback from:** David, Slack, 9 Nov 2026 8:14, with Plytix Core's answers on MCP-028, MCP-034, and MCP-018 (the questions held in the 2026-11-06 runs). Also used: Claude's "Get started with custom connectors using remote MCP" help article, and OpenAI's custom MCP server guide and plugin deploy page (all checked 2026-11-09; OpenAI's Help Center returned 403).
+**Approved by the user:** all (F1, F2, F3a). F3b wasn't a proposed correction, so it stays flagged.
+
+#### Feedback items
+
+| # | Feedback (short) | Type | Location | Verdict | Outcome |
+|---|---|---|---|---|---|
+| F1 | MCP-028: "The AI app controls whether it asks the user to approve a tool call. Plytix controls what the connection is authorized to do." Plus proposed wording; OAuth permissions and user roles still to be verified | Factual | `tools.mdx`, Permissions, line 47 and FLAG | Supported (Core, via David) | Applied |
+| F2 | MCP-034: "use a standalone product in the example and say that saving updates the description value for that SKU. In Plytix, variants can inherit the parent's description depending on the product family's settings." | Factual | `example-workflows.mdx`, Improve a product description, lines 74-84 and FLAG | Supported: `GF-Basket` is a parent (`sample-data.md` line 93); glossary → Product Family, inheritance from parent to variants | Applied |
+| F3a | MCP-018: revoking from the PIM is a future improvement; "document how to remove the connector from Claude" | Scope | `quickstart.mdx`, Claude tab, line 70 and FLAG | Supported: Claude help article, "Remove custom connectors" | Applied |
+| F3b | MCP-018: the same "from ... chatgpt" | Scope | `quickstart.mdx`, ChatGPT tab | Unverifiable: no OpenAI source we can read documents removal | Flagged, FB-064 |
+
+#### Applied changes
+
+| # | Change made | Source |
+|---|---|---|
+| F1 | "If your application has no per-tool controls, any tool can run when your assistant calls it." replaced with a paragraph: "Your AI application controls whether it asks you to approve a tool call. Plytix controls what the connection is authorized to do: the actions your assistant can perform depend on the access granted when you connect to Plytix. If your AI application supports per-tool approvals, you can manage those separately in the application." FLAG: MCP-028 and FB-055 lines removed; consent-screen question kept with David's note. | David, Slack 9 Nov ("AI app" → "AI application" per the page's wording) |
+| F2 | Intro: "Get a suggested rewrite for a standalone product, one with no parent or variants, and approve it before anything changes." Prompt and follow-up SKU `GF-Basket` → `GF-Chocolates`. Scope paragraph: "Saving the text updates the description value for that SKU through the tool that updates products. It doesn't change the description attribute itself. In Plytix, variants can inherit their parent's description, depending on the product family's settings, so check those settings before you update a parent product or a variant." FLAG: MCP-034 Core question replaced with a test note (use a product with `product_level` `0`). | David, Slack 9 Nov; `.claude/skills/writer/references/sample-data.md` lines 93-96; glossary → Variant (`product_level` `0` standalone) |
+| F3a | Claude tab removal paragraph gains: "On a Team or Enterprise plan, owners remove the organization's connector in **Organization settings** > **Connectors**." The FB-055 FLAG under the tabs is replaced by a FLAG for the missing ChatGPT removal step (FB-064). | support.claude.com article 11175166 → "Team and Enterprise Owners can do this on their organization's behalf in Organization settings > Connectors" |
+
+Checks: no em dashes, lowercase version names, or banned words in the 12 added lines. Build not rerun (MDX prose and comment edits only).
+
+#### Not changed
+
+- **F3b:** ChatGPT removal steps aren't documented by OpenAI's guides we could read; flagged as FB-064 for a test against production.
+- **`tools.mdx` line 51** ("remove the Plytix connection in your AI application's settings"): already aligned with MCP-018.
+- **"Plytix can't revoke connections":** not added; David describes it as a future improvement, and the pages don't document roadmap items.
+- **"Draft content for a sales channel"** keeps `GF-Basket`: it only reads data, so inheritance doesn't matter there.
+
+#### Flags
+
+Added: FB-064 · Resolved: FB-055 · Updated: FB-054, FB-058 (details in [`feedback-flags.md`](feedback-flags.md))
+
+#### Follow-ups on other pages
+
+- `quickstart.mdx`, ChatGPT tab: add removal steps after testing against `https://pim.plytix.com/mcp` (FB-064).
+
+#### Reply to David
+
+```text
+Thanks, David. I've applied all three:
+
+1. MCP-028: Capabilities and permissions now says your AI application controls whether it asks you to approve a tool call, Plytix controls what the connection is authorized to do, and the actions depend on the access granted when you connect. Per-tool approvals are managed in the application. We'll keep the OAuth permissions and user roles question open until you've verified them.
+2. MCP-034: the "Improve a product description" example now uses a standalone product (GF-Chocolates, since GF-Basket has variants). It says saving updates the description value for that SKU, and that variants can inherit the parent's description depending on the product family's settings.
+3. MCP-018: the Claude tab keeps the removal steps and now also covers Team and Enterprise owners, who remove the organization's connector in Organization settings > Connectors. For ChatGPT, OpenAI's docs don't describe removing a custom MCP plugin, so we'll test it against pim.plytix.com/mcp and add the exact steps.
+
+Open question
+- If your team has already removed the Plytix plugin in ChatGPT, could you share the menu path and button labels?
+```
 
 ### Run 2026-11-06 (2)
 

@@ -2466,11 +2466,9 @@
                       ]
                     ],
                     "pagination": {
-                      "count": 10,
                       "order": null,
                       "page": 1,
-                      "page_size": 25,
-                      "total_count": 82
+                      "page_size": 25
                     },
                     "attributes": [
                       "id",

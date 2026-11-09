@@ -44,7 +44,9 @@ What your assistant can do with your account depends on three things:
 - **The access you grant when you authorize the connection.** You sign in to Plytix with OAuth and review the access your AI application requests before you approve it.
 - **The controls your AI application offers.** These differ between applications, and some applications offer none.
 
-AI applications offer different tool controls. Claude provides approval options such as **Allow always** and controls for disabling tools in a conversation. ChatGPT provides tool controls and confirmation settings for write actions. See [Connect your AI assistant](/mcp/quickstart) for the application-specific steps. If your application has no per-tool controls, any tool can run when your assistant calls it.
+AI applications offer different tool controls. Claude provides approval options such as **Allow always** and controls for disabling tools in a conversation. ChatGPT provides tool controls and confirmation settings for write actions. See [Connect your AI assistant](/mcp/quickstart) for the application-specific steps.
+
+Your AI application controls whether it asks you to approve a tool call. Plytix controls what the connection is authorized to do: the actions your assistant can perform depend on the access granted when you connect to Plytix. If your AI application supports per-tool approvals, you can manage those separately in the application.
 
 Where your application allows it, let tools that only read data run on their own, and require your approval for tools that change your catalog. Try write workflows on a test account first, since Plytix can't undo some changes, such as deletions.
 
@@ -53,9 +55,8 @@ To stop your assistant from using the Plytix MCP, remove the Plytix connection i
 {/* FLAG (open):
   Plytix-side permissions need confirmation from Plytix Core before this section says more:
   - FB-054: which Plytix role the person signing in needs, and whether the assistant can see and change only what that user can see and change in Plytix (for example, whether a user without edit rights can run write tools).
-  - FB-055: whether a user or admin can see and revoke Plytix MCP connections from inside Plytix, and where.
-  - Whether the OAuth consent screen lets the user narrow the access granted (for example, read-only), or always grants the full tool set.
-  - MCP-028 (David, 6 Nov 2026) proposes: "If your AI application does not provide per-tool controls, tool access is governed by the authorization granted to the connection and the restrictions enforced by Plytix." Held until Core confirms which restrictions Plytix enforces (FB-058).
+  - FB-058: whether the OAuth consent screen lets the user narrow the access granted (for example, read-only), or always grants the full tool set.
+  David (9 Nov 2026): Plytix still needs to verify which OAuth permissions are available in the beta and how they interact with Plytix user roles. Managing and revoking OAuth access from inside Plytix is a possible future improvement, not available now (FB-055, resolved), so don't mention it on the page.
 */}
 
 ## Related articles

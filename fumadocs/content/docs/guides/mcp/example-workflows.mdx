@@ -8,7 +8,7 @@ import { ShieldCheckmarkRegular, WrenchRegular } from '@/components/icons';
 Use these prompts as starting points after [connecting your account](/mcp/quickstart). Replace sample SKUs, category names, and attribute labels with values from your own catalog. Each example identifies the [capabilities](/mcp/tools#available-capabilities) it requires. Specify that the assistant should use Plytix, and check the resulting tool calls and data.
 
 {/* FLAG (open):
-  None of these prompts has been run yet. Test each one on a sample account against the release endpoint before publishing, record the actual outcome, and remove any workflow whose tools aren't in the release. The channel content, supplier file, and team questions workflows were approved by David on 29 Oct 2026. Core to confirm how a description update through the MCP applies to parent and variant inheritance (MCP-034, FB-058).
+  None of these prompts has been run yet. Test each one on a sample account against the release endpoint before publishing, record the actual outcome, and remove any workflow whose tools aren't in the release. The channel content, supplier file, and team questions workflows were approved by David on 29 Oct 2026. "Improve a product description" uses a standalone product per David (9 Nov 2026, MCP-034): `GF-Chocolates` has no variants in the sample data; on the test account, use a product whose `product_level` is `0`.
 */}
 
 ## Find a product
@@ -73,15 +73,15 @@ Your assistant answers from the values Plytix returns and shows them, so your co
 
 ## Improve a product description
 
-Get a suggested rewrite and approve it before anything changes.
+Get a suggested rewrite for a standalone product, one with no parent or variants, and approve it before anything changes.
 
 ```text
-Using Plytix, for SKU GF-Basket, propose a clearer description and show me the proposed text before saving anything.
+Using Plytix, for SKU GF-Chocolates, propose a clearer description and show me the proposed text before saving anything.
 ```
 
-For this workflow, ask the assistant to read the description and propose a rewrite without saving it. Review the proposal before asking it to update the product, for example with "Save that description to GF-Basket." A write tool applies the update when it runs, subject to your AI application's controls.
+For this workflow, ask the assistant to read the description and propose a rewrite without saving it. Review the proposal before asking it to update the product, for example with "Save that description to GF-Chocolates." A write tool applies the update when it runs, subject to your AI application's controls.
 
-Saving the text updates the product's description value through the tool that updates products. It doesn't edit the attribute definition. Confirm how parent and variant inheritance applies before updating an inherited value.
+Saving the text updates the description value for that SKU through the tool that updates products. It doesn't change the description attribute itself. In Plytix, variants can inherit their parent's description, depending on the product family's settings, so check those settings before you update a parent product or a variant.
 
 <Callout type="warn" title="Review before you save">
   A write tool changes your catalog as soon as it runs. Ask for a proposal first, review it, and then approve the change in a separate prompt. Plytix can't undo some changes, so try write workflows on a test account first.

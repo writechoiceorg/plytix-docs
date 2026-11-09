@@ -45,10 +45,10 @@ Map `like` to `[contains:ignorecase]`. V3 splits text matching by case: `[contai
 _or[0]field[!contains:ignorecase]=value&_or[0]field[!exists]=true
 ```
 
-`[contains:ignorecase]` treats some punctuation as pattern syntax rather than literal text. In testing, values such as `A.B` and `A+B` matched as patterns, so a search for `A.B` can return records that don't contain that exact text. Check the results of any text filter whose value contains punctuation.
+`[contains:ignorecase]` treats some punctuation as pattern syntax rather than literal text. In testing, values such as `A.B` and `A+B` matched as patterns, so a search for `A.B` can return records that don't contain that exact text. To match punctuation literally, put one backslash before it: send `A\.B` for a literal dot and `A\+B` for a literal plus. The filter value contains that one backslash before URL encoding, so in a JSON string you write `"A\\.B"` and `"A\\+B"`.
 
 {/* FLAG (open):
-  PM-54 (2026-10-19): Plytix says to escape literal punctuation for the tested pattern cases but didn't give the escape syntax. Ask David for the exact escaped form (and whether plain `[contains]` behaves the same) before documenting it. */}
+  PM-54: David (9 Nov 2026) gave the escape syntax, verified with `[contains:ignorecase]` only. Confirm whether plain `[contains]` treats punctuation the same way before saying so (FB-045). */}
 
 `text_search` matched text across several fields, passed as a list in `field`. V3 has no `text_search` operator. The nearest form is an OR group with one `contains` filter per field, such as `_or[0]sku[contains:ignorecase]=kettle&_or[0]label[contains:ignorecase]=kettle`. That form isn't a confirmed equivalent, so compare the results before you rely on it.
 
@@ -60,10 +60,13 @@ A field can be absent, `null`, an empty string, or an empty list. The two versio
 - V3 has separate operators: `[exists]` and `[!exists]` test whether the field is defined, `[null]` and `[!null]` test for `null`, and `[length]=0` matches an empty string or an empty list. In practice they overlap. On the attribute types tested, an emptied value is stored as absent, so a cleared value and one that was never set both match `[!exists]=true` and `[length]=0`, and neither matches `[null]`.
 - V3's negated comparisons, such as `[!eq]`, `[!in]`, and `[!contains:ignorecase]`, skip records where the field is `null` or undefined. To include those records, add `[!exists]=true` to the same OR group, as in the `!like` example above.
 
-Case handling for `!in` on text values also needs care. A lowercase-based rewrite that preserved the tested ASCII results didn't hold for an accented value such as `ÉCOLE`, so it isn't a general Unicode rewrite. Because V1 doesn't define these cases, compare the record IDs that both versions return for matching, other-case, non-matching, and empty records before you rely on any translation.
+Case handling for `!in` on text values also needs care. For ASCII text, lowercase the field with `[lower]` and keep records with no value in the same OR group:
 
-{/* FLAG (open):
-  PM-54 (2026-10-19): Plytix refers to a tested lowercase recipe for ASCII `!in` but didn't share it. Ask David for the exact recipe and its control IDs before publishing a runnable example. */}
+```text
+_or[0]attributes.<text_label>[lower][!in]=alphabeta&_or[0]attributes.<text_label>[!exists]=true
+```
+
+In a test, this excluded `AlphaBeta` and `alphabeta`, and kept `Other` and a product with no value. It didn't preserve the V1 results for accented values such as `ÉCOLE` and `école`, so use it only for ASCII text, and compare the record IDs both versions return before you rely on it.
 
 ### Multi-value fields
 

@@ -67,7 +67,7 @@ Select your AI application and follow the steps to add the server, authorize the
 
     Claude asks for your approval before it runs a tool. Select **Allow always** only for tools you trust to run without review, such as tools that only read data. To keep a tool from running in a conversation, turn it off in the **Search and tools** menu.
 
-    To remove the connection, open **Customize** > **Connectors** and find **Plytix**. Select **Remove**, or open its three-dot menu and select the removal option. Complete any confirmation prompts.
+    To remove the connection, open **Customize** > **Connectors** and find **Plytix**. Select **Remove**, or open its three-dot menu and select the removal option. Complete any confirmation prompts. On a Team or Enterprise plan, owners remove the organization's connector in **Organization settings** > **Connectors**.
 
     For plan and workspace requirements, see [Claude's guide to custom connectors](https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp).
   </Tab>
@@ -93,7 +93,7 @@ Select your AI application and follow the steps to add the server, authorize the
 </Tabs>
 
 {/* FLAG (open):
-  Can a user revoke a Plytix MCP authorization from inside Plytix, and if so, where (FB-055)? David (29 Oct 2026) says access is managed on the AI application side. Removing the connection in the AI application isn't described as revoking the authorization in Plytix until Core confirms (MCP-018).
+  ChatGPT tab: no removal step yet. David (9 Nov 2026, MCP-018) asks us to document how to remove the connector from Claude and ChatGPT. Claude's steps follow its help article ("Remove custom connectors"). OpenAI's custom MCP server guide and plugin deploy page (checked 9 Nov 2026) don't describe removing a plugin or disconnecting OAuth, and the Help Center couldn't be read. Test removal in ChatGPT and add the exact labels (FB-064). Revoking access from inside Plytix isn't available (FB-055, resolved), so the page only describes removal in the AI application.
 */}
 
 ## Verify the connection

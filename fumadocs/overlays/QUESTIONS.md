@@ -33,6 +33,7 @@ Every fix in `00-fixes.yaml` cites one of these IDs through `x-plytix-question`.
 
 | Plytix response |
 | :---- |
+| 2026-11-09, David (Slack): "The Dev URL isn't working for us either, and I've flagged it internally. The build authentication method and the production spec URL are still open. In the meantime, please use the spec snapshot we shared on October 27 as the build input." WriteChoice: we don't have an October 27 file in the repo yet (the newest is `openapi_pimv3_20261019`, received October 23). Once it's saved, take it in with `npm run api:intake -- <file>`. CI stays off. |
 
 ### OAS-4
 
@@ -680,6 +681,7 @@ Raised while applying `materials/api-references/endpoint-reviews/Plytix_API_v3_W
 
 | Plytix response |
 | :---- |
+| 2026-11-09, David (Slack): "The endpoints public in the latest spec should be the one public." WriteChoice: all 11 are to be public. They stay `pending` in `visibility.yaml` until `ops/relationships.yaml` describes them: switching them on fails `api:build` (6 operations with no description, and the `GET .../{path}` 200 renders as `null`). The two follow-ups (old routes in production, `product_relationships_from`/`_to`) are still open. |
 
 ### PROD-21
 
