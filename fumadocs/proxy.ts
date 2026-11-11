@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { isMarkdownPreferred, rewritePath } from 'fumadocs-core/negotiation';
-import { docsContentRoute, docsRoute, referenceFolder, referenceRoute } from '@/lib/shared';
+import { docsContentRoute, docsRoute, mcpFolder, mcpRoute, referenceFolder, referenceRoute } from '@/lib/shared';
 
-// Pages under /docs and /reference both resolve to the same content route;
-// /reference/** maps to the reference/ folder of the content tree.
+// Pages under /docs, /reference and /mcp all resolve to the same content route;
+// /reference/** maps to the reference/ folder of the content tree, and
+// /mcp/** to guides/mcp/.
 const routes = [
   { from: docsRoute, to: docsContentRoute },
   { from: referenceRoute, to: `${docsContentRoute}/${referenceFolder}` },
+  { from: mcpRoute, to: [docsContentRoute, ...mcpFolder].join('/') },
 ].map(({ from, to }) => ({
   docs: rewritePath(`${from}{/*path}`, `${to}{/*path}/content.md`).rewrite,
   suffix: rewritePath(`${from}{/*path}.md`, `${to}{/*path}/content.md`).rewrite,

@@ -14,8 +14,11 @@ import {
   getPageImageUrl,
   getPageMarkdownUrl,
   gitConfig,
+  isMcpSlugs,
   isReferenceSlugs,
   landingRoute,
+  mcpFolder,
+  mcpRoute,
 } from '@/lib/shared';
 import { openapi } from '@/lib/openapi';
 import { getPageOperation } from '@/lib/openapi-markdown';
@@ -25,17 +28,19 @@ import Link from 'fumadocs-core/link';
 /**
  * The page at these slugs. A missing page is a 404, except the /docs and
  * /reference roots, which lead to the landing page when their own landing
- * page isn't published (see `publishedFolders` in lib/shared.ts).
+ * page isn't published (see `publishedFolders` in lib/shared.ts), and the
+ * /mcp root, which has no page of its own and leads to the MCP overview.
  */
 function getPublishedPage(slugs: string[]) {
   const page = source.getPage(slugs);
   if (page) return page;
   if (slugs.length === 0 || (isReferenceSlugs(slugs) && slugs.length === 1)) redirect(landingRoute);
+  if (isMcpSlugs(slugs) && slugs.length === mcpFolder.length) redirect(`${mcpRoute}/overview`);
   notFound();
 }
 
 /**
- * Renders one content page. Shared by the /docs and /reference routes, which
+ * Renders one content page. Shared by the /docs, /mcp and /reference routes, which
  * serve the same content tree (see `url` in lib/source.ts).
  */
 export async function DocsPageView({ slugs }: { slugs: string[] }) {
