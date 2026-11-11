@@ -1,5 +1,7 @@
 import { llms, loader } from 'fumadocs-core/source';
 import { fluentIconsPlugin } from './fluent-icons-plugin';
+import { sidebarTitlePlugin } from './sidebar-title-plugin';
+import { z } from 'zod';
 import { docsRoute, getPageUrl, isPublishedPath } from './shared';
 import { defineDocs } from 'fumadocs-mdx/macro';
 import { applyMdxPreset } from 'fumadocs-mdx/config';
@@ -11,7 +13,8 @@ import { remarkStructureOptions } from './search-structure';
 const docs = defineDocs({
   dir: 'content/docs',
   docs: {
-    schema: pageSchema,
+    // `sidebarTitle`: optional shorter sidebar label (see lib/sidebar-title-plugin.ts).
+    schema: pageSchema.extend({ sidebarTitle: z.string().optional() }),
     // The preset keeps Fumadocs' default plugins; only the search index changes.
     mdxOptions: applyMdxPreset({ remarkStructureOptions }),
     postprocess: {
@@ -32,7 +35,7 @@ export const source = loader({
   baseUrl: docsRoute,
   url: (slugs) => getPageUrl(slugs),
   source: { ...docsSource, files: docsSource.files.filter((file) => isPublishedPath(file.path)) },
-  plugins: [fluentIconsPlugin(), openapi.loaderPlugin()],
+  plugins: [fluentIconsPlugin(), sidebarTitlePlugin(), openapi.loaderPlugin()],
 });
 
 export const docsLlms = llms(source, {

@@ -1,0 +1,75 @@
+---
+title: "Plytix MCP"
+sidebarTitle: "Overview"
+description: "Learn what the Plytix MCP beta is, how it connects an AI application to your Plytix account, and where to start setting it up."
+---
+
+import {
+  HistoryRegular,
+  LightbulbRegular,
+  PlugConnectedRegular,
+  ShieldCheckmarkRegular,
+  WrenchRegular,
+} from '@/components/icons';
+
+<Callout type="info" title="Plytix MCP is in beta">
+  To enable the Plytix MCP beta for your account, contact your account manager. Explore the available tools in [Capabilities and permissions](/mcp/tools), and check the [changelog](/mcp/changelog) for updates.
+</Callout>
+
+The Plytix MCP connects a compatible AI application to your Plytix account, so you can ask your assistant to work with your product data in natural language. This page introduces the Plytix MCP and explains how access works. Use the guides below to connect your AI assistant, explore the available capabilities, try example workflows, and troubleshoot common issues.
+
+{/* FLAG (open):
+  Release URL `https://pim.plytix.com/mcp` confirmed by David (29 Oct 2026; he gave it without the scheme, `https://` follows the DEV URL). Launch planned for November 9, 2026 (David, MCP-041, 6 Nov 2026; earlier planned for November 6). Test every step in this section against it before publishing.
+*/}
+
+## What is the Plytix MCP?
+
+The Plytix MCP is a server that lets an AI application, such as an AI assistant or agent, work with the data in your Plytix account. It uses the Model Context Protocol (MCP), an open standard that lets AI applications discover and call tools exposed by external services.
+
+After you connect, your AI application discovers the available Plytix tools. Ask your assistant a question or describe a task in natural language. When needed, specify that it should use the Plytix connection.
+
+The Plytix MCP provides tools for working with your catalog through an AI assistant. See [Capabilities and permissions](/mcp/tools) for the available operations. Tools may be added, updated, or removed over time, with changes recorded in the [changelog](/mcp/changelog).
+
+## How access works
+
+You sign in to Plytix with OAuth to authorize your AI application. The available tools and the access granted to the connection determine what your assistant can do.
+
+Some AI applications also let you control individual tools, for example by asking for your approval before a tool runs or by turning a tool off. These controls belong to the AI application, so they differ from one application to another. Some tools can change your catalog, so try the [example workflows](/mcp/example-workflows) on a test account first.
+
+## Get started
+
+Start with Connect your AI assistant, verify the connection, and try an example workflow. Use Capabilities and permissions, Troubleshooting, and Changelog as reference guides.
+
+<Cards>
+  <Card icon={<PlugConnectedRegular />} title="Connect your AI assistant" href="/mcp/quickstart">
+    Add the Plytix MCP to Claude or ChatGPT, authorize it, and check the connection.
+  </Card>
+  <Card icon={<ShieldCheckmarkRegular />} title="Capabilities and permissions" href="/mcp/tools">
+    Explore the available capabilities and learn how access is controlled.
+  </Card>
+  <Card icon={<LightbulbRegular />} title="Example workflows" href="/mcp/example-workflows">
+    Start from prompts for finding products, reviewing content, and drafting copy.
+  </Card>
+  <Card icon={<WrenchRegular />} title="Troubleshooting" href="/mcp/troubleshooting">
+    Resolve connection issues, find missing tools, and investigate unexpected answers.
+  </Card>
+  <Card icon={<HistoryRegular />} title="Changelog" href="/mcp/changelog">
+    Check what changed in each Plytix MCP release.
+  </Card>
+</Cards>
+
+## Related articles
+
+Now that you know what the Plytix MCP does, you can explore these related guides.
+
+<Cards>
+  <Card icon={<ShieldCheckmarkRegular />} title="Capabilities and permissions" href="/mcp/tools">
+    Explore the available capabilities and learn how access is controlled.
+  </Card>
+  <Card icon={<LightbulbRegular />} title="Example workflows" href="/mcp/example-workflows">
+    Start from prompts for finding products, reviewing content, and drafting copy.
+  </Card>
+  <Card icon={<WrenchRegular />} title="Troubleshooting" href="/mcp/troubleshooting">
+    Resolve connection issues, find missing tools, and investigate unexpected answers.
+  </Card>
+</Cards>

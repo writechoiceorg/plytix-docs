@@ -1,0 +1,12 @@
+{
+  "title": "Plytix MCP",
+  "icon": "Bot",
+  "pages": [
+    "overview",
+    "quickstart",
+    "tools",
+    "example-workflows",
+    "troubleshooting",
+    "changelog"
+  ]
+}
