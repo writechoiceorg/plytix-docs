@@ -716,3 +716,11 @@ Raised while applying `materials/api-references/endpoint-reviews/Plytix_API_v3_W
 
 | Plytix response |
 | :---- |
+
+### AUTH-2
+
+- **Observed (2026-11-12, review of `reference/v3/authentication.mdx`):** The authentication guide (reconfirmed as current on 2026-11-12) lists token permissions for seven resources: Products, Assets, Product categories, Asset categories, Attributes, Product families, and Relationships. The 2026-10-19 spec also has asset lists (`/api/v3/asset-lists`) and product attribute groups (`/api/v3/product-attribute-groups`), and replaces relationships with product relationship types (`/api/v3/product-relationship-types`, `/api/v3/product-relationships`). The docs list the seven resources as written.
+- **Question:** Which token permission governs asset lists, product attribute groups, and product relationship types? For example, do asset lists fall under Assets and attribute groups under Attributes? Does "Relationships" in the token UI cover the new product relationship types endpoints?
+
+| Plytix response |
+| :---- |

@@ -207,6 +207,7 @@ Links to tutorials or how-to guides that use this reference material.
 - Keep descriptions factual and scannable. This is not the place for explanation or narrative.
 - If a field has accepted values, list them explicitly.
 - If a field has constraints, state them (e.g. "Maximum 255 characters").
+- Reference pages don't carry procedures, with one exception: the V3 Authentication reference (`reference/v3/authentication.mdx`) keeps the token creation, rotation, and revocation steps, because `style-guide.md` ("Access token step in integration guides") makes it, with the Quickstart, the only place those steps live. (Added 2026-11-12.)
 
 ---
 

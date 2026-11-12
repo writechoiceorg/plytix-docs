@@ -52,7 +52,7 @@ These are the only components registered in `fumadocs/components/mdx.tsx`, on to
 |---|---|---|
 | `Callout` | Notes, tips, warnings, and writer flags. See Callout types below. | `<Callout type="info" title="...">...</Callout>` |
 | `Cards` | Wrapper for a group of `Card` components, used in the "Related articles" section | `<Cards>...</Cards>`. Lays out cards in a grid; use exactly 2 cards in a "Related articles" or "Related resources" section (see `style-guide.md`). Landing and section-index pages use `Cards` for navigation and aren't capped. |
-| `Card` | A single related article card with title, icon, link, and short description | `<Card icon={<Search />} title="..." href="/guides/...">Description.</Card>` |
+| `Card` | A single related article card with title, icon, link, and short description | `<Card icon={<RocketRegular />} title="..." href="/guides/...">Description.</Card>` |
 | `Steps` / `Step` | Visual step layout. Available, but how-to procedures use numbered lists per `style-guide.md`. Use only for tutorial milestones if the project lead approves. | `<Steps><Step>...</Step></Steps>` |
 | `Tabs` / `Tab` | Alternatives the reader picks one of (for example, v1/v2 vs. v3 samples, or curl vs. Python) | `<Tabs items={['v3', 'v1/v2']}><Tab value="v3">...</Tab><Tab value="v1/v2">...</Tab></Tabs>` |
 | `Accordions` / `Accordion` | Collapsible detail, including supporting lists such as allowed field values inside a procedure step (indent to the step's level). **Required for how-to guide Troubleshooting sections** (one `Accordion` per problem, titled with the symptom; see `style-guide.md`). Also used for FAQs. Always precede with a lead-in sentence. | `<Accordions type="multiple"><Accordion title="...">...</Accordion></Accordions>` |
@@ -70,13 +70,13 @@ Escape `<` and `>` inside the JSX title (`&lt;identifier&gt;`). Titles with no c
 
 ### Icons
 
-`Card` icons are Lucide React components imported at the top of the page, below the frontmatter:
+`Card` icons are Fluent icons (Plytix's design system uses Fluent, not Lucide), imported from `@/components/icons` at the top of the page, below the frontmatter:
 
 ```mdx
-import { Search, SatelliteDish } from 'lucide-react';
+import { RocketRegular, WarningRegular } from '@/components/icons';
 ```
 
-Use any icon name from [lucide.dev/icons](https://lucide.dev/icons). Import every icon you use; an unimported icon breaks the build.
+Only icons exported from `fumadocs/components/icons.ts` are available. To use a new one, add an export there from `@fluentui/react-icons/headless/svg/<icon-name>` first. Import every icon you use; an unimported icon breaks the build. (Updated 2026-11-12: this section previously said Lucide from `lucide-react`, which no content page uses. Sidebar icons in `meta.json` and the frontmatter `icon` field are a separate mechanism and still take Lucide names.)
 
 ### Links
 

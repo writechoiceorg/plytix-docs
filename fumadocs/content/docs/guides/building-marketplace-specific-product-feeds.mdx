@@ -11,7 +11,7 @@ Produce a feed for one marketplace or retailer, for example a UK-only product fi
 
 Before you start, make sure you have the following:
 
-- API access to your Plytix account. How you get a token depends on the API version: V1/V2 exchange your API Key and password for a bearer token, as described in [Authentication](/reference/v1-v2/token-authentication). V3 is moving to a new token-based authentication model whose details aren't published yet; see [Authentication and base URLs](/guides/migrating-to-v3/authentication-and-base-urls). The examples below send the token as `Authorization: Bearer <access_token>`.
+- A V3 access token with **Read** on products, created in the **API v3** tab of your account settings, as described in [Authentication](/reference/v3/authentication). The examples below send it as `Authorization: Bearer <access_token>`.
 - The marketplace's feed specification: the fields it requires, their formats, and the file type it accepts.
 - The attribute or category that defines which products belong in the feed. See [Filtering and Query Syntax](/reference/v3/filtering-and-search).
 

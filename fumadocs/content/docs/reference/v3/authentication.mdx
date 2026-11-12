@@ -3,9 +3,9 @@ title: Authentication
 description: "Reference for creating a V3 access token, choosing its permissions, sending it as a bearer token, and rotating, revoking, or replacing it."
 ---
 
-import { KeyRegular, RocketRegular, WarningRegular } from '@/components/icons';
+import { RocketRegular, WarningRegular } from '@/components/icons';
 
-The V3 API authenticates requests with access tokens. You create a token in your Plytix account settings, choose what it can access and when it expires, then send it in the `Authorization` header of every request. There's no separate token request and no API key and password exchange: the token you create is the one you send. This page covers creating a token, its permissions, sending it, and managing it over its lifetime.
+The V3 API authenticates requests with access tokens. You create a token in your Plytix account settings, choose what it can access and when it expires, then send it in the `Authorization` header of every request. There's no separate token request and no API Key and password exchange: the token you create is the one you send. This page covers creating a token, its permissions, sending it, and managing it over its lifetime.
 
 <Callout type="info" title="V3 is in beta">
   To get access to the V3 beta, contact your account manager. Once the beta is enabled for your account, the **API v3** tab appears in your account settings.
@@ -59,7 +59,7 @@ You can't change a token's permissions after you create it. To change them, crea
 
 Send the token in the `Authorization` header of every request, with a space after `Bearer`, and ask for JSON with the `Accept` header:
 
-```
+```http
 Authorization: Bearer your_access_token
 Accept: application/json
 ```
@@ -134,14 +134,13 @@ Use a separate token for each integration, so you can set its permissions and re
 
 ## Related resources
 
+Now that you know how to create and send an access token, you can explore these related pages.
+
 <Cards>
   <Card icon={<RocketRegular />} title="Get started with the API" href="/guides/quickstart">
     Create an access token and make your first request.
   </Card>
   <Card icon={<WarningRegular />} title="Errors and status codes" href="/reference/v3/errors-status-codes">
     See every status code the V3 API returns and what it means.
-  </Card>
-  <Card icon={<KeyRegular />} title="Authentication and base URLs" href="/guides/migrating-to-v3/authentication-and-base-urls">
-    See what changes in authentication when you move from V1/V2 to V3.
   </Card>
 </Cards>

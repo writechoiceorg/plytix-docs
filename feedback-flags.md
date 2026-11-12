@@ -2,18 +2,18 @@
 
 Running log of open questions and conflicts found while applying Plytix feedback to the docs. Maintained by the `feedback-corrector` skill: one section per page, updated in place.
 
-**Last updated:** 2026-11-09
+**Last updated:** 2026-11-12
 
 ## Summary
 
 | Page | Open | Resolved | Last run |
 |---|---|---|---|
-| [Overview](fumadocs/content/docs/guides/overview.mdx) | 3 | 0 | 2026-10-13 |
+| [Overview](fumadocs/content/docs/guides/overview.mdx) | 0 | 3 | 2026-11-12 |
 | [The Plytix data model](fumadocs/content/docs/guides/data-model.mdx) | 1 | 3 | 2026-10-13 |
 | [Searching and pagination](fumadocs/content/docs/guides/migrating-to-v3/searching-and-pagination.mdx) | 2 | 3 | 2026-10-14 |
 | [Filter operators](fumadocs/content/docs/guides/migrating-to-v3/filter-operators.mdx) | 3 | 2 | 2026-10-14 |
 | [Responses and updates](fumadocs/content/docs/guides/migrating-to-v3/responses-and-updates.mdx) | 3 | 1 | 2026-10-14 |
-| [Authentication and base URLs](fumadocs/content/docs/guides/migrating-to-v3/authentication-and-base-urls.mdx) | 0 (tracked under FB-002) | 0 | 2026-10-14 |
+| [Authentication and base URLs](fumadocs/content/docs/guides/migrating-to-v3/authentication-and-base-urls.mdx) | 0 | 0 (FB-002 resolved 2026-11-12) | 2026-10-14 |
 | [Endpoint mapping](fumadocs/content/docs/guides/migrating-to-v3/endpoint-mapping.mdx) | 3 | 2 | 2026-10-14 |
 | [Sync your ERP](fumadocs/content/docs/guides/syncing-your-erp-with-plytix.mdx) | 2 | 0 | 2026-10-14 |
 | [Export your full catalog](fumadocs/content/docs/guides/exporting-your-full-catalog.mdx) | 1 | 1 | 2026-10-14 |
@@ -24,7 +24,7 @@ Running log of open questions and conflicts found while applying Plytix feedback
 | [Bulk operations for large catalogs (internal draft)](internal-drafts/guides/bulk-operations-for-large-catalogs.mdx) | 1 | 1 | 2026-10-14 |
 | [Connect an AI assistant to the Plytix docs (unpublished)](internal-drafts/guides/documentation-mcp.mdx) | 1 | 1 | 2026-11-06 |
 | [Not migrated and new in V3](fumadocs/content/docs/guides/migrating-to-v3/not-migrated-and-new-in-v3.mdx) | 2 | 0 | 2026-10-14 |
-| [Migrating to V3](fumadocs/content/docs/guides/migrating-to-v3/index.mdx) | 0 (tracked under FB-001, FB-002, FB-010, FB-016, FB-018, FB-019, FB-020, FB-042) | 0 | 2026-10-14 |
+| [Migrating to V3](fumadocs/content/docs/guides/migrating-to-v3/index.mdx) | 0 (tracked under FB-010, FB-016, FB-018, FB-019, FB-020, FB-042) | 0 | 2026-10-14 |
 | [19 October action list (PM items)](#19-october-2026-documentation-actions-pm-items) | 3 | 2 | 2026-11-09 |
 | [19 October marketing and design feedback](#19-october-2026-marketing-and-design-feedback) | 6 | 0 | 2026-10-21 |
 | [Plytix MCP](fumadocs/content/docs/guides/mcp/overview.mdx) (six pages) | 6 | 4 | 2026-11-09 |
@@ -47,13 +47,13 @@ Since 2026-11-06 the V3 reference, the nine API guides, and Migrating to V3 are 
 
 | ID | Status | Feedback | What our sources say | Source | Question for Plytix | Raised | Resolution |
 |---|---|---|---|---|---|---|---|
-| FB-001 | Open | F1: "As discussed on October 8, v1/v2 will retain the current authentication system, while v3 will introduce a new model whose details are still pending." Raised again on the Migrating to V3 overview (F1, 2026-10-14): "As confirmed on October 8, v1/v2 will retain the current authentication system, while v3 will introduce a new model whose details are pending." | The substance matches Plytix's earlier written answer, but we have no record of the October 8 call itself. The newest transcript we hold is dated 2026-10-01. | `materials/project-references/brief/Questions for the Plytix Dev Team.md` → AUTH-1: "for now we will keep using the same v1 auth until we develop v3 auth carefully… we will implement a token generation with different access level." | Could you share notes or a recording from the October 8 call, so we can cite the authentication decision directly? | 2026-10-13 | |
-| FB-002 | Open | F1: "v3 will introduce a new model whose details are still pending." Raised again on the Searching and pagination page (F8, 2026-10-14): "Remove the wording that describes a token flow shared by v1/v2 and v3. Keep it consistent with the agreed legacy authentication scope and the pending v3 model." Raised again on the Authentication and base URLs page (F1-F3, 2026-10-14): "We have confirmed that v3 will introduce a new token-based model, but its details are not ready to document." Raised again on the Sync your ERP page (F1, 2026-10-14): "Remove the API key/password exchange and 15-minute token lifetime as definitive v3 instructions." Raised again on the Migrating to V3 overview (F1, 2026-10-14): "Update all statements that credentials, tokens, roles, and refresh logic remain unchanged between versions." That page now says V1/V2 keep the current flow and V3 authentication is pending. | Today, V3 requests authenticate with the V1/V2 key and password exchanged for a bearer token at `auth.plytix.com`, and our live tests confirm that flow works. The Quickstart and the V3 Authentication reference document it as the V3 flow. Since 2026-10-14, the migration guide's authentication page documents only the V1/V2 flow and marks V3 authentication as pending, so it no longer tells V3 integrators how to authenticate today. | `config/api-testing.config.md`; `fumadocs/content/docs/reference/v3/authentication.mdx`; AUTH-1 and AUTH-2 in `Questions for the Plytix Dev Team.md` | Until the new V3 model ships, is it correct to keep documenting the current key/password-to-bearer-token exchange for V3? When will details of the new model (token generation, access levels, error format) be available? | 2026-10-13 | |
-| FB-003 | Open | F1: "Please update the next-page description too." | The description David refers to is on the Quickstart page ("…with the Plytix API V3 and curl"), and the whole Quickstart body teaches the bearer-token flow. Changing only the description would not make the page general. | `fumadocs/content/docs/guides/quickstart.mdx`, line 3 | No question for Plytix. WriteChoice will update the Quickstart in a separate pass, guided by the answer to FB-002. Raised again in the Data model feedback (F9, 2026-10-13): "Update the Quickstart navigation description consistently with the Overview feedback, avoiding a definitive v3 authentication flow until confirmed." | 2026-10-13 | |
+| FB-001 | Resolved | F1: "As discussed on October 8, v1/v2 will retain the current authentication system, while v3 will introduce a new model whose details are still pending." Raised again on the Migrating to V3 overview (F1, 2026-10-14): "As confirmed on October 8, v1/v2 will retain the current authentication system, while v3 will introduce a new model whose details are pending." | The substance matches Plytix's earlier written answer, but we have no record of the October 8 call itself. The newest transcript we hold is dated 2026-10-01. | `materials/project-references/brief/Questions for the Plytix Dev Team.md` → AUTH-1: "for now we will keep using the same v1 auth until we develop v3 auth carefully… we will implement a token generation with different access level." | Could you share notes or a recording from the October 8 call, so we can cite the authentication decision directly? | 2026-10-13 | 2026-11-12: Resolved. Plytix's written V3 authentication guide (received 2026-10-23, reconfirmed as current 2026-11-12) states the decision directly: "API V3 access tokens work only with API V3. API V1/V2 continue to use their existing API key and password authentication flow." We cite the guide (`materials/api-references/v3-reference/API V3 - Authentication guide (23_10_2026).md`) instead of the call notes. No question for Plytix. |
+| FB-002 | Resolved | F1: "v3 will introduce a new model whose details are still pending." Raised again on the Searching and pagination page (F8, 2026-10-14): "Remove the wording that describes a token flow shared by v1/v2 and v3. Keep it consistent with the agreed legacy authentication scope and the pending v3 model." Raised again on the Authentication and base URLs page (F1-F3, 2026-10-14): "We have confirmed that v3 will introduce a new token-based model, but its details are not ready to document." Raised again on the Sync your ERP page (F1, 2026-10-14): "Remove the API key/password exchange and 15-minute token lifetime as definitive v3 instructions." Raised again on the Migrating to V3 overview (F1, 2026-10-14): "Update all statements that credentials, tokens, roles, and refresh logic remain unchanged between versions." That page now says V1/V2 keep the current flow and V3 authentication is pending. | Today, V3 requests authenticate with the V1/V2 key and password exchanged for a bearer token at `auth.plytix.com`, and our live tests confirm that flow works. The Quickstart and the V3 Authentication reference document it as the V3 flow. Since 2026-10-14, the migration guide's authentication page documents only the V1/V2 flow and marks V3 authentication as pending, so it no longer tells V3 integrators how to authenticate today. | `config/api-testing.config.md`; `fumadocs/content/docs/reference/v3/authentication.mdx`; AUTH-1 and AUTH-2 in `Questions for the Plytix Dev Team.md` | Until the new V3 model ships, is it correct to keep documenting the current key/password-to-bearer-token exchange for V3? When will details of the new model (token generation, access levels, error format) be available? | 2026-10-13 | 2026-11-12: Resolved. Plytix's V3 authentication guide (`materials/api-references/v3-reference/API V3 - Authentication guide (23_10_2026).md`, reconfirmed as current 2026-11-12) defines the new model: access tokens created in the **API v3** tab with a name, an expiration (7 days, 1 month, 1 year, Custom) and per-resource None/Read/Write permissions, sent directly as `Authorization: Bearer`, with no key/password exchange. The V3 Authentication reference, the Quickstart, and the Migrating to V3 pages were rewritten to it on 2026-10-23 (commit `6679ebd`). Remaining auth questions (whether V3 still accepts a `get-token` JWT, rate-limit claims, the `403` body, who can create tokens, and the customer-facing tab name) are tracked in `fumadocs/overlays/QUESTIONS.md` → "2026-10-23 authentication guide" and `messages-for-david.md`. |
+| FB-003 | Resolved | F1: "Please update the next-page description too." | The description David refers to is on the Quickstart page ("…with the Plytix API V3 and curl"), and the whole Quickstart body teaches the bearer-token flow. Changing only the description would not make the page general. | `fumadocs/content/docs/guides/quickstart.mdx`, line 3 | No question for Plytix. WriteChoice will update the Quickstart in a separate pass, guided by the answer to FB-002. Raised again in the Data model feedback (F9, 2026-10-13): "Update the Quickstart navigation description consistently with the Overview feedback, avoiding a definitive v3 authentication flow until confirmed." | 2026-10-13 | 2026-11-12: Resolved. The Quickstart was rewritten on 2026-10-23 to the V3 access-token flow from Plytix's authentication guide (FB-002); its description now reads "Create an access token in your Plytix account and read your first products…". No question for Plytix. |
 
 ### Follow-ups on other pages
 
-- `fumadocs/content/docs/guides/quickstart.mdx`: generalize the description and authentication wording (FB-003).
+- ~~`fumadocs/content/docs/guides/quickstart.mdx`: generalize the description and authentication wording (FB-003).~~ Done 2026-10-23: rewritten to the V3 access-token flow.
 - `fumadocs/content/docs/index.mdx` (home): the "API Reference" card links only to V3, the same gap F2 raised on this page; "Legacy API (v1/v2)" and "v1/v2" break the V1/V2 naming rule in `guideline.md`.
 - Integration Guides has no index page, so the Overview's "Integration guides" card links to the first guide (Sync your ERP). Consider adding a section index page as the entry point.
 - The Overview now links to `guides/migrating-to-v3/` and the V1/V2 reference, both still marked "Draft, blocked on flags" in `information-architecture.md`.
@@ -208,19 +208,19 @@ Since 2026-11-06 the V3 reference, the nine API guides, and Migrating to V3 are 
 
 ### Flags
 
-No new flags. The pending V3 authentication model is tracked under FB-002 in the Overview section. The V3 note on this page links to `/docs/reference/v3/authentication` as a placeholder until Plytix publishes the new model.
+No new flags. The V3 authentication model was tracked under FB-002 (resolved 2026-11-12); the page now describes V3 access tokens and links to the V3 Authentication reference.
 
 ### Possible stale or inconsistent source material
 
 - `fumadocs/content/docs/reference/legacy/token-authentication.mdx` (line 9) says "The flow is the same one V3 uses, so a token from this exchange works against V1/V2 and V3." This page now links to it, so it should match David's feedback.
-- `fumadocs/content/docs/reference/v3/authentication.mdx` documents the V1/V2 key-and-password exchange as the V3 flow, and is the placeholder target of this page's V3 note (FB-002).
+- `fumadocs/content/docs/reference/v3/authentication.mdx` documents the V1/V2 key-and-password exchange as the V3 flow, and is the placeholder target of this page's V3 note (FB-002). (Done 2026-10-23: rewritten to Plytix's V3 authentication guide; FB-002 resolved 2026-11-12.)
 - V2 sharing the V1 flow rests on `openapi_pimv1.json` (`servers`, `bearerAuth`). No V2 request has been tested live.
 
 ### Follow-ups on other pages
 
 - `fumadocs/content/docs/guides/migrating-to-v3/index.mdx`: line 10 ("Your authentication doesn't change either way"), line 52 ("Both versions take the same bearer token…"), lines 55-57 (step 2 "Keep your authentication as it is", linking to the V3 Authentication page and the Quickstart), and the card description at line 229 still describe a shared flow (F5b). (Done 2026-10-14 in that page's feedback run.)
 - `fumadocs/content/docs/reference/legacy/token-authentication.mdx`: remove the "same one V3 uses" sentence (line 9). The Related resources card to the Quickstart also points V1/V2 readers to the pending V3 Quickstart (F4b).
-- `fumadocs/content/docs/reference/v3/authentication.mdx`: replace with a pending notice, or rewrite once the V3 model is published (FB-002).
+- `fumadocs/content/docs/reference/v3/authentication.mdx`: replace with a pending notice, or rewrite once the V3 model is published (FB-002). (Done 2026-10-23: rewritten to Plytix's V3 authentication guide; FB-002 resolved 2026-11-12.)
 
 ---
 
@@ -284,8 +284,8 @@ No new flags. The pending V3 authentication model is tracked under FB-002 in the
 ### Follow-ups on other pages
 
 - `fumadocs/content/docs/guides/bulk-operations-for-large-catalogs.mdx` (line 67): tells readers to "treat that response as success" when a retried `POST` returns `409`. Align it with this guide: search by SKU, confirm it's the same product, then update. (Done 2026-10-14 in that page's feedback run; the page is now an internal draft at `internal-drafts/guides/bulk-operations-for-large-catalogs.mdx`.)
-- `.claude/skills/writer/references/style-guide.md`: update the access-token rule's example facts to match the version-dependent wording (FB-002).
-- `fumadocs/content/docs/guides/quickstart.mdx` and `fumadocs/content/docs/reference/v3/authentication.mdx`: still present the key/password flow as V3's (FB-002, FB-003).
+- `.claude/skills/writer/references/style-guide.md`: update the access-token rule's example facts to match the version-dependent wording (FB-002). (Done 2026-10-23: rewritten to Plytix's V3 authentication guide; FB-002 resolved 2026-11-12.)
+- `fumadocs/content/docs/guides/quickstart.mdx` and `fumadocs/content/docs/reference/v3/authentication.mdx`: still present the key/password flow as V3's (FB-002, FB-003). (Done 2026-10-23: rewritten to Plytix's V3 authentication guide; FB-002 resolved 2026-11-12.)
 - Run the `endpoint-tester` skill on `modified[gte]` plus `modified[lt]` with full UTC timestamps, on whether `modified` advances after an attribute `PATCH` and after `PATCH {"status": "Archived"}` (FB-027), and on a number body for `PATCH /products/{id}/attributes/<decimal attribute>` (FB-020).
 
 ---
@@ -319,7 +319,7 @@ No new flags. The pending V3 authentication model is tracked under FB-002 in the
 - `fumadocs/content/docs/guides/migrating-to-v3/searching-and-pagination.mdx` (line 42): it can now cite keyset paging (FB-011 resolved), and it links here for "the full pattern".
 - `fumadocs/content/docs/guides/syncing-your-erp-with-plytix.mdx` (line 56): "Follow `pagination.next_page` until it's absent" should become "while it holds a usable URL".
 - `fumadocs/content/docs/reference/v3/pagination.mdx` (line 14): still says the keys are "never `null`".
-- This page's intro and prerequisites still describe the V3 bearer token and 15-minute expiry as settled (FB-002). Not part of David's feedback, so it wasn't changed.
+- This page's intro and prerequisites still describe the V3 bearer token and 15-minute expiry as settled (FB-002). Not part of David's feedback, so it wasn't changed. (Done 2026-10-23: rewritten to Plytix's V3 authentication guide; FB-002 resolved 2026-11-12.)
 - Run the `endpoint-tester` skill on `_sort_by=id` with `id[gt]=<id>` (FB-029), and on `GET /api/v3/products/{id}?_fields=sku` (FB-004).
 
 ---
@@ -351,7 +351,7 @@ No new flags. The pending V3 authentication model is tracked under FB-002 in the
 - `fumadocs/content/docs/reference/v3/filtering-query-syntax.mdx`: fix the encoding callout (line 39) and encode the bracketed names in its curl examples (F6).
 - `fumadocs/content/docs/guides/exporting-your-full-catalog.mdx` (`id[gt]`) and `fumadocs/content/docs/guides/syncing-your-erp-with-plytix.mdx` (`modified[gte]`, `modified[lt]`): same raw-bracket `--data-urlencode` pattern.
 - `fumadocs/content/docs/guides/building-marketplace-specific-product-feeds.mdx`: still to be reworked (Channels Internal, PIM product lists to be removed). This page no longer links to it.
-- This page's prerequisite still presents the V3 bearer token as settled (FB-002). Not part of David's feedback, so it wasn't changed.
+- This page's prerequisite still presents the V3 bearer token as settled (FB-002). Not part of David's feedback, so it wasn't changed. (Done 2026-10-23: rewritten to Plytix's V3 authentication guide; FB-002 resolved 2026-11-12.)
 - Run the `endpoint-tester` skill on the filters in FB-031 and on a product's completeness values (FB-032).
 
 ---
@@ -403,7 +403,7 @@ No new flags. The guide was rewritten around public product endpoints, so it no 
 ### Follow-ups on other pages
 
 - `.claude/skills/writer/references/style-guide.md` ("Procedure section headings", line 114): lists this page's old H2 "Change or clear a product's thumbnail" (unchanged); the assets section is now "Connect other assets to a product".
-- This page's prerequisite still presents the V3 bearer token as settled (FB-002). Not part of David's feedback, so it wasn't changed.
+- This page's prerequisite still presents the V3 bearer token as settled (FB-002). Not part of David's feedback, so it wasn't changed. (Done 2026-10-23: rewritten to Plytix's V3 authentication guide; FB-002 resolved 2026-11-12.)
 - Run the `endpoint-tester` skill on clearing `thumbnail_id` for a product whose asset is also in a media attribute (FB-033), and on unlinking a category from a nonexistent product (FB-034).
 
 ---
@@ -505,7 +505,7 @@ No new flags. The guide was rewritten around public product endpoints, so it no 
 - `fumadocs/content/docs/guides/meta.json` and `guides/platform-mcp/`: remove from the portal if FB-041 isn't approved.
 - `.claude/skills/writer/references/glossary.md`: add a "Documentation MCP" entry, distinct from the Platform MCP's "MCP Server" entry.
 - After deployment: run each client configuration and the curl check, then add a captured `tools/list` response and a cited answer to "Verify the connection" (F2, F3; FB-040).
-- This page's Authentication card (line 158) still says "exchange API credentials for a bearer token" (FB-002). Offered as X1, not approved.
+- This page's Authentication card (line 158) still says "exchange API credentials for a bearer token" (FB-002). Offered as X1, not approved. (Done: the wording no longer appears in the draft; FB-002 resolved 2026-11-12.)
 
 ---
 
@@ -683,7 +683,7 @@ Not changed under item 13: the `http://` `next_page` values in the Quickstart an
 - Items 2 (meta titles and descriptions) and 17 (version switcher alternative): held back by WriteChoice for now.
 - `merge-openapi.mjs` still reads the superseded `openapi_pimv3.json`. It now also applies `servers` and `v3-examples.json`, but it rebuilds component schemas from the source, so hand edits to schema descriptions (for example, the V1/V2 capitalization fixes) are lost on a refresh. Don't run `merge:api` until that's fixed; use `node scripts/openapi-examples.mjs` to re-apply examples.
 - The `npm run build` failure noted on 2026-10-19 is fixed: the Fluent icons stylesheet is now imported from `app/layout.tsx`. `npm run lint` fails before linting because `typescript-eslint` doesn't support TypeScript 7.
-- V3 code samples don't send an `Authorization` header, because `openapi.json` declares no security scheme. Adding one depends on the V3 authentication model (FB-002).
+- V3 code samples don't send an `Authorization` header, because `openapi.json` declares no security scheme. Adding one depends on the V3 authentication model (FB-002). (Done 2026-10-23: `overlays/20-meta.yaml` adds a `bearerAuth` scheme pointing to the V3 access-token flow; FB-002 resolved 2026-11-12.)
 
 ---
 
