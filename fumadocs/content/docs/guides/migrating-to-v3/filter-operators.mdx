@@ -45,10 +45,7 @@ Map `like` to `[contains:ignorecase]`. V3 splits text matching by case: `[contai
 _or[0]field[!contains:ignorecase]=value&_or[0]field[!exists]=true
 ```
 
-`[contains:ignorecase]` treats some punctuation as pattern syntax rather than literal text. In testing, values such as `A.B` and `A+B` matched as patterns, so a search for `A.B` can return records that don't contain that exact text. To match punctuation literally, put one backslash before it: send `A\.B` for a literal dot and `A\+B` for a literal plus. The filter value contains that one backslash before URL encoding, so in a JSON string you write `"A\\.B"` and `"A\\+B"`.
-
-{/* FLAG (open):
-  PM-54: David (9 Nov 2026) gave the escape syntax, verified with `[contains:ignorecase]` only. Confirm whether plain `[contains]` treats punctuation the same way before saying so (FB-045). */}
+`[contains]` and `[contains:ignorecase]` treat some punctuation as pattern syntax rather than literal text. In testing, values such as `A.B` and `A+B` matched as patterns, so a search for `A.B` can return records that don't contain that exact text. To match punctuation literally with either operator, put one backslash before it: send `A\.B` for a literal dot and `A\+B` for a literal plus. The filter value contains that one backslash before URL encoding, so in a JSON string you write `"A\\.B"` and `"A\\+B"`.
 
 `text_search` matched text across several fields, passed as a list in `field`. V3 has no `text_search` operator. The nearest form is an OR group with one `contains` filter per field, such as `_or[0]sku[contains:ignorecase]=kettle&_or[0]label[contains:ignorecase]=kettle`. That form isn't a confirmed equivalent, so compare the results before you rely on it.
 

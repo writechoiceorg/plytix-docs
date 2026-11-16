@@ -2,7 +2,7 @@
 
 Record of every `feedback-corrector` run: the feedback received, what our sources said, what changed on the page, and the reply sent to David. One section per page, newest run first. Open questions for Plytix live in [`feedback-flags.md`](feedback-flags.md).
 
-**Last updated:** 2026-11-09
+**Last updated:** 2026-11-16
 
 ## Index
 
@@ -22,7 +22,7 @@ Record of every `feedback-corrector` run: the feedback received, what our source
 | [Connect an AI assistant to the Plytix docs](#connect-an-ai-assistant-to-the-plytix-docs) | 1 | 2026-10-14 |
 | [Not migrated and new in V3](#not-migrated-and-new-in-v3) | 1 | 2026-10-14 |
 | [Migrating to V3](#migrating-to-v3) | 1 | 2026-10-14 |
-| [Plytix MCP](#plytix-mcp) | 6 | 2026-11-09 |
+| [Plytix MCP](#plytix-mcp) | 7 | 2026-11-16 |
 
 ---
 
@@ -1090,6 +1090,71 @@ Open questions:
 ## Plytix MCP
 
 **Page:** `fumadocs/content/docs/guides/mcp/overview.mdx` · **Page type:** Concept overview plus five child pages. Moved on 2026-11-06 from `guides/platform-mcp/` (`index.mdx`, `connect.mdx`, `capabilities-and-permissions.mdx`, `example-workflows.mdx`, `troubleshooting.mdx`, `changelog.mdx`; split into six pages on 2026-11-04) to `guides/mcp/` (`overview.mdx`, `quickstart.mdx`, `tools.mdx`, and the same last three), served at `/mcp/**`.
+
+### Run 2026-11-16
+
+**Feedback from:** David, Slack, answers to our five open questions (V3 token permissions, the "beta" tab label, MCP roles, ChatGPT removal, PM-54), plus three updates (MCP live in production, add Microsoft Copilot, Umami Cloud). Logged under Plytix MCP because most items are here; F1, F2, and F5 touch the hidden V3 Authentication, Filter operators, and Filtering and Query Syntax pages, and U3 the site setup files.
+**Approved by the user:** all (plan approved). Copilot tab scoped to Copilot Studio; production testing left as a follow-up.
+
+#### Feedback items
+
+| # | Feedback (short) | Type | Location | Verdict | Outcome |
+|---|---|---|---|---|---|
+| F1 | asset-lists → Assets, product-attribute-groups → Attributes, product-relationship-types → Relationships | Factual | `reference/v3/authentication.mdx`, Permissions, line 46 | Supported on David's authority (the spec has no permission model) | Applied |
+| F2 | "beta" is a temporary tag; the tab is "API v3" | Factual | `reference/v3/authentication.mdx` (5 mentions) | Already aligned | No change; memory note updated |
+| F3 | MCP respects Plytix plan and user-permission checks; no writes beyond Plytix permissions | Factual | `mcp/tools.mdx` Permissions; `mcp/quickstart.mdx` Prerequisites | Supported | Applied, FB-054 resolved |
+| F4 | ChatGPT removal: Plugins > Personal > three dots > Uninstall (screenshot) | Factual | `mcp/quickstart.mdx`, ChatGPT tab | Supported (screenshot) | Applied, FB-064 resolved (personal plugins) |
+| F5 | Plain `[contains]` needs the same escaping (Dev tests, October 19) | Factual | `guides/migrating-to-v3/filter-operators.mdx` line 48; `reference/v3/filtering-and-search.mdx` line 91 | Supported | Applied, FB-045 resolved |
+| U1 | MCP live in production as Beta, active on our account | Context | — | — | No page change; FB-057 updated, production test added to follow-ups |
+| U2 | Add Microsoft Copilot to "Connect your AI assistant" | Scope | `mcp/quickstart.mdx`; cards on `overview.mdx`, `troubleshooting.mdx`; `tools.mdx` line 47 | Supported by Microsoft Learn (Copilot Studio pages, checked 2026-11-16) | Applied, untested |
+| U3 | Umami Cloud instead of self-hosted | Config | `fumadocs/UMAMI-SETUP.md`, `.env.example`, `README.md` | — | Applied |
+
+#### Applied changes
+
+| # | Change made | Source |
+|---|---|---|
+| F1 | Permissions: "Some endpoints fall under a related permission: **Assets** covers asset lists, **Attributes** covers product attribute groups, and **Relationships** covers product relationship types." | David, Slack 16 Nov |
+| F3 | `tools.mdx`: "depends on four things", new first bullet "**Your Plytix plan and user permissions.** The Plytix MCP applies the same checks as Plytix, so your assistant can't make a change your Plytix user isn't allowed to make, even when the tool is turned on in your AI application."; the "Plytix controls" sentence now says Plytix checks every tool call against plan, user permissions, and the access granted at sign-in; FB-054 line in the FLAG marked resolved. `quickstart.mdx`: new prerequisite "A Plytix user account to sign in with. Your assistant works within that user's Plytix plan and permissions, so it can't make changes your Plytix user isn't allowed to make."; FB-054 FLAG removed. | David, Slack 16 Nov |
+| F4 | ChatGPT tab: "To remove the connection, go to **Plugins** > **Personal**, open the three-dot menu on the **Plytix** plugin, and select **Uninstall**." FB-064 FLAG removed. | David, Slack 16 Nov, with screenshot |
+| F5 | Filter operators: "`[contains]` and `[contains:ignorecase]` treat some punctuation as pattern syntax ... To match punctuation literally with either operator, put one backslash before it"; FLAG removed. Filtering and Query Syntax: "Both `contains` operators treat some punctuation, such as `.` and `+`, as pattern syntax. To match it literally, put one backslash before it, such as `A\.B` for a literal dot. In a JSON string, write `"A\\.B"`." | David, Slack 16 Nov |
+| U2 | New **Microsoft Copilot** tab (Copilot Studio): requirements (subscription to publish, generative orchestration, org policies); 7 steps to add Plytix as an MCP tool (**Tools** > **Add a tool** > **New tool** > **Model Context Protocol**, **OAuth 2.0** with **Dynamic discovery**, **Create a new connection**, **Add to agent**); 4 steps to publish to the **Microsoft 365 and Microsoft Teams** channel; per-user connection card; **Allow all** tool toggles and the 24-hour refresh; removal with **Delete** from the agent's **Tools** page; link to Microsoft's guide. Description, intro, prerequisites, and the verify step now name Microsoft Copilot; the untested-flows FLAG lists the Copilot checks. "Claude, ChatGPT, or Microsoft Copilot" on the Overview and Troubleshooting cards; `tools.mdx` adds "Copilot Studio lets you choose which Plytix tools an agent can use." | learn.microsoft.com/en-us/microsoft-copilot-studio/: `mcp-add-existing-server-to-agent`, `agent-extend-action-mcp`, `mcp-add-components-to-agent`, `mcp-troubleshooting`, `publication-fundamentals-publish-channels`, `publication-add-bot-to-microsoft-teams`, `configure-enduser-authentication`, `add-tools-custom-agent`, `requirements-licensing-subscriptions` |
+| U3 | `UMAMI-SETUP.md` rewritten for Umami Cloud (add the website, copy `src` and `data-website-id` from **Tracking code**, build-time env vars, verify, `data-domains`, cookieless note); `.env.example` comment and example `src` point at Umami Cloud; README line 56 says Umami Cloud. `app/layout.tsx` unchanged. | docs.umami.is (introduction, cloud, add-a-website, collect-data, tracker-configuration). The docs don't state the Cloud script URL, so the setup says to copy it from the dashboard. |
+
+Checks: `npm run build` passes; no em dashes, banned words, or lowercase version names in the changed prose; Quickstart description is 151 characters.
+
+#### Not changed
+
+- **F2:** the page already uses **API v3**; the "beta" tag is temporary.
+- **U1:** no page change. Production tests need the user's logged-in accounts, so they're a follow-up.
+
+#### Flags
+
+Resolved: FB-045, FB-054, FB-064 · Updated: FB-057 (production live) (details in [`feedback-flags.md`](feedback-flags.md))
+
+#### Follow-ups on other pages
+
+- Test all three Connect tabs against `https://pim.plytix.com/mcp`: ChatGPT workspace-plugin removal, Copilot Studio Dynamic discovery, deleting the Copilot tool, Teams sign-in (Microsoft notes Teams may need single sign-on setup). Then check the release tool list (FB-056), add screenshots, and remove the untested-flows FLAG.
+- Umami: set `NEXT_PUBLIC_UMAMI_SRC` and `NEXT_PUBLIC_UMAMI_WEBSITE_ID` in the production deploy once Plytix shares the tracking code.
+
+#### Reply to David
+
+```text
+Thanks, David. Here's where each one landed:
+
+1. Token permissions: the Authentication page now says Assets covers asset lists, Attributes covers product attribute groups, and Relationships covers product relationship types.
+2. API v3 tab: no change needed, the page already calls it the API v3 tab.
+3. MCP permissions: Capabilities and permissions now says the MCP applies your Plytix plan and user permissions, so the assistant can't make changes your Plytix user isn't allowed to make. Connect your AI assistant lists a Plytix user account as a prerequisite with the same note.
+4. ChatGPT removal: yes, that's what we meant, thanks. The ChatGPT tab now ends with Plugins > Personal > three-dot menu > Uninstall.
+5. PM-54: Filter operators now says both [contains] and [contains:ignorecase] need the backslash escape, and the Filtering reference has a short note too. Both are ready for the V3 release.
+
+Updates
+- MCP in production: thanks. We'll test the Claude, ChatGPT, and Copilot steps against production and add screenshots.
+- Microsoft Copilot: Connect your AI assistant has a new Microsoft Copilot tab. It covers Copilot Studio: add Plytix as an MCP tool to an agent, then publish the agent to Microsoft 365 Copilot and Teams. It follows Microsoft's docs, and we'll confirm it in our production test.
+- Umami: we've updated the site's setup notes for Umami Cloud. Once your team adds the website, share the script URL and website ID from its tracking code and we'll turn it on in the next deploy.
+
+Open question
+- Is Copilot Studio the Copilot you had in mind, or do your customers use a different one?
+```
 
 ### Run 2026-11-09 (2)
 

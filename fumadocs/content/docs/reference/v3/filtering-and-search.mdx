@@ -94,6 +94,8 @@ The text operators above were tested on text attributes. A negated text filter, 
 _or[0]field[!contains:ignorecase]=value&_or[0]field[!exists]=true
 ```
 
+Both `contains` operators treat some punctuation, such as `.` and `+`, as pattern syntax. To match it literally, put one backslash before it, such as `A\.B` for a literal dot. In a JSON string, write `"A\\.B"`.
+
 [Filter operators](/guides/migrating-to-v3/filter-operators) covers case and missing-field details when you migrate V1 filters.
 
 ## Functions

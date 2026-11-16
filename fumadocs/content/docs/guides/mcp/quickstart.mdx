@@ -1,22 +1,19 @@
 ---
 title: "Connect your AI assistant"
-description: "Connect Claude or ChatGPT to your Plytix account with the Plytix MCP, authorize it with OAuth, and check that the connection works."
+description: "Connect Claude, ChatGPT, or Microsoft Copilot to your Plytix account with the Plytix MCP, authorize it with OAuth, and check that the connection works."
 ---
 
 import { LightbulbRegular, ShieldCheckmarkRegular, WrenchRegular } from '@/components/icons';
 
-Add the Plytix MCP as a remote MCP server in your AI application, then sign in to Plytix with OAuth. Follow the instructions for Claude or ChatGPT below, then verify the connection.
+Add the Plytix MCP as a remote MCP server in your AI application, then sign in to Plytix with OAuth. Follow the instructions for Claude, ChatGPT, or Microsoft Copilot below, then verify the connection.
 
 ## Prerequisites
 
 Before you start, make sure you have the following:
 
 - Plytix MCP access turned on for your Plytix account. To request it, contact your account manager.
-- An AI application that supports remote MCP servers and OAuth sign-in, such as Claude or ChatGPT. Your subscription plan and workspace settings determine whether you can add a custom connection. A workspace administrator may need to add or approve the connection first. Check the requirements for your application in the tabs below.
-
-{/* FLAG (open):
-  Eligibility confirmed by David (29 Oct 2026): beta access is turned on per account through the account manager. Still open (FB-054): which Plytix role or access the person signing in needs, and whether the assistant sees only what that user can see in Plytix.
-*/}
+- An AI application that supports remote MCP servers and OAuth sign-in, such as Claude, ChatGPT, or Microsoft Copilot. Your subscription plan and workspace settings determine whether you can add a custom connection. A workspace administrator may need to add or approve the connection first. Check the requirements for your application in the tabs below.
+- A Plytix user account to sign in with. Your assistant works within that user's Plytix plan and permissions, so it can't make changes your Plytix user isn't allowed to make.
 
 You'll need the following connection details:
 
@@ -33,9 +30,10 @@ Select your AI application and follow the steps to add the server, authorize the
 
 {/* FLAG (open):
   Both tabs are written from Claude's and OpenAI's official guides (checked 4 Nov 2026; OpenAI's remembered-approval scope rechecked 6 Nov 2026), not from a tested connection. Test each flow against `https://pim.plytix.com/mcp` before the November 9, 2026 launch: menu labels (including the Claude organization setup and removal labels, MCP-017 and MCP-018), the OAuth client option Claude detects, when ChatGPT asks to sign in, how to disconnect, and one successful read. Add screenshots after that test. Per the brief, name an exact Google client before adding one, and add a Gemini CLI tab only after testing it with Plytix.
+  2026-11-16: Plytix MCP is live in production and active on the WriteChoice account (David), so these tests can run now. Also test: removing the plugin from a ChatGPT workspace (David gave the personal path only), and the Microsoft Copilot tab, written from Microsoft Learn's Copilot Studio pages (checked 16 Nov 2026: mcp-add-existing-server-to-agent, mcp-add-components-to-agent, publication-add-bot-to-microsoft-teams, configure-enduser-authentication, add-tools-custom-agent). Check that Dynamic discovery works with the Plytix server, that deleting the MCP tool removes the server, and whether Teams needs single sign-on setup for the Plytix connection.
 */}
 
-<Tabs items={['Claude', 'ChatGPT']}>
+<Tabs items={['Claude', 'ChatGPT', 'Microsoft Copilot']}>
   <Tab value="Claude">
     Custom connectors work in Claude on the web and in Claude Desktop, on every plan. On the Free plan, you can add one custom connector.
 
@@ -88,19 +86,45 @@ Select your AI application and follow the steps to add the server, authorize the
 
     After a Plytix MCP release, open the plugin's details page and refresh it, so ChatGPT picks up new and changed tools.
 
+    To remove the connection, go to **Plugins** > **Personal**, open the three-dot menu on the **Plytix** plugin, and select **Uninstall**.
+
     For plan, workspace, and authentication details, see [OpenAI's guide to adding a custom MCP server](https://developers.openai.com/api/docs/guides/custom-mcp-server).
   </Tab>
-</Tabs>
+  <Tab value="Microsoft Copilot">
+    You connect the Plytix MCP to Microsoft Copilot through Copilot Studio. You add Plytix as a tool to a Copilot Studio agent, then make the agent available in Microsoft 365 Copilot and Teams. Publishing an agent requires a Copilot Studio subscription, and the agent must use generative orchestration, which MCP tools require. Your organization's data policies and admin settings can limit which tools and channels you can use.
 
-{/* FLAG (open):
-  ChatGPT tab: no removal step yet. David (9 Nov 2026, MCP-018) asks us to document how to remove the connector from Claude and ChatGPT. Claude's steps follow its help article ("Remove custom connectors"). OpenAI's custom MCP server guide and plugin deploy page (checked 9 Nov 2026) don't describe removing a plugin or disconnecting OAuth, and the Help Center couldn't be read. Test removal in ChatGPT and add the exact labels (FB-064). Revoking access from inside Plytix isn't available (FB-055, resolved), so the page only describes removal in the AI application.
-*/}
+    **Add Plytix to your agent:**
+
+    1. **Open** your agent in Copilot Studio and go to its **Tools** page.
+    2. **Select** **Add a tool**, then **New tool**.
+    3. **Select** **Model Context Protocol** in the **Create new** section.
+    4. **Enter** `Plytix` as the **Server name**, a short **Server description**, and `https://pim.plytix.com/mcp` as the **Server URL**.
+    5. **Select** **OAuth 2.0** as the authentication type and **Dynamic discovery** as the type, then select **Create**.
+    6. **Select** **Next**, then select **Create a new connection** in the **Add tool** dialog. Sign in to Plytix when prompted, review the access requested, then approve it.
+    7. **Select** **Add to agent**.
+
+    **Make the agent available in Microsoft 365 Copilot and Teams:**
+
+    1. **Select** **Publish** in your agent, then confirm.
+    2. **Select** **Channels** on the top menu bar, then select the **Microsoft 365 and Microsoft Teams** tile.
+    3. **Check** that **Make agent available in Microsoft Copilot** is selected, then select **Add channel**.
+    4. **Select** **See agent in Teams**, then **Add**, to install the agent in Teams and Microsoft 365 Copilot.
+
+    By default, each person who uses the agent connects with their own Plytix account. The first time the agent calls a Plytix tool, it shows a connection card. Select **Connect** and sign in to Plytix in the window that opens.
+
+    All Plytix tools are turned on when you add the server. To choose which tools the agent can use, select **Plytix** on the agent's **Tools** page, turn off **Allow all**, and turn on the tools you want. Then select **Save** and **Publish**. After you publish, tool changes can take up to 24 hours to reach the agent.
+
+    To remove the connection, go to the agent's **Tools** page, hover over **Plytix**, open its three-dot menu, and select **Delete**. Confirm the deletion, then publish the agent again.
+
+    For licensing, authentication, and admin requirements, see [Microsoft's guide to connecting an agent to an MCP server](https://learn.microsoft.com/en-us/microsoft-copilot-studio/mcp-add-existing-server-to-agent).
+  </Tab>
+</Tabs>
 
 ## Verify the connection
 
 Follow the steps below to confirm that your AI application found the Plytix tools and can read your account.
 
-1. **Check** the tool list in your AI application's connection settings to see which tools were discovered. Claude shows them in the connector's settings, and ChatGPT on the plugin's details page.
+1. **Check** the tool list in your AI application's connection settings to see which tools were discovered. Claude shows them in the connector's settings, ChatGPT on the plugin's details page, and Copilot Studio on the Plytix tool's settings page.
 2. **Run** a small read that you can check yourself, the first prompt in [Example workflows](/mcp/example-workflows#find-a-product). Replace `YOUR-SKU` with a SKU that exists in your account, then ask:
 
    ```text
