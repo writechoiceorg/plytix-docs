@@ -124,7 +124,7 @@ Follow the steps below to write ERP-owned fields back to Plytix and create the p
    Address the attribute by name at its own path, and send the bare JSON value, not an object. This changes only the attribute you name. `<product_id>` can also be the product's SKU, URL-encoded. A `204` means the update succeeded. Read the product back only when your integration needs the resulting values.
 
    {/* FLAG (open):
-     The bare-value body is confirmed live for a text attribute (a JSON string). A number, such as `34.99` on a decimal attribute, hasn't been tested on this path, and the OpenAPI declares no request body for it (FB-020).
+     The bare-value body is confirmed live for a text attribute (a JSON string). For a decimal attribute, Plytix's staging audit (STG-004, 17 Nov 2026) found on Dev that the bare number `34.99` is accepted and the quoted string `"34.99"` is rejected. Our own earlier test (FB-020) found the opposite, so the API changed between the two. Confirm production behaves like Dev before the V3 launch (DEC-1 in overlays/QUESTIONS.md).
    */}
 
    <Callout type="error" title="Don't send a partial attributes map to the product itself">

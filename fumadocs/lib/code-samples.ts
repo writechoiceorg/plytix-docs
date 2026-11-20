@@ -81,7 +81,9 @@ function partValue(value: unknown): string {
 
 /** Mirrors the request body the playground encodes (media/adapter.js `encode`). */
 export function resolveBody(data: Pick<GeneratorData, 'body' | 'bodyMediaType'>): Body {
-  if (!data.body || !data.bodyMediaType) return { kind: 'none' };
+  // `null`, `false`, `0` and `""` are real JSON bodies (a cleared field is sent as
+  // `null`); only a missing body means there is none (STG-003).
+  if (data.body === undefined || !data.bodyMediaType) return { kind: 'none' };
   const mediaType = normalizeMediaType(data.bodyMediaType);
   const body = data.body;
 
@@ -94,14 +96,14 @@ export function resolveBody(data: Pick<GeneratorData, 'body' | 'bodyMediaType'>)
       : JSON.stringify(body);
     return { kind: 'text', mediaType, text };
   }
-  if (mediaType === 'application/x-www-form-urlencoded' && typeof body === 'object') {
+  if (mediaType === 'application/x-www-form-urlencoded' && body !== null && typeof body === 'object') {
     const form: Record<string, string> = {};
     for (const [k, v] of Object.entries(body as Record<string, unknown>)) {
       if (v !== undefined && v !== null) form[k] = String(v);
     }
     return { kind: 'text', mediaType, text: new URLSearchParams(form).toString(), form };
   }
-  if (mediaType === 'multipart/form-data' && typeof body === 'object') {
+  if (mediaType === 'multipart/form-data' && body !== null && typeof body === 'object') {
     const parts: Part[] = [];
     const add = (name: string, value: unknown) => {
       if (value === null || value === undefined || Number.isNaN(value)) return;
@@ -337,9 +339,32 @@ export const javascript = withFallback(stockJavascript, (data, body) => {
     options.push('body');
   }
 
-  s.push(`fetch(${dq(data.url)}, {\n${indentLines(options.join(',\n'), '  ')}\n});`);
+  s.push(`const response = await fetch(${dq(data.url)}, {\n${indentLines(options.join(',\n'), '  ')}\n});`);
+  // Read the response like the other languages do (NEW-010). The token exchange
+  // also extracts the token for the next request, without printing it.
+  if (isTokenExchange(data.url)) {
+    s.push(
+      [
+        'if (!response.ok) {',
+        '  throw new Error(`Token request failed with ${response.status}: ${await response.text()}`);',
+        '}',
+        'const { data } = await response.json();',
+        'const accessToken = data[0].access_token;',
+        '',
+        '// Send it on every API request until it expires (15 minutes). Keep it out of logs.',
+        'const authHeaders = { Authorization: `Bearer ${accessToken}` };',
+      ].join('\n'),
+    );
+  } else {
+    s.push('console.log(response.status);\nconsole.log(await response.text());');
+  }
   return s.join('\n\n');
 });
+
+/** The V1/V2 token exchange (`POST https://auth.plytix.com/auth/api/get-token`). */
+function isTokenExchange(url: string): boolean {
+  return /\/auth\/api\/get-token(?:[?#]|$)/.test(url);
+}
 
 export const python = withFallback(stockPython, (data, body) => {
   const headers = requestHeaders(data, body).filter(([k]) => k !== 'Cookie');

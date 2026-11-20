@@ -1,4 +1,4 @@
-# Plytix API Documentation
+# Plytix Developer Portal
 
 Fumadocs (Next.js) project for the Plytix API docs. This is a test/preview build — see `comments-1.md` and `comments-2.md` for the infra conversation this answers, and `documentation-structure.md` for the source information architecture.
 

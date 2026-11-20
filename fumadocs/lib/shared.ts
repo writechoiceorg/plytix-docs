@@ -1,7 +1,22 @@
 import { createGetUrl } from 'fumadocs-core/source';
 import hiddenContentList from '@/hidden-content.json';
 
-export const appName = 'Plytix Docs';
+export const appName = 'Plytix Developer Portal';
+
+/** Public origin of the portal, without a trailing slash. Used for absolute links (canonical URLs, llms.txt, Markdown exports). */
+export const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://docs.plytix.com').replace(/\/+$/, '');
+
+/** Default description of the portal: root metadata, homepage share card and llms.txt. */
+export const siteDescription =
+  'Developer docs for Plytix, the multi-technology product content platform: the Plytix API for your systems, and the Plytix MCP (beta) for AI assistants.';
+
+/** Plytix purple (see app/global.css), for generated share images. */
+export const brandColor = '#7a52ff';
+
+/** Absolute URL of a site path such as `/mcp/overview`. */
+export function absoluteUrl(path: string): string {
+  return new URL(path, `${siteUrl}/`).href;
+}
 // Internal base of the content tree. No page is served under /docs: every page
 // belongs to one of the `sections` below, which map content folders to public routes.
 export const docsRoute = '/docs';

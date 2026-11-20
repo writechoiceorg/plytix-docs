@@ -28,9 +28,8 @@ Before you start, you need:
    | Operation | Why V3 |
    |---|---|
    | Searching and reading any resource | Richer operators, real `OR` grouping, field expansion in one call |
-   | Create, update, and delete on products, assets, categories, asset categories, product attributes, attribute groups, families, and relationship types | Consistent conventions across every resource |
+   | Create, update, and delete on products, assets, categories, asset categories, product attributes, attribute groups, and families | Consistent conventions across every resource |
    | Linking products to categories, assets to categories, and attributes to groups | Dedicated link and unlink endpoints, rather than rewriting an array |
-   | Removing product relationships | V3's `DELETE /products/{product_id}/relationships/{relationship_id}` is a scoped unlink; V1 needs a separate `/unlink` call. Adding links and changing quantities aren't available through V3 yet, so keep those calls on V1/V2 for now; see [Product relationships](/guides/migrating-to-v3/endpoint-mapping#product-relationships) |
    | Creating variants | `parent_id` and `product_family_id` on the product itself |
    | Connecting assets to a product | Media and media gallery attributes: a media attribute takes a bare asset ID and a gallery takes an array of IDs. `thumbnail_id` sets the main image |
 
@@ -43,6 +42,7 @@ Before you start, you need:
    | Resyncing variants against their parent | `POST /api/v1/products/{parent_product_id}/variants/resync` | No equivalent |
    | Reading a total result count | `total_count` on every V1 search response | No equivalent anywhere in V3. See step 6 |
    | Searching API credentials and account memberships | `POST /api/v1/accounts/api-credentials/search`, `/accounts/memberships/search` | No equivalent. Managing keys and users in the Plytix dashboard doesn't replace searching them through the API |
+   | Relationship types, and linking, updating, or removing related products | `/api/v1/relationships`, `POST /api/v1/products/{product_id}/relationships/{relationship_id}` and its `/unlink` | Not available yet. V3's earlier relationship routes are retired, and their replacement, product relationship types, isn't documented yet. See [Product relationships](/guides/migrating-to-v3/endpoint-mapping#product-relationships) |
 
    **Bulk writes aren't in V3 yet.** The current V3 contract has no bulk create, update, or delete endpoints. Bulk endpoints are part of Plytix's V3 design (planned), so a large change is many single requests for now, paced under your [rate limit](/reference/v3/rate-limits).
 
@@ -210,7 +210,7 @@ Check the problems below if you run into issues while following this guide.
   </Accordion>
 
   <Accordion title="You can't find the V3 endpoint for replacing an asset's file or attaching an asset to a product" value="no-v3-asset-endpoint">
-    V3 has no dedicated endpoint for either. Uploading a new asset works in V3 with `POST /api/v3/assets` and a `url` or `content`, but replacing the file of an existing asset stays on V1. Attaching an asset to a product goes through media and media gallery attributes in V3: a media attribute takes a bare asset ID and a gallery takes an array of IDs. See [Connect other assets to a product](/guides/safely-removing-categories-assets-or-relationships#connect-other-assets-to-a-product).
+    V3 has no dedicated endpoint for either. Uploading a new asset works in V3 with `POST /api/v3/assets` and a `url` or `content`, but replacing the file of an existing asset stays on V1. Attaching an asset to a product goes through media and media gallery attributes in V3: a media attribute takes a bare asset ID and a gallery takes an array of IDs. See [Connect other assets to a product](/guides/safely-removing-categories-assets-or-relationships#connect-other-assets-to-a-product). To detach one asset from a gallery, don't clear the gallery: write back its remaining IDs, as in [Remove one asset from a gallery](/guides/safely-removing-categories-assets-or-relationships#remove-one-asset-from-a-gallery).
   </Accordion>
 </Accordions>
 

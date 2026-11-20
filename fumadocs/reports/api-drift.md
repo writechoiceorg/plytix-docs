@@ -4,7 +4,7 @@ Source: `upstream/openapi-v3.json` · Result: **PASS**
 
 Visibility: 78 public operations published; excluded 17 pending, 49 internal, 1 on-hold, 8 removed; 0 unclassified. Pruned 158 unreachable components.
 
-Coverage: 78/78 operations edited, 78/78 described, 78/78 clean operationIds, 161/161 params described, 78/118 responses with examples. Details: `reports/api-coverage.md`.
+Coverage: 78/78 operations edited, 78/78 described, 78/78 clean operationIds, 161/161 params described, 118/118 responses with examples. Details: `reports/api-coverage.md`.
 
 ## Warnings (144)
 

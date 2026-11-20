@@ -1,5 +1,5 @@
 import { docsLlms, source } from '@/lib/source';
-import { getPageMarkdownUrl } from '@/lib/shared';
+import { absoluteUrl, getPageMarkdownUrl } from '@/lib/shared';
 import { notFound } from 'next/navigation';
 
 export const revalidate = false;
@@ -11,7 +11,11 @@ export async function GET(_req: Request, { params }: RouteContext<'/llms.mdx/doc
 
   return new Response(await docsLlms.page(page), {
     headers: {
-      'Content-Type': 'text/markdown',
+      'Content-Type': 'text/markdown; charset=utf-8',
+      // Served at the page URL too, chosen by `Accept` (proxy.ts, STG-013).
+      Vary: 'Accept',
+      // The HTML page is the canonical version of every format (STG-014).
+      Link: `<${absoluteUrl(page.url)}>; rel="canonical"`,
     },
   });
 }

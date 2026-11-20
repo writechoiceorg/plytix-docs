@@ -28,7 +28,8 @@ _openapi:
 
           - Text: a string. `null` removes the value.
 
-          - Decimal: a string, such as `"12.5"`. A JSON number returns `422`.
+          - Decimal: a JSON number, such as `34.99`. A quoted string such as
+          `"34.99"` returns `422`.
 
           - Multi-select: an array of the attribute's configured options, such
           as `["Blue"]`.

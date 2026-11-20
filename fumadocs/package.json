@@ -19,6 +19,7 @@
     "api:check": "node scripts/api/check.mjs",
     "api:crosscheck": "node scripts/api/crosscheck.mjs",
     "api:test": "node --test \"scripts/api/test/*.test.mjs\"",
+    "redirects:check": "node scripts/check-redirects.mjs && node scripts/check-redirects.mjs --all",
     "generate:api": "npm run api:build",
     "generate:api:legacy": "node scripts/generate-docs-legacy.mjs",
     "cf:preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",

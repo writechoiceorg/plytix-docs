@@ -271,12 +271,27 @@
           "204": {
             "description": "Unlinked. The response has no body."
           },
-          "422": {
-            "description": "The request failed validation. A required field may be missing, a value may have the wrong type or length, or the body may include a field the operation doesn't accept. `errors` describes the problem, usually as `<field>: <message>`. Some checks return `product data validation failed` without naming the field.",
+          "404": {
+            "description": "No record with this ID exists in your account, or it was deleted. On some field routes, a field or link that doesn't exist also returns `404`. `errors` says which.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OperationResponse"
+                },
+                "examples": {
+                  "notFound": {
+                    "summary": "Record not found (illustrative)",
+                    "description": "Illustrative example, in the format the API returns. The ID, field and message depend on your request.",
+                    "value": {
+                      "data": [],
+                      "errors": [
+                        {
+                          "name": "NotFoundError",
+                          "description": "Document with id 6a1f0c2e9b3d4a5f8c7e1a99 not found"
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -441,6 +456,21 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OperationResponse"
+                },
+                "examples": {
+                  "invalidRequest": {
+                    "summary": "Validation error (illustrative)",
+                    "description": "Illustrative example, in the format the API returns. The ID, field and message depend on your request. The message names the field and what's wrong with it.",
+                    "value": {
+                      "data": [],
+                      "errors": [
+                        {
+                          "name": "InputDTOValidationError",
+                          "description": "<field>: <what to fix>"
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -490,12 +520,27 @@
           "204": {
             "description": "Successful Response"
           },
-          "422": {
-            "description": "The request failed validation. A required field may be missing, a value may have the wrong type or length, or the body may include a field the operation doesn't accept. `errors` describes the problem, usually as `<field>: <message>`. Some checks return `product data validation failed` without naming the field.",
+          "404": {
+            "description": "No record with this ID exists in your account, or it was deleted. On some field routes, a field or link that doesn't exist also returns `404`. `errors` says which.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OperationResponse"
+                },
+                "examples": {
+                  "notFound": {
+                    "summary": "Record not found (illustrative)",
+                    "description": "Illustrative example, in the format the API returns. The ID, field and message depend on your request.",
+                    "value": {
+                      "data": [],
+                      "errors": [
+                        {
+                          "name": "NotFoundError",
+                          "description": "Document with id 6a1f0c2e9b3d4a5f8c7e1a99 not found"
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -545,12 +590,27 @@
           "204": {
             "description": "Successful Response"
           },
-          "422": {
-            "description": "The request failed validation. A required field may be missing, a value may have the wrong type or length, or the body may include a field the operation doesn't accept. `errors` describes the problem, usually as `<field>: <message>`. Some checks return `product data validation failed` without naming the field.",
+          "404": {
+            "description": "No record with this ID exists in your account, or it was deleted. On some field routes, a field or link that doesn't exist also returns `404`. `errors` says which.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OperationResponse"
+                },
+                "examples": {
+                  "notFound": {
+                    "summary": "Record not found (illustrative)",
+                    "description": "Illustrative example, in the format the API returns. The ID, field and message depend on your request.",
+                    "value": {
+                      "data": [],
+                      "errors": [
+                        {
+                          "name": "NotFoundError",
+                          "description": "Document with id 6a1f0c2e9b3d4a5f8c7e1a99 not found"
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -628,6 +688,21 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OperationResponse"
+                },
+                "examples": {
+                  "invalidRequest": {
+                    "summary": "Validation error (illustrative)",
+                    "description": "Illustrative example, in the format the API returns. The ID, field and message depend on your request. The message names the field and what's wrong with it.",
+                    "value": {
+                      "data": [],
+                      "errors": [
+                        {
+                          "name": "InputDTOValidationError",
+                          "description": "<field>: <what to fix>"
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -773,12 +848,27 @@
           "204": {
             "description": "Unlinked. The response has no body."
           },
-          "422": {
-            "description": "The request failed validation. A required field may be missing, a value may have the wrong type or length, or the body may include a field the operation doesn't accept. `errors` describes the problem, usually as `<field>: <message>`. Some checks return `product data validation failed` without naming the field.",
+          "404": {
+            "description": "No record with this ID exists in your account, or it was deleted. On some field routes, a field or link that doesn't exist also returns `404`. `errors` says which.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OperationResponse"
+                },
+                "examples": {
+                  "notFound": {
+                    "summary": "Record not found (illustrative)",
+                    "description": "Illustrative example, in the format the API returns. The ID, field and message depend on your request.",
+                    "value": {
+                      "data": [],
+                      "errors": [
+                        {
+                          "name": "NotFoundError",
+                          "description": "Document with id 6a1f0c2e9b3d4a5f8c7e1a99 not found"
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -850,6 +940,21 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OperationResponse"
+                },
+                "examples": {
+                  "missingField": {
+                    "summary": "Missing id (illustrative)",
+                    "description": "Illustrative example, in the format the API returns. The ID, field and message depend on your request.",
+                    "value": {
+                      "data": [],
+                      "errors": [
+                        {
+                          "name": "InputDTOValidationError",
+                          "description": "id: Field required"
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -1561,12 +1666,27 @@
           "204": {
             "description": "Deleted. The response has no body."
           },
-          "422": {
-            "description": "The request failed validation. A required field may be missing, a value may have the wrong type or length, or the body may include a field the operation doesn't accept. `errors` describes the problem, usually as `<field>: <message>`. Some checks return `product data validation failed` without naming the field.",
+          "404": {
+            "description": "No record with this ID exists in your account, or it was deleted. On some field routes, a field or link that doesn't exist also returns `404`. `errors` says which.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OperationResponse"
+                },
+                "examples": {
+                  "notFound": {
+                    "summary": "Record not found (illustrative)",
+                    "description": "Illustrative example, in the format the API returns. The ID, field and message depend on your request.",
+                    "value": {
+                      "data": [],
+                      "errors": [
+                        {
+                          "name": "NotFoundError",
+                          "description": "Document with id 6a1f0c2e9b3d4a5f8c7e1a99 not found"
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -1698,7 +1818,7 @@
           "products"
         ],
         "summary": "Update a product field",
-        "description": "Changes one custom attribute value and leaves the rest of the product as it is. Set `path` to `attributes/<label>` and send the new value on its own as the request body: `\"2019\"`, not `{\"value\": \"2019\"}`. A successful update returns `204` with an empty body.\n\nUse this to change a single attribute. [Update a product](/reference/v3/products/update-product) replaces the whole `attributes` map, so any attribute you leave out of it is removed.\n\nThe value's format depends on the attribute type:\n\n- Text: a string. `null` removes the value.\n- Decimal: a string, such as `\"12.5\"`. A JSON number returns `422`.\n- Multi-select: an array of the attribute's configured options, such as `[\"Blue\"]`.\n- Media: one asset ID, as a string.\n- Media gallery: an array of asset IDs.\n\nCompleteness and formula attributes are calculated by Plytix, so writing to them returns `422`.\n\nLink collections such as `categories` can't be changed here (`405`). Link and unlink categories with [Link a category to a product](/reference/v3/products/link-product-category) and [Unlink a category from a product](/reference/v3/products/delete-product-category-link). See [Update and delete records](/reference/v3/updates-and-deletes).",
+        "description": "Changes one custom attribute value and leaves the rest of the product as it is. Set `path` to `attributes/<label>` and send the new value on its own as the request body: `\"2019\"`, not `{\"value\": \"2019\"}`. A successful update returns `204` with an empty body.\n\nUse this to change a single attribute. [Update a product](/reference/v3/products/update-product) replaces the whole `attributes` map, so any attribute you leave out of it is removed.\n\nThe value's format depends on the attribute type:\n\n- Text: a string. `null` removes the value.\n- Decimal: a JSON number, such as `34.99`. A quoted string such as `\"34.99\"` returns `422`.\n- Multi-select: an array of the attribute's configured options, such as `[\"Blue\"]`.\n- Media: one asset ID, as a string.\n- Media gallery: an array of asset IDs.\n\nCompleteness and formula attributes are calculated by Plytix, so writing to them returns `422`.\n\nLink collections such as `categories` can't be changed here (`405`). Link and unlink categories with [Link a category to a product](/reference/v3/products/link-product-category) and [Unlink a category from a product](/reference/v3/products/delete-product-category-link). See [Update and delete records](/reference/v3/updates-and-deletes).",
         "operationId": "update-product-field",
         "parameters": [
           {
@@ -1735,8 +1855,8 @@
                   "value": "2019"
                 },
                 "decimal": {
-                  "summary": "Decimal attribute (sent as a string)",
-                  "value": "12.5"
+                  "summary": "Decimal attribute",
+                  "value": 34.99
                 },
                 "multiSelect": {
                   "summary": "Multi-select attribute",
@@ -2291,12 +2411,27 @@
           "204": {
             "description": "Deleted. The response has no body."
           },
-          "422": {
-            "description": "The request failed validation. A required field may be missing, a value may have the wrong type or length, or the body may include a field the operation doesn't accept. `errors` describes the problem, usually as `<field>: <message>`. Some checks return `product data validation failed` without naming the field.",
+          "404": {
+            "description": "No record with this ID exists in your account, or it was deleted. On some field routes, a field or link that doesn't exist also returns `404`. `errors` says which.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OperationResponse"
+                },
+                "examples": {
+                  "notFound": {
+                    "summary": "Record not found (illustrative)",
+                    "description": "Illustrative example, in the format the API returns. The ID, field and message depend on your request.",
+                    "value": {
+                      "data": [],
+                      "errors": [
+                        {
+                          "name": "NotFoundError",
+                          "description": "Document with id 6a1f0c2e9b3d4a5f8c7e1a99 not found"
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -2463,6 +2598,21 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OperationResponse"
+                },
+                "examples": {
+                  "invalidRequest": {
+                    "summary": "Validation error (illustrative)",
+                    "description": "Illustrative example, in the format the API returns. The ID, field and message depend on your request. The message names the field and what's wrong with it.",
+                    "value": {
+                      "data": [],
+                      "errors": [
+                        {
+                          "name": "InputDTOValidationError",
+                          "description": "<field>: <what to fix>"
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -2699,6 +2849,21 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OperationResponse"
+                },
+                "examples": {
+                  "pageOutOfRange": {
+                    "summary": "Page number below 1 (illustrative)",
+                    "description": "Illustrative example, in the format the API returns. The ID, field and message depend on your request.",
+                    "value": {
+                      "data": [],
+                      "errors": [
+                        {
+                          "name": "InputDTOValidationError",
+                          "description": "query._page: Input should be greater than or equal to 1"
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -2943,6 +3108,21 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OperationResponse"
+                },
+                "examples": {
+                  "invalidRequest": {
+                    "summary": "Validation error (illustrative)",
+                    "description": "Illustrative example, in the format the API returns. The ID, field and message depend on your request. The message names the field and what's wrong with it.",
+                    "value": {
+                      "data": [],
+                      "errors": [
+                        {
+                          "name": "InputDTOValidationError",
+                          "description": "<field>: <what to fix>"
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -2972,12 +3152,27 @@
           "204": {
             "description": "Deleted. The response has no body."
           },
-          "422": {
-            "description": "The request failed validation. A required field may be missing, a value may have the wrong type or length, or the body may include a field the operation doesn't accept. `errors` describes the problem, usually as `<field>: <message>`. Some checks return `product data validation failed` without naming the field.",
+          "404": {
+            "description": "No record with this ID exists in your account, or it was deleted. On some field routes, a field or link that doesn't exist also returns `404`. `errors` says which.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OperationResponse"
+                },
+                "examples": {
+                  "notFound": {
+                    "summary": "Record not found (illustrative)",
+                    "description": "Illustrative example, in the format the API returns. The ID, field and message depend on your request.",
+                    "value": {
+                      "data": [],
+                      "errors": [
+                        {
+                          "name": "NotFoundError",
+                          "description": "Document with id 6a1f0c2e9b3d4a5f8c7e1a99 not found"
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -3095,7 +3290,7 @@
           "productcategories"
         ],
         "summary": "Update a product category field",
-        "description": "To rename a category or move it under another parent, use [Update a product category](/reference/v3/product-categories/update-product-category), which documents the request body.",
+        "description": "Changes one field of a category and leaves the rest as it is. Set `path` to the field, `name` or `parent_id`, and send the new value on its own as the request body, not wrapped in an object. For example, to rename a category, set `path` to `name` and send `\"Espresso Cups\"`.\n\nTo change both fields in one request, use [Update a product category](/reference/v3/product-categories/update-product-category).",
         "operationId": "update-product-category-field",
         "parameters": [
           {
@@ -3116,14 +3311,21 @@
               "type": "string",
               "title": "Path"
             },
-            "description": "Name of a category field, for example `name`."
+            "description": "Name of a category field, `name` or `parent_id`.",
+            "example": "name"
           }
         ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": {}
+              "schema": {},
+              "examples": {
+                "name": {
+                  "summary": "New name (path `name`)",
+                  "value": "Espresso Cups"
+                }
+              }
             }
           }
         },
@@ -3137,6 +3339,21 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OperationResponse"
+                },
+                "examples": {
+                  "invalidRequest": {
+                    "summary": "Validation error (illustrative)",
+                    "description": "Illustrative example, in the format the API returns. The ID, field and message depend on your request. The message names the field and what's wrong with it.",
+                    "value": {
+                      "data": [],
+                      "errors": [
+                        {
+                          "name": "InputDTOValidationError",
+                          "description": "<field>: <what to fix>"
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -3176,12 +3393,27 @@
           "204": {
             "description": "Successful Response"
           },
-          "422": {
-            "description": "The request failed validation. A required field may be missing, a value may have the wrong type or length, or the body may include a field the operation doesn't accept. `errors` describes the problem, usually as `<field>: <message>`. Some checks return `product data validation failed` without naming the field.",
+          "404": {
+            "description": "No record with this ID exists in your account, or it was deleted. On some field routes, a field or link that doesn't exist also returns `404`. `errors` says which.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OperationResponse"
+                },
+                "examples": {
+                  "notFound": {
+                    "summary": "Record not found (illustrative)",
+                    "description": "Illustrative example, in the format the API returns. The ID, field and message depend on your request.",
+                    "value": {
+                      "data": [],
+                      "errors": [
+                        {
+                          "name": "NotFoundError",
+                          "description": "Document with id 6a1f0c2e9b3d4a5f8c7e1a99 not found"
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -3323,6 +3555,21 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OperationResponse"
+                },
+                "examples": {
+                  "pageOutOfRange": {
+                    "summary": "Page number below 1 (illustrative)",
+                    "description": "Illustrative example, in the format the API returns. The ID, field and message depend on your request.",
+                    "value": {
+                      "data": [],
+                      "errors": [
+                        {
+                          "name": "InputDTOValidationError",
+                          "description": "query._page: Input should be greater than or equal to 1"
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -3567,6 +3814,21 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OperationResponse"
+                },
+                "examples": {
+                  "invalidRequest": {
+                    "summary": "Validation error (illustrative)",
+                    "description": "Illustrative example, in the format the API returns. The ID, field and message depend on your request. The message names the field and what's wrong with it.",
+                    "value": {
+                      "data": [],
+                      "errors": [
+                        {
+                          "name": "InputDTOValidationError",
+                          "description": "<field>: <what to fix>"
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -3596,12 +3858,27 @@
           "204": {
             "description": "Deleted. The response has no body."
           },
-          "422": {
-            "description": "The request failed validation. A required field may be missing, a value may have the wrong type or length, or the body may include a field the operation doesn't accept. `errors` describes the problem, usually as `<field>: <message>`. Some checks return `product data validation failed` without naming the field.",
+          "404": {
+            "description": "No record with this ID exists in your account, or it was deleted. On some field routes, a field or link that doesn't exist also returns `404`. `errors` says which.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OperationResponse"
+                },
+                "examples": {
+                  "notFound": {
+                    "summary": "Record not found (illustrative)",
+                    "description": "Illustrative example, in the format the API returns. The ID, field and message depend on your request.",
+                    "value": {
+                      "data": [],
+                      "errors": [
+                        {
+                          "name": "NotFoundError",
+                          "description": "Document with id 6a1f0c2e9b3d4a5f8c7e1a99 not found"
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -3704,7 +3981,7 @@
           "assetcategories"
         ],
         "summary": "Update an asset category field",
-        "description": "To rename an asset category or move it under another parent, use [Update an asset category](/reference/v3/asset-categories/update-asset-category), which documents the request body and what changes.",
+        "description": "Changes one field of an asset category and leaves the rest as it is. Set `path` to the field, `name` or `parent_id`, and send the new value on its own as the request body, not wrapped in an object. For example, to rename a category, set `path` to `name` and send `\"Product Packshots\"`.\n\nTo change both fields in one request, use [Update an asset category](/reference/v3/asset-categories/update-asset-category), which also explains what changes when a category moves.",
         "operationId": "update-asset-category-field",
         "parameters": [
           {
@@ -3725,14 +4002,21 @@
               "type": "string",
               "title": "Path"
             },
-            "description": "A field of the category, such as `name` or `parent_id`."
+            "description": "A field of the category, `name` or `parent_id`.",
+            "example": "name"
           }
         ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": {}
+              "schema": {},
+              "examples": {
+                "name": {
+                  "summary": "New name (path `name`)",
+                  "value": "Product Packshots"
+                }
+              }
             }
           }
         },
@@ -3746,6 +4030,21 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OperationResponse"
+                },
+                "examples": {
+                  "invalidRequest": {
+                    "summary": "Validation error (illustrative)",
+                    "description": "Illustrative example, in the format the API returns. The ID, field and message depend on your request. The message names the field and what's wrong with it.",
+                    "value": {
+                      "data": [],
+                      "errors": [
+                        {
+                          "name": "InputDTOValidationError",
+                          "description": "<field>: <what to fix>"
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -3785,12 +4084,27 @@
           "204": {
             "description": "Successful Response"
           },
-          "422": {
-            "description": "The request failed validation. A required field may be missing, a value may have the wrong type or length, or the body may include a field the operation doesn't accept. `errors` describes the problem, usually as `<field>: <message>`. Some checks return `product data validation failed` without naming the field.",
+          "404": {
+            "description": "No record with this ID exists in your account, or it was deleted. On some field routes, a field or link that doesn't exist also returns `404`. `errors` says which.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OperationResponse"
+                },
+                "examples": {
+                  "notFound": {
+                    "summary": "Record not found (illustrative)",
+                    "description": "Illustrative example, in the format the API returns. The ID, field and message depend on your request.",
+                    "value": {
+                      "data": [],
+                      "errors": [
+                        {
+                          "name": "NotFoundError",
+                          "description": "Document with id 6a1f0c2e9b3d4a5f8c7e1a99 not found"
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -4310,6 +4624,21 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OperationResponse"
+                },
+                "examples": {
+                  "invalidRequest": {
+                    "summary": "Validation error (illustrative)",
+                    "description": "Illustrative example, in the format the API returns. The ID, field and message depend on your request. The message names the field and what's wrong with it.",
+                    "value": {
+                      "data": [],
+                      "errors": [
+                        {
+                          "name": "InputDTOValidationError",
+                          "description": "<field>: <what to fix>"
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -4339,12 +4668,27 @@
           "204": {
             "description": "Deleted. The response has no body."
           },
-          "422": {
-            "description": "The request failed validation. A required field may be missing, a value may have the wrong type or length, or the body may include a field the operation doesn't accept. `errors` describes the problem, usually as `<field>: <message>`. Some checks return `product data validation failed` without naming the field.",
+          "404": {
+            "description": "No record with this ID exists in your account, or it was deleted. On some field routes, a field or link that doesn't exist also returns `404`. `errors` says which.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OperationResponse"
+                },
+                "examples": {
+                  "notFound": {
+                    "summary": "Record not found (illustrative)",
+                    "description": "Illustrative example, in the format the API returns. The ID, field and message depend on your request.",
+                    "value": {
+                      "data": [],
+                      "errors": [
+                        {
+                          "name": "NotFoundError",
+                          "description": "Document with id 6a1f0c2e9b3d4a5f8c7e1a99 not found"
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -4458,7 +4802,7 @@
           "assetlists"
         ],
         "summary": "Update an asset list field",
-        "description": "To rename a list or replace its query, use [Update an asset list](/reference/v3/asset-lists/update-asset-list), which documents the request body.",
+        "description": "Changes one field of an asset list and leaves the rest as it is. Set `path` to the field and send the new value on its own as the request body, not wrapped in an object. For example, to rename a list, set `path` to `name` and send `\"Kettle Photos\"`.\n\nTo replace a smart list's `query`, use [Update an asset list](/reference/v3/asset-lists/update-asset-list), which documents the query format.",
         "operationId": "update-asset-list-field",
         "parameters": [
           {
@@ -4479,14 +4823,21 @@
               "type": "string",
               "title": "Path"
             },
-            "description": "Name of an asset list field, for example `name`."
+            "description": "Name of an asset list field, for example `name`.",
+            "example": "name"
           }
         ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": {}
+              "schema": {},
+              "examples": {
+                "name": {
+                  "summary": "New name (path `name`)",
+                  "value": "Kettle Photos"
+                }
+              }
             }
           }
         },
@@ -4500,6 +4851,21 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OperationResponse"
+                },
+                "examples": {
+                  "invalidRequest": {
+                    "summary": "Validation error (illustrative)",
+                    "description": "Illustrative example, in the format the API returns. The ID, field and message depend on your request. The message names the field and what's wrong with it.",
+                    "value": {
+                      "data": [],
+                      "errors": [
+                        {
+                          "name": "InputDTOValidationError",
+                          "description": "<field>: <what to fix>"
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -4539,12 +4905,27 @@
           "204": {
             "description": "Successful Response"
           },
-          "422": {
-            "description": "The request failed validation. A required field may be missing, a value may have the wrong type or length, or the body may include a field the operation doesn't accept. `errors` describes the problem, usually as `<field>: <message>`. Some checks return `product data validation failed` without naming the field.",
+          "404": {
+            "description": "No record with this ID exists in your account, or it was deleted. On some field routes, a field or link that doesn't exist also returns `404`. `errors` says which.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OperationResponse"
+                },
+                "examples": {
+                  "notFound": {
+                    "summary": "Record not found (illustrative)",
+                    "description": "Illustrative example, in the format the API returns. The ID, field and message depend on your request.",
+                    "value": {
+                      "data": [],
+                      "errors": [
+                        {
+                          "name": "NotFoundError",
+                          "description": "Document with id 6a1f0c2e9b3d4a5f8c7e1a99 not found"
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -4716,6 +5097,21 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OperationResponse"
+                },
+                "examples": {
+                  "pageOutOfRange": {
+                    "summary": "Page number below 1 (illustrative)",
+                    "description": "Illustrative example, in the format the API returns. The ID, field and message depend on your request.",
+                    "value": {
+                      "data": [],
+                      "errors": [
+                        {
+                          "name": "InputDTOValidationError",
+                          "description": "query._page: Input should be greater than or equal to 1"
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -4932,6 +5328,21 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OperationResponse"
+                },
+                "examples": {
+                  "invalidRequest": {
+                    "summary": "Validation error (illustrative)",
+                    "description": "Illustrative example, in the format the API returns. The ID, field and message depend on your request. The message names the field and what's wrong with it.",
+                    "value": {
+                      "data": [],
+                      "errors": [
+                        {
+                          "name": "InputDTOValidationError",
+                          "description": "<field>: <what to fix>"
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -4961,12 +5372,27 @@
           "204": {
             "description": "Deleted. The response has no body."
           },
-          "422": {
-            "description": "The request failed validation. A required field may be missing, a value may have the wrong type or length, or the body may include a field the operation doesn't accept. `errors` describes the problem, usually as `<field>: <message>`. Some checks return `product data validation failed` without naming the field.",
+          "404": {
+            "description": "No record with this ID exists in your account, or it was deleted. On some field routes, a field or link that doesn't exist also returns `404`. `errors` says which.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OperationResponse"
+                },
+                "examples": {
+                  "notFound": {
+                    "summary": "Record not found (illustrative)",
+                    "description": "Illustrative example, in the format the API returns. The ID, field and message depend on your request.",
+                    "value": {
+                      "data": [],
+                      "errors": [
+                        {
+                          "name": "NotFoundError",
+                          "description": "Document with id 6a1f0c2e9b3d4a5f8c7e1a99 not found"
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -5120,6 +5546,21 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OperationResponse"
+                },
+                "examples": {
+                  "invalidRequest": {
+                    "summary": "Validation error (illustrative)",
+                    "description": "Illustrative example, in the format the API returns. The ID, field and message depend on your request. The message names the field and what's wrong with it.",
+                    "value": {
+                      "data": [],
+                      "errors": [
+                        {
+                          "name": "InputDTOValidationError",
+                          "description": "<field>: <what to fix>"
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -5159,12 +5600,27 @@
           "204": {
             "description": "Successful Response"
           },
-          "422": {
-            "description": "The request failed validation. A required field may be missing, a value may have the wrong type or length, or the body may include a field the operation doesn't accept. `errors` describes the problem, usually as `<field>: <message>`. Some checks return `product data validation failed` without naming the field.",
+          "404": {
+            "description": "No record with this ID exists in your account, or it was deleted. On some field routes, a field or link that doesn't exist also returns `404`. `errors` says which.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OperationResponse"
+                },
+                "examples": {
+                  "notFound": {
+                    "summary": "Record not found (illustrative)",
+                    "description": "Illustrative example, in the format the API returns. The ID, field and message depend on your request.",
+                    "value": {
+                      "data": [],
+                      "errors": [
+                        {
+                          "name": "NotFoundError",
+                          "description": "Document with id 6a1f0c2e9b3d4a5f8c7e1a99 not found"
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -5308,6 +5764,21 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OperationResponse"
+                },
+                "examples": {
+                  "pageOutOfRange": {
+                    "summary": "Page number below 1 (illustrative)",
+                    "description": "Illustrative example, in the format the API returns. The ID, field and message depend on your request.",
+                    "value": {
+                      "data": [],
+                      "errors": [
+                        {
+                          "name": "InputDTOValidationError",
+                          "description": "query._page: Input should be greater than or equal to 1"
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -5462,6 +5933,21 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OperationResponse"
+                },
+                "examples": {
+                  "pageOutOfRange": {
+                    "summary": "Page number below 1 (illustrative)",
+                    "description": "Illustrative example, in the format the API returns. The ID, field and message depend on your request.",
+                    "value": {
+                      "data": [],
+                      "errors": [
+                        {
+                          "name": "InputDTOValidationError",
+                          "description": "query._page: Input should be greater than or equal to 1"
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -5862,12 +6348,27 @@
           "204": {
             "description": "Deleted. The response has no body."
           },
-          "422": {
-            "description": "The request failed validation. A required field may be missing, a value may have the wrong type or length, or the body may include a field the operation doesn't accept. `errors` describes the problem, usually as `<field>: <message>`. Some checks return `product data validation failed` without naming the field.",
+          "404": {
+            "description": "No record with this ID exists in your account, or it was deleted. On some field routes, a field or link that doesn't exist also returns `404`. `errors` says which.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OperationResponse"
+                },
+                "examples": {
+                  "notFound": {
+                    "summary": "Record not found (illustrative)",
+                    "description": "Illustrative example, in the format the API returns. The ID, field and message depend on your request.",
+                    "value": {
+                      "data": [],
+                      "errors": [
+                        {
+                          "name": "NotFoundError",
+                          "description": "Document with id 6a1f0c2e9b3d4a5f8c7e1a99 not found"
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -5945,6 +6446,21 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OperationResponse"
+                },
+                "examples": {
+                  "invalidRequest": {
+                    "summary": "Validation error (illustrative)",
+                    "description": "Illustrative example, in the format the API returns. The ID, field and message depend on your request. The message names the field and what's wrong with it.",
+                    "value": {
+                      "data": [],
+                      "errors": [
+                        {
+                          "name": "InputDTOValidationError",
+                          "description": "<field>: <what to fix>"
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -5956,7 +6472,7 @@
           "productattributes"
         ],
         "summary": "Update a product attribute field",
-        "description": "To change an attribute's settings, use [Update a product attribute](/reference/v3/product-attributes/update-product-attribute), which documents the request body.",
+        "description": "Changes one setting of an attribute and leaves the others as they are. Set `path` to the setting and send the new value on its own as the request body, not wrapped in an object. For example, to rename an attribute, set `path` to `name` and send `\"Collection name\"`. The attribute's `label` and `type` can't be changed.\n\nTo change several settings in one request, such as a dropdown's `options`, use [Update a product attribute](/reference/v3/product-attributes/update-product-attribute), which lists the settings of each attribute type.",
         "operationId": "update-product-attribute-field",
         "parameters": [
           {
@@ -5977,14 +6493,21 @@
               "type": "string",
               "title": "Path"
             },
-            "description": "Name of the field to work on."
+            "description": "The setting to change, such as `name` or `description`.",
+            "example": "name"
           }
         ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": {}
+              "schema": {},
+              "examples": {
+                "name": {
+                  "summary": "New name (path `name`)",
+                  "value": "Collection name"
+                }
+              }
             }
           }
         },
@@ -5998,6 +6521,21 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OperationResponse"
+                },
+                "examples": {
+                  "invalidRequest": {
+                    "summary": "Validation error (illustrative)",
+                    "description": "Illustrative example, in the format the API returns. The ID, field and message depend on your request. The message names the field and what's wrong with it.",
+                    "value": {
+                      "data": [],
+                      "errors": [
+                        {
+                          "name": "InputDTOValidationError",
+                          "description": "<field>: <what to fix>"
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -6037,12 +6575,27 @@
           "204": {
             "description": "Successful Response"
           },
-          "422": {
-            "description": "The request failed validation. A required field may be missing, a value may have the wrong type or length, or the body may include a field the operation doesn't accept. `errors` describes the problem, usually as `<field>: <message>`. Some checks return `product data validation failed` without naming the field.",
+          "404": {
+            "description": "No record with this ID exists in your account, or it was deleted. On some field routes, a field or link that doesn't exist also returns `404`. `errors` says which.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OperationResponse"
+                },
+                "examples": {
+                  "notFound": {
+                    "summary": "Record not found (illustrative)",
+                    "description": "Illustrative example, in the format the API returns. The ID, field and message depend on your request.",
+                    "value": {
+                      "data": [],
+                      "errors": [
+                        {
+                          "name": "NotFoundError",
+                          "description": "Document with id 6a1f0c2e9b3d4a5f8c7e1a99 not found"
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -6186,6 +6739,21 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OperationResponse"
+                },
+                "examples": {
+                  "pageOutOfRange": {
+                    "summary": "Page number below 1 (illustrative)",
+                    "description": "Illustrative example, in the format the API returns. The ID, field and message depend on your request.",
+                    "value": {
+                      "data": [],
+                      "errors": [
+                        {
+                          "name": "InputDTOValidationError",
+                          "description": "query._page: Input should be greater than or equal to 1"
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -6445,12 +7013,27 @@
           "204": {
             "description": "Deleted. The response has no body."
           },
-          "422": {
-            "description": "The request failed validation. A required field may be missing, a value may have the wrong type or length, or the body may include a field the operation doesn't accept. `errors` describes the problem, usually as `<field>: <message>`. Some checks return `product data validation failed` without naming the field.",
+          "404": {
+            "description": "No record with this ID exists in your account, or it was deleted. On some field routes, a field or link that doesn't exist also returns `404`. `errors` says which.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OperationResponse"
+                },
+                "examples": {
+                  "notFound": {
+                    "summary": "Record not found (illustrative)",
+                    "description": "Illustrative example, in the format the API returns. The ID, field and message depend on your request.",
+                    "value": {
+                      "data": [],
+                      "errors": [
+                        {
+                          "name": "NotFoundError",
+                          "description": "Document with id 6a1f0c2e9b3d4a5f8c7e1a99 not found"
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -6528,6 +7111,21 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OperationResponse"
+                },
+                "examples": {
+                  "invalidRequest": {
+                    "summary": "Validation error (illustrative)",
+                    "description": "Illustrative example, in the format the API returns. The ID, field and message depend on your request. The message names the field and what's wrong with it.",
+                    "value": {
+                      "data": [],
+                      "errors": [
+                        {
+                          "name": "InputDTOValidationError",
+                          "description": "<field>: <what to fix>"
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -6590,6 +7188,21 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OperationResponse"
+                },
+                "examples": {
+                  "invalidRequest": {
+                    "summary": "Validation error (illustrative)",
+                    "description": "Illustrative example, in the format the API returns. The ID, field and message depend on your request. The message names the field and what's wrong with it.",
+                    "value": {
+                      "data": [],
+                      "errors": [
+                        {
+                          "name": "InputDTOValidationError",
+                          "description": "<field>: <what to fix>"
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -6629,12 +7242,27 @@
           "204": {
             "description": "Successful Response"
           },
-          "422": {
-            "description": "The request failed validation. A required field may be missing, a value may have the wrong type or length, or the body may include a field the operation doesn't accept. `errors` describes the problem, usually as `<field>: <message>`. Some checks return `product data validation failed` without naming the field.",
+          "404": {
+            "description": "No record with this ID exists in your account, or it was deleted. On some field routes, a field or link that doesn't exist also returns `404`. `errors` says which.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OperationResponse"
+                },
+                "examples": {
+                  "notFound": {
+                    "summary": "Record not found (illustrative)",
+                    "description": "Illustrative example, in the format the API returns. The ID, field and message depend on your request.",
+                    "value": {
+                      "data": [],
+                      "errors": [
+                        {
+                          "name": "NotFoundError",
+                          "description": "Document with id 6a1f0c2e9b3d4a5f8c7e1a99 not found"
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }

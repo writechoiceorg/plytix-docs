@@ -1,18 +1,18 @@
 ---
 title: Unlink categories, assets, or relationships
-description: Remove a category or a relationship link from a product, or change its thumbnail, through the V3 API while keeping the product's other links.
+description: Remove a category or one gallery asset from a product, or change its thumbnail, through the V3 API while keeping the product's other links and assets.
 ---
 
 import { ArrowClockwiseRegular, DocumentEditRegular } from '@/components/icons';
 
-Remove one category from a product, or remove a product's link to one relationship type, without touching the product's other links. Each is a link between two entities, and Plytix V3 gives you a dedicated endpoint to add or remove it: `POST` to the collection to link, `DELETE` on the specific link to unlink. Removing a relationship link removes every related product the product has under that relationship type, so it isn't a way to remove a single related product. The relationship type and the products themselves stay. This guide covers categories and relationships, and explains how a product's thumbnail and other assets are set. All requests use the V3 API with a bearer token. A successful `PATCH` or `DELETE` returns `204` with an empty body, which confirms the change. Read the product back when you need to inspect the result.
+Remove one category or one asset from a product without touching the product's other links or assets. A category is a link between two entities, and Plytix V3 gives you a dedicated endpoint to add or remove it: `POST` to the collection to link, `DELETE` on the specific link to unlink. Assets are held in the product's media and media gallery attributes instead, so removing one means writing the attribute's new value. This guide covers categories, assets, and the thumbnail, and explains where relationships stand in V3. All requests use the V3 API with a bearer token. A successful `PATCH` or `DELETE` returns `204` with an empty body, which confirms the change. Read the product back when you need to inspect the result.
 
 ## Prerequisites
 
 Before you start, make sure you have the following:
 
 - A V3 access token with the permissions this guide needs. See [Authentication](/reference/v3/authentication), or the [Quickstart](/guides/quickstart) for a first walkthrough.
-- The product's ID, and the ID of the category or relationship you want to remove.
+- The product's ID, and the ID of the category or asset you want to remove.
 
 ## Remove a category from a product
 
@@ -64,39 +64,18 @@ Follow the steps below to read a product's current categories, remove one of the
 
 ## Remove a relationship from a product
 
-{/* FLAG (open): REL-23. The 2026-10-19 spec removes `product_relationships` and the `/api/v3/products/{product_id}/relationships` routes in favor of `product_relationships_from`/`_to` and `/api/v3/products/{product_identifier}/product_relationship_types`. Rewrite this section once Plytix classifies the new operations. */}
-
-Relationships work the same way as categories, with one extra layer: the relationship type is an account-level entity, and the link between two products lives under it.
-
-Follow the steps below to remove a relationship link without deleting the relationship type or either product.
-
-1. **Read the product's current relationships.**
-
-   ```bash
-   curl -G "https://pim.plytix.com/api/v3/products" \
-     -H "Authorization: Bearer <access_token>" \
-     --data-urlencode "sku=<sku>" \
-     --data-urlencode "_fields=product_relationships"
-   ```
-
-   Each entry carries a `relationship_id`, which is what you need next.
-
-2. **Unlink the relationship.**
-
-   ```bash
-   curl -X DELETE "https://pim.plytix.com/api/v3/products/<product_id>/relationships/<relationship_id>" \
-     -H "Authorization: Bearer <access_token>"
-   ```
-
-   This removes the product's link to that relationship type, including every related product listed under it for this product. You can't use it to remove one related product. It returns `204`. The relationship type itself survives, and so does every product that was on the other end of the link.
-
-3. **Check the result, if your integration needs it.**
-
-   Repeat the read from step 1. The entry for that `relationship_id` should be gone.
-
-<Callout type="warn" title="Deleting the relationship type is a different action">
-  `DELETE /relationships/{relationship_id}` deletes the relationship type from your whole account. Check what uses it before you call it. Use the product-scoped path above when you only mean to unlink one product.
+<Callout type="warn" title="V3 relationship routes are retired">
+  Earlier versions of this guide used `/api/v3/products/<product_id>/relationships/<relationship_id>`, `/api/v3/relationships`, `/api/v3/related-products`, and the `product_relationships` field. They're no longer part of V3: the routes return `404`, `405`, or `422`, so don't build on them. Their replacement, product relationship types, isn't documented yet.
 </Callout>
+
+Until V3 relationship types are documented, manage a product's related products with the V1/V2 API, which uses its own [authentication](/reference/v1-v2/token-authentication):
+
+- [Remove products from a relationship](/reference/v1-v2/products/remove-related-products) unlinks the related products you name from one relationship, and keeps the others.
+- [Add products to a relationship](/reference/v1-v2/products/add-related-products) links them again.
+
+Neither deletes the relationship type or any product.
+
+{/* FLAG (open): STG-005, REL-23. The 2026-10-19 spec removes `product_relationships` and every `/api/v3/products/{product_id}/relationships`, `/api/v3/relationships` and `/api/v3/related-products` route (live: FB-024), and adds `/api/v3/product-relationship-types` and `/api/v3/products/{product_identifier}/product_relationship_types` (link, update, unlink), with `product_relationships_from` / `_to` on products. Add a V3 recipe here once Core confirms those routes are public and `ops/relationships.yaml` is written. */}
 
 ## Change or clear a product's thumbnail
 
@@ -130,7 +109,7 @@ There's no link or unlink endpoint for assets: `POST /products/<product_id>/asse
 - A media gallery attribute takes an array of asset IDs, such as `["<asset_id_1>", "<asset_id_2>"]`.
 - Objects such as `{"id": "<asset_id>"}` are rejected, and so is the other attribute's shape, an array on a media attribute or a bare string on a gallery.
 
-These formats were tested on the attribute's own path, in a `PATCH` of the whole `attributes` map, and when creating a product. This request sets a gallery:
+These formats were tested on the attribute's own path, in a `PATCH` of the whole `attributes` map, and when creating a product. Use the attribute's own path, as below: a `PATCH` of the whole map on the product replaces every attribute, and deletes the ones you leave out (see [How PATCH treats the attributes map](/guides/migrating-to-v3/responses-and-updates#how-patch-treats-the-attributes-map)). This request sets a gallery:
 
 ```bash
 curl -X PATCH "https://pim.plytix.com/api/v3/products/<product_id>/attributes/<gallery_label>" \
@@ -145,7 +124,43 @@ Keep these behaviors in mind when you read the result back:
 - A gallery keeps the order you send and drops duplicate IDs. That order belongs to the gallery: the product's `assets` list can come back in a different order.
 - Gallery order doesn't choose the thumbnail. Set the main image with `thumbnail_id`, as shown in [Change or clear a product's thumbnail](#change-or-clear-a-products-thumbnail).
 
-To disconnect assets, send `[]` to a gallery, or use `DELETE /products/<product_id>/attributes/<label>` on either attribute. A media attribute rejects `""`. Clearing or unlinking removes only the product's association: the asset stays in Plytix DAM, and deleting it is the separate `DELETE /api/v3/assets/<asset_id>`.
+## Remove one asset from a gallery
+
+A gallery has no endpoint for removing one asset. To remove one, write the gallery again without it. Follow the steps below.
+
+<Callout type="warn" title="Don't clear the gallery to remove one asset">
+  Sending `[]` or `null` to a gallery, or a `DELETE` on its attribute path, clears the whole gallery: every asset in it is disconnected from the product, not only the one you meant.
+</Callout>
+
+1. **Read the gallery's current assets, in order.**
+
+   ```bash
+   curl "https://pim.plytix.com/api/v3/products/<product_id>/attributes/<gallery_label>"      -H "Authorization: Bearer <access_token>"
+   ```
+
+   The response lists the gallery's assets as expanded objects, in gallery order. Take the `id` of each one, keeping that order. For example, a gallery that holds assets `A`, `B`, and `C` gives `["<asset_id_A>", "<asset_id_B>", "<asset_id_C>"]`.
+
+2. **Remove the one ID from the list.**
+
+   To remove `B`, keep the other IDs in the same order: `["<asset_id_A>", "<asset_id_C>"]`. If `B` is the only asset in the gallery, see the last step.
+
+3. **Write the remaining IDs back to the gallery.**
+
+   ```bash
+   curl -X PATCH "https://pim.plytix.com/api/v3/products/<product_id>/attributes/<gallery_label>"      -H "Authorization: Bearer <access_token>"      -H "Content-Type: application/json"      -d '["<asset_id_A>", "<asset_id_C>"]'
+   ```
+
+   A `204` confirms the write. Read the gallery again to check that it holds `A` and `C`, in that order.
+
+4. **Clear the gallery only when you mean to remove every asset.**
+
+   To remove the last asset, or all of them, send `[]` to the gallery path, or use `DELETE /products/<product_id>/attributes/<gallery_label>`.
+
+V3 has no conditional write, so if someone edits the gallery between your read and your write, your `PATCH` overwrites their change. Read and write close together, and avoid running two of these for the same product at once.
+
+To remove the asset of a media attribute, which holds only one, use `DELETE /products/<product_id>/attributes/<media_label>`. A media attribute rejects `""`. Removing an asset from a product removes only the product's association: the asset stays in Plytix DAM, and deleting it is the separate `DELETE /api/v3/assets/<asset_id>`.
+
+{/* FLAG (open): NEW-001. Rewriting a gallery with fewer IDs uses the tested gallery write (FB-006, order kept per the read-back notes above), but removing one ID this way hasn't been run end to end. Test [A, B, C] → [A, C] on Dev, including the read-back order and the product's `assets` list. */}
 
 ## Troubleshooting
 

@@ -253,7 +253,7 @@ test('shellQuote round-trips arbitrary strings through bash', { skip: !hasBash &
 
 test('JavaScript body decodes to the same object', () => {
   const code = javascript.generate(jsonRequest, ctx);
-  const expr = between(code, 'const body = ', ';\n\nfetch(');
+  const expr = between(code, 'const body = ', ';\n\nconst response = await fetch(');
   const body = new Function(`return ${expr}`)();
   assert.deepEqual(JSON.parse(body), payload);
 });
@@ -359,4 +359,50 @@ test('registry keeps the stock ids and order', () => {
 test('path values are encoded as one segment (patched pathnameFromRequest)', () => {
   const data = { path: { asset_id: { value: "a/b c?#&'$&" } }, query: {} };
   assert.equal(pathnameFromRequest('/api/v1/assets/{asset_id}/content', data), "/api/v1/assets/a%2Fb%20c%3F%23%26'%24%26/content");
+});
+
+// STG-003: a top-level falsy body (e.g. `null` to clear a field) is still a body.
+for (const value of [null, false, 0, '']) {
+  const request = { ...jsonRequest, body: value };
+  const text = JSON.stringify(value, null, 2);
+
+  test(`top-level ${JSON.stringify(value)} body is sent, not dropped`, { skip: !hasBash && 'bash not available' }, () => {
+    const argv = curlArgv(curl.generate(request, ctx));
+    assert.equal(argv[argv.indexOf('--data-raw') + 1], text);
+  });
+
+  test(`top-level ${JSON.stringify(value)} body in every language`, () => {
+    const js = javascript.generate(request, ctx);
+    assert.equal(JSON.parse(new Function(`return ${between(js, 'const body = ', ';\n\nconst response')}`)()), value);
+    const py = /^body = ("""[\s\S]*?(?<!\\)""")$/m.exec(python.generate(request, ctx))?.[1];
+    assert.ok(py, 'python body');
+    assert.equal(decodePythonTriple(py), text);
+    for (const generator of [go, java, csharp, rust]) {
+      assert.match(generator.generate(request, ctx), /body|payload/i);
+    }
+  });
+}
+
+// NEW-010: the JavaScript sample reads the response; the token exchange extracts the token.
+test('JavaScript awaits the response and reads it', () => {
+  const code = javascript.generate(jsonRequest, ctx);
+  assert.match(code, /const response = await fetch\(/);
+  assert.match(code, /console\.log\(await response\.text\(\)\);$/);
+});
+
+test('JavaScript token exchange extracts the access token without logging it', () => {
+  const request = {
+    method: 'post',
+    url: 'https://auth.plytix.com/auth/api/get-token',
+    path: {},
+    query: {},
+    header: {},
+    cookie: {},
+    body: { api_key: '<api_key>', api_password: '<api_password>' },
+    bodyMediaType: 'application/json',
+  };
+  const code = javascript.generate(request, ctx);
+  assert.match(code, /if \(!response\.ok\)/);
+  assert.match(code, /const accessToken = data\[0\]\.access_token;/);
+  assert.doesNotMatch(code, /console\.log/);
 });

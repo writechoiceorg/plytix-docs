@@ -331,12 +331,24 @@ actions:
     update:
       summary: Update an asset list field
       operationId: update-asset-list-field
-      description: To rename a list or replace its query, use [Update an asset list](/reference/v3/asset-lists/update-asset-list), which documents the request body.
+      description: |-
+        Changes one field of an asset list and leaves the rest as it is. Set `path` to the field and send the new value on its own as the request body, not wrapped in an object. For example, to rename a list, set `path` to `name` and send `"Kettle Photos"`.
+
+        To replace a smart list's `query`, use [Update an asset list](/reference/v3/asset-lists/update-asset-list), which documents the query format.
 
   - target: $.paths['/api/v3/asset-lists/{identifier}/{path}'].patch.parameters[?(@.name=='path' && @.in=='path')]
     description: Patchable fields from AssetListUpdateInputDto (spec)
     update:
       description: Name of an asset list field, for example `name`.
+      example: name
+
+  - target: $.paths['/api/v3/asset-lists/{identifier}/{path}'].patch.requestBody.content['application/json']
+    description: STG-017. Bare-value body per the 2026-10-19 spec's field-route description (OAS-21); not live-tested (LIST-23, VERIFY.md).
+    update:
+      examples:
+        name:
+          summary: New name (path `name`)
+          value: Kettle Photos
 
   # --- DELETE /api/v3/asset-lists/{identifier}/{path} (spec only) -------------------
   - target: $.paths['/api/v3/asset-lists/{identifier}/{path}'].delete

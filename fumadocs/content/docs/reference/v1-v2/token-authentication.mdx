@@ -59,6 +59,58 @@ Authorization: Bearer your_access_token
 
 Tokens expire after 15 minutes. When a token expires, or the API can't verify it, requests using it return `401` and you need to request a new token with the same exchange.
 
+## Make your first request
+
+With a token, you can read your catalog. This product search returns the first five products and their labels, which is enough to confirm that the token, the host, and your credentials all work:
+
+```bash
+curl --request POST \
+  --url https://pim.plytix.com/api/v1/products/search \
+  --header 'Authorization: Bearer <access_token>' \
+  --header 'Content-Type: application/json' \
+  --header 'Accept: application/json' \
+  --data '{
+    "attributes": ["label"],
+    "pagination": { "page": 1, "page_size": 5 }
+  }'
+```
+
+A `200` response has up to five products in `data`, each with its `id`, `sku`, and the attributes you asked for, and a `pagination` object whose `total_count` is the number of products in your account:
+
+```json
+{
+  "data": [
+    {
+      "id": "<product_id>",
+      "sku": "GF-Basket",
+      "attributes": { "label": "Gift basket" },
+      "num_variations": 3
+    }
+  ],
+  "pagination": {
+    "count": 1,
+    "order": null,
+    "page": 1,
+    "page_size": 5,
+    "total_count": 1
+  }
+}
+```
+
+If the request fails, check the status code:
+
+| Status code | What to do |
+|---|---|
+| `401` | The token is missing, malformed, or expired. Check the `Authorization` header (`Bearer`, a space, then the token), request a new token, and send the request again. |
+| `403` | The token is valid, but these API credentials aren't allowed to do this. Ask an administrator of your Plytix account to check the credentials on the **API** tab. |
+| `422` | The search body isn't valid, for example a `page_size` over `100`. The response says which field to fix. |
+
+To read the rest of the catalog, increase `page` until you've read `total_count` products. See [Pagination](/reference/v1-v2/pagination) and [Filtering and search](/reference/v1-v2/filtering-and-search).
+
+{/* FLAG (open):
+  STG-034. The request shape and response fields come from the V1 collection and the search-products reference. The 403 cause (credential role) is inferred from the status description, not tested. Run this walkthrough once against Dev with a USER-role credential before the next release.
+*/}
+
 ## Error responses
 
 If the token request fails, you get one of the following:

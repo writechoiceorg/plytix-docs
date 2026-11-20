@@ -153,13 +153,7 @@ related-entity.attribute[operator]=value
 
 {/* FLAG (open): REL-23. The 2026-10-19 spec removes `product_relationships` and the `/api/v3/products/{product_id}/relationships` routes in favor of `product_relationships_from`/`_to` and `/api/v3/products/{product_identifier}/product_relationship_types`. Rewrite this section once Plytix classifies the new operations. */}
 
-For product relationships, the relationship and the related product are separate parameters:
-
-| Goal | Syntax |
-|---|---|
-| Products in a given relationship | `product_relationships.relationship_id=<relationship_id>` |
-| Products linked to a specific product | `product_relationships.relationship_id=<id>&product_relationships.related_products.product_id=<product_id>` |
-| Linked with a quantity above a threshold | `product_relationships.related_products.quantity[gt]=2` |
+Product relationships can't be filtered this way yet. The `product_relationships` field that earlier versions of this page filtered on is retired, and its replacement, `product_relationships_from` and `product_relationships_to`, isn't documented yet. Until it is, filter by relationship with the [V1/V2 product search](/reference/v1-v2/filtering-and-search).
 
 ## Choose which fields come back
 

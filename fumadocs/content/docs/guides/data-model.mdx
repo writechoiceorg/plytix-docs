@@ -15,7 +15,7 @@ In short:
 - Your custom attribute values live in the product's `attributes` map. System fields, relationship fields, timestamps, and foreign keys sit at the top level of the product.
 - A product family controls which attributes apply to a product and how values flow from a parent down to its variants.
 - Categories, assets, relationships, and asset lists are separate entities. Ask for one by name and Plytix returns the full object, already expanded.
-- Products, attributes, families, categories, relationship types, and asset lists are writable through the API. Linking products to each other under a relationship type isn't available through V3 yet. A product's main image is set through `thumbnail_id`, and other assets connect to it through media attributes. There's no separate endpoint for linking an asset to a product. Inheritance between family levels is an account-level feature that isn't available on every account.
+- Products, attributes, families, categories, and asset lists are writable through the V3 API. Relationship types, and linking products to each other under them, aren't available through V3 yet: use V1 for them. A product's main image is set through `thumbnail_id`, and other assets connect to it through media attributes. There's no separate endpoint for linking an asset to a product. Inheritance between family levels is an account-level feature that isn't available on every account.
 
 ## The core entities
 

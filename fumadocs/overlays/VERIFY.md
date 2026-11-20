@@ -107,3 +107,16 @@ These claims come from Plytix's 16 Oct 2026 handoff (`materials/api-references/e
 | Newly public `POST /products/{id}/categories` and `DELETE /products/{id}/categories/{id}`: 201/409/422 captured 2026-10-08 on the same URLs, but the `404` bodies (unknown ID, category not linked) come from the generic `/{path}` route | `ops/products.yaml` | |
 | Newly public `POST /product-attributes/{id}/groups` and `DELETE /product-attributes/{id}/groups/{id}`: 201 captured 2026-10-13; `409` body, `404`/`422` bodies and the DELETE `204` not captured in full | `ops/product-attributes.yaml` | |
 | Families created with `name` only; the API still accepts `attributes`, `parent_attributes`, `variant_attributes` (hidden from the docs) | `ops/product-families.yaml`, `schemas/product-families.yaml` | OAS-26 |
+
+## Staging audit fixes (2026-11-20)
+
+Written from the spec, the audit's own Dev results, or earlier captures, not replayed by us.
+
+| Check | Overlay or page | Closes |
+|---|---|---|
+| Decimal attribute on `PATCH /products/{id}/attributes/{label}`: bare number `34.99` → `204`, string `"34.99"` → `422` (audit result; reverses FB-020). Also on the whole-map and partial-map routes | `00-fixes.yaml`, `ops/products.yaml`, `reference/v3/updates-and-deletes.mdx` | DEC-1 |
+| Field PATCH with a bare value on product categories, asset categories, asset lists, and product attributes (`name` → `"Espresso Cups"`, `"Product Packshots"`, `"Kettle Photos"`, `"Collection name"`): `204`, and only that field changes | `ops/product-categories.yaml`, `asset-categories.yaml`, `asset-lists.yaml`, `product-attributes.yaml` (STG-017) | CAT-23, LIST-23, OAS-21 |
+| Illustrative error examples (`scripts/api/lib/responses.mjs`): a missing record on the 18 record-only operations returns `404 NotFoundError "Document with id … not found"`; a search with `_page=0` returns the `query._page` `422` | Pipeline, STG-018 | ERR-1 |
+| Remove one asset from a gallery: `PATCH .../attributes/<gallery>` with `[A, C]` on a gallery holding `[A, B, C]` leaves `[A, C]` in that order, and `B` leaves `assets` | `guides/safely-removing-categories-assets-or-relationships.mdx` (NEW-001) | |
+| Filter table for a never-set, a cleared and a filled text attribute: `[!exists]`, `[exists]`, `[length]=0`, `[null]` | `guides/migrating-to-v3/filter-operators.mdx` (STG-007) | PROD-20 |
+

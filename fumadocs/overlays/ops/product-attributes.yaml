@@ -362,11 +362,28 @@ actions:
 
   # --- PATCH /api/v3/product-attributes/{identifier}/{path} ------------------------
   - target: $.paths['/api/v3/product-attributes/{identifier}/{path}'].patch
-    description: Untested on this resource and no request body in the spec (OAS-21, VERIFY.md), so this page redirects to the full update.
+    description: Untested on this resource (OAS-21, VERIFY.md). The 2026-10-19 spec declares an untyped body that replaces the field; STG-017 asks for a concrete example.
     update:
       summary: Update a product attribute field
       operationId: update-product-attribute-field
-      description: To change an attribute's settings, use [Update a product attribute](/reference/v3/product-attributes/update-product-attribute), which documents the request body.
+      description: |-
+        Changes one setting of an attribute and leaves the others as they are. Set `path` to the setting and send the new value on its own as the request body, not wrapped in an object. For example, to rename an attribute, set `path` to `name` and send `"Collection name"`. The attribute's `label` and `type` can't be changed.
+
+        To change several settings in one request, such as a dropdown's `options`, use [Update a product attribute](/reference/v3/product-attributes/update-product-attribute), which lists the settings of each attribute type.
+
+  - target: $.paths['/api/v3/product-attributes/{identifier}/{path}'].patch.parameters[?(@.name=='path' && @.in=='path')]
+    description: Settings from ProductAttributeUpdateInputDto (spec)
+    update:
+      description: The setting to change, such as `name` or `description`.
+      example: name
+
+  - target: $.paths['/api/v3/product-attributes/{identifier}/{path}'].patch.requestBody.content['application/json']
+    description: STG-017. Bare-value body per the 2026-10-19 spec's field-route description (OAS-21); not live-tested (VERIFY.md).
+    update:
+      examples:
+        name:
+          summary: New name (path `name`)
+          value: Collection name
 
   # --- DELETE /api/v3/product-attributes/{identifier}/{path} -----------------------
   - target: $.paths['/api/v3/product-attributes/{identifier}/{path}'].delete

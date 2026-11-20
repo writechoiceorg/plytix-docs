@@ -336,12 +336,24 @@ actions:
     update:
       summary: Update a product category field
       operationId: update-product-category-field
-      description: To rename a category or move it under another parent, use [Update a product category](/reference/v3/product-categories/update-product-category), which documents the request body.
+      description: |-
+        Changes one field of a category and leaves the rest as it is. Set `path` to the field, `name` or `parent_id`, and send the new value on its own as the request body, not wrapped in an object. For example, to rename a category, set `path` to `name` and send `"Espresso Cups"`.
+
+        To change both fields in one request, use [Update a product category](/reference/v3/product-categories/update-product-category).
 
   - target: $.paths['/api/v3/product-categories/{identifier}/{path}'].patch.parameters[?(@.name=='path' && @.in=='path')]
     description: Patchable fields from ProductCategoryUpdateInputDto (spec)
     update:
-      description: Name of a category field, for example `name`.
+      description: Name of a category field, `name` or `parent_id`.
+      example: name
+
+  - target: $.paths['/api/v3/product-categories/{identifier}/{path}'].patch.requestBody.content['application/json']
+    description: STG-017. Bare-value body per the 2026-10-19 spec's field-route description (OAS-21); not live-tested (CAT-23, VERIFY.md).
+    update:
+      examples:
+        name:
+          summary: New name (path `name`)
+          value: Espresso Cups
 
   # --- DELETE /api/v3/product-categories/{identifier}/{path} (spec only) ----------
   - target: $.paths['/api/v3/product-categories/{identifier}/{path}'].delete

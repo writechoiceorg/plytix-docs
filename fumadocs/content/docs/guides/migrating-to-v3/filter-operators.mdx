@@ -55,6 +55,21 @@ A field can be absent, `null`, an empty string, or an empty list. The two versio
 
 - V1 documents only `exists` (the value is defined) and `!exists` (the value is undefined). It doesn't say how a `null`, an empty string, or an empty list is treated.
 - V3 has separate operators: `[exists]` and `[!exists]` test whether the field is defined, `[null]` and `[!null]` test for `null`, and `[length]=0` matches an empty string or an empty list. In practice they overlap. On the attribute types tested, an emptied value is stored as absent, so a cleared value and one that was never set both match `[!exists]=true` and `[length]=0`, and neither matches `[null]`.
+
+For example, take three products and a text attribute `collection`. One never had a value, one had `"2019"` and was cleared with `null` (or `""`, or a `DELETE` on the attribute), and one still holds `"2019"`. The first two read back the same way, with no `collection` key in `attributes`, and the filters return:
+
+| Filter | Never set | Cleared | Holds `"2019"` |
+|---|---|---|---|
+| `attributes.collection[!exists]=true` | Matches | Matches | No |
+| `attributes.collection[exists]=true` | No | No | Matches |
+| `attributes.collection[length]=0` | Matches | Matches | No |
+| `attributes.collection[null]` | No | No | No |
+
+A multiselect cleared with `[]` or `null` behaves the same way. Top-level fields are different: clearing `thumbnail_id`, `parent_id`, or `product_family_id` with `null` can leave the field reading back as `null`, but `[null]` still didn't match it in testing. Use `[!exists]=true` to find products with no thumbnail. To see each update route's effect on the stored value, see [Empty values, null, and deletion](/guides/migrating-to-v3/responses-and-updates#empty-values-null-and-deletion).
+
+{/* FLAG (open):
+  STG-007. `[!exists]`, `[length]=0` and `[null]` for cleared and never-set text and multiselect values: FB-015 (confirmed by Plytix, PM-26). `thumbnail_id[null]` returning nothing: FB-031. `[exists]=true` as the exact complement of `[!exists]=true` is inferred, not tested. Retest the table on the release candidate (PM-26), and ask whether `[null]` is meant to match a top-level `null` (PROD-20).
+*/}
 - V3's negated comparisons, such as `[!eq]`, `[!in]`, and `[!contains:ignorecase]`, skip records where the field is `null` or undefined. To include those records, add `[!exists]=true` to the same OR group, as in the `!like` example above.
 
 Case handling for `!in` on text values also needs care. For ASCII text, lowercase the field with `[lower]` and keep records with no value in the same OR group:
@@ -94,13 +109,9 @@ Custom attributes are addressed directly in V3 rather than through a field-name 
 |---|---|---|
 | Custom attribute | `{"field": "attributes.name", "operator": "<op>", "value": "<value>"}` | `attributes.name[<op>]=value` |
 | Related entity field | Not possible | `categories.name[<op>]=value`, for example `categories.name=Drinkware` |
-| Product relationships | `relationship_filters` with nested `product_ids` objects | `product_relationships.relationship_id=<id>&product_relationships.related_products.product_id=<id>` |
+| Product relationships | `relationship_filters` with nested `product_ids` objects | Not available yet. The `product_relationships` field is retired, and its replacement isn't documented. Keep relationship filters on V1 |
 
-{/* FLAG (open): REL-23. The 2026-10-19 spec removes `product_relationships` and the `/api/v3/products/{product_id}/relationships` routes in favor of `product_relationships_from`/`_to` and `/api/v3/products/{product_identifier}/product_relationship_types`. Rewrite this section once Plytix classifies the new operations. */}
-
-{/* FLAG (open):
-  The `product_relationships` filter in the last row comes from the internal API V3 reference and the 2026-10-02 spec's field names. It hasn't been tested live. Confirm with `endpoint-tester`, including whether the relationship, product, and quantity conditions apply to the same related product.
-*/}
+{/* FLAG (open): REL-23, STG-005. The 2026-10-19 spec removes `product_relationships` and the `/api/v3/products/{product_id}/relationships` routes in favor of `product_relationships_from`/`_to` and `/api/v3/products/{product_identifier}/product_relationship_types`. The retired `product_relationships.*` filter syntax was removed from this row (20 Nov 2026). Add the V3 filter for `product_relationships_from`/`_to` once Plytix confirms it, and test it with `endpoint-tester`. */}
 
 ## Convert a filter
 

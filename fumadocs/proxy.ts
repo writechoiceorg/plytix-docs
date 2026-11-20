@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { isMarkdownPreferred, rewritePath } from 'fumadocs-core/negotiation';
 import { docsContentRoute, sections } from '@/lib/shared';
+import { appendVary, NEGOTIATED_PATH } from '@/lib/vary';
 
 // Every section route (/guides, /mcp, /reference) resolves to the same content
 // route; each maps to its own folder of the content tree (see lib/shared.ts).
@@ -27,13 +28,16 @@ export default function proxy(request: NextRequest) {
       const result = route.docs(pathname);
 
       if (result) {
-        return NextResponse.rewrite(new URL(result, request.nextUrl), {
-          // this URL has two representations, selected by `Accept`
-          headers: { Vary: 'Accept' },
-        });
+        // this URL has two representations, selected by `Accept`
+        const response = NextResponse.rewrite(new URL(result, request.nextUrl));
+        appendVary(response.headers);
+        return response;
       }
     }
   }
 
-  return NextResponse.next();
+  const response = NextResponse.next();
+  // The HTML representation varies by `Accept` too (STG-013).
+  if (NEGOTIATED_PATH.test(pathname)) appendVary(response.headers);
+  return response;
 }

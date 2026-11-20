@@ -1,7 +1,7 @@
 # patches/
 
 [patch-package](https://github.com/ds300/patch-package) patches for the API
-playground, applied to `node_modules` by the `postinstall` script on every
+playground and a few accessibility fixes in the docs layout, applied to `node_modules` by the `postinstall` script on every
 `npm install`. Each patch is pinned to the exact package version in its file
 name. When you upgrade `fumadocs-openapi` or `@fumadocs/api-docs`, check
 whether upstream has fixed the issue. If it hasn't, re-apply the edit in
@@ -12,7 +12,8 @@ Code samples aren't patched. They come from our own generators in
 `lib/code-samples.ts`, registered through the supported `codeUsages` option in
 `components/openapi-page.tsx` and tested by `npm run test:code-samples`.
 
-Every patched line is marked with a `[plytix-docs patch PM-xx]` comment.
+Every patched line is marked with a `[plytix-docs patch <id>]` comment, where the id is
+a PM-xx item or a finding from the 17 November 2026 staging audit (STG-xxx, NEW-xxx, UX-xx).
 
 ## fumadocs-openapi+11.4.3.patch
 
@@ -22,6 +23,10 @@ Every patched line is marked with a `[plytix-docs patch PM-xx]` comment.
 | `dist/playground/client.js` | PM-56 | **Send** is blocked while a required path parameter is empty or only whitespace. The Path panel opens, an inline error appears under the field (`aria-invalid` and `aria-describedby` on the input), and focus moves to the first empty field. No request is sent. The error clears as the user types. Path inputs get `aria-required`. |
 | `dist/playground/client.js` | PM-58 | Closing the JSON editor returns focus to the **Open JSON Editor** button. |
 | `dist/playground/client.js` | PM-51 | `BodyInput` treats a body with `contentMediaType: application/octet-stream` as binary, like `format: binary`. fumadocs upgrades OpenAPI 3.0 documents (`openapi-v1v2.json`) to 3.1 on load, and the upgrader replaces `format: binary` with `contentMediaType`. |
+| `dist/playground/client.js` | STG-003 | A falsy example body (`null` to clear a field, `false`, `0`, `""`) stays in the form. It used to become `{}`, so the **Clear** example sent `{}`. |
+| `dist/playground/fetcher.js` | STG-003 | **Send** includes a falsy body. Only a missing body is skipped. |
+| `dist/playground/client.js` | NEW-013 | Switching the body example replaces only the body. The path, query, header and cookie values the reader entered (a SKU, a field path, a token) are kept; the new example only fills parameters that are still empty. |
+| `dist/ui/operation/usage-tabs.js` | STG-002 | Code samples use the operation's absolute server URL in the server-rendered HTML, instead of `https://example.com` until JavaScript runs. A relative server URL still waits for the browser. |
 
 ## @fumadocs+api-docs+0.2.9.patch
 
@@ -34,3 +39,12 @@ Every patched line is marked with a `[plytix-docs patch PM-xx]` comment.
 | `dist/components/schema/client.js` | PM-40 | The icon-only link button next to each schema field copies a link that highlights that field. It gets `aria-label="Copy link to field <name>"` and `type="button"`. |
 | `dist/components/playground/inputs.js` | PM-51 | `FieldInput` shows the file picker for a string with `contentMediaType: application/octet-stream` as well as `format: binary`. Without it, the multipart `file` field of the V1/V2 upload endpoint rendered as a text box after the 3.0-to-3.1 upgrade. |
 | `dist/schema/to-string.js` | PM-51 | The same fields show the type `file` instead of `string`. |
+
+## fumadocs-ui+16.15.11.patch
+
+`fumadocs-ui` is installed as an alias of `@fumadocs/base-ui`; patch-package keys the patch on the `node_modules/fumadocs-ui` folder name.
+
+| File | Item | Change |
+|---|---|---|
+| `dist/components/sidebar/base.js` | UX-04 | The active sidebar link (`SidebarItem` and `SidebarFolderLink`) gets `aria-current="page"` next to `data-active`. Both come from the same `active` prop, so it follows client-side navigation. |
+| `dist/layouts/notebook/page/slots/toc.js` | UX-05 | The mobile table-of-contents button is named "Table of contents: <current section or page>". The reading-progress ring is `aria-hidden`, so its numeric value is no longer in the name, and the faded-out label is hidden from assistive technology. |

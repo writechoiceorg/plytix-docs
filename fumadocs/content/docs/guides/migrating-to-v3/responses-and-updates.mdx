@@ -104,7 +104,11 @@ The examples below start from the same product, which has two attributes:
 
 ### Replace the whole map
 
-Naming `attributes` in a PATCH on the product replaces the product's whole map with the one you send, so every attribute you leave out is deleted, with no error and no warning. Attributes that Plytix calculates, such as completeness scores, are kept. This PATCH names only `brand`:
+<Callout type="warn" title="This deletes every attribute you leave out">
+  Don't use this route to change a few attributes. Sending `{"attributes": {...}}` to the product replaces its whole map, and every attribute missing from your map is deleted, with no error and no warning. Use [Merge a partial map](#merge-a-partial-map) or [Update one attribute](#update-one-attribute) instead. Send a whole map only when you mean to set every attribute the product should keep, for example when you restore a product from a backup.
+</Callout>
+
+Naming `attributes` in a PATCH on the product replaces the product's whole map with the one you send. Attributes that Plytix calculates, such as completeness scores, are kept. This PATCH names only `brand`:
 
 ```bash
 curl --request PATCH \
@@ -157,7 +161,13 @@ curl --request PATCH \
   --data '"Plytix"'
 ```
 
-This returns `204` and leaves every other attribute untouched. Prefer it for routine syncs, such as price or stock updates, where each request changes one or two attributes.
+This returns `204` and leaves every other attribute untouched. A GET afterward shows the new `brand` and the unchanged `collection`:
+
+```json
+{ "attributes": { "brand": "Plytix", "collection": "2019" } }
+```
+
+Prefer this route for routine syncs, such as price or stock updates, where each request changes one or two attributes.
 
 ## Empty values, null, and deletion
 
@@ -167,10 +177,26 @@ Clearing an attribute works differently by attribute type, so use the forms belo
 |---|---|---|
 | Text | `null`, `""`, or a string of only spaces | The value is removed, and the attribute is absent from the product |
 | MultiSelect | `null` or `[]` | The value is removed, and the attribute is absent from the product |
-| Media gallery | `null` or `[]` | The gallery's association with its assets is cleared. The assets stay in Plytix DAM |
+| Media gallery | `null` or `[]` | Every asset in the gallery is disconnected from the product. The assets stay in Plytix DAM. To remove only one asset, write the remaining IDs instead; see [Remove one asset from a gallery](/guides/safely-removing-categories-assets-or-relationships#remove-one-asset-from-a-gallery) |
 | Media | `DELETE` on the attribute's path. Sending `""` is rejected | The value is removed. The asset stays in Plytix DAM |
 
-After you clear it, the attribute looks the same as one that was never set. Both match `[!exists]=true` and `[length]=0`, and neither matches `[null]`, so a filter can't tell a cleared value from a missing one.
+After you clear it, the attribute looks the same as one that was never set: it's absent from the product's `attributes` map, not stored as `null` or `""`. For example, starting from the product above, this request clears `collection`:
+
+```bash
+curl --request PATCH \
+  --url 'https://<v3-base-url>/api/v3/products/<identifier>/attributes/collection' \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data 'null'
+```
+
+A GET afterward shows no `collection` key at all, exactly like a product that never had one:
+
+```json
+{ "attributes": { "brand": "Plytix Kitchen" } }
+```
+
+So a filter can't tell a cleared value from a missing one. Both match `[!exists]=true` and `[length]=0`, and neither matches `[null]`. See [Missing, null, and empty values](/guides/migrating-to-v3/filter-operators#missing-null-and-empty-values) for each filter's result. If your integration needs to know that a value was cleared on purpose, record that in your own system.
 
 {/* FLAG (open):
   PM-26 (2026-10-19): the `null` results for Text, MultiSelect and Media gallery, gallery `[]`, and the rejected media `""` come from Plytix's controlled Dev tests; Text `null` on the attribute path (FB-020) and Text `""` / MultiSelect `[]` (FB-015) match our own. Plytix didn't say which route each `null` case used. Retest the exact baselines and readbacks on the release candidate. */}

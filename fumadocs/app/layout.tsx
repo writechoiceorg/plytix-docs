@@ -5,6 +5,7 @@ import '@fluentui/react-icons/headless/styles.css';
 import './global.css';
 import { Figtree } from 'next/font/google';
 import Script from 'next/script';
+import { appName, siteDescription, siteUrl } from '@/lib/shared';
 
 const figtree = Figtree({
   subsets: ['latin'],
@@ -13,11 +14,15 @@ const figtree = Figtree({
 const umamiSrc = process.env.NEXT_PUBLIC_UMAMI_SRC;
 const umamiWebsiteId = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID;
 
+// Page titles keep their own name ("Get a product · V1 (Legacy)") and take the
+// portal name as a suffix (STG-001).
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://docs.plytix.com'),
-  title: { default: 'Plytix API Documentation', template: '%s | Plytix API Documentation' },
-  description:
-    'Developer docs for the Plytix API. Connect your systems to Plytix, the multi-technology product content platform, and manage products, assets, and catalog data in code.',
+  metadataBase: new URL(siteUrl),
+  title: { default: appName, template: `%s | ${appName}` },
+  description: siteDescription,
+  applicationName: appName,
+  openGraph: { siteName: appName, type: 'website' },
+  twitter: { card: 'summary_large_image' },
   icons: {
     icon: '/favicon.svg',
   },

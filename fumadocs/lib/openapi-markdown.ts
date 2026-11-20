@@ -173,6 +173,9 @@ function renderSchema(doc: Json, raw: Json, depth: number, seen: Set<string>): s
   if (!schema) return '';
 
   const object = objectSchema(doc, schema, nextSeen);
+  // `oneOf`/`anyOf` alternatives (also inside `allOf`), each with its own fields
+  // and required set (STG-011). FastAPI's `anyOf: [X, null]` counts as one branch.
+  const variants = unionBranches(doc, schema, nextSeen);
   if (object) {
     const required = new Set<string>(object.required ?? []);
     const indent = '  '.repeat(depth);
@@ -194,16 +197,59 @@ function renderSchema(doc: Json, raw: Json, depth: number, seen: Set<string>): s
     if (object.additionalProperties && typeof object.additionalProperties === 'object') {
       lines.push(`${indent}- \`<key>\` (${typeLabel(doc, resolve(doc, object.additionalProperties))}): additional properties`);
     }
+    if (variants.length > 1) lines.push(renderVariants(doc, schema, variants, depth, nextSeen));
     return lines.join('\n');
   }
 
   if (schema.type === 'array' && schema.items) return renderSchema(doc, schema.items, depth, nextSeen);
 
   // `anyOf: [X, null]` (FastAPI's optional fields): expand the non-null branch.
-  const branches = nonNullBranches(schema);
-  if (branches.length === 1) return renderSchema(doc, branches[0], depth, nextSeen);
+  if (variants.length === 1) return renderSchema(doc, variants[0], depth, nextSeen);
+  if (variants.length > 1) return renderVariants(doc, schema, variants, depth, nextSeen);
 
   return '';
+}
+
+/** Non-null `oneOf`/`anyOf` branches of a schema and of its `allOf` members. */
+function unionBranches(doc: Json, schema: Json, seen: Set<string>): Json[] {
+  const own = nonNullBranches(schema);
+  if (own.length > 0 || !schema.allOf) return own;
+  for (const part of schema.allOf) {
+    const { schema: p } = deref(doc, part, seen);
+    const branches = p ? nonNullBranches(p) : [];
+    if (branches.length > 1) return branches;
+  }
+  return [];
+}
+
+/**
+ * Lists each alternative as "Variant: <title>" with its own fields, so fields
+ * required by only one variant (an attribute type's `options`, an asset's
+ * `filename`) appear with that variant.
+ */
+function renderVariants(doc: Json, parent: Json, branches: Json[], depth: number, seen: Set<string>): string {
+  const indent = '  '.repeat(depth);
+  const keyword = parent.oneOf ? 'Exactly one' : 'One or more';
+  const discriminator = parent.discriminator;
+  const lines = [
+    `${indent}- ${keyword} of these variants${discriminator?.propertyName ? `, selected by \`${discriminator.propertyName}\`` : ''}:`,
+  ];
+  branches.forEach((raw, i) => {
+    const branch = resolve(doc, raw);
+    const refName = typeof raw?.$ref === 'string' ? raw.$ref.split('/').at(-1) : undefined;
+    const title = branch.title ?? refName ?? `Option ${i + 1}`;
+    const tag = Object.entries<string>(discriminator?.mapping ?? {}).find(([, ref]) => ref === raw?.$ref)?.[0];
+    const details = [tag ? `\`${discriminator.propertyName}\`: \`${tag}\`` : undefined, branch.description && oneLine(branch.description)]
+      .filter(Boolean)
+      .join('. ');
+    lines.push(`${indent}  - **Variant: ${title}**${details ? `: ${details}` : ''}`);
+    if (depth + 2 < MAX_DEPTH) {
+      const fields = renderSchema(doc, raw, depth + 2, seen);
+      if (fields) lines.push(fields);
+      else lines.push(`${indent}    - Type: ${typeLabel(doc, raw)}`);
+    }
+  });
+  return lines.join('\n');
 }
 
 /** Merges `allOf` members into a single object schema, if this is an object. */

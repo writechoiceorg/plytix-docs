@@ -5,7 +5,7 @@ description: "Reference for the V1 endpoints that have no V3 counterpart, the re
 
 import { ArrowSwapRegular, BookOpenRegular } from '@/components/icons';
 
-Not every V1 call has a V3 counterpart yet. This page lists the V1 endpoints missing from the current V3 contract, the entry points that are new in V3, and the slice of the API that V2 covers. It reflects the V3 OpenAPI dated 2026-10-02 and will change as V3 expands. Keep a legacy call wherever your integration needs a capability with no confirmed public V3 equivalent, and move everything else to V3. It's part of the reference set for [Migration overview](/guides/migrating-to-v3).
+Not every V1 call has a V3 counterpart yet. This page lists the V1 endpoints missing from the current V3 contract, the entry points that are new in V3, and the slice of the API that V2 covers. It reflects the V3 OpenAPI dated 2026-10-19 and will change as V3 expands. Keep a legacy call wherever your integration needs a capability with no confirmed public V3 equivalent, and move everything else to V3. It's part of the reference set for [Migration overview](/guides/migrating-to-v3).
 
 Each entry below falls into one of these groups:
 
@@ -15,16 +15,18 @@ Each entry below falls into one of these groups:
 
 ## V1 endpoints missing from the V3 contract
 
-All six endpoints below remain documented in the [V1/V2 reference](/reference/v1-v2/api-v1-v2-reference), and none of them is in the current V3 contract.
+The endpoints below remain documented in the [V1/V2 reference](/reference/v1-v2/api-v1-v2-reference), and none of them has a matching endpoint in the current V3 contract. [Endpoint mapping](/guides/migrating-to-v3/endpoint-mapping) gives the V3 outcome for every V1/V2 endpoint, including the ones with an equivalent.
 
 | V1 endpoint | Status | What to do |
 |---|---|---|
 | `PUT /api/v1/assets/{asset_id}/content` | Legacy only | Keep on V1. V3 takes a file only when it creates an asset. An asset update changes `filename` and `alt_text`, not the file. |
-| `POST` and `DELETE /api/v1/products/{product_id}/assets[/{asset_id}]` | Alternative in V3 | V3 has no product-to-asset link path. You set a media or media gallery attribute to the asset ID with `PATCH /api/v3/products/{identifier}/attributes/{label}` and clear it with `DELETE` on the same path, and `thumbnail_id` sets the main image. A media attribute takes a bare asset ID and a media gallery attribute takes an array of IDs; objects such as `{"id": "<asset_id>"}` are rejected. Clearing the attribute doesn't delete the asset. See [Connect other assets to a product](/guides/safely-removing-categories-assets-or-relationships#connect-other-assets-to-a-product). |
+| `POST` and `DELETE /api/v1/products/{product_id}/assets[/{asset_id}]` | Alternative in V3 | V3 has no product-to-asset link path. You set a media or media gallery attribute to the asset ID with `PATCH /api/v3/products/{identifier}/attributes/{label}`, and `thumbnail_id` sets the main image. A media attribute takes a bare asset ID and a media gallery attribute takes an array of IDs; objects such as `{"id": "<asset_id>"}` are rejected. To remove one asset, `DELETE` on a media attribute's path clears its single asset, but on a gallery it clears every asset: write the gallery's remaining IDs instead, as in [Remove one asset from a gallery](/guides/safely-removing-categories-assets-or-relationships#remove-one-asset-from-a-gallery). Removing an asset from a product doesn't delete the asset. |
 | `GET /api/v1/filters/product`, `/filters/asset`, `/filters/relationships` | Alternative in V3, partial | `GET /api/v3/product-attributes` returns your product attribute definitions, including each attribute's `type`. It doesn't list system fields, asset or relationship fields, or the supported operators: see [Filtering and search](/reference/v3/filtering-and-search) for those. Keep on V1 if you need the full list from the API. |
 | `POST /api/v1/products/{parent_product_id}/variants/resync` | Legacy only | Keep on V1. |
 | `POST /api/v1/accounts/api-credentials/search` | Legacy only | Keep on V1. You can manage API keys in the Plytix dashboard under the **API** tab, but that doesn't replace searching them through the API. |
 | `POST /api/v1/accounts/memberships/search` | Legacy only | Keep on V1. You can manage users in the Plytix dashboard, but that doesn't replace searching them through the API. |
+| `POST /api/v1/product_families/{product_family_id}/all_attributes/edit` | Alternative in V3, partial | Change each custom attribute's `level` with `PATCH /api/v3/product-families/{product_family_id}/attributes/{attribute_id}`. V3 has no documented way to set inheritance for system attributes, so keep that on V1. |
+| Relationship types (`/api/v1/relationships`), and adding, updating, or removing related products (`/api/v1/products/{product_id}/relationships/{relationship_id}` and its `/unlink`, plus their V2 counterparts) | Planned | Keep on V1/V2. V3's earlier relationship routes are retired, and their replacement, product relationship types, isn't documented yet. See [Product relationships](/guides/migrating-to-v3/endpoint-mapping#product-relationships). |
 
 ## Bulk operations
 

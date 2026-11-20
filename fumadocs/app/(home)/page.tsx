@@ -1,5 +1,18 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowRightRegular, BookOpenRegular, BotRegular, RocketRegular } from '@/components/icons';
+import { appName, siteDescription } from '@/lib/shared';
+
+// Homepage share card (STG-021). The root layout supplies siteName and the card type.
+const homeImage = { url: '/og/home', width: 1200, height: 630, alt: appName };
+
+export const metadata: Metadata = {
+  title: { absolute: appName },
+  description: siteDescription,
+  alternates: { canonical: '/' },
+  openGraph: { title: appName, description: siteDescription, url: '/', images: [homeImage] },
+  twitter: { title: appName, description: siteDescription, images: [homeImage] },
+};
 
 // API V3 isn't public yet: the homepage points only to the V1/V2 reference and
 // avoids V3-dependent steps. The Help Center stays reachable from the footer.

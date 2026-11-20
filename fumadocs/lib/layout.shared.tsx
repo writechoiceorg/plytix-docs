@@ -2,6 +2,7 @@ import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 import Image from 'next/image';
 import { FullSearchTrigger, SearchTrigger, ThemeSwitch } from '@/components/header-controls';
 import { HeaderActions } from '@/components/header-actions';
+import { appName } from '@/lib/shared';
 
 export function baseOptions(): BaseLayoutProps {
   return {
@@ -17,7 +18,7 @@ export function baseOptions(): BaseLayoutProps {
             className="hidden dark:block"
           />
           <span className="text-sm font-bold uppercase tracking-normal text-fd-foreground">
-            Plytix API Documentation
+            {appName}
           </span>
         </>
       ),

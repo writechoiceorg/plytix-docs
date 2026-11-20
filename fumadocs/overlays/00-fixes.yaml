@@ -215,9 +215,13 @@ actions:
               text:
                 summary: Text attribute
                 value: '2019'
+              # STG-004 (staging audit, 17 Nov 2026): Dev accepted a bare JSON number
+              # and rejected the quoted string on a decimal attribute. This reverses our
+              # earlier live result (FB-020: number 422, string 204), so the API changed;
+              # production behavior is logged as DEC-1 in QUESTIONS.md.
               decimal:
-                summary: Decimal attribute (sent as a string)
-                value: "12.5"
+                summary: Decimal attribute
+                value: 34.99
               multiSelect:
                 summary: Multi-select attribute
                 value:

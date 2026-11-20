@@ -10,9 +10,18 @@ import { notFound } from 'next/navigation';
 import { getMDXComponents } from '@/components/mdx';
 import type { Metadata } from 'next';
 import { createRelativeLink } from 'fumadocs-ui/mdx';
-import { getPageImageUrl, getPageMarkdownUrl, gitConfig, isReferenceSlugs, v3Published } from '@/lib/shared';
+import {
+  appName,
+  getPageImageUrl,
+  getPageMarkdownUrl,
+  gitConfig,
+  isReferenceSlugs,
+  v3Published,
+} from '@/lib/shared';
 import { openapi } from '@/lib/openapi';
 import { getPageOperation } from '@/lib/openapi-markdown';
+import { getPageVersionLabel } from '@/lib/page-version';
+import { getStructuredData, toJsonLd } from '@/lib/structured-data';
 import { Callout } from '@/components/callout';
 import Link from 'fumadocs-core/link';
 
@@ -30,6 +39,12 @@ export async function DocsPageView({ slugs }: { slugs: string[] }) {
 
   return (
     <DocsPage toc={page.data.toc} full={page.data.full}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: toJsonLd(getStructuredData(page, page.data.title, page.data.description)),
+        }}
+      />
       <DocsTitle>{page.data.title}</DocsTitle>
       <div className="flex flex-row gap-2 items-center pb-4">
         <MarkdownCopyButton markdownUrl={markdownUrl} />
@@ -98,11 +113,6 @@ function LegacyVersionNote({ slugs, page }: { slugs: string[]; page: NonNullable
   );
 }
 
-const VERSION_LABELS: Record<string, string> = {
-  v3: 'V3 (Beta)',
-  'v1-v2': 'V1/V2 (Legacy)',
-};
-
 /** First sentence of an operation's description, as plain text for a meta tag. */
 function firstSentence(markdown: string | undefined): string | undefined {
   const paragraph = markdown
@@ -112,11 +122,58 @@ function firstSentence(markdown: string | undefined): string | undefined {
   if (!paragraph) return;
   const text = paragraph
     .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-    .replace(/[`*_]/g, '')
+    .replace(/[`*]/g, '')
+    // `_emphasis_` loses its underscores; identifiers such as `parent_level` keep theirs.
+    .replace(/(^|[\s("“])_([^_\s][^_]*?)_(?=[\s).,;:!?"”]|$)/g, '$1$2')
     .replace(/\s+/g, ' ');
   const sentence = text.match(/^.+?[.!?](?=\s|$)/)?.[0] ?? `${text.replace(/[\s:;,]+$/, '')}.`;
   return sentence.length > 200 ? `${sentence.slice(0, 197).replace(/\s+\S*$/, '')}…` : sentence;
 }
+
+const MAX_DESCRIPTION = 160;
+
+/**
+ * A generated endpoint description within the length search results show: the
+ * summary, then the API version, then the route if it still fits (STG-019).
+ */
+function operationDescription(summary: string, version: string, route: string): string {
+  const withRoute = `${summary} Plytix ${version} API: ${route}.`;
+  if (withRoute.length <= MAX_DESCRIPTION) return withRoute;
+  const suffix = ` Plytix ${version} API.`;
+  const room = MAX_DESCRIPTION - suffix.length;
+  const short = summary.length <= room ? summary : `${summary.slice(0, room - 1).replace(/\s+\S*$/, '')}…`;
+  return `${short}${suffix}`;
+}
+
+/**
+ * Targeted overrides for generated reference pages whose title or description
+ * is too long or too vague in search results and shared links (STG-019). Keyed
+ * by page URL; generated MDX is rewritten on every build, so overrides live here.
+ */
+const PAGE_META_OVERRIDES: Record<string, { title?: string; description?: string }> = {
+  '/reference/v1-v2/product-families/list-all-family-attributes': {
+    title: 'List all family attributes · V1 (Legacy)',
+    description:
+      'List every attribute of a product family, system attributes included, with its inheritance level. Plytix V1 (Legacy) API.',
+  },
+  '/reference/v1-v2/product-families/edit-all-family-attributes': {
+    title: 'Edit all family attributes · V1 (Legacy)',
+    description:
+      "Set the inheritance level of a product family's attributes, system attributes included. Plytix V1 (Legacy) API.",
+  },
+  '/reference/v1-v2/authentication/get-token': {
+    description:
+      'Exchange your API key and password for the bearer token every V1/V2 request needs. Plytix V1/V2 (Legacy) API: POST /auth/api/get-token.',
+  },
+  '/reference/v1-v2/product-attribute-groups/create-product-attribute-group': {
+    description:
+      'Create a product attribute group and choose the attributes it holds. Plytix V1 (Legacy) API: POST /api/v1/attribute-groups/product.',
+  },
+  '/reference/v1-v2/available-filters/get-available-product-filters': {
+    description:
+      'List the fields you can filter products on, and the operators each one accepts. Plytix V1 (Legacy) API: GET /api/v1/filters/product.',
+  },
+};
 
 /**
  * Titles get the site name from the root layout's title template, and
@@ -130,30 +187,45 @@ export function getDocsPageMetadata(slugs: string[]): Metadata {
   if (!page) notFound();
 
   const found = getPageOperation(page);
-  let version = isReferenceSlugs(slugs) ? VERSION_LABELS[slugs[1]] : undefined;
-  // V1 and V2 (beta) both have pages such as "Create a product"; name the one
-  // each endpoint belongs to.
-  if (slugs[1] === 'v1-v2' && found?.path.startsWith('/api/v1/')) version = 'V1 (Legacy)';
-  if (slugs[1] === 'v1-v2' && found?.path.startsWith('/api/v2/')) version = 'V2 beta (Legacy)';
+  const version = getPageVersionLabel(page);
+  // `metaTitle` / `metaDescription` (frontmatter) override the generated values
+  // when the page title is too generic or the generated text too crowded (STG-019, STG-020).
+  const override = PAGE_META_OVERRIDES[page.url];
   const title =
-    version && !page.data.title.startsWith(version.split(' ')[0])
+    page.data.metaTitle ??
+    override?.title ??
+    (version && !page.data.title.startsWith(version.split(' ')[0])
       ? `${page.data.title} · ${version}`
-      : page.data.title;
+      : page.data.title);
 
-  let description = page.data.description;
+  let description = page.data.metaDescription ?? override?.description ?? page.data.description;
   if (!description && found && version) {
-    const route = `${found.method.toUpperCase()} ${found.path}`;
-    const summary = firstSentence(found.operation.description);
-    description = summary
-      ? `${summary} Plytix ${version} API reference for ${route}.`
-      : `${page.data.title} with ${route}, from the Plytix ${version} API reference.`;
+    description = operationDescription(
+      firstSentence(found.operation.description) ?? `${page.data.title}.`,
+      version,
+      `${found.method.toUpperCase()} ${found.path}`,
+    );
   }
 
+  const image = getPageImageUrl(page).url;
   return {
     title,
     description,
-    openGraph: {
-      images: getPageImageUrl(page).url,
+    // The HTML page is canonical for every format of this page (HTML, `.md`, Accept
+    // negotiation). Each API version keeps its own page, so its own canonical (STG-014).
+    alternates: {
+      canonical: page.url,
+      types: { 'text/markdown': `${page.url}.md` },
     },
+    // Next replaces (doesn't merge) the root openGraph, so siteName is repeated here.
+    openGraph: {
+      title,
+      description,
+      url: page.url,
+      siteName: appName,
+      type: 'article',
+      images: image,
+    },
+    twitter: { card: 'summary_large_image', title, description, images: image },
   };
 }

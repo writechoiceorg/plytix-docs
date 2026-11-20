@@ -1,0 +1,56 @@
+diff --git a/node_modules/fumadocs-ui/dist/components/sidebar/base.js b/node_modules/fumadocs-ui/dist/components/sidebar/base.js
+index a5a8005..d53452b 100644
+--- a/node_modules/fumadocs-ui/dist/components/sidebar/base.js
++++ b/node_modules/fumadocs-ui/dist/components/sidebar/base.js
+@@ -168,6 +168,8 @@ function SidebarItem({ icon, active = false, children, ...props }) {
+ 	return /* @__PURE__ */ jsxs(Link, {
+ 		ref,
+ 		"data-active": active,
++		// [plytix-docs patch UX-04] announce the current page to assistive technology
++		"aria-current": active ? "page" : void 0,
+ 		prefetch,
+ 		...props,
+ 		children: [icon ?? (props.external ? /* @__PURE__ */ jsx(ExternalLink, {}) : null), children]
+@@ -223,6 +225,8 @@ function SidebarFolderLink({ children, active = false, ...props }) {
+ 	return /* @__PURE__ */ jsxs(Link, {
+ 		ref,
+ 		"data-active": active,
++		// [plytix-docs patch UX-04] announce the current page to assistive technology
++		"aria-current": active ? "page" : void 0,
+ 		onClick: (e) => {
+ 			if (!collapsible) return;
+ 			if (e.target instanceof Element && e.target.matches("[data-icon], [data-icon] *")) {
+diff --git a/node_modules/fumadocs-ui/dist/layouts/notebook/page/slots/toc.js b/node_modules/fumadocs-ui/dist/layouts/notebook/page/slots/toc.js
+index ebec037..3e8053d 100644
+--- a/node_modules/fumadocs-ui/dist/layouts/notebook/page/slots/toc.js
++++ b/node_modules/fumadocs-ui/dist/layouts/notebook/page/slots/toc.js
+@@ -111,18 +111,29 @@ function PageTOCPopoverTrigger({ className, ...props }) {
+ 		"data-toc-popover-trigger": "",
+ 		...props,
+ 		children: [
++			// [plytix-docs patch UX-05] the reading-progress ring is decorative: keep its
++			// numeric value out of the button's accessible name.
+ 			/* @__PURE__ */ jsx(ProgressCircle, {
+ 				value: (items.findLastIndex((item) => item.active) + 1) / Math.max(1, items.length),
+ 				max: 1,
++				"aria-hidden": true,
+ 				className: cn("shrink-0", open && "text-fd-primary")
+ 			}),
++			// [plytix-docs patch UX-05] name the control "Table of contents", then the
++			// visible label (current section or page). The faded-out label is hidden.
++			/* @__PURE__ */ jsx("span", {
++				className: "sr-only",
++				children: "Table of contents: "
++			}),
+ 			/* @__PURE__ */ jsxs("span", {
+ 				className: "grid flex-1 *:my-auto *:row-start-1 *:col-start-1",
+ 				children: [/* @__PURE__ */ jsx("span", {
+ 					className: cn("truncate transition-[opacity,translate,color]", open && "text-fd-foreground", showItem && "opacity-0 -translate-y-full pointer-events-none"),
++					"aria-hidden": showItem || void 0,
+ 					children: path?.name ?? t("On this page")
+ 				}), /* @__PURE__ */ jsx("span", {
+ 					className: cn("truncate transition-[opacity,translate]", !showItem && "opacity-0 translate-y-full pointer-events-none"),
++					"aria-hidden": !showItem || void 0,
+ 					children: items[selectedIdx]?.original.title
+ 				})]
+ 			}),

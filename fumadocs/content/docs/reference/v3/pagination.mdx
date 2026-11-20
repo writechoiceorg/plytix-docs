@@ -46,6 +46,8 @@ The `pagination` object holds up to two keys:
   When a link doesn't apply, the application leaves the key out rather than setting it to `null`. A client written as `if (pagination.next_page !== null)` will loop forever, because the key is `undefined` on the last page, not `null`. Test for presence or truthiness instead.
 </Callout>
 
+Check that the `pagination` object is there, too. Every search response has one, so a search response without `pagination`, or with `"pagination": null`, is incomplete. Request the same page again instead of treating it as the last page, or your loop can report a finished export that stopped early.
+
 So the object you get back depends on where you are in the result set:
 
 | Where you are | What `pagination` contains |

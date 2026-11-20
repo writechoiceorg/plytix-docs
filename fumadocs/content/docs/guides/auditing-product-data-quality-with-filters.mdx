@@ -42,27 +42,26 @@ Follow the steps below to define your rules, check each one with a filter, and c
 
 2. **Find products where a field is missing, null, or empty.**
 
-   A field can fail a rule in three ways, and each has its own check:
+   A field with no useful value can look one of a few ways, but V3 stores most of them the same way. A custom attribute that was never set and one that was cleared, with `null`, `""`, `[]`, or a `DELETE`, are both absent from the product's `attributes` map. So one check finds both:
 
-   - `[!exists]=true` matches a product where the field isn't set at all.
-   - `[null]` matches a product where the field is set to `null`.
-   - `[length]=0` matches an empty string or an empty list.
+   - `[!exists]=true` matches a product where the field has no stored value, whether it was never set or was cleared.
+   - `[length]=0` matches the same products for text and list values, and also catches an empty value on a field that keeps one.
+   - `[null]` hasn't matched any product in testing, including top-level fields that read back as `null`, such as `thumbnail_id`. Don't rely on it on its own.
 
-   To catch all three, put them in one OR group, and add your scope filter outside the group:
+   [Missing, null, and empty values](/guides/migrating-to-v3/filter-operators#missing-null-and-empty-values) shows what each filter returns for a never-set, a cleared, and a filled value. To catch every case, put `[!exists]` and `[length]=0` in one OR group, and add your scope filter outside the group:
 
    ```bash
    curl -G "https://pim.plytix.com/api/v3/products" \
      -H "Authorization: Bearer <access_token>" \
      --data-urlencode "product_family_id=<family_id>" \
      --data-urlencode "_or%5B0%5Dgtin%5B!exists%5D=true" \
-     --data "_or%5B0%5Dgtin%5Bnull%5D" \
      --data-urlencode "_or%5B0%5Dgtin%5Blength%5D=0" \
      --data-urlencode "_fields=id" \
      --data-urlencode "_fields=sku" \
      --data-urlencode "_fields=gtin"
    ```
 
-   `[null]` takes no value, so it's sent with `--data` as it is. The same pattern works for a custom attribute, such as `attributes.feature_description`. Whether V3 treats an empty value as missing for `[!exists]` hasn't been confirmed, so keep all three checks when your audit has to catch every case.
+   The same pattern works for a custom attribute, such as `attributes.feature_description`. Plytix confirmed that an emptied text or multiselect value is stored as absent, so `[!exists]=true` finds it as well as a value that was never set.
 
 3. **Treat whitespace as empty in your own code.**
 
@@ -72,9 +71,9 @@ Follow the steps below to define your rules, check each one with a filter, and c
 
    A product can hold images in more than one place, so a missing value in one field doesn't prove the product has no images. Pick the field that matches your rule:
 
-   - **Thumbnail:** the top-level `thumbnail_id`, checked with `_or%5B0%5Dthumbnail_id%5B!exists%5D=true` and `_or%5B0%5Dthumbnail_id%5Bnull%5D`.
-   - **A required media attribute:** `attributes.<media_attribute>`, with the three checks from step 2.
-   - **A media gallery attribute:** `attributes.<gallery_attribute>`, with the three checks from step 2. `[length]=0` finds a gallery with no assets in it.
+   - **Thumbnail:** the top-level `thumbnail_id`, checked with `thumbnail_id%5B!exists%5D=true`. In testing, `thumbnail_id[null]` returned no products, even though a cleared thumbnail can read back as `null`.
+   - **A required media attribute:** `attributes.<media_attribute>`, with the checks from step 2.
+   - **A media gallery attribute:** `attributes.<gallery_attribute>`, with the checks from step 2. `[length]=0` finds a gallery with no assets in it.
 
    Media and media gallery attributes are named per account. Find yours in the attribute definitions, where their `type` is `MediaAttribute` or `MediaGalleryAttribute`. A custom attribute that stores an image link, such as `main_image_link` in some accounts, is a text field like any other.
 

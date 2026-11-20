@@ -34,9 +34,9 @@ _openapi:
           request.
 
 
-          # Moving Categories
+          ## Moving Categories
 
-          ## Convert to root category (a.k.a first level categories)
+          ### Convert to root category (a.k.a first level categories)
 
           You must issue a patch request to
           https://pim.plytix.com/api/v1/categories/product/categoryId (see
@@ -44,7 +44,7 @@ _openapi:
           {"parent_id": ""}
 
 
-          ## Move as subcategory of another category
+          ### Move as subcategory of another category
 
           You must issue a patch request to
           https://pim.plytix.com/api/v1/categories/product/categoryId (see
@@ -53,9 +53,9 @@ _openapi:
 
 
 
-          # Sorting Categories
+          ## Sorting Categories
 
-          ## Sorting Root Categories
+          ### Sorting Root Categories
 
 
           When patching root categories (a.k.a first level categories) only
@@ -64,7 +64,7 @@ _openapi:
           is returned upon successful response and empty data array is returned.
 
 
-          # Sorting Subcategories
+          ## Sorting Subcategories
 
           A patch request must be issued to parent ID category including in its
           body a dictionary with **ALL** subcategories in desired order, you are

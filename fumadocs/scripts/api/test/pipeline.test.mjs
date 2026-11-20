@@ -347,3 +347,44 @@ test('content checks: missing descriptions, lost upstream descriptions, and null
   assert.ok(!errors.some((e) => e.includes('S.gone')), 'a removed field is not reported');
   assert.equal(errors.length, 4);
 });
+
+test('an error without its own example gets an illustrative one (STG-018)', () => {
+  const shared = { $ref: '#/components/schemas/OperationResponse' };
+  const generic = (description) => ({ description, content: { 'application/json': { schema: shared } } });
+  const spec = {
+    components: { schemas: { CreateDto: { type: 'object', required: ['name'], properties: { name: {} } } } },
+    paths: {
+      '/things': {
+        get: {
+          parameters: [{ name: '_page', in: 'query' }],
+          responses: { 200: { description: 'ok' }, 404: generic('missing'), 422: generic('invalid') },
+        },
+        post: {
+          requestBody: { content: { 'application/json': { schema: { $ref: '#/components/schemas/CreateDto' } } } },
+          responses: { 201: { description: 'created' }, 422: generic('invalid') },
+        },
+      },
+      '/things/{id}': {
+        delete: {
+          parameters: [{ name: 'id', in: 'path' }],
+          responses: { 204: { description: 'gone' }, 404: generic('missing'), 422: generic('invalid') },
+        },
+      },
+    },
+  };
+  const { illustrated } = trimResponses(spec);
+  assert.equal(illustrated.length, 3);
+  const example = (op, code) => Object.values(op.responses[code].content['application/json'].examples)[0];
+
+  const search = spec.paths['/things'].get;
+  assert.deepEqual(Object.keys(search.responses), ['200', '422'], 'a search keeps its 422');
+  assert.match(example(search, '422').value.errors[0].description, /^query\._page: /);
+
+  const create = spec.paths['/things'].post;
+  assert.equal(example(create, '422').value.errors[0].description, 'name: Field required');
+
+  const remove = spec.paths['/things/{id}'].delete;
+  assert.deepEqual(Object.keys(remove.responses), ['204', '404'], 'an operation on one record keeps its 404');
+  assert.equal(example(remove, '404').value.errors[0].name, 'NotFoundError');
+  assert.match(example(remove, '404').summary, /illustrative/);
+});

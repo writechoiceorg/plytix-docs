@@ -54,7 +54,7 @@ Follow the steps below to request the fields you need, walk the pages until you 
    }
    ```
 
-   The link above is shortened. The real link repeats every filter, field, page size, and sort you sent on the first call, so request `pagination.next_page` as it is, after the scheme fix in the warning below. Continue while `next_page` holds a URL you can request, and stop when it's missing, `null`, or empty. Live responses leave the key out on the last page, and the `Pagination` schema also allows `null`, so check for both. The V3 search endpoint has no total count, so plan progress reporting around pages rather than a percentage. See [Pagination](/reference/v3/pagination) for the full rules.
+   The link above is shortened. The real link repeats every filter, field, page size, and sort you sent on the first call, so request `pagination.next_page` as it is, after the scheme fix in the warning below. Continue while `next_page` holds a URL. On the last page, `pagination` is still there but has no `next_page`: live responses leave the key out, and a result that fits on one page returns `"pagination": {}`. The `Pagination` schema also allows `next_page: null`, so treat `null` as the end too. A response with no `pagination` object at all, or `"pagination": null`, is incomplete, not the last page: request that page again instead of ending the export. The V3 search endpoint has no total count, so plan progress reporting around pages rather than a percentage. See [Pagination](/reference/v3/pagination) for the full rules.
 
    Page numbers don't freeze the catalog. Each request runs the search again, so if a product is created, deleted, or changes its sort value while you're paging, the products after it shift by one position. One product can then be skipped or repeated at a page boundary. If the catalog is being edited during your export, use [keyset paging](#export-by-id-instead-of-page-number) instead.
 
@@ -75,7 +75,7 @@ Follow the steps below to request the fields you need, walk the pages until you 
    }
    ```
 
-   The example is trimmed to a few fields of each related object. Because `categories` and `assets` return the related records themselves, such as each category's name and each asset's file name and alt text, your export doesn't need a separate lookup per category or asset. It doesn't include the asset files themselves, and asset records don't currently include a download URL, so if you also need the files, plan that as a separate step.
+   The example is trimmed to a few fields of each related object. Because `categories` and `assets` return the related records themselves, such as each category's name and each asset's file name and alt text, your export doesn't need a separate lookup per category or asset. It doesn't include the asset files themselves, and V3 asset records don't include a download URL. To download the files, see [Download the asset files](#download-the-asset-files).
 
 4. **Scope the export if you don't need the whole catalog.**
 
@@ -91,6 +91,35 @@ Follow the steps below to request the fields you need, walk the pages until you 
    ```
 
    See [Filtering and search](/reference/v3/filtering-and-search) for the other filters you can combine with `_fields`.
+
+## Download the asset files
+
+V3 asset records describe each file but don't link to it. The V1 API does: its asset records include `url`, the address of the file itself. To download the files behind your export, use the V1 API alongside it:
+
+1. **Get a V1 token.**
+
+   The V1 API uses its own authentication, a bearer token exchanged from your API key and password, which expires after 15 minutes. A V3 access token doesn't work on V1. See [V1/V2 authentication](/reference/v1-v2/token-authentication).
+
+2. **Read each asset's `url`.**
+
+   For each asset ID in your export, request [Get an asset](/reference/v1-v2/assets/get-asset):
+
+   ```bash
+   curl "https://pim.plytix.com/api/v1/assets/<asset_id>" \
+     -H "Authorization: Bearer <v1_access_token>"
+   ```
+
+   The response's `data[0].url` is the file's address, for example `https://files.plytix.com/api/v1.1/file/3536.jpg`. To read many assets in fewer requests, use [Search assets](/reference/v1-v2/assets/search-assets) with `url` in `attributes`.
+
+3. **Download each file from its `url`.**
+
+   Request the `url` without your token: it's a file address, not an API endpoint, so don't send the `Authorization` header to it. Save each file under its `filename`.
+
+The V1 API has its own [rate limits](/reference/v1-v2/rate-limits), separate from V3's, so pace these requests too.
+
+{/* FLAG (open):
+  STG-047. From the V1 reference (Get an asset, Search assets examples), not live-tested. Before publishing, check on Dev: (1) that a V3 asset ID returns the same asset from `GET /api/v1/assets/<id>`; (2) whether `url` needs authentication, and whether it's permanent or signed and expiring (ASSET-25); (3) whether `url` can be requested in the V1 search `attributes`.
+*/}
 
 ## Export by ID instead of page number
 
@@ -117,9 +146,9 @@ Follow the steps below to page through the catalog by ID.
 
    Take the `id` of the last product on the page and send the same request with `id[gt]=<last_id>` added. Keep `_page=1`: the filter moves you forward, so don't follow `next_page`, which points to page 2 of the narrowed results.
 
-3. **Stop when `next_page` holds no URL.**
+3. **Stop when `pagination` has no `next_page`.**
 
-   A response without a usable `next_page` link is the last page, so no products remain after it.
+   A response whose `pagination` object has no `next_page` link is the last page, so no products remain after it. If the response has no `pagination` object, request the same page again rather than stopping.
 
 Keyset paging keeps the traversal stable, but it doesn't take a snapshot of the catalog. A product edited after you've read it keeps the values you read, and a product deleted after you've read it stays in your export.
 
@@ -128,6 +157,7 @@ Keyset paging keeps the traversal stable, but it doesn't take a snapshot of the 
 A long export should survive a failed request or a stopped script without starting over. Check each page before you save it, save it so an interruption can't leave a half-written file, record where to continue, retry only the failures worth retrying, and pace requests under both rate-limit windows. The Python script below does all of this while following `next_page`, using the `requests` library:
 
 ```python title="export_catalog.py"
+import hashlib
 import json
 import os
 import random
@@ -137,9 +167,15 @@ from urllib.parse import urlsplit
 
 import requests
 
+# A name for the account and environment you export from. It isn't secret, and
+# it's stored in the manifest, so a run against another account doesn't resume
+# this export.
+EXPORT_LABEL = "kitchen-and-home-production"
 BASE_URL = "https://pim.plytix.com/api/v3/products"
 FIELDS = ["id", "sku", "label", "attributes", "categories", "assets"]
 FILTERS = []                # extra query parameters, such as ("categories.name", "Kettles & Teapots")
+SORT_BY = "id"
+PAGE_SIZE = 100
 STATE_DIR = "export"        # one file per page, plus the manifest
 OUTPUT = "products.jsonl"   # the finished export, one product per line
 # This export's share of your account's limits, as (requests, seconds).
@@ -193,22 +229,33 @@ def save_state(state):
     write_atomic(MANIFEST, [json.dumps(state)])
 
 
+def config_fingerprint():
+    """A hash of the settings that decide which products the export contains. No token."""
+    settings = [EXPORT_LABEL, BASE_URL, FIELDS, [list(f) for f in FILTERS], SORT_BY, PAGE_SIZE]
+    return hashlib.sha256(json.dumps(settings).encode("utf-8")).hexdigest()
+
+
 def load_state():
     if not os.path.exists(MANIFEST):
         params = [("_fields", name) for name in FIELDS] + FILTERS
-        params += [("_sort_by", "id"), ("_page_size", 100)]
+        params += [("_sort_by", SORT_BY), ("_page_size", PAGE_SIZE)]
         first = requests.Request("GET", BASE_URL, params=params).prepare().url
-        return {"pages": 0, "next_url": checked_url(first), "sent": []}
+        return {"config": config_fingerprint(), "pages": 0, "next_url": checked_url(first), "sent": []}
     try:
         with open(MANIFEST, encoding="utf-8") as f:
             state = json.load(f)
-        valid = (isinstance(state.get("pages"), int) and state["pages"] >= 0
+        valid = (isinstance(state.get("config"), str)
+                 and isinstance(state.get("pages"), int) and state["pages"] >= 0
                  and isinstance(state.get("next_url"), (str, type(None)))
                  and isinstance(state.get("sent"), list))
     except (OSError, ValueError, AttributeError):
         valid = False
     if not valid:
         raise Stop(f"{MANIFEST} is unreadable. Delete {STATE_DIR} to start a fresh export.")
+    if state["config"] != config_fingerprint():
+        raise Stop(f"The settings changed since this export started (account label, fields, filters, "
+                   f"sort, or page size). Restore them to resume, or delete {STATE_DIR} and {OUTPUT} "
+                   f"to start a fresh export.")
     for number in range(1, state["pages"] + 1):
         if not os.path.exists(page_path(number)):
             raise Stop(f"{page_path(number)} is missing. Delete {STATE_DIR} to start a fresh export.")
@@ -279,14 +326,16 @@ def read_page(page):
     for product in page["data"]:
         if not isinstance(product, dict) or not isinstance(product.get("id"), str) or not product["id"]:
             raise Stop("A product in the response has no id. Rerun the script to retry the page.")
+    # Every search response has a pagination object. A missing or null one means the
+    # response is incomplete, not that this is the last page.
     pagination = page.get("pagination")
-    if pagination is None:
-        pagination = {}
-    if not isinstance(pagination, dict) or not isinstance(pagination.get("next_page"), (str, type(None))):
-        raise Stop("The response has an invalid pagination block. Rerun the script to retry the page.")
+    if not isinstance(pagination, dict):
+        raise Stop("The response has no pagination object. Rerun the script to retry the page.")
     next_url = pagination.get("next_page")
-    if not next_url:
-        return page["data"], None  # the last page
+    if next_url is None:
+        return page["data"], None  # the last page: {} or no next_page key
+    if not isinstance(next_url, str) or not next_url:
+        raise Stop("The response has an invalid next_page link. Rerun the script to retry the page.")
     return page["data"], checked_url(next_url)
 
 
@@ -338,7 +387,8 @@ if __name__ == "__main__":
 The script handles each part of a long run this way:
 
 - **Credential safety:** before it sends the token, the script checks that every URL it requests, including each `next_page` link and the URL saved in the manifest, uses HTTPS on the Plytix host and points to the product search. It rewrites a same-host `http` link to `https`, refuses any other host, port, path, or user name, and doesn't follow redirects, so the token is never sent anywhere else.
-- **Page validation:** a page is saved only after its `data` list, each product's `id`, and its `pagination` block have the expected shape. A malformed page stops the run without writing anything, and the next run requests that page again.
+- **Page validation:** a page is saved only after its `data` list, each product's `id`, and its `pagination` object have the expected shape. A `pagination` object without `next_page`, including `{}`, marks the last page. A missing or `null` `pagination`, or a `next_page` that isn't a URL, stops the run without saving the page or moving the manifest, so the export never reports success on a truncated response, and the next run requests that page again.
+- **Matching settings:** the manifest records a fingerprint of `EXPORT_LABEL`, `BASE_URL`, `FIELDS`, `FILTERS`, `SORT_BY`, and `PAGE_SIZE`, but not the token. If any of them changes, the script refuses to resume, so an export can't mix pages from two accounts, two field lists, or two filters. Set `EXPORT_LABEL` to a name for the account and environment, such as `kitchen-and-home-production`, and change it when you point the script at another account. Restore the previous settings to resume, or delete `export/` and `products.jsonl` to start over. Rotating the token doesn't change the fingerprint, so you can resume with a new token.
 - **Interruption-safe saving:** each page goes to its own file under `export/`, and `export/manifest.json` records the page only after that file is complete. Every file is written to a temporary file first and then swapped into place, so an interruption leaves the previous version or the new one, never half a line. The next run continues from the manifest. A missing or unreadable manifest or page file stops the run with a message rather than reporting a finished export.
 - **Deduplicated output:** after the last page is saved, the script merges the page files into `products.jsonl` and keeps the last saved copy of each product `id`. A product can be saved twice when the catalog changes during the run or a page is requested again after an interruption. Delete `export/` and `products.jsonl` before you start a fresh export. For [keyset paging](#export-by-id-instead-of-page-number), save the last `id` instead of the URL.
 - **Pacing for both windows:** `LIMITS` holds the requests allowed per 10 seconds and per hour, set here to the lowest standard pair in [Rate limits](/reference/v3/rate-limits). Every integration on your account shares that allowance, so set `LIMITS` to the part this export may use. The manifest keeps the times of recent requests, so the next run still counts the requests made in the last hour. When the next request would have to wait longer than `MAX_WAIT`, the script saves its place, stops, and tells you when to rerun it.
@@ -350,7 +400,7 @@ Check the problems below if you run into issues while following this guide.
 
 <Accordions type="multiple">
   <Accordion title={<>A field you asked for with <code>_fields</code> is missing from the response</>} value="fields-silently-dropped">
-    If a field is missing from every product, check its name. Plytix rejects some unknown names with a `400` error but drops others with no error, so a typo can cost you the field silently. Check top-level names against the product schema in [Get a product](/reference/v3/products/get-product), and custom attribute names against your account's attribute definitions from [`GET /api/v3/product-attributes`](/reference/v3/product-attributes/search-product-attributes). If the field is missing only on some products, the name is fine and those products have no value for it: an attribute with no value can be missing from a product's `attributes` map, and other unset fields can come back as `null`. A product's response shows only what that product holds, so don't use one as the list of fields that exist.
+    If a field is missing from every product, check its name. Plytix rejects some unknown names with a `400` error but drops others with no error, so a typo can cost you the field silently. Check top-level names against the product schema in [Get a product](/reference/v3/products/get-product), and custom attribute names against your account's attribute definitions from [`GET /api/v3/product-attributes`](/reference/v3/product-attributes/search-product-attributes). If the field is missing only on some products, the name is fine and those products have no value for it: a custom attribute with no value, whether it was never set or was cleared, is missing from the product's `attributes` map, and a top-level field with no value, such as `thumbnail_id`, can come back as `null`. A product's response shows only what that product holds, so don't use one as the list of fields that exist.
   </Accordion>
   <Accordion title={<><code>_fields=category_ids</code> returns 400 instead of the field</>} value="fields-ids-hidden">
     Any field ending in `_ids` is hidden from API responses, so this returns a `HiddenFieldError`. That's deliberate: Plytix doesn't expose the denormalized ID arrays behind its relationships. Ask for the expanded plural form instead, so `categories` rather than `category_ids`, and `assets` rather than `asset_ids`. The expanded form returns the full objects and includes the IDs you were after anyway.

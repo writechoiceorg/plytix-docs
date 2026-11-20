@@ -66,6 +66,7 @@ Every fix in `00-fixes.yaml` cites one of these IDs through `x-plytix-question`.
 
 - **Observed:** The `Pagination` schema declares `next_page` and `previous_page` as `string | null`, but the API leaves a key out when it doesn't apply and never sends `null` (quirk #91). The links also use `http://` and redirect, which can drop the `Authorization` header (quirk #92).
 - **Update (2026-10-23, 2026-10-19 spec):** Unchanged: `next_page` and `previous_page` are still `string | null`.
+- **Update (2026-11-20, staging audit NEW-002):** The export guide treated a missing or `null` `pagination` as the last page, so a truncated response could end an export as a success. The guides now treat `{}` or a `pagination` without `next_page` as the end, and a missing or `null` `pagination` as an incomplete response to retry. Please confirm every search response always carries a `pagination` object.
 - **Question:** Can the schema mark both keys as optional strings (not nullable), and can the links use `https://`?
 
 | Plytix response |
@@ -641,6 +642,7 @@ Raised while applying `materials/api-references/endpoint-reviews/Plytix_API_v3_W
 
 - **Observed:** The audit lists `url` as a default read field on assets, but live asset records have no URL field (FB-030, rechecked 2026-10-15). The docs now say asset records don't currently include a download URL, and `path` is hidden.
 - **Update (2026-10-23, 2026-10-19 spec):** Unchanged: `AssetOutputDto` has no `url`.
+- **Update (2026-11-20, staging audit STG-047):** The export guide now downloads asset files through V1 (`GET /api/v1/assets/{asset_id}`, `url`), since V3 has none. Also: do V1 and V3 return the same ID for the same asset, and does the V1 `url` need authentication?
 - **Question:** When will `url` be returned, and what does it point to (a permanent file URL, or a signed URL that expires)?
 
 | Plytix response |
@@ -677,6 +679,7 @@ Raised while applying `materials/api-references/endpoint-reviews/Plytix_API_v3_W
 ### REL-23
 
 - **Observed:** The 2026-10-19 spec removes the relationships API: `/api/v3/relationships/*`, `/api/v3/related-products`, and every `/api/v3/products/{product_id}/relationships/*` route (23 operations, 11 of them published). It adds `/api/v3/product-relationship-types/*` (search, create, get, update, delete, field routes) and `POST`/`PATCH /api/v3/products/{product_identifier}/product_relationship_types` plus `POST .../product_relationship_types/unlink`. `ProductOutputDto.product_relationships` is replaced by `product_relationships_from` and `product_relationships_to`. We've removed the old pages and keep the 11 new operations `pending`, so the docs currently have no relationships reference. This may also answer REL-2.
+- **Update (2026-11-20, staging audit STG-005, NEW-011):** The guides no longer show the retired routes or the `product_relationships` field as usable; they point to V1/V2 for relationships until the new routes are documented. The 33 historical redirects to the removed relationship pages now land on the endpoint mapping's relationship sections.
 - **Question:** Which of the 11 new operations are public? Are the old routes gone from production, or only from the spec? Are `product_relationships_from`/`_to` public fields?
 
 | Plytix response |
@@ -686,6 +689,7 @@ Raised while applying `materials/api-references/endpoint-reviews/Plytix_API_v3_W
 ### PROD-21
 
 - **Observed:** The 2026-10-19 spec drops the generic `POST /api/v3/products/{identifier}/{path}` link route (and `POST /api/v3/product-families/{identifier}/{path}`) in favor of the dedicated link routes (`POST /api/v3/products/{identifier}/categories`, and so on). Our "Link a record to a product" page is removed; we point readers to the category link route instead.
+- **Update (2026-11-20, staging audit STG-006):** "Update and delete records" no longer offers POST on any field path, and lists only the declared link routes. Still open: whether the generic POST answers in production.
 - **Question:** Does the generic `POST` still work in production, or is it retired?
 
 | Plytix response |
@@ -721,6 +725,42 @@ Raised while applying `materials/api-references/endpoint-reviews/Plytix_API_v3_W
 
 - **Observed (2026-11-12, review of `reference/v3/authentication.mdx`):** The authentication guide (reconfirmed as current on 2026-11-12) lists token permissions for seven resources: Products, Assets, Product categories, Asset categories, Attributes, Product families, and Relationships. The 2026-10-19 spec also has asset lists (`/api/v3/asset-lists`) and product attribute groups (`/api/v3/product-attribute-groups`), and replaces relationships with product relationship types (`/api/v3/product-relationship-types`, `/api/v3/product-relationships`). The docs list the seven resources as written.
 - **Question:** Which token permission governs asset lists, product attribute groups, and product relationship types? For example, do asset lists fall under Assets and attribute groups under Attributes? Does "Relationships" in the token UI cover the new product relationship types endpoints?
+
+| Plytix response |
+| :---- |
+
+## 2026-11-20 staging audit
+
+Questions raised while fixing Plytix's staging audit of 17 November 2026. Findings already covered above are noted there (OAS-7, ASSET-25, REL-23, PROD-21).
+
+### DEC-1
+
+- **Observed:** The staging audit (STG-004) found on Dev that `PATCH /api/v3/products/{identifier}/attributes/{label}` on a decimal attribute accepts the bare number `34.99` and rejects the string `"34.99"`. Our own live test (FB-020, `config/api-testing.config.md`) found the opposite: the number returned `422` and the string `204`. The docs now follow the audit (bare number).
+- **Question:** Was decimal handling changed on purpose? Does production behave like Dev today, and is the same true for the whole-map and partial-map routes?
+
+| Plytix response |
+| :---- |
+
+### MIG-1
+
+- **Observed:** The audit (NEW-006) asked whether the migration map is selective. It now covers all 88 operations in the V1/V2 reference, each with an outcome: a V3 endpoint, a workaround, or "keep on V1/V2". Our calls on `POST /api/v1/product_families/{id}/all_attributes/edit` (system-attribute inheritance stays on V1) and the `/filters/*` endpoints (no V3 equivalent) are inferred from the spec.
+- **Question:** What migration scope has Core approved? Should any "keep on V1/V2" row name a V3 equivalent instead, and are any V1/V2 operations out of scope for the guide?
+
+| Plytix response |
+| :---- |
+
+### EXP-1
+
+- **Observed:** The audit (NEW-009) asked that an export not resume after the account changes. The export script now stores a fingerprint of its settings, but V3 has no documented call that identifies the account a token belongs to (`account_id` was dropped from the 2026-10-19 output schemas, OAS-31), so the script asks the reader for an `EXPORT_LABEL` instead.
+- **Question:** Is there, or will there be, a V3 call that returns the token's account (a "who am I" endpoint), so a client can bind its state to the account without asking the user?
+
+| Plytix response |
+| :---- |
+
+### ERR-1
+
+- **Observed:** The audit (STG-018) asked for example bodies for the common errors, including `403` and `429`. We have live bodies for `401`, `404`, `409`, and `422`; pages that had none now show an example labelled "illustrative" in those formats. No V3 operation declares `429`, and we have no live `403` body (see AUTH-1).
+- **Question:** What do the `403` (missing permission or feature) and `429` (rate limit) bodies look like, and do `429` responses carry `Retry-After`? Can the spec declare `429`?
 
 | Plytix response |
 | :---- |

@@ -8396,6 +8396,21 @@
           "upstream": {
             "description": {
               "$absent": true
+            },
+            "example": {
+              "$absent": true
+            }
+          }
+        }
+      }
+    },
+    "ops/asset-categories.yaml::$.paths['/api/v3/asset-categories/{identifier}/{path}'].patch.requestBody.content['application/json']": {
+      "nodes": {
+        "$.paths./api/v3/asset-categories/{identifier}/{path}.patch.requestBody.content.application/json": {
+          "sig": {},
+          "upstream": {
+            "examples": {
+              "$absent": true
             }
           }
         }
@@ -8881,6 +8896,21 @@
           },
           "upstream": {
             "description": {
+              "$absent": true
+            },
+            "example": {
+              "$absent": true
+            }
+          }
+        }
+      }
+    },
+    "ops/asset-lists.yaml::$.paths['/api/v3/asset-lists/{identifier}/{path}'].patch.requestBody.content['application/json']": {
+      "nodes": {
+        "$.paths./api/v3/asset-lists/{identifier}/{path}.patch.requestBody.content.application/json": {
+          "sig": {},
+          "upstream": {
+            "examples": {
               "$absent": true
             }
           }
@@ -10546,6 +10576,39 @@
         }
       }
     },
+    "ops/product-attributes.yaml::$.paths['/api/v3/product-attributes/{identifier}/{path}'].patch.parameters[?(@.name=='path' && @.in=='path')]": {
+      "nodes": {
+        "$.paths./api/v3/product-attributes/{identifier}/{path}.patch.parameters[path@path]": {
+          "sig": {
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          "upstream": {
+            "description": {
+              "$absent": true
+            },
+            "example": {
+              "$absent": true
+            }
+          }
+        }
+      }
+    },
+    "ops/product-attributes.yaml::$.paths['/api/v3/product-attributes/{identifier}/{path}'].patch.requestBody.content['application/json']": {
+      "nodes": {
+        "$.paths./api/v3/product-attributes/{identifier}/{path}.patch.requestBody.content.application/json": {
+          "sig": {},
+          "upstream": {
+            "examples": {
+              "$absent": true
+            }
+          }
+        }
+      }
+    },
     "ops/product-categories.yaml::$.paths['/api/v3/product-categories'].get": {
       "nodes": {
         "$.paths./api/v3/product-categories.get": {
@@ -11015,6 +11078,21 @@
           },
           "upstream": {
             "description": {
+              "$absent": true
+            },
+            "example": {
+              "$absent": true
+            }
+          }
+        }
+      }
+    },
+    "ops/product-categories.yaml::$.paths['/api/v3/product-categories/{identifier}/{path}'].patch.requestBody.content['application/json']": {
+      "nodes": {
+        "$.paths./api/v3/product-categories/{identifier}/{path}.patch.requestBody.content.application/json": {
+          "sig": {},
+          "upstream": {
+            "examples": {
               "$absent": true
             }
           }

@@ -1,59 +1,67 @@
 ---
 title: "Example workflows"
+metaTitle: "Plytix MCP example workflows"
 description: "Try example prompts for the Plytix MCP beta, from finding a product and reviewing content to drafting copy and updating a product description."
 ---
 
 import { ShieldCheckmarkRegular, WrenchRegular } from '@/components/icons';
 
-Use these prompts as starting points after [connecting your account](/mcp/quickstart). Replace sample SKUs, category names, and attribute labels with values from your own catalog. Each example identifies the [capabilities](/mcp/tools#available-capabilities) it requires. Specify that the assistant should use Plytix, and check the resulting tool calls and data.
+Use these prompts as starting points after [connecting your account](/mcp/quickstart). Replace each placeholder in angle brackets, such as `<SKU>` or `<category name>`, with a value from your own catalog. Each example identifies the [capabilities](/mcp/tools#available-capabilities) it requires and what it changes in Plytix:
+
+- **Read-only**: the assistant reads from Plytix and changes nothing.
+- **Drafts only**: the assistant writes text in the conversation. Plytix doesn't change.
+- **Saves after approval**: the assistant changes your catalog, but only after you review its proposal and approve the save in a separate prompt.
+
+Specify that the assistant should use Plytix, and check the resulting tool calls and data.
 
 {/* FLAG (open):
   None of these prompts has been run yet. Test each one on a sample account against the release endpoint before publishing, record the actual outcome, and remove any workflow whose tools aren't in the release. The channel content, supplier file, and team questions workflows were approved by David on 29 Oct 2026. "Improve a product description" uses a standalone product per David (9 Nov 2026, MCP-034): `GF-Chocolates` has no variants in the sample data; on the test account, use a product whose `product_level` is `0`.
+  2026-11-20 (audit STG-029): prompts now use placeholders, the category review asks the assistant to follow every page and report the count, and each workflow is labelled Read-only, Drafts only, or Saves after approval. When testing, check that the assistant really pages through a category larger than one page, and that its reported count matches the category size.
 */}
 
 ## Find a product
 
-Look up one product and read back its values. Replace `YOUR-SKU` with a SKU that exists in your account, then ask:
+**Read-only.** Look up one product and read back its values. Replace `<SKU>` with a SKU that exists in your account, then ask:
 
 ```text
-Using Plytix, find the product with SKU YOUR-SKU and show its SKU, name, and description. Don't change anything.
+Using Plytix, find the product with SKU <SKU> and show its SKU, name, and description. Don't change anything.
 ```
 
 Your assistant gets the matching product and reports the values Plytix returned. This workflow needs product lookup and access to those fields.
 
 ## Understand your catalog structure
 
-Ask your assistant to explain how your attributes are set up.
+**Read-only.** Ask your assistant to explain how your attributes are set up.
 
 ```text
-Using Plytix, list the product attributes available in my account and explain which ones describe product dimensions.
+Using Plytix, list the product attributes available in my account and explain which ones describe product dimensions. If the list comes back in pages, keep requesting the next page until there are none left, and tell me how many attributes you found. Don't change anything.
 ```
 
-Your assistant gets your attribute definitions and explains the relevant ones, such as `product_length_mm` or `product_weight_kg`. This workflow needs attribute discovery.
+Your assistant gets your attribute definitions and explains the relevant ones, using the attribute labels in your account. This workflow needs attribute discovery.
 
 ## Review content quality
 
-Check a small set of products for missing content, without changing anything.
+**Read-only.** Check the products in one category for missing content, without changing anything. Replace `<category name>` with a category in your account, then ask:
 
 ```text
-Using Plytix, inspect 10 products in the Drinkware category and identify which have an empty description. Show the SKUs and don't change anything.
+Using Plytix, check every product in the <category name> category and identify which have an empty description. Search results come in pages: keep requesting the next page until there are none left. Then show the SKUs with an empty description, and tell me how many products you checked and how many the category has. Don't change anything.
 ```
 
-Your assistant reviews the products it gets and lists the SKUs with an empty description. The result covers only those 10 products, so it's a spot check, not an audit of your whole catalog. This workflow needs product search with the relevant fields.
+Your assistant pages through the search results and lists the SKUs with an empty description. Compare the number of products it checked with the number in the category: if they differ, the assistant stopped early, and the list isn't complete. For a quick spot check instead, ask it to inspect only the first 10 products. This workflow needs product search with the relevant fields.
 
 ## Draft content for a sales channel
 
-Turn your product data into listing copy, without changing anything in Plytix.
+**Drafts only.** Turn your product data into listing copy, without changing anything in Plytix. Replace `<SKU>` with a SKU that exists in your account, then ask:
 
 ```text
-Using Plytix, get the name and description of SKU GF-Basket, and draft a product title and a 150-word description for an Amazon listing. Don't change anything in Plytix.
+Using Plytix, get the name and description of SKU <SKU>, and draft a product title and a 150-word description for an Amazon listing. Don't change anything in Plytix.
 ```
 
 Your assistant reads the product's values and writes the draft in the conversation. Plytix doesn't change. This workflow needs product lookup and access to those fields.
 
 ## Check a supplier file before you import it
 
-Compare a supplier's file with your catalog before you import it into Plytix.
+**Read-only.** Compare a supplier's file with your catalog before you import it into Plytix.
 
 ```text
 Using Plytix, compare the attached supplier file with my catalog. List the SKUs that are missing from Plytix and the SKUs of products whose names differ between the file and the catalog. Report how many rows you checked and any rows you couldn't compare. Don't change anything.
@@ -63,23 +71,23 @@ Your assistant reads the file in your AI application, looks up its SKUs in Plyti
 
 ## Answer product questions for your team
 
-Let colleagues in sales or support get product facts from Plytix in chat. Replace `YOUR-SKU` with a SKU that exists in your account, then ask:
+**Read-only.** Let colleagues in sales or support get product facts from Plytix in chat. Replace `<SKU>` with a SKU that exists in your account, then ask:
 
 ```text
-Using Plytix, list the categories assigned to SKU YOUR-SKU and show its description. Include the SKU and the values returned by Plytix. Don't change anything.
+Using Plytix, list the categories assigned to SKU <SKU> and show its description. Include the SKU and the values returned by Plytix. Don't change anything.
 ```
 
 Your assistant answers from the values Plytix returns and shows them, so your colleague can check the answer. This workflow needs product lookup and access to the product's categories.
 
 ## Improve a product description
 
-Get a suggested rewrite for a standalone product, one with no parent or variants, and approve it before anything changes.
+**Saves after approval.** Get a suggested rewrite for a standalone product, one with no parent or variants, and approve it before anything changes. Replace `<SKU>` with the SKU of a standalone product, then ask:
 
 ```text
-Using Plytix, for SKU GF-Chocolates, propose a clearer description and show me the proposed text before saving anything.
+Using Plytix, for SKU <SKU>, propose a clearer description and show me the proposed text before saving anything.
 ```
 
-For this workflow, ask the assistant to read the description and propose a rewrite without saving it. Review the proposal before asking it to update the product, for example with "Save that description to GF-Chocolates." A write tool applies the update when it runs, subject to your AI application's controls.
+For this workflow, ask the assistant to read the description and propose a rewrite without saving it. Review the proposal before asking it to update the product, for example with `Save that description to <SKU>.` A write tool applies the update when it runs, subject to your AI application's controls.
 
 Saving the text updates the description value for that SKU through the tool that updates products. It doesn't change the description attribute itself. In Plytix, variants can inherit their parent's description, depending on the product family's settings, so check those settings before you update a parent product or a variant.
 
