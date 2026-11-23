@@ -82,7 +82,7 @@ actions:
 
   # --- GET /api/v3/assets ---------------------------------------------------------
   - target: $.paths['/api/v3/assets'].get
-    description: Q#89 and Q#91 (both confirmed on /assets), Q#92 and FB-012 (http:// links), Q#116, FB-030 (2026-10-15, no url); 16 Oct handoff (file metadata, counters, status, path, downloaded_from excluded; categories expandable, untested, VERIFY.md)
+    description: Q#89 and Q#91 (both confirmed on /assets), Q#92 and FB-012 (http:// links), Q#116, FB-030 (2026-10-15, no url) superseded by FB-066 (Plytix Dev test 2026-11-23, url returned); 16 Oct handoff (file metadata, counters, status, path, downloaded_from excluded; categories expandable, untested, VERIFY.md)
     update:
       summary: Search assets
       operationId: search-assets
@@ -93,7 +93,7 @@ actions:
 
         Filters are query parameters written as `field=value` or `field[operator]=value`. An asset must match all of them, unless you group filters with `_or`.
 
-        Each asset holds its `filename`, its `alt_text`, whether it's `assigned`, and its timestamps. Asset records don't currently include a download URL.
+        Each asset holds its `filename`, its `alt_text`, whether it's `assigned`, its timestamps, and `url`, the address of the file. Request the `url` without your access token: it's a file address, not an API endpoint.
 
         To get the asset categories each asset belongs to, add `_fields=categories`. They come back only when you name them in `_fields`.
 
@@ -137,14 +137,14 @@ actions:
 
   # --- GET /api/v3/assets/{identifier} ----------------------------------------------
   - target: $.paths['/api/v3/assets/{identifier}'].get
-    description: Delete Asset.bru 404 (2026-09-15), static_lists removed until LIST-20/OAS-4 (Q#105 confirms it), FB-030 (2026-10-15, no url), Asset Subpaths.bru, spec GetAssetsResponse; 16 Oct handoff (categories expandable, untested, VERIFY.md)
+    description: Delete Asset.bru 404 (2026-09-15), static_lists removed until LIST-20/OAS-4 (Q#105 confirms it), FB-030 (2026-10-15, no url) superseded by FB-066 (Plytix Dev test 2026-11-23, url returned), Asset Subpaths.bru, spec GetAssetsResponse; 16 Oct handoff (categories expandable, untested, VERIFY.md)
     update:
       summary: Get an asset
       operationId: get-asset
       description: |-
         Returns one asset, identified by its ID. An ID that matches no asset returns `404`.
 
-        `data` holds the asset object itself, not a list. Asset records don't currently include a download URL.
+        `data` holds the asset object itself, not a list. Its `url` is the address of the file, which you request without your access token.
 
         To see which asset categories the asset belongs to, add `_fields=categories`, or use [Get an asset field](/reference/v3/assets/get-asset-field) with `categories`.
 

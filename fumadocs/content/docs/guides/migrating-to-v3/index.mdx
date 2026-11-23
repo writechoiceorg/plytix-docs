@@ -38,7 +38,7 @@ Before you start, you need:
    | Operation | V1 endpoint | Status in V3 |
    |---|---|---|
    | Replacing the binary content of an existing asset | `PUT /api/v1/assets/{asset_id}/content` | No equivalent. V3 accepts `url` or `content` only when the asset is created; its update schema carries only `filename` and `alt_text` |
-   | Discovering the available filters for a resource | `GET /api/v1/filters/product`, `/filters/asset`, `/filters/relationships` | No equivalent. Build filters from `GET /api/v3/product-attributes` instead |
+   | Discovering the available filters for a resource | `GET /api/v1/filters/product`, `/filters/asset`, `/filters/relationships` | No equivalent. Keep these calls on V1 to discover the available fields and operators |
    | Resyncing variants against their parent | `POST /api/v1/products/{parent_product_id}/variants/resync` | No equivalent |
    | Reading a total result count | `total_count` on every V1 search response | No equivalent anywhere in V3. See step 6 |
    | Searching API credentials and account memberships | `POST /api/v1/accounts/api-credentials/search`, `/accounts/memberships/search` | No equivalent. Managing keys and users in the Plytix dashboard doesn't replace searching them through the API |

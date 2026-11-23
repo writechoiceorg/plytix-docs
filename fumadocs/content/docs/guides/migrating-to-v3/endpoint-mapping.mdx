@@ -161,12 +161,12 @@ You can create a Product Family, link attributes to it, and rename it through th
 | `POST /auth/api/get-token` | No equivalent call | V3 uses access tokens that you create in your account settings, not an exchange of API key and password. See [Authentication and base URLs](/guides/migrating-to-v3/authentication-and-base-urls). |
 | `POST /api/v1/accounts/api-credentials/search` | No V3 equivalent | Keep on V1. |
 | `POST /api/v1/accounts/memberships/search` | No V3 equivalent | Keep on V1. |
-| `GET /api/v1/filters/product` | No V3 equivalent | To find the attributes you can filter on, read the definitions from `GET /api/v3/product-attributes`. |
-| `GET /api/v1/filters/asset` | No V3 equivalent | Keep on V1. |
+| `GET /api/v1/filters/product` | No V3 equivalent | Keep on V1 to discover the fields and operators you can filter on. |
+| `GET /api/v1/filters/asset` | No V3 equivalent | Keep on V1 to discover the fields and operators you can filter on. |
 | `GET /api/v1/filters/relationships` | No V3 equivalent | Keep on V1, with the rest of your relationship calls. |
 
 {/* FLAG (open):
-  NEW-006. The map now covers all 88 operations in openapi-v1v2.json (V2 through their V1 counterparts). The outcomes for `all_attributes/edit` (system-attribute inheritance) and the filter endpoints are our reading of the 2026-10-19 spec. Ask Core to confirm the approved migration scope, and whether any of these rows should name a V3 equivalent instead.
+  MIG-1, FB-065. Plytix confirmed (2026-11-23) the filter rows and keeping `all_attributes/edit` on V1. Still open: Plytix found on Dev that `GET /api/v3/product-attribute-definitions` returns `200` and `GET /api/v3/product-attributes` returns `404`, but the 2026-10-19 spec and the reference still use `/api/v3/product-attributes`. The attribute rows keep the spec path until Plytix confirms the rename and sends the spec that declares it.
 */}
 
 ## Linking and unlinking

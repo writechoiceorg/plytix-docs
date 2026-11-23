@@ -28,7 +28,7 @@ Your account plan sets the limits, and they apply to all resources in the API. T
 
 ## Exceeding your limit
 
-If you reach either limit, the API returns a `429 TOO MANY REQUESTS` status code. Every request you make keeps returning `429` until the time interval for the limit you hit expires. Pause when you see a `429` instead of retrying right away. See [Errors and status codes](/reference/v1-v2/errors-status-codes) for the full list of status codes the API returns.
+If you reach either limit, the API returns a `429 TOO MANY REQUESTS` status code. Every request you make keeps returning `429` until the time interval for the limit you hit expires. Pause when you see a `429` instead of retrying right away. A `429` response includes a `Retry-After` header with the number of seconds to wait, such as `Retry-After: 10`. Wait at least that long before you retry. See [Errors and status codes](/reference/v1-v2/errors-status-codes) for the full list of status codes the API returns.
 
 ## Related resources
 

@@ -13,6 +13,8 @@ const figtree = Figtree({
 
 const umamiSrc = process.env.NEXT_PUBLIC_UMAMI_SRC;
 const umamiWebsiteId = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID;
+// Where the tracker sends pageviews (`data-host-url`). Unset: the script's own host.
+const umamiHostUrl = process.env.NEXT_PUBLIC_UMAMI_HOST_URL || undefined;
 
 // Page titles keep their own name ("Get a product · V1 (Legacy)") and take the
 // portal name as a suffix (STG-001).
@@ -37,6 +39,7 @@ export default function Layout({ children }: LayoutProps<'/'>) {
           <Script
             src={umamiSrc}
             data-website-id={umamiWebsiteId}
+            data-host-url={umamiHostUrl}
             strategy="afterInteractive"
             defer
           />

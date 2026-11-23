@@ -1968,7 +1968,7 @@
           "assets"
         ],
         "summary": "Search assets",
-        "description": "Returns the assets in your Plytix DAM that match your filters, one page at a time.\n\nUse it to find an asset's `id` before you read, update, or delete it, or to list the files in your account page by page.\n\nFilters are query parameters written as `field=value` or `field[operator]=value`. An asset must match all of them, unless you group filters with `_or`.\n\nEach asset holds its `filename`, its `alt_text`, whether it's `assigned`, and its timestamps. Asset records don't currently include a download URL.\n\nTo get the asset categories each asset belongs to, add `_fields=categories`. They come back only when you name them in `_fields`.\n\nResults come back 25 per page by default, up to 1000 with `_page_size`. To get the next page, follow `pagination.next_page`. On the last page that key is left out, not set to `null`. The link starts with `http://`, so change it to `https://` before you follow it. Otherwise the redirect can drop your `Authorization` header. The response doesn't include a total count.\n\nRelated pages:\n\n- [Filtering and search](/reference/v3/filtering-and-search)\n- [Pagination](/reference/v3/pagination)\n- [The Plytix data model](/guides/data-model#assets)",
+        "description": "Returns the assets in your Plytix DAM that match your filters, one page at a time.\n\nUse it to find an asset's `id` before you read, update, or delete it, or to list the files in your account page by page.\n\nFilters are query parameters written as `field=value` or `field[operator]=value`. An asset must match all of them, unless you group filters with `_or`.\n\nEach asset holds its `filename`, its `alt_text`, whether it's `assigned`, its timestamps, and `url`, the address of the file. Request the `url` without your access token: it's a file address, not an API endpoint.\n\nTo get the asset categories each asset belongs to, add `_fields=categories`. They come back only when you name them in `_fields`.\n\nResults come back 25 per page by default, up to 1000 with `_page_size`. To get the next page, follow `pagination.next_page`. On the last page that key is left out, not set to `null`. The link starts with `http://`, so change it to `https://` before you follow it. Otherwise the redirect can drop your `Authorization` header. The response doesn't include a total count.\n\nRelated pages:\n\n- [Filtering and search](/reference/v3/filtering-and-search)\n- [Pagination](/reference/v3/pagination)\n- [The Plytix data model](/guides/data-model#assets)",
         "operationId": "search-assets",
         "parameters": [
           {
@@ -2077,6 +2077,7 @@
                           "assigned": true,
                           "filename": "Enjoy Mug - White.jpg",
                           "alt_text": "Adventure mug in white",
+                          "url": "https://files.plytix.com/api/v1.1/file/public_files/pim/assets/2e/0c/1f/6a/6a1f0c2e9b3d4a5f8c7e1a00/images/2e/0c/1f/6a/6a1f0c2e9b3d4a5f8c7e1b03/Enjoy Mug - White.jpg",
                           "created": "2026-06-22T08:44:19.008000",
                           "modified": "2026-06-22T08:44:19.046000"
                         },
@@ -2085,6 +2086,7 @@
                           "assigned": true,
                           "filename": "Enjoy Mug - Blue.jpg",
                           "alt_text": null,
+                          "url": "https://files.plytix.com/api/v1.1/file/public_files/pim/assets/2e/0c/1f/6a/6a1f0c2e9b3d4a5f8c7e1a00/images/2e/0c/1f/6a/6a1f0c2e9b3d4a5f8c7e1b02/Enjoy Mug - Blue.jpg",
                           "created": "2026-06-22T08:44:18.978000",
                           "modified": "2026-06-22T08:44:18.990000"
                         }
@@ -2232,7 +2234,7 @@
           "assets"
         ],
         "summary": "Get an asset",
-        "description": "Returns one asset, identified by its ID. An ID that matches no asset returns `404`.\n\n`data` holds the asset object itself, not a list. Asset records don't currently include a download URL.\n\nTo see which asset categories the asset belongs to, add `_fields=categories`, or use [Get an asset field](/reference/v3/assets/get-asset-field) with `categories`.",
+        "description": "Returns one asset, identified by its ID. An ID that matches no asset returns `404`.\n\n`data` holds the asset object itself, not a list. Its `url` is the address of the file, which you request without your access token.\n\nTo see which asset categories the asset belongs to, add `_fields=categories`, or use [Get an asset field](/reference/v3/assets/get-asset-field) with `categories`.",
         "operationId": "get-asset",
         "parameters": [
           {
@@ -2278,6 +2280,7 @@
                         "assigned": true,
                         "filename": "Enjoy Mug - White.jpg",
                         "alt_text": "Adventure mug in white",
+                        "url": "https://files.plytix.com/api/v1.1/file/public_files/pim/assets/2e/0c/1f/6a/6a1f0c2e9b3d4a5f8c7e1a00/images/2e/0c/1f/6a/6a1f0c2e9b3d4a5f8c7e1b03/Enjoy Mug - White.jpg",
                         "created": "2026-06-22T08:44:19.008000",
                         "modified": "2026-06-22T08:44:19.046000"
                       },
@@ -8062,6 +8065,21 @@
             ],
             "title": "Modified",
             "description": "Modification timestamp"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url",
+            "description": "Address of the file. Request it without your access token, because it's a file address, not an API endpoint.",
+            "examples": [
+              "https://files.plytix.com/api/v1.1/file/public_files/pim/assets/2e/0c/1f/6a/6a1f0c2e9b3d4a5f8c7e1a00/images/2e/0c/1f/6a/6a1f0c2e9b3d4a5f8c7e1b03/Enjoy Mug - White.jpg"
+            ]
           }
         },
         "type": "object",

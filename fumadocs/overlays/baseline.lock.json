@@ -13509,6 +13509,20 @@
         }
       }
     },
+    "schemas/assets.yaml::$.components.schemas.AssetOutputDto": {
+      "nodes": {
+        "$.components.schemas.AssetOutputDto": {
+          "sig": {
+            "type": "object"
+          },
+          "upstream": {
+            "properties/url": {
+              "$absent": true
+            }
+          }
+        }
+      }
+    },
     "schemas/assets.yaml::$.components.schemas.AssetOutputDto.properties.categories": {
       "nodes": {
         "$.components.schemas.AssetOutputDto.properties.categories": {

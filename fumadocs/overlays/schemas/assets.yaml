@@ -49,6 +49,18 @@ actions:
       description: Text that describes the asset for people who can't see it.
       examples:
         - Adventure mug in blue, front view
+  - target: $.components.schemas.AssetOutputDto
+    description: FB-066, ASSET-25. Plytix Dev test (2026-11-23) - Get an asset and Search assets return url, the same as V1, and the file downloads without a token (206 on a range request). Not declared in the 2026-10-19 spec; not tested by us.
+    update:
+      properties:
+        url:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Url
+          description: Address of the file. Request it without your access token, because it's a file address, not an API endpoint.
+          examples:
+            - https://files.plytix.com/api/v1.1/file/public_files/pim/assets/2e/0c/1f/6a/6a1f0c2e9b3d4a5f8c7e1a00/images/2e/0c/1f/6a/6a1f0c2e9b3d4a5f8c7e1b03/Enjoy Mug - White.jpg
   - target: $.components.schemas.AssetOutputDto.properties.content_type
     remove: true
   - target: $.components.schemas.AssetOutputDto.properties.checksum

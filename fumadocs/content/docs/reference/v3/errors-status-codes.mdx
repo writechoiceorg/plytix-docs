@@ -64,6 +64,30 @@ Example response for a request that fails with a 404:
 }
 ```
 
+A request without a valid access token fails with `401`, and the body is a single `detail` string:
+
+```json
+{
+  "detail": "Unauthorized"
+}
+```
+
+A token that authenticates but lacks the permission the request needs fails with `403`. The error's `description` names the missing permission. For example, a token with read access to assets only, requesting a product:
+
+```json
+{
+  "data": [],
+  "errors": [
+    {
+      "name": "Forbidden",
+      "description": "None of the scopes pim:products:read granted"
+    }
+  ]
+}
+```
+
+See [Authentication](/reference/v3/authentication) to check a token's permissions.
+
 Open the entries below for the shape of each error object.
 
 <Accordions type="multiple">

@@ -2,7 +2,7 @@
 
 Record of every `feedback-corrector` run: the feedback received, what our sources said, what changed on the page, and the reply sent to David. One section per page, newest run first. Open questions for Plytix live in [`feedback-flags.md`](feedback-flags.md).
 
-**Last updated:** 2026-11-16
+**Last updated:** 2026-11-23
 
 ## Index
 
@@ -13,7 +13,7 @@ Record of every `feedback-corrector` run: the feedback received, what our source
 | [Authentication and base URLs](#authentication-and-base-urls) | 1 | 2026-10-14 |
 | [Endpoint mapping](#endpoint-mapping) | 1 | 2026-10-14 |
 | [Sync your ERP](#sync-your-erp) | 1 | 2026-10-14 |
-| [Export your full catalog](#export-your-full-catalog) | 1 | 2026-10-14 |
+| [Export your full catalog](#export-your-full-catalog) | 2 | 2026-11-23 |
 | [Audit product data quality with filters](#audit-product-data-quality-with-filters) | 1 | 2026-10-14 |
 | [Build a marketplace-specific product feed](#build-a-marketplace-specific-product-feed) | 1 | 2026-10-14 |
 | [Safely remove categories, assets, or relationships](#safely-remove-categories-assets-or-relationships) | 1 | 2026-10-14 |
@@ -413,6 +413,85 @@ Open questions:
 ## Export your full catalog
 
 **Page:** `fumadocs/content/docs/guides/exporting-your-full-catalog.mdx` · **Page type:** How-to
+
+### Run 2026-11-23
+
+**Feedback from:** David, written answers to our eight open questions (Microsoft Copilot; Umami; decimal attributes, DEC-1; migration scope, MIG-1; error bodies, ERR-1; pagination, OAS-7; asset files, ASSET-25; account lookup, EXP-1). Logged here because most items land on this page; A1 and A2 touch the MCP Quickstart and the site setup files, A3 to A5 the V3 reference and the migration pages, A7 the data model, feed guide, and asset overlay.
+**Approved by the user:** all (A2a, A3, A4a, A5a-c, A6, A7, A8). A2b (an `/api/send` rewrite) not requested; A4b held as contradicted.
+
+Live retest wasn't possible: the Dev API key exchange (`auth.dev.plytix.com`) now returns `401`, and the Dev `openapi.json` needs credentials. Plytix's Dev results are recorded as dated findings.
+
+#### Feedback items
+
+| # | Feedback (short) | Type | Location | Verdict | Outcome |
+|---|---|---|---|---|---|
+| A1 | Keep Copilot Studio; show how to publish to Microsoft 365 Copilot and Teams | Scope | `mcp/quickstart.mdx`, Microsoft Copilot tab | Already aligned | No change |
+| A2 | Umami Cloud script URL, website ID, `data-host-url`; keep in the next deploy | Config | `app/layout.tsx`, `.env.production`, `UMAMI-SETUP.md`, `.env.example`, `README.md` | Supported; `/api/send` caveat | Applied (A2a), FB-067 |
+| A3 | Decimal: number `204`, string `422` | Factual | `reference/v3/updates-and-deletes.mdx` line 82; ERP guide FLAG | Supported (newer live test) | Applied |
+| A4a | Keep `/filters/*` on V1 to discover fields and operators | Scope | `endpoint-mapping.mdx` lines 164-165; `migrating-to-v3/index.mdx` line 41; `not-migrated-and-new-in-v3.mdx` line 24 | Supported | Applied |
+| A4b | Use `/api/v3/product-attribute-definitions` in the mapping | Factual | `endpoint-mapping.mdx` lines 112-116 | Contradicted (2026-10-19 spec, our live tests) | Not changed, FB-065 |
+| A4c | Keep `all_attributes/edit` on V1 | Scope | `endpoint-mapping.mdx` line 153 | Already aligned | Scope FLAG replaced |
+| A5a | `401` body `{"detail":"Unauthorized"}`, Dev and production | Factual | `reference/v3/errors-status-codes.mdx` | Supported | Applied |
+| A5b | Captured `403` body | Factual | `errors-status-codes.mdx`; `reference/v3/authentication.mdx` `403` accordion | Supported | Applied |
+| A5c | V1 `429` has `Retry-After: 10`; V3 `429` unverified; honor `Retry-After`, else bounded backoff | Factual | `reference/v1-v2/rate-limits.mdx`; exporter retry bullet | Supported (V1); V3 part already aligned | Applied (V1), FB-028 updated |
+| A6 | Last page can keep `next_page`; extra empty page; keep the null safeguard | Factual | `reference/v3/pagination.mdx` table; export guide step 2 | Supported; the table said the opposite | Applied |
+| A7 | V3 lookup and search return `url`; same as V1; downloads without a token | Factual | export guide, Download the asset files; `data-model.mdx` line 118; feeds guide line 153; asset overlay | Supported; spec lacks `url` | Applied, FB-030 resolved, FB-066 |
+| A8 | No V3 account lookup; check a known product's SKU and ID | Scope | export guide script and "Matching settings" | Supported | Applied |
+
+#### Applied changes
+
+| # | Change made | Source |
+|---|---|---|
+| A2a | `app/layout.tsx` renders `data-host-url` from new `NEXT_PUBLIC_UMAMI_HOST_URL` (omitted when unset). New `fumadocs/.env.production` with `NEXT_PUBLIC_UMAMI_SRC=https://cloud.umami.is/script.js`, `NEXT_PUBLIC_UMAMI_WEBSITE_ID=04bcf1a3-81f2-4814-af19-d7aa2a2cbd9c`, `NEXT_PUBLIC_UMAMI_HOST_URL=https://docs.plytix.com`, loaded by every `next build`. `UMAMI-SETUP.md`: "Current configuration" section with the snippet, the values table, and the open `/api/send` question; env-var steps now point at `.env.production`; preview builds can turn it off with `NEXT_PUBLIC_UMAMI_WEBSITE_ID= npm run cf:preview` (checked in `@next/env`: a defined shell var, even empty, wins over the file). `.env.example` and `README.md` updated. | David, 2026-11-23 |
+| A3 | "Sending the number as a quoted string, `"34.99"`, returns `422` with `Attribute 'price' is a DecimalAttribute: its value must be a number.`" ERP guide: DEC-1 FLAG removed. | David, Dev retest 2026-11-23 |
+| A4a | Endpoint mapping: `/filters/product` and `/filters/asset` rows read "Keep on V1 to discover the fields and operators you can filter on." Migrating to V3: "No equivalent. Keep these calls on V1 to discover the available fields and operators." Not migrated: status "Legacy only", "Keep on V1 to discover the available fields and operators." The attribute-definitions context stays. Endpoint mapping's NEW-006 FLAG replaced by one on FB-065. | David, 2026-11-23 (all three `200` on Dev) |
+| A5a | Errors and status codes: "A request without a valid access token fails with `401`, and the body is a single `detail` string" + `{"detail": "Unauthorized"}` example. | David, 2026-11-23 |
+| A5b | Errors and status codes: `403` example with `Forbidden` / `None of the scopes pim:products:read granted`, "The error's `description` names the missing permission", link to Authentication. Authentication `403` accordion: "The error's `description` names the permission the token is missing, such as `pim:products:read` in `"None of the scopes pim:products:read granted"`." | David, 2026-11-23 |
+| A5c | V1/V2 Rate limits: "A `429` response includes a `Retry-After` header with the number of seconds to wait, such as `Retry-After: 10`. Wait at least that long before you retry." | David, V1 test 2026-11-23 |
+| A6 | Pagination table, last page: "`previous_page` only, though the last page with results can still include `next_page`", plus "When the last page with results still includes `next_page`, following it returns `200` with `"data": []` and only `previous_page`. That empty page is the end of the results, so a loop that follows `next_page` until the key is gone can make one extra request." Export guide step 2: same point with a JSON example of the empty page. | David, Dev test 2026-11-23 |
+| A7 | Export guide: "Download the asset files" rewritten for V3 (`GET /api/v3/assets/<asset_id>`, `data.url`; Search assets for many; download without `Authorization`; same rate limits; V1 returns the same IDs and `url`); step 3's "V3 asset records don't include a download URL" removed; STG-047 FLAG replaced by an FB-066 FLAG. Data model: "its `url` is the address of the file, which you can download without your access token." Feed guide: read each asset's `url` with Get an asset or Search assets. Overlay: `url` added to `AssetOutputDto` (`schemas/assets.yaml`, schema-level target), Get an asset and Search assets descriptions and both examples carry `url` in the V1 file-URL format. | David, Dev test 2026-11-23 |
+| A8 | Script: `EXPORT_LABEL` replaced by `KNOWN_PRODUCT_ID` / `KNOWN_PRODUCT_SKU`; new `check_account()` requests `GET {BASE_URL}/<id>?_fields=sku` before every run, fresh or resumed, and before anything is saved; a `404` stops with "isn't in this account", a different SKU stops with both values; `fetch()` takes a `not_found` message; the fingerprint holds `KNOWN_PRODUCT_ID` (not the SKU, so a renamed SKU can be updated and resumed). New "Matching account" bullet; "Matching settings" and "Credential safety" bullets updated. | David, 2026-11-23 |
+
+Checks: `npm run api:build` passes (the first try failed on a `.properties` target, fixed by targeting the schema); `npm run api:test` 12/12; `npm run build` passes; `npm run api:check` fails only until the regenerated files are committed. `npm run test:code-samples`: 24/26, and the same 2 shell-quoting tests fail with these changes stashed, so they predate this run. Export script: 10 offline tests against a simulated API (extra empty page, no extra page, unknown product, SKU mismatch, resume after a stop with the wrong and then the right account, changed known product refused, changed SKU resumed, `Retry-After: 10` honored, missing `pagination`, generic `404`). No em dashes, banned words, or lowercase version names in the added prose.
+
+#### Not changed
+
+- **A1:** the Microsoft Copilot tab already covers Copilot Studio and publishing to Microsoft 365 Copilot and Teams.
+- **A4b:** the 2026-10-19 spec declares `/api/v3/product-attributes` and its item routes, our live tests used it, and the reference is built on it. Changing only the mapping would point readers at an undocumented path (FB-065, ATTR-30).
+- **A4c:** already aligned.
+- **A5c (V3):** the exporter already honors `Retry-After` when present and backs off within bounds.
+
+#### Flags
+
+Added: FB-065, FB-066, FB-067 · Resolved: FB-030 · Updated: FB-020 (decimal), FB-028 (`429`) (details in [`feedback-flags.md`](feedback-flags.md)). `overlays/QUESTIONS.md`: answers recorded for DEC-1, MIG-1, EXP-1, ERR-1; updates on OAS-7 and ASSET-25; new ATTR-30.
+
+#### Follow-ups on other pages
+
+- `reference/v3/errors-status-codes.mdx`: the `404` example uses `NOT_FOUND` and says a `422` uses a `detail` array, but live captures use `NotFoundError` and the `data`/`errors` envelope (`InputDTOValidationError`, and Plytix's decimal `422`). Not part of this feedback.
+- When Plytix confirms FB-065, rename the attribute paths across the reference (overlays), the mapping, and the five guides that use `GET /api/v3/product-attributes`.
+- When Plytix sends the V3 `429` capture, add it to the spec overlay and the V3 Rate limits page.
+- Before the docs.plytix.com cutover, settle FB-067 (forward `/api/send` to Umami Cloud, or drop `data-host-url`).
+- Commit the regenerated `openapi.json`, `baseline.lock.json`, and the two asset reference pages with the overlay change, so `api:check` passes.
+
+#### Reply to David
+
+```text
+Thanks, David. Here's where each answer landed:
+
+1. Microsoft Copilot: no change needed. Connect your AI assistant already covers Copilot Studio, plus the steps to make the agent available in Microsoft 365 Copilot and Teams.
+2. Umami: the script URL, website ID, and data-host-url are now part of every build, so the next deploy keeps them.
+3. Decimal attributes: the examples keep the number, and Update and delete records now quotes the 422 message you get for a string.
+4. Migration: the /filters/* rows now say to keep those calls on V1 to discover fields and operators, and all_attributes/edit stays on V1. We haven't changed the product attributes path yet, see the first question below.
+5. Errors: Errors and status codes now shows the 401 body and your captured 403 body, and the Authentication page explains that the 403 description names the missing permission. V1/V2 Rate limits now says a 429 includes Retry-After, such as 10 seconds. The export script already honors Retry-After when it's there and backs off within limits when it isn't.
+6. Pagination: the Pagination page and Export your full catalog now show that the last page can still include next_page, which leads to an empty page with only previous_page. The export keeps the check for a missing or null pagination object.
+7. Asset files: Export your full catalog now downloads files through V3: read url from Get an asset or Search assets, then download it without the token. The asset reference pages, the data model, and the marketplace feed guide mention url too.
+8. Account check: the export script now reads a known product by ID before every run, fresh or resumed, and stops if the product is missing or its SKU doesn't match.
+
+Open questions
+- Product attributes: the latest spec we have (19 October) and our earlier tests use /api/v3/product-attributes, and every reference page is built on it. Is /api/v3/product-attribute-definitions a rename that will reach production and the spec? Do the other routes (/{identifier}, /{identifier}/{path}, /groups) move too? Could you send the updated spec?
+- Asset url: the spec's asset schema doesn't include url yet. Will it be added? Is it a permanent address, or does it expire? And do a product's expanded assets include it?
+- Umami: data-host-url sends pageviews to docs.plytix.com/api/send. How does the live portal handle that path today? This site will need the same forwarding once it serves docs.plytix.com. Should staging builds stop sending pageviews?
+```
 
 ### Run 2026-10-14
 

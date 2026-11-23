@@ -54,7 +54,20 @@ Follow the steps below to request the fields you need, walk the pages until you 
    }
    ```
 
-   The link above is shortened. The real link repeats every filter, field, page size, and sort you sent on the first call, so request `pagination.next_page` as it is, after the scheme fix in the warning below. Continue while `next_page` holds a URL. On the last page, `pagination` is still there but has no `next_page`: live responses leave the key out, and a result that fits on one page returns `"pagination": {}`. The `Pagination` schema also allows `next_page: null`, so treat `null` as the end too. A response with no `pagination` object at all, or `"pagination": null`, is incomplete, not the last page: request that page again instead of ending the export. The V3 search endpoint has no total count, so plan progress reporting around pages rather than a percentage. See [Pagination](/reference/v3/pagination) for the full rules.
+   The link above is shortened. The real link repeats every filter, field, page size, and sort you sent on the first call, so request `pagination.next_page` as it is, after the scheme fix in the warning below. Continue while `next_page` holds a URL.
+
+   The last page of products can still include `next_page`. Following it returns `200` with no products and only a `previous_page` link, which ends the export:
+
+   ```json
+   {
+     "data": [],
+     "pagination": {
+       "previous_page": "http://pim.plytix.com/api/v3/products?_fields=id&_fields=sku&...&_sort_by=id&_page_size=100&_page=2"
+     }
+   }
+   ```
+
+   Otherwise, on the last page, `pagination` is still there but has no `next_page`: live responses leave the key out, and a result that fits on one page returns `"pagination": {}`. The `Pagination` schema also allows `next_page: null`, so treat `null` as the end too. A response with no `pagination` object at all, or `"pagination": null`, is incomplete, not the last page: request that page again instead of ending the export. The V3 search endpoint has no total count, so plan progress reporting around pages rather than a percentage. See [Pagination](/reference/v3/pagination) for the full rules.
 
    Page numbers don't freeze the catalog. Each request runs the search again, so if a product is created, deleted, or changes its sort value while you're paging, the products after it shift by one position. One product can then be skipped or repeated at a page boundary. If the catalog is being edited during your export, use [keyset paging](#export-by-id-instead-of-page-number) instead.
 
@@ -75,7 +88,7 @@ Follow the steps below to request the fields you need, walk the pages until you 
    }
    ```
 
-   The example is trimmed to a few fields of each related object. Because `categories` and `assets` return the related records themselves, such as each category's name and each asset's file name and alt text, your export doesn't need a separate lookup per category or asset. It doesn't include the asset files themselves, and V3 asset records don't include a download URL. To download the files, see [Download the asset files](#download-the-asset-files).
+   The example is trimmed to a few fields of each related object. Because `categories` and `assets` return the related records themselves, such as each category's name and each asset's file name and alt text, your export doesn't need a separate lookup per category or asset. It doesn't include the asset files themselves. To download the files, see [Download the asset files](#download-the-asset-files).
 
 4. **Scope the export if you don't need the whole catalog.**
 
@@ -94,31 +107,27 @@ Follow the steps below to request the fields you need, walk the pages until you 
 
 ## Download the asset files
 
-V3 asset records describe each file but don't link to it. The V1 API does: its asset records include `url`, the address of the file itself. To download the files behind your export, use the V1 API alongside it:
+An asset record includes `url`, the address of the file itself. To download the files behind your export, read each asset's `url`, then request it:
 
-1. **Get a V1 token.**
+1. **Read each asset's `url`.**
 
-   The V1 API uses its own authentication, a bearer token exchanged from your API key and password, which expires after 15 minutes. A V3 access token doesn't work on V1. See [V1/V2 authentication](/reference/v1-v2/token-authentication).
-
-2. **Read each asset's `url`.**
-
-   For each asset ID in your export, request [Get an asset](/reference/v1-v2/assets/get-asset):
+   For each asset ID in your export, request [Get an asset](/reference/v3/assets/get-asset):
 
    ```bash
-   curl "https://pim.plytix.com/api/v1/assets/<asset_id>" \
-     -H "Authorization: Bearer <v1_access_token>"
+   curl "https://pim.plytix.com/api/v3/assets/<asset_id>" \
+     -H "Authorization: Bearer <access_token>"
    ```
 
-   The response's `data[0].url` is the file's address, for example `https://files.plytix.com/api/v1.1/file/3536.jpg`. To read many assets in fewer requests, use [Search assets](/reference/v1-v2/assets/search-assets) with `url` in `attributes`.
+   The response's `data.url` is the file's address. To read many assets in fewer requests, page through [Search assets](/reference/v3/assets/search-assets) instead, the same way as the product search: each asset in its `data` carries `url` too.
 
-3. **Download each file from its `url`.**
+2. **Download each file from its `url`.**
 
    Request the `url` without your token: it's a file address, not an API endpoint, so don't send the `Authorization` header to it. Save each file under its `filename`.
 
-The V1 API has its own [rate limits](/reference/v1-v2/rate-limits), separate from V3's, so pace these requests too.
+These asset requests count against the same [rate limits](/reference/v3/rate-limits) as the product pages, so pace them too. The V1 API returns the same asset IDs and the same `url`, so an integration that already reads assets through V1 can keep doing so.
 
 {/* FLAG (open):
-  STG-047. From the V1 reference (Get an asset, Search assets examples), not live-tested. Before publishing, check on Dev: (1) that a V3 asset ID returns the same asset from `GET /api/v1/assets/<id>`; (2) whether `url` needs authentication, and whether it's permanent or signed and expiring (ASSET-25); (3) whether `url` can be requested in the V1 search `attributes`.
+  ASSET-25, FB-066. Plytix confirmed on Dev (2026-11-23) that V3 Get an asset and Search assets return `url`, that V1 returns the same ID and `url`, and that the file downloads without a token (a 16-byte range request returned `206` with JPEG bytes). The 2026-10-19 spec doesn't declare `url` on `AssetOutputDto` (added by overlay). Still open: is `url` permanent or does it expire, and do a product's expanded `assets` include it? Not tested by us: the Dev key exchange now returns `401`.
 */}
 
 ## Export by ID instead of page number
@@ -163,14 +172,15 @@ import os
 import random
 import time
 from email.utils import parsedate_to_datetime
-from urllib.parse import urlsplit
+from urllib.parse import quote, urlsplit
 
 import requests
 
-# A name for the account and environment you export from. It isn't secret, and
-# it's stored in the manifest, so a run against another account doesn't resume
-# this export.
-EXPORT_LABEL = "kitchen-and-home-production"
+# A product you know is in the account you export from. Before every run, the
+# script reads it and stops if it's missing or has another SKU, so a token for
+# another account can't start or resume this export.
+KNOWN_PRODUCT_ID = "6a38f614c3d65a5f868b1a06"
+KNOWN_PRODUCT_SKU = "Black Kettle"
 BASE_URL = "https://pim.plytix.com/api/v3/products"
 FIELDS = ["id", "sku", "label", "attributes", "categories", "assets"]
 FILTERS = []                # extra query parameters, such as ("categories.name", "Kettles & Teapots")
@@ -231,7 +241,7 @@ def save_state(state):
 
 def config_fingerprint():
     """A hash of the settings that decide which products the export contains. No token."""
-    settings = [EXPORT_LABEL, BASE_URL, FIELDS, [list(f) for f in FILTERS], SORT_BY, PAGE_SIZE]
+    settings = [KNOWN_PRODUCT_ID, BASE_URL, FIELDS, [list(f) for f in FILTERS], SORT_BY, PAGE_SIZE]
     return hashlib.sha256(json.dumps(settings).encode("utf-8")).hexdigest()
 
 
@@ -253,7 +263,7 @@ def load_state():
     if not valid:
         raise Stop(f"{MANIFEST} is unreadable. Delete {STATE_DIR} to start a fresh export.")
     if state["config"] != config_fingerprint():
-        raise Stop(f"The settings changed since this export started (account label, fields, filters, "
+        raise Stop(f"The settings changed since this export started (known product, fields, filters, "
                    f"sort, or page size). Restore them to resume, or delete {STATE_DIR} and {OUTPUT} "
                    f"to start a fresh export.")
     for number in range(1, state["pages"] + 1):
@@ -291,7 +301,7 @@ def retry_after(response):
         return None
 
 
-def fetch(url, state):
+def fetch(url, state, not_found=None):
     for attempt in range(MAX_ATTEMPTS):
         pace(state)
         wait = None
@@ -307,6 +317,8 @@ def fetch(url, state):
                     raise Stop("The response isn't valid JSON. Rerun the script to retry the page.")
             if response.status_code == 401:
                 raise Stop("401: the token expired. Get a new token and rerun the script.")
+            if response.status_code == 404 and not_found:
+                raise Stop(not_found)
             if response.status_code == 429:
                 wait = retry_after(response)
             elif response.status_code not in (500, 502, 503, 504):
@@ -317,6 +329,19 @@ def fetch(url, state):
             raise Stop(f"Asked to wait {wait:.0f} seconds. Rerun the script after that.")
         time.sleep(wait)
     raise Stop("Too many failed attempts. Rerun the script to resume.")
+
+
+def check_account(state):
+    """Stop unless the known product is in this account and has the expected SKU."""
+    url = f"{BASE_URL}/{quote(KNOWN_PRODUCT_ID, safe='')}?_fields=sku"
+    page = fetch(url, state, not_found=f"Product {KNOWN_PRODUCT_ID} isn't in this account. "
+                                       f"Check that the token belongs to the account you export from.")
+    product = page.get("data") if isinstance(page, dict) else None
+    sku = product.get("sku") if isinstance(product, dict) else None
+    if sku != KNOWN_PRODUCT_SKU:
+        raise Stop(f"Product {KNOWN_PRODUCT_ID} has the SKU {sku!r}, not {KNOWN_PRODUCT_SKU!r}. Check that "
+                   f"the token belongs to the account you export from, or update KNOWN_PRODUCT_SKU if the "
+                   f"SKU changed in Plytix.")
 
 
 def read_page(page):
@@ -362,6 +387,7 @@ def main():
     os.makedirs(STATE_DIR, exist_ok=True)
     try:
         state = load_state()
+        check_account(state)  # before anything is saved, on a fresh run and on a resumed one
     except Stop as stop:
         raise SystemExit(str(stop))
     try:
@@ -386,9 +412,10 @@ if __name__ == "__main__":
 
 The script handles each part of a long run this way:
 
-- **Credential safety:** before it sends the token, the script checks that every URL it requests, including each `next_page` link and the URL saved in the manifest, uses HTTPS on the Plytix host and points to the product search. It rewrites a same-host `http` link to `https`, refuses any other host, port, path, or user name, and doesn't follow redirects, so the token is never sent anywhere else.
+- **Credential safety:** before it sends the token, the script checks that every URL it requests, including each `next_page` link and the URL saved in the manifest, uses HTTPS on the Plytix host and points to the product search. The account check builds its URL from `BASE_URL`. The script rewrites a same-host `http` link to `https`, refuses any other host, port, path, or user name, and doesn't follow redirects, so the token is never sent anywhere else.
 - **Page validation:** a page is saved only after its `data` list, each product's `id`, and its `pagination` object have the expected shape. A `pagination` object without `next_page`, including `{}`, marks the last page. A missing or `null` `pagination`, or a `next_page` that isn't a URL, stops the run without saving the page or moving the manifest, so the export never reports success on a truncated response, and the next run requests that page again.
-- **Matching settings:** the manifest records a fingerprint of `EXPORT_LABEL`, `BASE_URL`, `FIELDS`, `FILTERS`, `SORT_BY`, and `PAGE_SIZE`, but not the token. If any of them changes, the script refuses to resume, so an export can't mix pages from two accounts, two field lists, or two filters. Set `EXPORT_LABEL` to a name for the account and environment, such as `kitchen-and-home-production`, and change it when you point the script at another account. Restore the previous settings to resume, or delete `export/` and `products.jsonl` to start over. Rotating the token doesn't change the fingerprint, so you can resume with a new token.
+- **Matching account:** V3 has no call that returns the account a token belongs to, so the script checks a product you know instead. Set `KNOWN_PRODUCT_ID` and `KNOWN_PRODUCT_SKU` to a product in the account you export from, one that won't be deleted during the export. Before every run, fresh or resumed, the script reads that product and stops if it's missing or has another SKU, so a token for another account can't start or resume the export. If the product's SKU changes in Plytix, update `KNOWN_PRODUCT_SKU` and rerun.
+- **Matching settings:** the manifest records a fingerprint of `KNOWN_PRODUCT_ID`, `BASE_URL`, `FIELDS`, `FILTERS`, `SORT_BY`, and `PAGE_SIZE`, but not the token. If any of them changes, the script refuses to resume, so an export can't mix pages from two accounts, two field lists, or two filters. Restore the previous settings to resume, or delete `export/` and `products.jsonl` to start over. Rotating the token doesn't change the fingerprint, so you can resume with a new token.
 - **Interruption-safe saving:** each page goes to its own file under `export/`, and `export/manifest.json` records the page only after that file is complete. Every file is written to a temporary file first and then swapped into place, so an interruption leaves the previous version or the new one, never half a line. The next run continues from the manifest. A missing or unreadable manifest or page file stops the run with a message rather than reporting a finished export.
 - **Deduplicated output:** after the last page is saved, the script merges the page files into `products.jsonl` and keeps the last saved copy of each product `id`. A product can be saved twice when the catalog changes during the run or a page is requested again after an interruption. Delete `export/` and `products.jsonl` before you start a fresh export. For [keyset paging](#export-by-id-instead-of-page-number), save the last `id` instead of the URL.
 - **Pacing for both windows:** `LIMITS` holds the requests allowed per 10 seconds and per hour, set here to the lowest standard pair in [Rate limits](/reference/v3/rate-limits). Every integration on your account shares that allowance, so set `LIMITS` to the part this export may use. The manifest keeps the times of recent requests, so the next run still counts the requests made in the last hour. When the next request would have to wait longer than `MAX_WAIT`, the script saves its place, stops, and tells you when to rerun it.

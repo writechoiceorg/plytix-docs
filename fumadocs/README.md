@@ -53,7 +53,7 @@ Enabled via `app/api/mcp/route.ts` (added with `npx @fumadocs/cli feature mcp`).
 
 ## Analytics
 
-Umami Cloud analytics is wired as a no-op placeholder — set `NEXT_PUBLIC_UMAMI_SRC` and `NEXT_PUBLIC_UMAMI_WEBSITE_ID` (see `.env.example`) once the website exists in Plytix's Umami Cloud account. See `UMAMI-SETUP.md` for the activation steps, including a Cloudflare/OpenNext gotcha around build-time env vars.
+Umami Cloud analytics is on: the live portal's tracking values (script URL, website ID, `data-host-url`) are committed in `.env.production`, which every build loads. See `UMAMI-SETUP.md` for the values, the open `/api/send` question, and the build-time env var gotcha.
 
 ## Deploying (Cloudflare via OpenNext)
 

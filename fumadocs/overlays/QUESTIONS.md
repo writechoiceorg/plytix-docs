@@ -67,6 +67,7 @@ Every fix in `00-fixes.yaml` cites one of these IDs through `x-plytix-question`.
 - **Observed:** The `Pagination` schema declares `next_page` and `previous_page` as `string | null`, but the API leaves a key out when it doesn't apply and never sends `null` (quirk #91). The links also use `http://` and redirect, which can drop the `Authorization` header (quirk #92).
 - **Update (2026-10-23, 2026-10-19 spec):** Unchanged: `next_page` and `previous_page` are still `string | null`.
 - **Update (2026-11-20, staging audit NEW-002):** The export guide treated a missing or `null` `pagination` as the last page, so a truncated response could end an export as a success. The guides now treat `{}` or a `pagination` without `next_page` as the end, and a missing or `null` `pagination` as an incomplete response to retry. Please confirm every search response always carries a `pagination` object.
+- **Update (2026-11-23, Plytix):** Every search response Plytix tested had `pagination`. With exactly two matches and a page size of 1, page 2 still had `next_page`; following it returned `200` with `data: []` and only `previous_page`. Requesting the next page over HTTPS on the same host worked. The Pagination table and the export guide now show that extra empty page; the missing-or-`null` safeguard stays. Still open: `https` links and the nullable keys in the schema.
 - **Question:** Can the schema mark both keys as optional strings (not nullable), and can the links use `https://`?
 
 | Plytix response |
@@ -643,6 +644,7 @@ Raised while applying `materials/api-references/endpoint-reviews/Plytix_API_v3_W
 - **Observed:** The audit lists `url` as a default read field on assets, but live asset records have no URL field (FB-030, rechecked 2026-10-15). The docs now say asset records don't currently include a download URL, and `path` is hidden.
 - **Update (2026-10-23, 2026-10-19 spec):** Unchanged: `AssetOutputDto` has no `url`.
 - **Update (2026-11-20, staging audit STG-047):** The export guide now downloads asset files through V1 (`GET /api/v1/assets/{asset_id}`, `url`), since V3 has none. Also: do V1 and V3 return the same ID for the same asset, and does the V1 `url` need authentication?
+- **Update (2026-11-23, Plytix):** V1 and V3 returned the same ID and file URL for a Dev test asset. V3 returned `url` on Get an asset and Search assets, and a 16-byte range request on it without a token or cookies returned `206` with JPEG bytes. The export guide now downloads through V3, and an overlay adds `url` to `AssetOutputDto` (FB-066). Still open: whether the spec will declare `url`, whether it expires, and whether a product's expanded `assets` include it.
 - **Question:** When will `url` be returned, and what does it point to (a permanent file URL, or a signed URL that expires)?
 
 | Plytix response |
@@ -740,6 +742,7 @@ Questions raised while fixing Plytix's staging audit of 17 November 2026. Findin
 
 | Plytix response |
 | :---- |
+| 2026-11-23, Plytix (Dev retest on a temporary product): `PATCH /api/v3/products/{id}/attributes/price` with the JSON number `34.99` returned `204`, and a follow-up `GET` confirmed it was saved. The string `"34.99"` returned `422` with `Attribute 'price' is a DecimalAttribute: its value must be a number.` Keep the numeric example. WriteChoice: done; the exact message is on Update and delete records, and the ERP guide's FLAG is gone. Production and the map routes weren't covered. |
 
 ### MIG-1
 
@@ -748,6 +751,7 @@ Questions raised while fixing Plytix's staging audit of 17 November 2026. Findin
 
 | Plytix response |
 | :---- |
+| 2026-11-23, Plytix: all three V1 `/filters/*` endpoints returned `200` on Dev; keep them in the mapping for integrations that need to discover fields and operators. Keep `all_attributes/edit` (system-attribute inheritance) on V1 until the V3 version is confirmed. `GET /api/v3/product-attribute-definitions` returned `200` and `/api/v3/product-attributes` returned `404`; update that path in the mapping. WriteChoice: filter rows done. The path change is held (FB-065, ATTR-30): the 2026-10-19 spec and every reference page use `/product-attributes`. |
 
 ### EXP-1
 
@@ -756,11 +760,21 @@ Questions raised while fixing Plytix's staging audit of 17 November 2026. Findin
 
 | Plytix response |
 | :---- |
+| 2026-11-23, Plytix: V3 has no way to look up the account behind an access token today. Core is targeting December or January for one. Meanwhile, the export guide can check the expected account before resuming by comparing the SKU and ID of a known product. WriteChoice: done; `EXPORT_LABEL` is replaced by `KNOWN_PRODUCT_ID` and `KNOWN_PRODUCT_SKU`, checked before every run (10 offline tests). The planned endpoint isn't mentioned in the docs. |
 
 ### ERR-1
 
 - **Observed:** The audit (STG-018) asked for example bodies for the common errors, including `403` and `429`. We have live bodies for `401`, `404`, `409`, and `422`; pages that had none now show an example labelled "illustrative" in those formats. No V3 operation declares `429`, and we have no live `403` body (see AUTH-1).
 - **Question:** What do the `403` (missing permission or feature) and `429` (rate limit) bodies look like, and do `429` responses carry `Retry-After`? Can the spec declare `429`?
+
+| Plytix response |
+| :---- |
+| 2026-11-23, Plytix: `401` without a token returns `{"detail":"Unauthorized"}` on Dev and production. `403`: a token with read access to Assets got `200` on `GET /api/v3/assets/{id}` and `403` on `GET /api/v3/products/{id}` with `{"data": [], "errors": [{"name": "Forbidden", "description": "None of the scopes pim:products:read granted"}]}`. `429`: 24 concurrent reads per version; V1 returned four `429`s with `Retry-After: 10`, V3 returned `200` for all 24, so V3's `429` is still unverified and Plytix will send more. Add the V3 example to OpenAPI once captured. WriteChoice: `401` and `403` examples on Errors and status codes, the `403` description on Authentication, `Retry-After` on V1/V2 Rate limits. Still open: the V3 `429` body and headers, and declaring `429` in the spec. |
+
+### ATTR-30
+
+- **Observed (2026-11-23):** Plytix found on Dev that `GET /api/v3/product-attribute-definitions` returns `200` and `GET /api/v3/product-attributes` returns `404`. The 2026-10-19 spec declares `GET,POST /api/v3/product-attributes` plus its item routes, and has no `product-attribute-definitions`; our live tests used `/product-attributes`. The docs keep the spec path (FB-065).
+- **Question:** Has `/api/v3/product-attributes` been renamed to `/api/v3/product-attribute-definitions`, and do the item routes (`/{identifier}`, `/{identifier}/{path}`, `/{identifier}/groups`) move with it? Will production follow, and can you send the spec that declares it?
 
 | Plytix response |
 | :---- |

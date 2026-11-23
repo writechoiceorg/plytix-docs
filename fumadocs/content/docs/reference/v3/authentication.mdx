@@ -121,7 +121,7 @@ If a request fails authentication, check the problem that matches the response.
     The API couldn't authenticate the token, and the body is `{"detail": "Unauthorized"}`. Check that the token is present, copied in full, and sent with the `Bearer ` prefix. Then check in the **API v3** tab that it hasn't expired, been revoked, or been replaced by a rotation.
   </Accordion>
   <Accordion title={<><code>403 Forbidden</code></>} value="auth-403">
-    The token authenticated, but it isn't allowed to do what the request asks. Check that the token has the permission the operation needs, such as **Write** for a create, update, or delete, and that your user role allows that access.
+    The token authenticated, but it isn't allowed to do what the request asks. The error's `description` names the permission the token is missing, such as `pim:products:read` in `"None of the scopes pim:products:read granted"`. Check that the token has the permission the operation needs, such as **Write** for a create, update, or delete, and that your user role allows that access.
   </Accordion>
   <Accordion title="The API v3 tab is missing from your account settings">
     The V3 beta isn't enabled for your account. Contact your account manager to request access.

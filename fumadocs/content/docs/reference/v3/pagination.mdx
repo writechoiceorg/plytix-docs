@@ -54,10 +54,12 @@ So the object you get back depends on where you are in the result set:
 |---|---|
 | First page of several | `next_page` only |
 | A middle page | Both keys |
-| The last page | `previous_page` only |
+| The last page | `previous_page` only, though the last page with results can still include `next_page` |
 | The result set fits on one page | `{}` an empty object |
 | A page past the end | `previous_page` only, with `data: []` and status `200` |
 | Getting a single record | No `pagination` key at all, and `data` is an object |
+
+When the last page with results still includes `next_page`, following it returns `200` with `"data": []` and only `previous_page`. That empty page is the end of the results, so a loop that follows `next_page` until the key is gone can make one extra request.
 
 ## Page through a result set
 

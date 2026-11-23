@@ -115,7 +115,7 @@ Assets have their own separate tree, `/api/v3/asset-categories`. Product categor
 
 An asset is a file stored in Plytix DAM: an image, video, document, spreadsheet, or other file type. Assets exist independently of products, and uploading one with `POST /api/v3/assets` is separate from connecting it to a product. A product connects to assets in two ways: `thumbnail_id` sets its single main image, and media and media gallery attributes hold other assets as attribute values in the `attributes` map. There's no dedicated endpoint for linking or unlinking an asset.
 
-Each asset record carries its `id`, its `filename`, and an `alt_text` field, along with `created` and `modified` timestamps. Request `categories` with `_fields` to expand the asset categories it's filed under. Asset records don't currently include a download URL for the file.
+Each asset record carries its `id`, its `filename`, and an `alt_text` field, along with `created` and `modified` timestamps. Request `categories` with `_fields` to expand the asset categories it's filed under. When you read an asset with [Get an asset](/reference/v3/assets/get-asset) or [Search assets](/reference/v3/assets/search-assets), its `url` is the address of the file, which you can download without your access token.
 
 On the product side, `thumbnail_id` points at the single asset used as the product's main image, while `assets` lists every asset linked to it.
 

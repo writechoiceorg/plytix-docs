@@ -150,7 +150,7 @@ Follow the steps below to map the fields, read the products in scope, and turn t
 
    The script builds each product's category path from the first category in its `categories` list and the ancestors saved in `categories.jsonl`. A category missing from that file falls back to its own name. The script keeps the last saved copy of each product `id`, so a product that a resumed export saved twice still gets one row. It records every product it skips, with the fields it was missing, so you can fix them in Plytix. It writes both files under temporary names and replaces `uk_feed.csv` and `skipped.jsonl` only once they're complete, so a failed run leaves the previous feed in place. [Audit product data quality](/guides/auditing-product-data-quality-with-filters) shows how to find those products before you build the feed.
 
-   If the marketplace needs image links, plan for them separately. The `assets` field returns each asset's record, such as its file name and alt text, but asset records don't currently include a download URL.
+   If the marketplace needs image links, plan for them separately. The `assets` field returns each asset's record, such as its file name and alt text. Read each asset's `url`, the address of the file, with [Get an asset](/reference/v3/assets/get-asset) or [Search assets](/reference/v3/assets/search-assets). Check that the marketplace accepts that address, or host the files where it can fetch them.
 
 6. **Deliver the file and refresh it on your schedule.**
 

@@ -79,7 +79,7 @@ curl --request PATCH \
   --data '34.99'
 ```
 
-Sending the number as a quoted string, `"34.99"`, returns `422`. See [Update a product field](/reference/v3/products/update-product-field) for the format each attribute type takes.
+Sending the number as a quoted string, `"34.99"`, returns `422` with `Attribute 'price' is a DecimalAttribute: its value must be a number.` See [Update a product field](/reference/v3/products/update-product-field) for the format each attribute type takes.
 
 This returns `204` and leaves every other attribute intact.
 
