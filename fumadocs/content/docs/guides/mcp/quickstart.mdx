@@ -1,19 +1,19 @@
 ---
 title: "Connect your AI assistant"
 metaTitle: "Connect your AI assistant to the Plytix MCP"
-description: "Connect Claude, ChatGPT, or Microsoft Copilot to your Plytix account with the Plytix MCP, authorize it with OAuth, and check that the connection works."
+description: "Connect Claude, ChatGPT, Copilot Studio, Cursor, or another MCP client to your Plytix account with the Plytix MCP, then authorize it and test it."
 ---
 
 import { LightbulbRegular, ShieldCheckmarkRegular, WrenchRegular } from '@/components/icons';
 
-Add the Plytix MCP as a remote MCP server in your AI application, then sign in to Plytix with OAuth. Follow the instructions for Claude, ChatGPT, or Microsoft Copilot below, then verify the connection.
+Add the Plytix MCP as a remote MCP server in your AI application, then sign in to Plytix with OAuth. This page covers Claude Desktop, Claude Code, Microsoft Copilot Studio, ChatGPT, Codex, Cursor, Perplexity, and VS Code, plus the general settings for any other MCP client. Find your application below, follow its steps, then verify the connection.
 
 ## Prerequisites
 
 Before you start, make sure you have the following:
 
 - Plytix MCP access turned on for your Plytix account. To request it, contact your account manager.
-- An AI application that supports remote MCP servers and OAuth sign-in, such as Claude, ChatGPT, or Microsoft Copilot. Your subscription plan and workspace settings determine whether you can add a custom connection. A workspace administrator may need to add or approve the connection first. Check the requirements for your application in the tabs below.
+- An AI application that supports remote MCP servers and OAuth sign-in, such as Claude, ChatGPT, or Microsoft Copilot. Your subscription plan and workspace settings determine whether you can add a custom connection. A workspace administrator may need to add or approve the connection first. Check the requirements in your application's section below.
 - A Plytix user account to sign in with. Your assistant works within that user's Plytix plan and permissions, so it can't make changes your Plytix user isn't allowed to make.
 
 You'll need the following connection details:
@@ -27,103 +27,248 @@ You don't need V3 API beta access or a V3 access token to use the Plytix MCP. Si
 
 ## Add the Plytix MCP to your AI application
 
-Select your AI application. Each tab lists its prerequisites, the steps to add and authorize the server, and how to check that it works.
+Find your AI application in the list below. Each section lists its prerequisites, the steps to add and authorize the server, and how to check that it works.
+
+- [Claude Desktop](#claude-desktop)
+- [Claude Code](#claude-code)
+- [Microsoft Copilot Studio](#microsoft-copilot-studio)
+- [ChatGPT](#chatgpt)
+- [Codex](#codex)
+- [Cursor](#cursor)
+- [Perplexity](#perplexity)
+- [VS Code](#vs-code)
+- [Other MCP clients](#other-mcp-clients)
 
 {/* FLAG (open):
-  Both tabs are written from Claude's and OpenAI's official guides (checked 4 Nov 2026; OpenAI's remembered-approval scope rechecked 6 Nov 2026), not from a tested connection. Test each flow against `https://pim.plytix.com/mcp` before the November 9, 2026 launch: menu labels (including the Claude organization setup and removal labels, MCP-017 and MCP-018), the OAuth client option Claude detects, when ChatGPT asks to sign in, how to disconnect, and one successful read. Add screenshots after that test. Per the brief, name an exact Google client before adding one, and add a Gemini CLI tab only after testing it with Plytix.
-  2026-11-16: Plytix MCP is live in production and active on the WriteChoice account (David), so these tests can run now. Also test: removing the plugin from a ChatGPT workspace (David gave the personal path only), and the Microsoft Copilot tab, written from Microsoft Learn's Copilot Studio pages (checked 16 Nov 2026: mcp-add-existing-server-to-agent, mcp-add-components-to-agent, publication-add-bot-to-microsoft-teams, configure-enduser-authentication, add-tools-custom-agent). Check that Dynamic discovery works with the Plytix server, that deleting the MCP tool removes the server, and whether Teams needs single sign-on setup for the Plytix connection.
+  The Claude Desktop, ChatGPT, and Microsoft Copilot Studio sections are written from Claude's, OpenAI's, and Microsoft Learn's official guides (checked 4, 6, and 16 Nov 2026), not from a tested connection. The Claude Code, Codex, Cursor, Perplexity, and VS Code sections and Other MCP clients were added 2026-11-24 from each vendor's official docs (code.claude.com/docs/en/mcp; developers.openai.com/codex/mcp and the Codex config reference; cursor.com/docs/context/mcp; Perplexity help center "Adding custom remote connectors"; code.visualstudio.com/docs/copilot/customization/mcp-servers, dated 18 Nov 2026), also untested. David (24 Nov 2026) confirmed that beta clients use all eight applications with Plytix.
+  Test each flow against `https://pim.plytix.com/mcp`: menu labels (including the Claude organization setup and removal labels, MCP-017 and MCP-018), the OAuth client option Claude detects, when ChatGPT asks to sign in, how to disconnect, and one successful read. Add screenshots after that test. Also test: removing the plugin from a ChatGPT workspace; Copilot Studio's Dynamic discovery, deleting the MCP tool, and whether Teams needs single sign-on setup; the sign-in labels in Claude Code (`/mcp`), Cursor (**Customize**), and VS Code (**Authenticate**); whether Codex needs `codex mcp login` or signs in on first use; Perplexity's dynamic client registration (a community report from May 2026 describes a "did not return a client_secret" error with public clients); and whether VS Code still offers **Global** in **MCP: Add Server** (the Copilot harness may label it **Copilot Global**).
+  Per the brief, name an exact Google client before adding one, and add a Gemini CLI section only after testing it with Plytix.
 */}
 
-<Tabs items={['Claude', 'ChatGPT', 'Microsoft Copilot']}>
-  <Tab value="Claude">
-    **Prerequisites:** Claude on the web or Claude Desktop, on any plan. On the Free plan, you can add one custom connector. On a Team or Enterprise plan, an owner adds the connector for the whole organization, then each member signs in. On Team, Owners and Primary Owners can add it. On Enterprise, Owners, Primary Owners, and custom roles with Manage access to Libraries can add it.
+### Claude Desktop
 
-    **Connect on a Team or Enterprise plan.** First, an owner adds Plytix for the organization:
+**Prerequisites:** Claude Desktop or Claude on the web, on any plan. Both use the same connectors, so you only add Plytix once. On the Free plan, you can add one custom connector. On a Team or Enterprise plan, an owner adds the connector for the whole organization, then each member signs in. On Team, Owners and Primary Owners can add it. On Enterprise, Owners, Primary Owners, and custom roles with Manage access to Libraries can add it.
 
-    1. **Open** **Organization settings** > **Connectors** in Claude.
-    2. **Click** **Add**, hover over **Custom**, and select **Web**.
-    3. **Enter** `Plytix` as the name and `https://pim.plytix.com/mcp` as the server URL, then click **Continue**.
-    4. **Review** the authentication settings that Claude detects for the server, then click **Continue**.
-    5. **Select** **Sign in now** under **Authentication**, keep the detected **OAuth client** setting, and click **Add**.
+**Connect on a Team or Enterprise plan.** First, an owner adds Plytix for the organization:
 
-    Then each member connects with their own Plytix account:
+1. **Open** **Organization settings** > **Connectors** in Claude.
+2. **Click** **Add**, hover over **Custom**, and select **Web**.
+3. **Enter** `Plytix` as the name and `https://pim.plytix.com/mcp` as the server URL, then click **Continue**.
+4. **Review** the authentication settings that Claude detects for the server, then click **Continue**.
+5. **Select** **Sign in now** under **Authentication**, keep the detected **OAuth client** setting, and click **Add**.
 
-    1. **Open** **Customize** > **Connectors**, select **Plytix**, and click **Connect**.
-    2. **Sign in** to your own Plytix account in the window that opens. Review the access that Claude requests, then approve it.
-    3. **Turn on** the connector in a conversation: click the **+** button in the lower left of the chat, click **Connectors**, and turn on the **Plytix** toggle.
+Then each member connects with their own Plytix account:
 
-    **Connect on a Free, Pro, or Max plan:**
+1. **Open** **Customize** > **Connectors**, select **Plytix**, and click **Connect**.
+2. **Sign in** to your own Plytix account in the window that opens. Review the access that Claude requests, then approve it.
+3. **Turn on** the connector in a conversation: click the **+** button in the lower left of the chat, click **Connectors**, and turn on the **Plytix** toggle.
 
-    1. **Open** **Customize** > **Connectors** in Claude.
-    2. **Click** **+ Add**, then **Add custom connector**.
-    3. **Enter** `Plytix` as the name and `https://pim.plytix.com/mcp` as the server URL, then click **Continue**.
-    4. **Review** the authentication settings that Claude detects for the server, then click **Continue**.
-    5. **Select** **Sign in now** under **Authentication**, keep the detected **OAuth client** setting, and click **Add**.
-    6. **Sign in** to Plytix in the window that opens. Review the access that Claude requests, then approve it.
-    7. **Turn on** the connector in a conversation: click the **+** button in the lower left of the chat, click **Connectors**, and turn on the **Plytix** toggle.
+**Connect on a Free, Pro, or Max plan:**
 
-    **Verify:** Open **Customize** > **Connectors** > **Plytix** and check that the Plytix tools are listed. Then run the product lookup in [Verify the connection](#verify-the-connection) and check that Claude shows a Plytix tool call.
+1. **Open** **Customize** > **Connectors** in Claude.
+2. **Click** **+ Add**, then **Add custom connector**.
+3. **Enter** `Plytix` as the name and `https://pim.plytix.com/mcp` as the server URL, then click **Continue**.
+4. **Review** the authentication settings that Claude detects for the server, then click **Continue**.
+5. **Select** **Sign in now** under **Authentication**, keep the detected **OAuth client** setting, and click **Add**.
+6. **Sign in** to Plytix in the window that opens. Review the access that Claude requests, then approve it.
+7. **Turn on** the connector in a conversation: click the **+** button in the lower left of the chat, click **Connectors**, and turn on the **Plytix** toggle.
 
-    **Manage the connection:** Claude asks for your approval before it runs a tool. Select **Allow always** only for tools you trust to run without review, such as tools that only read data. To keep a tool from running in a conversation, turn it off in the **Search and tools** menu. To remove the connection, open **Customize** > **Connectors** and find **Plytix**. Select **Remove**, or open its three-dot menu and select the removal option. Complete any confirmation prompts. On a Team or Enterprise plan, owners remove the organization's connector in **Organization settings** > **Connectors**.
+**Verify:** Open **Customize** > **Connectors** > **Plytix** and check that the Plytix tools are listed. Then run the product lookup in [Verify the connection](#verify-the-connection) and check that Claude shows a Plytix tool call.
 
-    For plan and workspace requirements, see [Claude's guide to custom connectors](https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp).
-  </Tab>
-  <Tab value="ChatGPT">
-    **Prerequisites:** ChatGPT on the web, on a plan and workspace that allow custom MCP servers. Workspace permissions and security restrictions apply, and on some workspace plans only admins and owners can add a custom MCP server. Check your plan in OpenAI's guide linked at the end of this tab.
+**Manage the connection:** Claude asks for your approval before it runs a tool. Select **Allow always** only for tools you trust to run without review, such as tools that only read data. To keep a tool from running in a conversation, turn it off in the **Search and tools** menu. To remove the connection, open **Customize** > **Connectors** and find **Plytix**. Select **Remove**, or open its three-dot menu and select the removal option. Complete any confirmation prompts. On a Team or Enterprise plan, owners remove the organization's connector in **Organization settings** > **Connectors**.
 
-    **Connect:**
+For plan and workspace requirements, see [Claude's guide to custom connectors](https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp).
 
-    1. **Go** to [chatgpt.com/plugins](https://chatgpt.com/plugins), select the plus button, then select **Add custom MCP server**.
-    2. **Enter** `Plytix` as the name. You can also add a description.
-    3. **Enter** `https://pim.plytix.com/mcp` as the server URL under **Connection**.
-    4. **Select** **OAuth** as the authentication method.
-    5. **Review** the risk warning, then select **I understand and want to continue**.
-    6. **Select** **Create as a plugin**.
-    7. **Install** the Plytix plugin. You'll find it in your personal plugins, or in the workspace where you created it.
-    8. **Sign in** to Plytix when ChatGPT asks you to. Review the access that ChatGPT requests, then approve it.
-    9. **Use** the plugin in a conversation: type `@` in the prompt box and select **Plytix**.
+### Claude Code
 
-    **Verify:** Open the Plytix plugin's details page in your settings and check that the Plytix tools are listed. Then, in a conversation with **@Plytix** selected, run the product lookup in [Verify the connection](#verify-the-connection) and check that ChatGPT shows a Plytix tool call.
+**Prerequisites:** Claude Code installed and signed in. If you already added Plytix as a connector in Claude Desktop or on the web, and you sign in to Claude Code with the same Claude account, the connector is already available in Claude Code. Run `/mcp` to check, then skip to **Verify**.
 
-    **Manage the connection:** ChatGPT asks you to confirm write actions before they run, and you can turn individual tools on or off on the plugin's details page. Review each tool request before approving it. Choose to remember an approval only if you trust the tool to make further changes without another review. A remembered approval applies to that tool for the rest of the conversation, and a new conversation asks for confirmation again. After a Plytix MCP release, open the plugin's details page and refresh it, so ChatGPT picks up new and changed tools. To remove the connection, go to **Plugins** > **Personal**, open the three-dot menu on the **Plytix** plugin, and select **Uninstall**.
+**Connect:**
 
-    For plan, workspace, and authentication details, see [OpenAI's guide to adding a custom MCP server](https://developers.openai.com/api/docs/guides/custom-mcp-server).
-  </Tab>
-  <Tab value="Microsoft Copilot">
-    **Prerequisites:** A Copilot Studio subscription and a Copilot Studio agent that uses generative orchestration, which MCP tools require. You add Plytix as a tool to the agent, then make the agent available in Microsoft 365 Copilot and Teams. Your organization's data policies and admin settings can limit which tools and channels you can use.
+1. **Add** the Plytix MCP from your terminal:
 
-    **Connect: add Plytix to your agent.**
+   ```bash
+   claude mcp add --transport http plytix https://pim.plytix.com/mcp
+   ```
 
-    1. **Open** your agent in Copilot Studio and go to its **Tools** page.
-    2. **Select** **Add a tool**, then **New tool**.
-    3. **Select** **Model Context Protocol** in the **Create new** section.
-    4. **Enter** `Plytix` as the **Server name**, a short **Server description**, and `https://pim.plytix.com/mcp` as the **Server URL**.
-    5. **Select** **OAuth 2.0** as the authentication type and **Dynamic discovery** as the type, then select **Create**.
-    6. **Select** **Next**, then select **Create a new connection** in the **Add tool** dialog. Sign in to Plytix when prompted, review the access requested, then approve it.
-    7. **Select** **Add to agent**.
+   This adds Plytix for you in the current project. To use it in all your projects, add `--scope user` after `--transport http`. To share it with everyone working on the project through its `.mcp.json` file, add `--scope project` instead.
+2. **Start** Claude Code and run `/mcp`.
+3. **Select** **plytix** and follow the steps in your browser to sign in to Plytix. Review the access that Claude Code requests, then approve it. If your browser doesn't open, copy the URL that Claude Code shows and open it manually.
 
-    **Connect: make the agent available in Microsoft 365 Copilot and Teams.**
+**Verify:** Run `claude mcp list` and check that **plytix** shows as connected. Then run the product lookup in [Verify the connection](#verify-the-connection) and check that Claude Code calls a Plytix tool.
 
-    1. **Select** **Publish** in your agent, then confirm.
-    2. **Select** **Channels** on the top menu bar, then select the **Microsoft 365 and Microsoft Teams** tile.
-    3. **Check** that **Make agent available in Microsoft Copilot** is selected, then select **Add channel**.
-    4. **Select** **See agent in Teams**, then **Add**, to install the agent in Teams and Microsoft 365 Copilot.
+**Manage the connection:** To sign out of Plytix, run `/mcp`, select **plytix**, and select **Clear authentication**. To remove the connection, run `claude mcp logout plytix` to revoke its access, then `claude mcp remove plytix`.
 
-    By default, each person who uses the agent connects with their own Plytix account. The first time the agent calls a Plytix tool, it shows a connection card. Select **Connect** and sign in to Plytix in the window that opens.
+For scopes, configuration files, and organization policies, see [Claude Code's MCP guide](https://code.claude.com/docs/en/mcp).
 
-    **Verify:** Select **Plytix** on the agent's **Tools** page and check that the Plytix tools are listed. Then ask the agent the product lookup in [Verify the connection](#verify-the-connection), in Teams or Microsoft 365 Copilot, and check that it calls a Plytix tool.
+### Microsoft Copilot Studio
 
-    **Manage the connection:** All Plytix tools are turned on when you add the server. To choose which tools the agent can use, select **Plytix** on the agent's **Tools** page, turn off **Allow all**, and turn on the tools you want. Then select **Save** and **Publish**. After you publish, tool changes can take up to 24 hours to reach the agent. To remove the connection, go to the agent's **Tools** page, hover over **Plytix**, open its three-dot menu, and select **Delete**. Confirm the deletion, then publish the agent again.
+**Prerequisites:** A Copilot Studio subscription and a Copilot Studio agent that uses generative orchestration, which MCP tools require. You add Plytix as a tool to the agent, then make the agent available in Microsoft 365 Copilot and Teams. Your organization's data policies and admin settings can limit which tools and channels you can use.
 
-    For licensing, authentication, and admin requirements, see [Microsoft's guide to connecting an agent to an MCP server](https://learn.microsoft.com/en-us/microsoft-copilot-studio/mcp-add-existing-server-to-agent).
-  </Tab>
-</Tabs>
+**Connect: add Plytix to your agent.**
+
+1. **Open** your agent in Copilot Studio and go to its **Tools** page.
+2. **Select** **Add a tool**, then **New tool**.
+3. **Select** **Model Context Protocol** in the **Create new** section.
+4. **Enter** `Plytix` as the **Server name**, a short **Server description**, and `https://pim.plytix.com/mcp` as the **Server URL**.
+5. **Select** **OAuth 2.0** as the authentication type and **Dynamic discovery** as the type, then select **Create**.
+6. **Select** **Next**, then select **Create a new connection** in the **Add tool** dialog. Sign in to Plytix when prompted, review the access requested, then approve it.
+7. **Select** **Add to agent**.
+
+**Connect: make the agent available in Microsoft 365 Copilot and Teams.**
+
+1. **Select** **Publish** in your agent, then confirm.
+2. **Select** **Channels** on the top menu bar, then select the **Microsoft 365 and Microsoft Teams** tile.
+3. **Check** that **Make agent available in Microsoft Copilot** is selected, then select **Add channel**.
+4. **Select** **See agent in Teams**, then **Add**, to install the agent in Teams and Microsoft 365 Copilot.
+
+By default, each person who uses the agent connects with their own Plytix account. The first time the agent calls a Plytix tool, it shows a connection card. Select **Connect** and sign in to Plytix in the window that opens.
+
+**Verify:** Select **Plytix** on the agent's **Tools** page and check that the Plytix tools are listed. Then ask the agent the product lookup in [Verify the connection](#verify-the-connection), in Teams or Microsoft 365 Copilot, and check that it calls a Plytix tool.
+
+**Manage the connection:** All Plytix tools are turned on when you add the server. To choose which tools the agent can use, select **Plytix** on the agent's **Tools** page, turn off **Allow all**, and turn on the tools you want. Then select **Save** and **Publish**. After you publish, tool changes can take up to 24 hours to reach the agent. To remove the connection, go to the agent's **Tools** page, hover over **Plytix**, open its three-dot menu, and select **Delete**. Confirm the deletion, then publish the agent again.
+
+For licensing, authentication, and admin requirements, see [Microsoft's guide to connecting an agent to an MCP server](https://learn.microsoft.com/en-us/microsoft-copilot-studio/mcp-add-existing-server-to-agent).
+
+### ChatGPT
+
+**Prerequisites:** ChatGPT on the web, on a plan and workspace that allow custom MCP servers. Workspace permissions and security restrictions apply, and on some workspace plans only admins and owners can add a custom MCP server. Check your plan in OpenAI's guide linked at the end of this section.
+
+**Connect:**
+
+1. **Go** to [chatgpt.com/plugins](https://chatgpt.com/plugins), select the plus button, then select **Add custom MCP server**.
+2. **Enter** `Plytix` as the name. You can also add a description.
+3. **Enter** `https://pim.plytix.com/mcp` as the server URL under **Connection**.
+4. **Select** **OAuth** as the authentication method.
+5. **Review** the risk warning, then select **I understand and want to continue**.
+6. **Select** **Create as a plugin**.
+7. **Install** the Plytix plugin. You'll find it in your personal plugins, or in the workspace where you created it.
+8. **Sign in** to Plytix when ChatGPT asks you to. Review the access that ChatGPT requests, then approve it.
+9. **Use** the plugin in a conversation: type `@` in the prompt box and select **Plytix**.
+
+**Verify:** Open the Plytix plugin's details page in your settings and check that the Plytix tools are listed. Then, in a conversation with **@Plytix** selected, run the product lookup in [Verify the connection](#verify-the-connection) and check that ChatGPT shows a Plytix tool call.
+
+**Manage the connection:** ChatGPT asks you to confirm write actions before they run, and you can turn individual tools on or off on the plugin's details page. Review each tool request before approving it. Choose to remember an approval only if you trust the tool to make further changes without another review. A remembered approval applies to that tool for the rest of the conversation, and a new conversation asks for confirmation again. After a Plytix MCP release, open the plugin's details page and refresh it, so ChatGPT picks up new and changed tools. To remove the connection, go to **Plugins** > **Personal**, open the three-dot menu on the **Plytix** plugin, and select **Uninstall**.
+
+For plan, workspace, and authentication details, see [OpenAI's guide to adding a custom MCP server](https://developers.openai.com/api/docs/guides/custom-mcp-server).
+
+### Codex
+
+**Prerequisites:** The Codex CLI or the Codex IDE extension, installed and signed in. Both read the same configuration file, so you only add Plytix once.
+
+**Connect:**
+
+1. **Add** the Plytix MCP to `~/.codex/config.toml`. To use Plytix in one project only, add it to `.codex/config.toml` in that project instead. Codex reads a project's configuration only when you trust the project.
+
+   ```toml
+   [mcp_servers.plytix]
+   url = "https://pim.plytix.com/mcp"
+   ```
+
+2. **Run** the following command, then sign in to Plytix in the browser window that opens. Review the access that Codex requests, then approve it.
+
+   ```bash
+   codex mcp login plytix
+   ```
+
+**Verify:** Run `codex mcp list` and check that **plytix** is listed, or run `/mcp` in a Codex session. Then run the product lookup in [Verify the connection](#verify-the-connection) and check that Codex calls a Plytix tool.
+
+**Manage the connection:** To remove the connection, delete the `[mcp_servers.plytix]` table from your `config.toml` file.
+
+For configuration options and sign-in flags, see [OpenAI's Codex MCP guide](https://developers.openai.com/codex/mcp).
+
+### Cursor
+
+**Prerequisites:** The Cursor desktop app. On a Team or Enterprise plan, an admin's MCP allowlist can block servers that aren't on it.
+
+**Connect:**
+
+1. **Create** `~/.cursor/mcp.json` to use Plytix in all your projects, or `.cursor/mcp.json` in one project, and add the following. If the file already has an `mcpServers` object, add the `plytix` entry to it.
+
+   ```json
+   {
+     "mcpServers": {
+       "plytix": {
+         "url": "https://pim.plytix.com/mcp"
+       }
+     }
+   }
+   ```
+
+2. **Open** **Customize** in Cursor's sidebar, find **plytix**, and follow the prompt to sign in. Review the access that Cursor requests in the browser window that opens, then approve it.
+
+**Verify:** In **Customize**, check that **plytix** is turned on and lists its tools. Then run the product lookup in [Verify the connection](#verify-the-connection) in Agent chat and check that Cursor calls a Plytix tool.
+
+**Manage the connection:** Cursor asks for your approval before it runs an MCP tool. To stop using Plytix for a while, turn it off in **Customize**. To remove the connection, remove **plytix** from **Customize**, or delete its entry from `mcp.json`.
+
+For configuration options and team controls, see [Cursor's MCP guide](https://cursor.com/docs/context/mcp).
+
+### Perplexity
+
+**Prerequisites:** A Perplexity Pro, Max, or Enterprise plan, on the web or in the desktop apps. On an Enterprise plan, an admin must turn on **Allow members to add custom connectors** first, or add Plytix for the whole organization in **Organization settings** > **Connectors**.
+
+**Connect:**
+
+1. **Open** **Plugins** in the sidebar, then select **Add custom** > **Add MCP connector**.
+2. **Select** **Remote**.
+3. **Enter** `Plytix` as the **Name** and `https://pim.plytix.com/mcp` as the **MCP server URL**.
+4. **Open** **Advanced** and check that **Authentication** is **OAuth** and **Transport** is **Streamable HTTP**.
+5. **Select** the check box to confirm that you understand the risks of custom connectors, then select **Add**.
+6. **Select** the **Plytix** connector card to start sign-in. Sign in to Plytix, review the access that Perplexity requests, then approve it.
+
+**Verify:** Open **Plugins** > **Installed** and check that **Plytix** shows **Connected**. Then run the product lookup in [Verify the connection](#verify-the-connection) and check that Perplexity uses the Plytix connector. If Perplexity doesn't call Plytix, select it in the connector picker or mention it with `@`.
+
+**Manage the connection:** To disconnect, open the **Plytix** connector and select **Disconnect**. To remove it, open the three-dot menu on its card.
+
+For plans and organization settings, see [Perplexity's guide to custom remote connectors](https://www.perplexity.ai/help-center/en/articles/13915507-adding-custom-remote-connectors).
+
+### VS Code
+
+**Prerequisites:** VS Code with GitHub Copilot and its AI features turned on. Your organization's Copilot policies can block MCP servers.
+
+**Connect:**
+
+1. **Open** the Command Palette and run **MCP: Add Server**.
+2. **Select** **HTTP (HTTP or Server-Sent Events)**, enter `https://pim.plytix.com/mcp` as the URL, and enter `plytix` as the server ID.
+3. **Select** **Global** to use Plytix in all your workspaces.
+4. **Sign in** to Plytix when VS Code asks you to. Review the access that VS Code requests, then approve it. If VS Code doesn't ask, run **Chat: Open Customizations**, select **MCP Servers**, open the **...** menu on **plytix**, and select **Authenticate**.
+
+**Verify:** Run **MCP: List Servers** and check that **plytix** is running. Then run the product lookup in [Verify the connection](#verify-the-connection) in Copilot Chat, and expand the tool call to check that Copilot called a Plytix tool.
+
+**Manage the connection:** To stop using Plytix for a while, run **Chat: Open Customizations**, select **MCP Servers**, and turn **plytix** off. To remove the connection, open the **...** menu on **plytix** and select **Uninstall**, or delete its entry from the configuration file.
+
+For configuration files and organization policies, see [VS Code's guide to MCP servers](https://code.visualstudio.com/docs/copilot/customization/mcp-servers).
+
+### Other MCP clients
+
+Any MCP client that supports remote servers and OAuth can connect to the Plytix MCP. Look for the option to add a remote or custom MCP server, and use these settings:
+
+| Setting | Value |
+|---|---|
+| Transport | Streamable HTTP (some clients call it HTTP) |
+| Server URL | `https://pim.plytix.com/mcp` |
+| Authentication | OAuth |
+
+If your client uses a JSON configuration file, start from the following entry. Some clients leave out `type` or use a different top-level key, so check your client's documentation.
+
+```json
+{
+  "mcpServers": {
+    "plytix": {
+      "type": "http",
+      "url": "https://pim.plytix.com/mcp"
+    }
+  }
+}
+```
+
+After you add the server, sign in to Plytix when your client prompts you. Then check that your client lists the Plytix tools, and run the product lookup in [Verify the connection](#verify-the-connection).
 
 ## Verify the connection
 
 Follow the steps below to confirm that your AI application found the Plytix tools and can read your account.
 
-1. **Check** the tool list in your AI application's connection settings to see which tools were discovered. Claude shows them in the connector's settings, ChatGPT on the plugin's details page, and Copilot Studio on the Plytix tool's settings page.
+1. **Check** the tool list in your AI application to see which tools were discovered. Your application's section above says where to find it.
 2. **Run** a small read that you can check yourself, the first prompt in [Example workflows](/mcp/example-workflows#find-a-product). Replace `<SKU>` with a SKU that exists in your account, then ask:
 
    ```text

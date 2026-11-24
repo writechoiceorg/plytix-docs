@@ -2,7 +2,7 @@
 
 Record of every `feedback-corrector` run: the feedback received, what our sources said, what changed on the page, and the reply sent to David. One section per page, newest run first. Open questions for Plytix live in [`feedback-flags.md`](feedback-flags.md).
 
-**Last updated:** 2026-11-23
+**Last updated:** 2026-11-24
 
 ## Index
 
@@ -22,7 +22,7 @@ Record of every `feedback-corrector` run: the feedback received, what our source
 | [Connect an AI assistant to the Plytix docs](#connect-an-ai-assistant-to-the-plytix-docs) | 1 | 2026-10-14 |
 | [Not migrated and new in V3](#not-migrated-and-new-in-v3) | 1 | 2026-10-14 |
 | [Migrating to V3](#migrating-to-v3) | 1 | 2026-10-14 |
-| [Plytix MCP](#plytix-mcp) | 7 | 2026-11-16 |
+| [Plytix MCP](#plytix-mcp) | 8 | 2026-11-24 |
 
 ---
 
@@ -1169,6 +1169,75 @@ Open questions:
 ## Plytix MCP
 
 **Page:** `fumadocs/content/docs/guides/mcp/overview.mdx` · **Page type:** Concept overview plus five child pages. Moved on 2026-11-06 from `guides/platform-mcp/` (`index.mdx`, `connect.mdx`, `capabilities-and-permissions.mdx`, `example-workflows.mdx`, `troubleshooting.mdx`, `changelog.mdx`; split into six pages on 2026-11-04) to `guides/mcp/` (`overview.mdx`, `quickstart.mdx`, `tools.mdx`, and the same last three), served at `/mcp/**`.
+
+### Run 2026-11-24
+
+**Feedback from:** David, Slack message following the 17 Nov 2026 staging audit (finding STG-001, MCP: "The initial Quickstart HTML omits the ChatGPT and Copilot setup instructions that appear after client interaction"). He listed the clients used in the beta by usage (Claude Desktop, Claude Code, Microsoft Copilot Studio, ChatGPT, Codex, Cursor, Perplexity, VS Code) and pointed to Notion's connection guide (developers.notion.com/guides/mcp/get-started-with-mcp) as the model: every client on the page without a selector, links that jump to each block, and an "Other MCP clients" section. Page: `fumadocs/content/docs/guides/mcp/quickstart.mdx` (How-to).
+**Approved by the user:** all (F1-F9). The `mcp-remote` fallback was not proposed and is flagged (FB-070).
+
+#### Feedback items
+
+| # | Feedback (short) | Type | Location | Verdict | Outcome |
+|---|---|---|---|---|---|
+| F1 | No selector; everything loads without interaction; selecting a client jumps to its block (audit STG-001 MCP) | Structure / flow | `<Tabs>`, lines 37-120 | Supported (audit; style guide "more than four H3s" rule) | Applied |
+| F2 | Clients sorted by beta usage | Scope | `<Tabs>` | Supported | Applied |
+| F3 | Claude Code | Scope | Missing | Supported by vendor docs; untested with Plytix | Applied, FB-068 |
+| F4 | Codex | Scope | Missing | Supported by vendor docs and Notion's page; untested | Applied, FB-068 |
+| F5 | Cursor | Scope | Missing | Supported by vendor docs; untested | Applied, FB-068 |
+| F6 | Perplexity | Scope | Missing | Supported by vendor docs; untested; known DCR issue | Applied, FB-068, FB-069 |
+| F7 | VS Code | Scope | Missing | Supported by vendor docs; untested | Applied, FB-068 |
+| F8 | "Other MCP Clients" with general instructions | Scope | Missing | Supported | Applied without the `mcp-remote` fallback, FB-070 |
+| F9 | Follow-on wording (description, intro, "tabs below", Verify step 1, FLAG) | Consistency | Lines 4, 9, 16, 72, 126, FLAG | Supported | Applied |
+
+#### Applied changes
+
+| # | Change made | Source |
+|---|---|---|
+| F1 | `<Tabs>` removed. `## Add the Plytix MCP to your AI application` now has a lead-in sentence, a bulleted list of anchor links to each client, and one H3 per client, all visible in the initial HTML. Bulleted list used instead of Notion's cards, per the style guide | Audit CSV, STG-001 (MCP); `style-guide.md` line 128; Notion guide |
+| F2 | H3 order: Claude Desktop, Claude Code, Microsoft Copilot Studio, ChatGPT, Codex, Cursor, Perplexity, VS Code, Other MCP clients. The Claude tab became "Claude Desktop" (adds "Both use the same connectors, so you only add Plytix once."); "Microsoft Copilot" became "Microsoft Copilot Studio". Existing step content unchanged | David's message, 2026-11-24 |
+| F3 | Claude Code: `claude mcp add --transport http plytix https://pim.plytix.com/mcp`, `--scope user`/`project` options, `/mcp` browser sign-in, verify with `claude mcp list`, **Clear authentication**, `claude mcp logout` then `claude mcp remove`; notes that claude.ai connectors are available automatically | code.claude.com/docs/en/mcp (checked 2026-11-24) |
+| F4 | Codex: `[mcp_servers.plytix]` + `url` in `~/.codex/config.toml` (or trusted project `.codex/config.toml`), `codex mcp login plytix`, verify with `codex mcp list` or `/mcp`, remove by deleting the table | developers.openai.com/codex/mcp and config reference → `mcp_servers.<id>.url`; Notion guide; tool inventory prefix `mcp__codex_apps__plytix_mcp_` |
+| F5 | Cursor: `mcpServers.plytix.url` in `~/.cursor/mcp.json` or `.cursor/mcp.json`, sign in from **Customize**, approval per tool call, toggle off or remove in **Customize** | cursor.com/docs/context/mcp (checked 2026-11-24) |
+| F6 | Perplexity: Pro, Max, or Enterprise; **Plugins** > **Add custom** > **Add MCP connector** > **Remote**, **Name**, **MCP server URL**, **Advanced** (OAuth, Streamable HTTP), risk check box, **Add**, select the card to sign in; verify **Connected** under **Plugins** > **Installed**; **Disconnect** | Perplexity help center 13915507, 2026100701, 2026091802; changelog 2026-03-12 |
+| F7 | VS Code: **MCP: Add Server** > **HTTP (HTTP or Server-Sent Events)**, URL, ID `plytix`, **Global**, sign in or **Authenticate**; verify with **MCP: List Servers** and an expanded tool call; disable or **Uninstall** in **Chat: Open Customizations** > **MCP Servers** | code.visualstudio.com/docs/copilot/customization/mcp-servers (dated 2026-11-18) |
+| F8 | Other MCP clients: settings table (Streamable HTTP, server URL, OAuth), JSON template with `"type": "http"`, sign-in and verify pointer | Notion guide, "Other MCP clients" |
+| F9 | Description now "Connect Claude, ChatGPT, Copilot Studio, Cursor, or another MCP client to your Plytix account with the Plytix MCP, then authorize it and test it." (145 characters); intro names all eight clients; "in the tabs below" → "in your application's section below"; ChatGPT "end of this tab" → "end of this section"; Verify step 1 → "Your application's section above says where to find it."; in-page FLAG extended to the new sections and their test points | Consequence of F1-F8 |
+
+#### Not changed
+
+- Audit STG-001 "Retain keyboard access to the client tabs": not applicable, the tabs are gone and the jump links are plain anchors.
+- ChatGPT section stays "ChatGPT on the web" (OpenAI documents adding the server on the web only), FB-071.
+- `mcp-remote` stdio fallback from Notion's page: not added, needs Plytix approval, FB-070.
+- Gemini: not in David's list; the brief says add it only after testing.
+
+#### Flags
+
+Added: FB-068, FB-069, FB-070, FB-071 (details in [`feedback-flags.md`](feedback-flags.md))
+
+#### Follow-ups on other pages
+
+- `overview.mdx` line 45 and `troubleshooting.mdx` line 38: card text still says "Claude, ChatGPT, or Microsoft Copilot".
+- `tools.mdx` line 49: tool controls described for three clients only.
+- `troubleshooting.mdx`: consider a "My client isn't listed" accordion pointing to Other MCP clients.
+
+#### Reply to David
+
+```text
+Thanks, David. I've updated the Connect your AI assistant page (/mcp/quickstart) following Notion's pattern:
+
+- No selector: every client's setup is on the page from the first load, with a list of links at the top that jumps to each one. This also covers the audit's MCP Quickstart finding.
+- Clients follow your usage order: Claude Desktop, Claude Code, Microsoft Copilot Studio, ChatGPT, Codex, Cursor, Perplexity, and VS Code.
+- New sections for Claude Code, Codex, Cursor, Perplexity, and VS Code, each with prerequisites, connection steps, a verification check, and how to remove the connection. The Claude Code section also notes that a connector added in Claude Desktop shows up there automatically.
+- New "Other MCP clients" section with the transport, server URL, OAuth setting, and a JSON template for any client that isn't listed.
+
+The new sections follow each vendor's official docs. We'll test them against production and adjust any labels that differ.
+
+Open questions:
+1. Did your beta users share setup steps or screenshots for any of these clients, especially Codex, Cursor, and VS Code? That would help us match the exact labels.
+2. Have beta users connected Perplexity successfully? Perplexity has a reported sign-in issue with servers that don't return a client secret during registration.
+3. Notion also suggests a third-party package (mcp-remote) for clients that only support local servers. Should we recommend it for Plytix, or leave those clients out?
+4. Do ChatGPT users add Plytix from the desktop app, or on the web first? Our ChatGPT section covers the web, which is what OpenAI documents.
+```
 
 ### Run 2026-11-16
 
